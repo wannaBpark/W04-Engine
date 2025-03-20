@@ -165,7 +165,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Source\Runtime\Core\Container\String.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\EngineStatics.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\HAL\PlatformMemory.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Math\JungleMath.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ActorComponent.cpp" />
     <ClCompile Include="Engine\Source\Editor\UnrealEd\EditorViewportClient.cpp" />
@@ -177,10 +179,7 @@
     <ClCompile Include="Engine\Source\Runtime\Core\Math\Define.cpp" />
     <ClCompile Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoBaseComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoCircleComponent.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Launch\EngineLoop.cpp">
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)Engine\Source\Runtime\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)Engine\Source\Runtime\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
+    <ClCompile Include="Engine\Source\Runtime\Launch\EngineLoop.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Launch\ImGuiManager.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\include\ImGUI\imgui.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\include\ImGUI\imgui_demo.cpp" />
@@ -214,15 +213,22 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UText.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UTextUUID.cpp" />
     <ClCompile Include="Engine\Source\Editor\PropertyEditor\ViewModeDropdown.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\World.cpp">
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)Engine\Source\Runtime\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)Engine\Source\Runtime\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
+    <ClCompile Include="Engine\Source\Runtime\Engine\World.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\QuadTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\Array.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\ContainerAllocator.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\CString.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\Map.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\Pair.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\Set.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\String.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\EngineStatics.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\HAL\PlatformMemory.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\HAL\PlatformType.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\JungleMath.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\MathUtility.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ActorComponent.h" />
     <ClInclude Include="Engine\Source\Editor\UnrealEd\EditorViewportClient.h" />
     <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoArrowComponent.h" />
