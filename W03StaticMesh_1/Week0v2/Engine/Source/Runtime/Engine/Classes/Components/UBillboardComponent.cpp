@@ -6,8 +6,10 @@
 #include "Define.h"
 #include <DirectXMath.h>
 
+#include "Math/MathUtility.h"
+
 UBillboardComponent::UBillboardComponent() : 
-	UPrimitiveComponent("Quad")
+                                           UPrimitiveComponent("Quad")
 {
 }
 
@@ -216,10 +218,10 @@ bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& checkQuad, fl
 		
 		if (clipPos.a != 0)	clipPos = clipPos/clipPos.a;
 
-		minX = min(minX, clipPos.x);
-		maxX = max(maxX, clipPos.x);
-		minY = min(minY, clipPos.y);
-		maxY = max(maxY, clipPos.y);
+		minX = FMath::Min(minX, clipPos.x);
+		maxX = FMath::Max(maxX, clipPos.x);
+		minY = FMath::Min(minY, clipPos.y);
+		maxY = FMath::Max(maxY, clipPos.y);
 		avgZ += clipPos.z;
 	}
 

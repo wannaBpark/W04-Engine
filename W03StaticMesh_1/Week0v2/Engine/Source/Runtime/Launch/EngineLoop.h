@@ -1,6 +1,6 @@
 #pragma once
 #include "Define.h"
-#include <Windows.h>
+#include "Core/HAL/PlatformType.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Renderer/Renderer.h"
 #include "UnrealEd/PrimitiveBatch.h"

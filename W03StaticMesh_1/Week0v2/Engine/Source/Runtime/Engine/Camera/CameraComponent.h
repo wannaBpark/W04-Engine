@@ -1,6 +1,5 @@
 #pragma once
 #include "Components/SceneComponent.h"
-#include <windows.h>
 
 class UCameraComponent :
     public USceneComponent

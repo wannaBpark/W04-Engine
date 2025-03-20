@@ -3,6 +3,8 @@
 #include <ostream>
 #include <iostream>
 
+#include "Core/HAL/PlatformType.h"
+
 class FNameEntry
 {
 public:

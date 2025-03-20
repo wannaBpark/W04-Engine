@@ -6,10 +6,10 @@
 #include <list>
 #include <unordered_map>
 
-// ±âº» Å¸ÀÔ Á¤ÀÇ
-using int32 = int;
-using uint32 = unsigned int;
-using uint64 = unsigned long long;
+// ê¸°ë³¸ íƒ€ì… ì •ì˜
+//using int32 = int;
+//using uint32 = unsigned int;
+//using uint64 = unsigned long long;
 using FString = std::string;
 using FWString = std::wstring;
 

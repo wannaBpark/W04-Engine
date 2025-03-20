@@ -1,5 +1,6 @@
 #pragma once
-#include <Windows.h>
+#include "Core/HAL/PlatformType.h"
+
 class UImGuiManager
 {
 public:

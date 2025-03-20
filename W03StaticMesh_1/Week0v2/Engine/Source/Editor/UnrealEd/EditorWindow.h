@@ -6,12 +6,13 @@
 #define	FEATHER_FONT		1
 #endif // !__ICON_FONT_INDEX__
 
-// #include "Types/Types.h";
+#include "HAL/PlatformType.h";
+
 
 class UEditorWindow
 {
 public:
-    virtual ~UEditorWindow() {}
+    virtual ~UEditorWindow() = default;
     virtual void Render() = 0;
     virtual void OnResize(uint32 Width, uint32 Height) = 0;
 };

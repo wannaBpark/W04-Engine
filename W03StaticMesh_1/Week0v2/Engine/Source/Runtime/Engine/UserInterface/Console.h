@@ -7,7 +7,6 @@
 #include "UnrealEd/EditorWindow.h"
 #include "PropertyEditor/IWindowToggleable.h"
 
-#include <Windows.h>
 enum class LogLevel { Display, Warning, Error };
 
 class Console : public IWindowToggleable

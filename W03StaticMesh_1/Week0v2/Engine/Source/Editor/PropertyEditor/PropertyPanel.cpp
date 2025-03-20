@@ -7,6 +7,9 @@
 #include "Components/LightComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/UText.h"
+#include "Math/MathUtility.h"
+
+
 PropertyPanel::PropertyPanel()
 {
 }
@@ -214,8 +217,8 @@ void PropertyPanel::Draw(UWorld* world)
 }
 void PropertyPanel::RGBToHSV(float r, float g, float b, float& h, float& s, float& v)
 {
-	float mx = max(r, max(g, b));
-	float mn = min(r, min(g, b));
+	float mx = FMath::Max(r, FMath::Max(g, b));
+	float mn = FMath::Min(r, FMath::Min(g, b));
 	float delta = mx - mn;
 
 	v = mx;
