@@ -12,8 +12,8 @@ Outliner::~Outliner()
 
 Outliner& Outliner::GetInstance()
 {
-	static Outliner instance;
-	return instance;
+    static Outliner instance;
+    return instance;
 }
 
 void Outliner::Draw(UWorld* world)
@@ -24,32 +24,32 @@ void Outliner::Draw(UWorld* world)
     float controllWindowPosX = (static_cast<float>(width) - controllWindowWidth) * 0.f;
     float controllWindowPosY = (static_cast<float>(height) - controllWindowHeight) * 0.47f;
 
-    // Ã¢ Å©±â¿Í À§Ä¡ ¼³Á¤
+    // ì°½ í¬ê¸°ì™€ ìœ„ì¹˜ ì„¤ì •
     ImGui::SetNextWindowPos(ImVec2(controllWindowPosX, controllWindowPosY));
     ImGui::SetNextWindowSize(ImVec2(controllWindowWidth, controllWindowHeight), ImGuiCond_Always);
 
-    if (ImGui::Begin("OutLiner")) // À©µµ¿ì ½ÃÀÛ
+    if (ImGui::Begin("OutLiner")) // ìœˆë„ìš° ì‹œì‘
     {
-        if (ImGui::TreeNode("Primitives")) // Æ®¸® ³ëµå »ı¼º
+        if (ImGui::TreeNode("Primitives")) // íŠ¸ë¦¬ ë…¸ë“œ ìƒì„±
         {
-            static int selected = -1; // ¼±ÅÃµÈ Ç×¸ñ ÀúÀå¿ë º¯¼ö
+            static int selected = -1; // ì„ íƒëœ í•­ëª© ì €ì¥ìš© ë³€ìˆ˜
 
-            // ¿ÀºêÁ§Æ® ¸®½ºÆ®
+            // ì˜¤ë¸Œì íŠ¸ ë¦¬ìŠ¤íŠ¸
             for (int32 i = 0; i < world->GetObjectArr().size();i++)
             {
                 if(!world->GetObjectArr()[i]->IsA(USceneComponent::StaticClass()))
                     continue;
-                // ¼±ÅÃ °¡´É Ç×¸ñ (Selectable)
+                // ì„ íƒ ê°€ëŠ¥ í•­ëª© (Selectable)
                 if (ImGui::Selectable(world->GetObjectArr()[i]->GetName().ToString().c_str(), selected == i))
                 {
-                    selected = i; // ¼±ÅÃµÈ ¾ÆÀÌÅÛ ¾÷µ¥ÀÌÆ®
+                    selected = i; // ì„ íƒëœ ì•„ì´í…œ ì—…ë°ì´íŠ¸
                     world->SetPickingObj(world->GetObjectArr()[i]);
                 }
             }
-            ImGui::TreePop(); // Æ®¸® ´İ±â
+            ImGui::TreePop(); // íŠ¸ë¦¬ ë‹«ê¸°
         }
     }
-    ImGui::End(); // À©µµ¿ì Á¾·á
+    ImGui::End(); // ìœˆë„ìš° ì¢…ë£Œ
 }
 
 void Outliner::OnResize(HWND hWnd)

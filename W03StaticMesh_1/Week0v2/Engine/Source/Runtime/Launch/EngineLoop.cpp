@@ -27,7 +27,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_SIZE:
 		if (wParam != SIZE_MINIMIZED) {
-			//UGraphicsDevice °´Ã¼ÀÇ OnResize ÇÔ¼ö È£Ãâ
+			//UGraphicsDevice ê°ì²´ì˜ OnResize í•¨ìˆ˜ í˜¸ì¶œ
 			if (FEngineLoop::graphicDevice.SwapChain) {
 				FEngineLoop::graphicDevice.OnResize(hWnd);
 			}
@@ -40,7 +40,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		ShowFlags::GetInstance().OnResize(hWnd);
 		break;
 	case WM_MOUSEWHEEL:
-		zDelta = GET_WHEEL_DELTA_WPARAM(wParam); // ÈÙ È¸Àü °ª (+120 / -120)
+		zDelta = GET_WHEEL_DELTA_WPARAM(wParam); // íœ  íšŒì „ ê°’ (+120 / -120)
 		if (GEngineLoop.GetWorld()->GetCamera()->IsCameraMode()) {
 			GEngineLoop.GetViewportClient()->SetCameraSpeedScalar(static_cast<float>(GEngineLoop.GetViewportClient()->GetCameraSpeedScalar() + zDelta * 0.01));
 		}
@@ -100,7 +100,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 void FEngineLoop::Tick()
 {
 	LARGE_INTEGER frequency;
-	const double targetFrameTime = 1000.0 / targetFPS; // ÇÑ ÇÁ·¹ÀÓÀÇ ¸ñÇ¥ ½Ã°£ (¹Ğ¸®ÃÊ ´ÜÀ§)
+	const double targetFrameTime = 1000.0 / targetFPS; // í•œ í”„ë ˆì„ì˜ ëª©í‘œ ì‹œê°„ (ë°€ë¦¬ì´ˆ ë‹¨ìœ„)
 
 	QueryPerformanceFrequency(&frequency);
 
@@ -114,8 +114,8 @@ void FEngineLoop::Tick()
 		MSG msg;
 		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
-			TranslateMessage(&msg); // Å°º¸µå ÀÔ·Â ¸Ş½ÃÁö¸¦ ¹®ÀÚ¸Ş½ÃÁö·Î º¯°æ
-			DispatchMessage(&msg); // ¸Ş½ÃÁö¸¦ WndProc¿¡ Àü´Ş
+			TranslateMessage(&msg); // í‚¤ë³´ë“œ ì…ë ¥ ë©”ì‹œì§€ë¥¼ ë¬¸ìë©”ì‹œì§€ë¡œ ë³€ê²½
+			DispatchMessage(&msg); // ë©”ì‹œì§€ë¥¼ WndProcì— ì „ë‹¬
 
 			if (msg.message == WM_QUIT)
 			{

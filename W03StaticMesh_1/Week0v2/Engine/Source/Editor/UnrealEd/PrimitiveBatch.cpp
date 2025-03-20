@@ -142,7 +142,7 @@ void UPrimitiveBatch::RenderAABB(const FBoundingBox& localAABB, const FVector& c
 
     FVector min = worldVertices[0], max = worldVertices[0];
 
-    // Ã¹ ¹øÂ° °ªÀ» Á¦¿ÜÇÑ ³ª¸ÓÁö ¹öÅØ½º¸¦ º¯È¯ÇÏ°í min/max °è»ê
+    // ì²« ë²ˆì§¸ ê°’ì„ ì œì™¸í•œ ë‚˜ë¨¸ì§€ ë²„í…ìŠ¤ë¥¼ ë³€í™˜í•˜ê³  min/max ê³„ì‚°
     for (int i = 1; i < 8; ++i)
     {
         worldVertices[i] = center + FMatrix::TransformVector(localVertices[i], modelMatrix);
@@ -162,7 +162,7 @@ void UPrimitiveBatch::RenderAABB(const FBoundingBox& localAABB, const FVector& c
 }
 void UPrimitiveBatch::RenderOBB(const FBoundingBox& localAABB, const FVector& center, const FMatrix& modelMatrix)
 {
-    // 1) ·ÎÄÃ AABBÀÇ 8°³ ²ÀÁşÁ¡
+    // 1) ë¡œì»¬ AABBì˜ 8ê°œ ê¼­ì§“ì 
     FVector localVertices[8] =
     {
         { localAABB.min.x, localAABB.min.y, localAABB.min.z },
@@ -177,7 +177,7 @@ void UPrimitiveBatch::RenderOBB(const FBoundingBox& localAABB, const FVector& ce
 
     FOBB faceBB;
     for (int32 i = 0; i < 8; ++i) {
-        // ¸ğµ¨ ¸ÅÆ®¸¯½º·Î Á¡À» º¯È¯ ÈÄ, center¸¦ ´õÇØÁØ´Ù.
+        // ëª¨ë¸ ë§¤íŠ¸ë¦­ìŠ¤ë¡œ ì ì„ ë³€í™˜ í›„, centerë¥¼ ë”í•´ì¤€ë‹¤.
         faceBB.corners[i] =  center + FMatrix::TransformVector(localVertices[i], modelMatrix);
     }
 

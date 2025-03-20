@@ -1,8 +1,10 @@
 #pragma once
-
-#include "IWindowToggleable.h"
 #include <Windows.h>
+#include "IWindowToggleable.h"
+
 class UWorld;
+
+
 class ControlPanel : public IWindowToggleable
 {
 private:
@@ -30,4 +32,3 @@ private:
 	UINT width;
 	UINT height;
 };
-

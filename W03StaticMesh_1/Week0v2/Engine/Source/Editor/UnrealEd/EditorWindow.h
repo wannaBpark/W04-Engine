@@ -11,7 +11,7 @@
 class UEditorWindow
 {
 public:
-	virtual ~UEditorWindow() {}
-	virtual void Render() = 0;
-	virtual void OnResize(uint32 Width, uint32 Height) = 0;
+    virtual ~UEditorWindow() {}
+    virtual void Render() = 0;
+    virtual void OnResize(uint32 Width, uint32 Height) = 0;
 };

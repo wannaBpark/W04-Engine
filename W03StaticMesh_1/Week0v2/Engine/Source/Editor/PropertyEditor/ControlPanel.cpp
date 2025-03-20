@@ -29,7 +29,7 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
 	float controllWindowPosX = (static_cast<float>(width) - controllWindowWidth) * 0.f;
 	float controllWindowPosY = (static_cast<float>(height) - controllWindowHeight) * 0.f;
 
-	// √¢ ≈©±‚øÕ ¿ßƒ° º≥¡§
+	// Ï∞Ω ÌÅ¨Í∏∞ÏôÄ ÏúÑÏπò ÏÑ§Ï†ï
 	ImGui::SetNextWindowPos(ImVec2(controllWindowPosX, controllWindowPosY));
 	ImGui::SetNextWindowSize(ImVec2(controllWindowWidth, controllWindowHeight), ImGuiCond_Always);
 
@@ -59,23 +59,23 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
 	ImVec4 ActiveColor = ImVec4(0, 0.5, 0, 0.6f);
 
 	UPlayer* player = static_cast<UPlayer*>(world->GetPlayer());
-	// «ˆ¿Á ∏µÂ ¿˙¿Â ∫Øºˆ ( ¿Ã ∫Øºˆ¥¬ ¡ˆø™ ∫Øºˆ∑Œ∏∏ ªÁøÎ«—¥Ÿ)
+	// ÌòÑÏû¨ Î™®Îìú Ï†ÄÏû• Î≥ÄÏàò ( Ïù¥ Î≥ÄÏàòÎäî ÏßÄÏó≠ Î≥ÄÏàòÎ°úÎßå ÏÇ¨Ïö©ÌïúÎã§)
 	if (!player) return;
 	static ControlMode selectedMode = CM_TRANSLATION;
 
-	//PropertyPanel* propPanel = world->GetPropertyPanel(); // PropertyPanel ∞°¡Æø¿±‚
+	//PropertyPanel* propPanel = world->GetPropertyPanel(); // PropertyPanel Í∞ÄÏ†∏Ïò§Í∏∞
 	//bool isTranslationActive = (PrimaryGizmo && PrimaryGizmo->GetCurrentGizmo() == EGizmoType::Translation);
 	//if (isTranslationActive)
-	//	ImGui::PushStyleColor(ImGuiCol_Button, ActiveColor); // »∞º∫ ªÛ≈¬ ªˆªÛ
-	if (ImGui::Button(u8"\ue9bc", ControlButtonSize))
+	//	ImGui::PushStyleColor(ImGuiCol_Button, ActiveColor); // ÌôúÏÑ± ÏÉÅÌÉú ÏÉâÏÉÅ
+	if (ImGui::Button("\ue9bc", ControlButtonSize))
 	{
 		selectedMode = CM_TRANSLATION;
-		player->SetMode(CM_TRANSLATION); // «ˆ¿Á ∏µÂ∏¶ TRANSLATION ¿∏∑Œ ∫Ø∞Ê
+		player->SetMode(CM_TRANSLATION); // ÌòÑÏû¨ Î™®ÎìúÎ•º TRANSLATION ÏúºÎ°ú Î≥ÄÍ≤Ω
 	}
 	
 	ImGui::SameLine();
 
-	if (ImGui::Button(u8"\ue9d3", ControlButtonSize))
+	if (ImGui::Button("\ue9d3", ControlButtonSize))
 	{
 		selectedMode = CM_ROTATION;
 		player->SetMode(CM_ROTATION);
@@ -84,7 +84,7 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
 	
 	ImGui::SameLine();
 
-	if (ImGui::Button(u8"\ue9ab", ControlButtonSize))
+	if (ImGui::Button("\ue9ab", ControlButtonSize))
 	{
 		selectedMode = CM_SCALE;
 		player->SetMode(CM_SCALE);
@@ -92,7 +92,7 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
 
 	ImGui::Separator();
 
-	if (ImGui::Button(u8"\ue9b7"))
+	if (ImGui::Button("\ue9b7"))
 	{
 		Console::GetInstance().bWasOpen = !Console::GetInstance().bWasOpen;
 	}

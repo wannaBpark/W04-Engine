@@ -7,15 +7,15 @@ cbuffer MatrixBuffer : register(b0)
 cbuffer GridParametersData : register(b1)
 {
     float GridSpacing;
-    int GridCount; // ÃÑ grid ¶óÀÎ ¼ö
-    float3 GridOrigin; // GridÀÇ Áß½É
+    int GridCount; // ì´ grid ë¼ì¸ ìˆ˜
+    float3 GridOrigin; // Gridì˜ ì¤‘ì‹¬
     float Padding;
 };
 cbuffer PrimitiveCounts : register(b3)
 {
-    int BoundingBoxCount; // ·»´õ¸µÇÒ AABBÀÇ °³¼ö
+    int BoundingBoxCount; // ë Œë”ë§í•  AABBì˜ ê°œìˆ˜
     int pad;
-    int ConeCount; // ·»´õ¸µÇÒ coneÀÇ °³¼ö
+    int ConeCount; // ë Œë”ë§í•  coneì˜ ê°œìˆ˜
     int pad1;
 };
 struct FBoundingBoxData
@@ -27,19 +27,19 @@ struct FBoundingBoxData
 };
 struct FConeData
 {
-    float3 ConeApex; // ¿ø»ÔÀÇ ²ÀÁşÁ¡
-    float ConeRadius; // ¿ø»Ô ¹Ø¸é ¹İÁö¸§
+    float3 ConeApex; // ì›ë¿”ì˜ ê¼­ì§“ì 
+    float ConeRadius; // ì›ë¿” ë°‘ë©´ ë°˜ì§€ë¦„
     
-    float3 ConeBaseCenter; // ¿ø»Ô ¹Ø¸é Áß½É
-    float ConeHeight; // ¿ø»Ô ³ôÀÌ (Apex¿Í BaseCenter °£ Â÷ÀÌ)
+    float3 ConeBaseCenter; // ì›ë¿” ë°‘ë©´ ì¤‘ì‹¬
+    float ConeHeight; // ì›ë¿” ë†’ì´ (Apexì™€ BaseCenter ê°„ ì°¨ì´)
     float4 Color;
     
-    int ConeSegmentCount; // ¿ø»Ô ¹Ø¸é ºĞÇÒ ¼ö
+    int ConeSegmentCount; // ì›ë¿” ë°‘ë©´ ë¶„í•  ìˆ˜
     float pad[3];
 };
 struct FOrientedBoxCornerData
 {
-    float3 corners[8]; // È¸Àü/ÀÌµ¿ µÈ ¿ùµå °ø°£»óÀÇ 8²ÀÁşÁ¡
+    float3 corners[8]; // íšŒì „/ì´ë™ ëœ ì›”ë“œ ê³µê°„ìƒì˜ 8ê¼­ì§“ì 
 };
 
 StructuredBuffer<FBoundingBoxData> g_BoundingBoxes : register(t2);
@@ -50,21 +50,21 @@ static const int BB_EdgeIndices[12][2] =
     { 0, 1 },
     { 1, 3 },
     { 3, 2 },
-    { 2, 0 }, // ¾Õ¸é
+    { 2, 0 }, // ì•ë©´
     { 4, 5 },
     { 5, 7 },
     { 7, 6 },
-    { 6, 4 }, // µŞ¸é
+    { 6, 4 }, // ë’·ë©´
     { 0, 4 },
     { 1, 5 },
     { 2, 6 },
-    { 3, 7 } // Ãø¸é
+    { 3, 7 } // ì¸¡ë©´
 };
 
 struct VS_INPUT
 {
-    uint vertexID : SV_VertexID; // 0 ¶Ç´Â 1: °¢ ¶óÀÎÀÇ ½ÃÀÛ°ú ³¡
-    uint instanceID : SV_InstanceID; // ÀÎ½ºÅÏ½º ID·Î grid, axis, bounding box¸¦ ±¸ºĞ
+    uint vertexID : SV_VertexID; // 0 ë˜ëŠ” 1: ê° ë¼ì¸ì˜ ì‹œì‘ê³¼ ë
+    uint instanceID : SV_InstanceID; // ì¸ìŠ¤í„´ìŠ¤ IDë¡œ grid, axis, bounding boxë¥¼ êµ¬ë¶„
 };
 
 struct PS_INPUT
@@ -74,19 +74,19 @@ struct PS_INPUT
 };
 
 /////////////////////////////////////////////////////////////////////////
-// Grid À§Ä¡ °è»ê ÇÔ¼ö
+// Grid ìœ„ì¹˜ ê³„ì‚° í•¨ìˆ˜
 /////////////////////////////////////////////////////////////////////////
 float3 ComputeGridPosition(uint instanceID, uint vertexID)
 {
     int halfCount = GridCount / 2;
-    float centerOffset = halfCount * 0.5; // grid Áß½ÉÀÌ ¿øÁ¡¿¡ ¿Àµµ·Ï
+    float centerOffset = halfCount * 0.5; // grid ì¤‘ì‹¬ì´ ì›ì ì— ì˜¤ë„ë¡
 
     float3 startPos;
     float3 endPos;
     
     if (instanceID < halfCount)
     {
-        // ¼öÁ÷¼±: X ÁÂÇ¥ º¯È­, Y´Â -centerOffset ~ +centerOffset
+        // ìˆ˜ì§ì„ : X ì¢Œí‘œ ë³€í™”, YëŠ” -centerOffset ~ +centerOffset
         float x = GridOrigin.x + (instanceID - centerOffset) * GridSpacing;
         if (abs(x - GridOrigin.x) < 0.001)
         {
@@ -101,7 +101,7 @@ float3 ComputeGridPosition(uint instanceID, uint vertexID)
     }
     else
     {
-        // ¼öÆò¼±: Y ÁÂÇ¥ º¯È­, X´Â -centerOffset ~ +centerOffset
+        // ìˆ˜í‰ì„ : Y ì¢Œí‘œ ë³€í™”, XëŠ” -centerOffset ~ +centerOffset
         int idx = instanceID - halfCount;
         float y = GridOrigin.y + (idx - centerOffset) * GridSpacing;
         if (abs(y - GridOrigin.y) < 0.001)
@@ -120,7 +120,7 @@ float3 ComputeGridPosition(uint instanceID, uint vertexID)
 }
 
 /////////////////////////////////////////////////////////////////////////
-// Axis À§Ä¡ °è»ê ÇÔ¼ö (ÃÑ 3°³: X, Y, Z)
+// Axis ìœ„ì¹˜ ê³„ì‚° í•¨ìˆ˜ (ì´ 3ê°œ: X, Y, Z)
 /////////////////////////////////////////////////////////////////////////
 float3 ComputeAxisPosition(uint axisInstanceID, uint vertexID)
 {
@@ -129,17 +129,17 @@ float3 ComputeAxisPosition(uint axisInstanceID, uint vertexID)
     float zOffset = 0.f;
     if (axisInstanceID == 0)
     {
-        // X Ãà: »¡°£»ö
+        // X ì¶•: ë¹¨ê°„ìƒ‰
         end = float3(1000.0, 0.0, zOffset);
     }
     else if (axisInstanceID == 1)
     {
-        // Y Ãà: ÃÊ·Ï»ö
+        // Y ì¶•: ì´ˆë¡ìƒ‰
         end = float3(0.0, 1000.0, zOffset);
     }
     else if (axisInstanceID == 2)
     {
-        // Z Ãà: ÆÄ¶õ»ö
+        // Z ì¶•: íŒŒë€ìƒ‰
         end = float3(0.0, 0.0, 1000.0 + zOffset);
     }
     else
@@ -150,9 +150,9 @@ float3 ComputeAxisPosition(uint axisInstanceID, uint vertexID)
 }
 
 /////////////////////////////////////////////////////////////////////////
-// Bounding Box À§Ä¡ °è»ê ÇÔ¼ö
-// bbInstanceID: StructuredBuffer¿¡¼­ ¸î ¹øÂ° bounding boxÀÎÁö
-// edgeIndex: ÇØ´ç bounding boxÀÇ 12°³ ¿§Áö Áß ¾î´À °ÍÀÎÁö
+// Bounding Box ìœ„ì¹˜ ê³„ì‚° í•¨ìˆ˜
+// bbInstanceID: StructuredBufferì—ì„œ ëª‡ ë²ˆì§¸ bounding boxì¸ì§€
+// edgeIndex: í•´ë‹¹ bounding boxì˜ 12ê°œ ì—£ì§€ ì¤‘ ì–´ëŠ ê²ƒì¸ì§€
 /////////////////////////////////////////////////////////////////////////
 float3 ComputeBoundingBoxPosition(uint bbInstanceID, uint edgeIndex, uint vertexID)
 {
@@ -174,43 +174,43 @@ float3 ComputeBoundingBoxPosition(uint bbInstanceID, uint edgeIndex, uint vertex
 }
 
 /////////////////////////////////////////////////////////////////////////
-// Axis À§Ä¡ °è»ê ÇÔ¼ö (ÃÑ 3°³: X, Y, Z)
+// Axis ìœ„ì¹˜ ê³„ì‚° í•¨ìˆ˜ (ì´ 3ê°œ: X, Y, Z)
 /////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////
-// Cone °è»ê ÇÔ¼ö
+// Cone ê³„ì‚° í•¨ìˆ˜
 /////////////////////////////////////////////////
-// Helper: °è»êµÈ °¢µµ¿¡ µû¸¥ ¹Ø¸é ²ÀÁşÁ¡ À§Ä¡ °è»ê
+// Helper: ê³„ì‚°ëœ ê°ë„ì— ë”°ë¥¸ ë°‘ë©´ ê¼­ì§“ì  ìœ„ì¹˜ ê³„ì‚°
 
 float3 ComputeConePosition(uint globalInstanceID, uint vertexID)
 {
-    // ¸ğµç coneÀÌ µ¿ÀÏÇÑ ¼¼±×¸ÕÆ® ¼ö¸¦ °¡Áü
+    // ëª¨ë“  coneì´ ë™ì¼í•œ ì„¸ê·¸ë¨¼íŠ¸ ìˆ˜ë¥¼ ê°€ì§
     int N = g_ConeData[0].ConeSegmentCount;
     
     uint coneIndex = globalInstanceID / (2 * N);
     uint lineIndex = globalInstanceID % (2 * N);
     
-    // cone µ¥ÀÌÅÍ ÀĞ±â
+    // cone ë°ì´í„° ì½ê¸°
     FConeData cone = g_ConeData[coneIndex];
     
-    // coneÀÇ Ãà °è»ê
+    // coneì˜ ì¶• ê³„ì‚°
     float3 axis = normalize(cone.ConeApex - cone.ConeBaseCenter);
     
-    // axis¿¡ ¼öÁ÷ÀÎ µÎ º¤ÅÍ(u, v)¸¦ »ı¼º
+    // axisì— ìˆ˜ì§ì¸ ë‘ ë²¡í„°(u, v)ë¥¼ ìƒì„±
     float3 arbitrary = abs(dot(axis, float3(0, 0, 1))) < 0.99 ? float3(0, 0, 1) : float3(0, 1, 0);
     float3 u = normalize(cross(axis, arbitrary));
     float3 v = cross(axis, u);
     
     if (lineIndex < (uint) N)
     {
-        // Ãø¸é ¼±ºĞ: coneÀÇ ²ÀÁşÁ¡°ú ¹Ø¸éÀÇ ÇÑ Á¡À» ÀÕ´Â´Ù.
+        // ì¸¡ë©´ ì„ ë¶„: coneì˜ ê¼­ì§“ì ê³¼ ë°‘ë©´ì˜ í•œ ì ì„ ì‡ëŠ”ë‹¤.
         float angle = lineIndex * 6.28318530718 / N;
         float3 baseVertex = cone.ConeBaseCenter + (cos(angle) * u + sin(angle) * v) * cone.ConeRadius;
         return (vertexID == 0) ? cone.ConeApex : baseVertex;
     }
     else
     {
-        // ¹Ø¸é µÑ·¹ ¼±ºĞ: ¹Ø¸é»óÀÇ ÀÎÁ¢ÇÑ µÎ Á¡À» ÀÕ´Â´Ù.
+        // ë°‘ë©´ ë‘˜ë ˆ ì„ ë¶„: ë°‘ë©´ìƒì˜ ì¸ì ‘í•œ ë‘ ì ì„ ì‡ëŠ”ë‹¤.
         uint idx = lineIndex - N;
         float angle0 = idx * 6.28318530718 / N;
         float angle1 = ((idx + 1) % N) * 6.28318530718 / N;
@@ -230,7 +230,7 @@ float3 ComputeOrientedBoxPosition(uint obIndex, uint edgeIndex, uint vertexID)
 }
 
 /////////////////////////////////////////////////////////////////////////
-// ¸ŞÀÎ ¹öÅØ½º ¼ÎÀÌ´õ
+// ë©”ì¸ ë²„í…ìŠ¤ ì…°ì´ë”
 /////////////////////////////////////////////////////////////////////////
 PS_INPUT mainVS(VS_INPUT input)
 {
@@ -238,54 +238,54 @@ PS_INPUT mainVS(VS_INPUT input)
     float3 pos;
     float4 color;
     
-    // Cone ÇÏ³ª´ç (2 * SegmentCount) ¼±ºĞ.
-    // ConeCount °³¼ö¸¸Å­ÀÌ¹Ç·Î ÃÑ (2 * SegmentCount * ConeCount).
+    // Cone í•˜ë‚˜ë‹¹ (2 * SegmentCount) ì„ ë¶„.
+    // ConeCount ê°œìˆ˜ë§Œí¼ì´ë¯€ë¡œ ì´ (2 * SegmentCount * ConeCount).
     uint coneInstCnt = ConeCount * 2 * g_ConeData[0].ConeSegmentCount;
 
-    // Grid / Axis / AABB ÀÎ½ºÅÏ½º °³¼ö °è»ê
-    uint gridLineCount = GridCount; // ±×¸®µå ¶óÀÎ
-    uint axisCount = 3; // X, Y, Z Ãà (¿ùµå ÁÂÇ¥Ãà)
-    uint aabbInstanceCount = 12 * BoundingBoxCount; // AABB ÇÏ³ª´ç 12°³ ¿§Áö
+    // Grid / Axis / AABB ì¸ìŠ¤í„´ìŠ¤ ê°œìˆ˜ ê³„ì‚°
+    uint gridLineCount = GridCount; // ê·¸ë¦¬ë“œ ë¼ì¸
+    uint axisCount = 3; // X, Y, Z ì¶• (ì›”ë“œ ì¢Œí‘œì¶•)
+    uint aabbInstanceCount = 12 * BoundingBoxCount; // AABB í•˜ë‚˜ë‹¹ 12ê°œ ì—£ì§€
 
-    // 1) "ÄÜ ÀÎ½ºÅÏ½º ½ÃÀÛ" ÁöÁ¡
+    // 1) "ì½˜ ì¸ìŠ¤í„´ìŠ¤ ì‹œì‘" ì§€ì 
     uint coneInstanceStart = gridLineCount + axisCount + aabbInstanceCount;
-    // 2) ±× ´ÙÀ½(=ÄÜ ±¸°£ÀÇ ³¡)ÀÌ °ğ OBB ½ÃÀÛ ÁöÁ¡
+    // 2) ê·¸ ë‹¤ìŒ(=ì½˜ êµ¬ê°„ì˜ ë)ì´ ê³§ OBB ì‹œì‘ ì§€ì 
     uint obbStart = coneInstanceStart + coneInstCnt;
 
-    // ÀÌÁ¦ instanceID¸¦ ±âÁØÀ¸·Î ºĞ±â
+    // ì´ì œ instanceIDë¥¼ ê¸°ì¤€ìœ¼ë¡œ ë¶„ê¸°
     if (input.instanceID < gridLineCount)
     {
-        // 0 ~ (GridCount-1): ±×¸®µå
+        // 0 ~ (GridCount-1): ê·¸ë¦¬ë“œ
         pos = ComputeGridPosition(input.instanceID, input.vertexID);
         color = float4(0.1, 0.1, 0.1, 1.0);
     }
     else if (input.instanceID < gridLineCount + axisCount)
     {
-        // ±× ´ÙÀ½ (axisCount)°³: Ãà(Axis)
+        // ê·¸ ë‹¤ìŒ (axisCount)ê°œ: ì¶•(Axis)
         uint axisInstanceID = input.instanceID - gridLineCount;
         pos = ComputeAxisPosition(axisInstanceID, input.vertexID);
 
-        // Ãà¸¶´Ù »ö»ó
+        // ì¶•ë§ˆë‹¤ ìƒ‰ìƒ
         if (axisInstanceID == 0)
-            color = float4(1.0, 0.0, 0.0, 1.0); // X: »¡°­
+            color = float4(1.0, 0.0, 0.0, 1.0); // X: ë¹¨ê°•
         else if (axisInstanceID == 1)
-            color = float4(0.0, 1.0, 0.0, 1.0); // Y: ÃÊ·Ï
+            color = float4(0.0, 1.0, 0.0, 1.0); // Y: ì´ˆë¡
         else
-            color = float4(0.0, 0.0, 1.0, 1.0); // Z: ÆÄ¶û
+            color = float4(0.0, 0.0, 1.0, 1.0); // Z: íŒŒë‘
     }
     else if (input.instanceID < gridLineCount + axisCount + aabbInstanceCount)
     {
-        // ±× ´ÙÀ½ AABB ÀÎ½ºÅÏ½º ±¸°£
+        // ê·¸ ë‹¤ìŒ AABB ì¸ìŠ¤í„´ìŠ¤ êµ¬ê°„
         uint index = input.instanceID - (gridLineCount + axisCount);
-        uint bbInstanceID = index / 12; // 12°³°¡ 1¹Ú½º
+        uint bbInstanceID = index / 12; // 12ê°œê°€ 1ë°•ìŠ¤
         uint bbEdgeIndex = index % 12;
         
         pos = ComputeBoundingBoxPosition(bbInstanceID, bbEdgeIndex, input.vertexID);
-        color = float4(1.0, 1.0, 0.0, 1.0); // ³ë¶õ»ö
+        color = float4(1.0, 1.0, 0.0, 1.0); // ë…¸ë€ìƒ‰
     }
     else if (input.instanceID < obbStart)
     {
-        // ±× ´ÙÀ½ ÄÜ(Cone) ±¸°£
+        // ê·¸ ë‹¤ìŒ ì½˜(Cone) êµ¬ê°„
         uint coneInstanceID = input.instanceID - coneInstanceStart;
         pos = ComputeConePosition(coneInstanceID, input.vertexID);
         int N = g_ConeData[0].ConeSegmentCount;
@@ -302,10 +302,10 @@ PS_INPUT mainVS(VS_INPUT input)
         uint edgeIndex = obbLocalID % 12;
 
         pos = ComputeOrientedBoxPosition(obbIndex, edgeIndex, input.vertexID);
-        color = float4(0.4, 1.0, 0.4, 1.0); // ¿¹½Ã: ¿¬µÎ»ö
+        color = float4(0.4, 1.0, 0.4, 1.0); // ì˜ˆì‹œ: ì—°ë‘ìƒ‰
     }
 
-    // Ãâ·Â º¯È¯
+    // ì¶œë ¥ ë³€í™˜
     output.Position = mul(float4(pos, 1.0), MVP);
     output.Color = color;
     return output;

@@ -193,7 +193,7 @@ void PropertyPanel::Draw(UWorld* world)
                 static char buf[256];
                 strcpy_s(buf, u8Text.c_str());
                
-                if (ImGui::InputText(u8"����", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue))
+                if (ImGui::InputText("����", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     textOBj->ClearText();
                     int wlen = MultiByteToWideChar(CP_UTF8, 0, buf, -1, nullptr, 0);

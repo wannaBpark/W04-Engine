@@ -16,7 +16,7 @@ private:
     Console();
     ~Console();
 public:
-    static Console& GetInstance(); // ÂüÁ¶ ¹İÈ¯À¸·Î º¯°æ
+    static Console& GetInstance(); // ì°¸ì¡° ë°˜í™˜ìœ¼ë¡œ ë³€ê²½
 
     void Clear();
     void AddLog(LogLevel level, const char* fmt, ...);
@@ -29,7 +29,7 @@ public:
         else {
             bWasOpen = true;
         }
-    } // Toggle() ±¸Çö 
+    } // Toggle() êµ¬í˜„ 
 
 public:
     struct LogEntry {
@@ -43,15 +43,15 @@ public:
     char inputBuf[256] = "";
     bool scrollToBottom = false;
 
-    ImGuiTextFilter filter;  // ÇÊÅÍ¸µÀ» À§ÇÑ ImGuiTextFilter
+    ImGuiTextFilter filter;  // í•„í„°ë§ì„ ìœ„í•œ ImGuiTextFilter
 
-    // Ãß°¡µÈ ¸â¹ö º¯¼öµé
-    bool showLogTemp = true;   // LogTemp Ã¼Å©¹Ú½º
-    bool showWarning = true;   // Warning Ã¼Å©¹Ú½º
-    bool showError = true;     // Error Ã¼Å©¹Ú½º
+    // ì¶”ê°€ëœ ë©¤ë²„ ë³€ìˆ˜ë“¤
+    bool showLogTemp = true;   // LogTemp ì²´í¬ë°•ìŠ¤
+    bool showWarning = true;   // Warning ì²´í¬ë°•ìŠ¤
+    bool showError = true;     // Error ì²´í¬ë°•ìŠ¤
 
     bool bWasOpen = true;
-    // º¹»ç ¹æÁö
+    // ë³µì‚¬ ë°©ì§€
     Console(const Console&) = delete;
     Console& operator=(const Console&) = delete;
     Console(Console&&) = delete;

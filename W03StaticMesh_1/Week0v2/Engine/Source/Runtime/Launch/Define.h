@@ -2,18 +2,18 @@
 #include <cmath>
 #include <algorithm>
 
-// ±âº» Å¸ÀÔ 
+// ê¸°ë³¸ íƒ€ì… 
 #include "CoreTypes.h"
 
 
-// ¼öÇĞ °ü·Ã
+// ìˆ˜í•™ ê´€ë ¨
 #include "Math/MathDefines.h"
 #include "Math/Vector.h"
 #include "Math/Vector4.h"
 #include "Math/Matrix.h"
 #include "Math/Quat.h"
 
-// °´Ã¼ ¸ÅÅ©·Î Á¤ÀÇ 
+// ê°ì²´ ë§¤í¬ë¡œ ì •ì˜ 
 #include "UObject/ObjectMacros.h"
 #include "UObject/ObjectTypes.h"
 
@@ -50,7 +50,7 @@ struct FGridParameters
 };
 struct FSimpleVertex
 {
-	float dummy; // ³»¿ëÀº »ç¿ëµÇÁö ¾ÊÀ½
+	float dummy; // ë‚´ìš©ì€ ì‚¬ìš©ë˜ì§€ ì•ŠìŒ
     float padding[11];
 };
 struct FOBB {
@@ -68,11 +68,11 @@ struct FBoundingBox
         float tmax = FLT_MAX;
         const float epsilon = 1e-6f;
 
-        // XÃà Ã³¸®
+        // Xì¶• ì²˜ë¦¬
         if (fabs(rayDir.x) < epsilon)
         {
-            // ·¹ÀÌ°¡ XÃà ¹æÇâÀ¸·Î °ÅÀÇ ÆòÇàÇÑ °æ¿ì,
-            // ¿øÁ¡ÀÇ x°¡ ¹Ú½º [min.x, max.x] ¹üÀ§ ¹ÛÀÌ¸é ±³Â÷ ¾øÀ½
+            // ë ˆì´ê°€ Xì¶• ë°©í–¥ìœ¼ë¡œ ê±°ì˜ í‰í–‰í•œ ê²½ìš°,
+            // ì›ì ì˜ xê°€ ë°•ìŠ¤ [min.x, max.x] ë²”ìœ„ ë°–ì´ë©´ êµì°¨ ì—†ìŒ
             if (rayOrigin.x < min.x || rayOrigin.x > max.x)
                 return false;
         }
@@ -82,15 +82,15 @@ struct FBoundingBox
             float t2 = (max.x - rayOrigin.x) / rayDir.x;
             if (t1 > t2)  std::swap(t1, t2);
 
-            // tminÀº "ÇöÀç±îÁöÀÇ ±³Â÷ ±¸°£ Áß °¡Àå Å« min"
+            // tminì€ "í˜„ì¬ê¹Œì§€ì˜ êµì°¨ êµ¬ê°„ ì¤‘ ê°€ì¥ í° min"
             tmin = (t1 > tmin) ? t1 : tmin;
-            // tmax´Â "ÇöÀç±îÁöÀÇ ±³Â÷ ±¸°£ Áß °¡Àå ÀÛÀº max"
+            // tmaxëŠ” "í˜„ì¬ê¹Œì§€ì˜ êµì°¨ êµ¬ê°„ ì¤‘ ê°€ì¥ ì‘ì€ max"
             tmax = (t2 < tmax) ? t2 : tmax;
             if (tmin > tmax)
                 return false;
         }
 
-        // YÃà Ã³¸®
+        // Yì¶• ì²˜ë¦¬
         if (fabs(rayDir.y) < epsilon)
         {
             if (rayOrigin.y < min.y || rayOrigin.y > max.y)
@@ -108,7 +108,7 @@ struct FBoundingBox
                 return false;
         }
 
-        // ZÃà Ã³¸®
+        // Zì¶• ì²˜ë¦¬
         if (fabs(rayDir.z) < epsilon)
         {
             if (rayOrigin.z < min.z || rayOrigin.z > max.z)
@@ -126,13 +126,13 @@ struct FBoundingBox
                 return false;
         }
 
-        // ¿©±â±îÁö ¿ÔÀ¸¸é ±³Â÷ ±¸°£ [tmin, tmax]°¡ À¯È¿ÇÏ´Ù.
-        // tmax < 0 ÀÌ¸é, ·¹ÀÌ°¡ ¹Ú½º µÚÂÊ¿¡¼­ ±³Â÷ÇÏ¹Ç·Î È­¸é»ó º¸±â¿£ ±³Â÷ ¾È ÇÑ´Ù°í º¼ ¼ö ÀÖÀ½
+        // ì—¬ê¸°ê¹Œì§€ ì™”ìœ¼ë©´ êµì°¨ êµ¬ê°„ [tmin, tmax]ê°€ ìœ íš¨í•˜ë‹¤.
+        // tmax < 0 ì´ë©´, ë ˆì´ê°€ ë°•ìŠ¤ ë’¤ìª½ì—ì„œ êµì°¨í•˜ë¯€ë¡œ í™”ë©´ìƒ ë³´ê¸°ì—” êµì°¨ ì•ˆ í•œë‹¤ê³  ë³¼ ìˆ˜ ìˆìŒ
         if (tmax < 0.0f)
             return false;
 
-        // outDistance = tminÀÌ 0º¸´Ù Å©¸é ±×°Ô ·¹ÀÌ°¡ Ã³À½À¸·Î ¹Ú½º¸¦ ¸¸³ª´Â ÁöÁ¡
-        // ¸¸¾à tmin < 0 ÀÌ¸é, ·¹ÀÌÀÇ ½ÃÀÛÁ¡ÀÌ ¹Ú½º ³»ºÎ¿¡ ÀÖ´Ù´Â ÀÇ¹ÌÀÌ¹Ç·Î, °Å¸®¸¦ 0À¸·Î Ã³¸®ÇØµµ µÊ.
+        // outDistance = tminì´ 0ë³´ë‹¤ í¬ë©´ ê·¸ê²Œ ë ˆì´ê°€ ì²˜ìŒìœ¼ë¡œ ë°•ìŠ¤ë¥¼ ë§Œë‚˜ëŠ” ì§€ì 
+        // ë§Œì•½ tmin < 0 ì´ë©´, ë ˆì´ì˜ ì‹œì‘ì ì´ ë°•ìŠ¤ ë‚´ë¶€ì— ìˆë‹¤ëŠ” ì˜ë¯¸ì´ë¯€ë¡œ, ê±°ë¦¬ë¥¼ 0ìœ¼ë¡œ ì²˜ë¦¬í•´ë„ ë¨.
         outDistance = (tmin >= 0.0f) ? tmin : 0.0f;
 
         return true;
@@ -141,14 +141,14 @@ struct FBoundingBox
 };
 struct FCone
 {
-    FVector ConeApex; // ¿ø»ÔÀÇ ²ÀÁşÁ¡
-    float ConeRadius; // ¿ø»Ô ¹Ø¸é ¹İÁö¸§
+    FVector ConeApex; // ì›ë¿”ì˜ ê¼­ì§“ì 
+    float ConeRadius; // ì›ë¿” ë°‘ë©´ ë°˜ì§€ë¦„
 
-    FVector ConeBaseCenter; // ¿ø»Ô ¹Ø¸é Áß½É
-    float ConeHeight; // ¿ø»Ô ³ôÀÌ (Apex¿Í BaseCenter °£ Â÷ÀÌ)
+    FVector ConeBaseCenter; // ì›ë¿” ë°‘ë©´ ì¤‘ì‹¬
+    float ConeHeight; // ì›ë¿” ë†’ì´ (Apexì™€ BaseCenter ê°„ ì°¨ì´)
     FVector4 Color;
 
-    int ConeSegmentCount; // ¿ø»Ô ¹Ø¸é ºĞÇÒ ¼ö
+    int ConeSegmentCount; // ì›ë¿” ë°‘ë©´ ë¶„í•  ìˆ˜
     float pad[3];
 
 };
@@ -161,14 +161,14 @@ struct FPrimitiveCounts
 };
 struct FLighting
 {
-	float lightDirX, lightDirY, lightDirZ; // Á¶¸í ¹æÇâ
-	float pad1;                      // 16¹ÙÀÌÆ® Á¤·Ä¿ë ÆĞµù
-	float lightColorX, lightColorY, lightColorZ;    // Á¶¸í »ö»ó
-	float pad2;                      // 16¹ÙÀÌÆ® Á¤·Ä¿ë ÆĞµù
-	float AmbientFactor;             // ambient °è¼ö
-	float pad3; // 16¹ÙÀÌÆ® Á¤·Ä ¸ÂÃã Ãß°¡ ÆĞµù
-	float pad4; // 16¹ÙÀÌÆ® Á¤·Ä ¸ÂÃã Ãß°¡ ÆĞµù
-	float pad5; // 16¹ÙÀÌÆ® Á¤·Ä ¸ÂÃã Ãß°¡ ÆĞµù
+	float lightDirX, lightDirY, lightDirZ; // ì¡°ëª… ë°©í–¥
+	float pad1;                      // 16ë°”ì´íŠ¸ ì •ë ¬ìš© íŒ¨ë”©
+	float lightColorX, lightColorY, lightColorZ;    // ì¡°ëª… ìƒ‰ìƒ
+	float pad2;                      // 16ë°”ì´íŠ¸ ì •ë ¬ìš© íŒ¨ë”©
+	float AmbientFactor;             // ambient ê³„ìˆ˜
+	float pad3; // 16ë°”ì´íŠ¸ ì •ë ¬ ë§ì¶¤ ì¶”ê°€ íŒ¨ë”©
+	float pad4; // 16ë°”ì´íŠ¸ ì •ë ¬ ë§ì¶¤ ì¶”ê°€ íŒ¨ë”©
+	float pad5; // 16ë°”ì´íŠ¸ ì •ë ¬ ë§ì¶¤ ì¶”ê°€ íŒ¨ë”©
 };
 
 

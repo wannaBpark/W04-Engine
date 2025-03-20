@@ -56,7 +56,7 @@ void UBillboardComponent::Render()
 	FMatrix M = CreateBillboardMatrix();
 	FMatrix VP = GetEngine().View * GetEngine().Projection;
 
-	// √÷¡æ MVP «‡∑ƒ
+	// ÏµúÏ¢Ö MVP ÌñâÎ†¨
 	FMatrix MVP = M * VP;
 	if (this == GetWorld()->GetPickingGizmo()) {
 		FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);
@@ -105,7 +105,7 @@ int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 	pickPosition.z = 1.0f; // Near Plane
 
 	FVector _rayDirection = inverseMatrix.TransformPosition(pickPosition);
-	_rayDirection = (_rayDirection - pickRayOrigin).Normalize(); // local ¡¬«•√‡¿« ray
+	_rayDirection = (_rayDirection - pickRayOrigin).Normalize(); // local Ï¢åÌëúÏ∂ïÏùò ray
 
 	return Super::CheckRayIntersection(pickRayOrigin, _rayDirection, pfNearHitDistance);
 	*/
@@ -228,11 +228,11 @@ bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& checkQuad, fl
 	if (pickPosition.x >= minX && pickPosition.x <= maxX &&
 		pickPosition.y >= minY && pickPosition.y <= maxY)
 	{
-		float A = P.M[2][2];  // Projection Matrix¿« A∞™ (Z ∫Ø»Ø ∞Ëºˆ)
-		float B = P.M[3][2];  // Projection Matrix¿« B∞™ (Z ∫Ø»Ø ∞Ëºˆ)
+		float A = P.M[2][2];  // Projection MatrixÏùò AÍ∞í (Z Î≥ÄÌôò Í≥ÑÏàò)
+		float B = P.M[3][2];  // Projection MatrixÏùò BÍ∞í (Z Î≥ÄÌôò Í≥ÑÏàò)
 
-		float z_view_pick = (pickPosition.z - B) / A; // ∏∂øÏΩ∫ ≈¨∏Ø View ∞¯∞£ Z
-		float z_view_billboard = (avgZ - B) / A; // Billboard View ∞¯∞£ Z
+		float z_view_pick = (pickPosition.z - B) / A; // ÎßàÏö∞Ïä§ ÌÅ¥Î¶≠ View Í≥µÍ∞Ñ Z
+		float z_view_billboard = (avgZ - B) / A; // Billboard View Í≥µÍ∞Ñ Z
 
 		hitDistance = 1000.0f;
 		result = true;

@@ -28,14 +28,14 @@ void ShowFlags::Draw(UWorld* world)
 	float controllWindowPosX = (static_cast<float>(width) - controllWindowWidth) * 0.46f;
 	float controllWindowPosY = (static_cast<float>(height) - controllWindowHeight) * 0.f;
 
-	// Ã¢ Å©±â¿Í À§Ä¡ ¼³Á¤
+	// ì°½ í¬ê¸°ì™€ ìœ„ì¹˜ ì„¤ì •
 	ImGui::SetNextWindowPos(ImVec2(controllWindowPosX, controllWindowPosY));
 	ImGui::SetNextWindowSize(ImVec2(controllWindowWidth, controllWindowHeight), ImGuiCond_Always);
 
 	if (ImGui::Begin("ShowFlags"))
 	{
 		const char* items[] = { "AABB", "Primitves","BillBoardText","UUID"};
-		static bool selected[IM_ARRAYSIZE(items)] = { true, true, true, true };  // °¢ Ç×¸ñÀÇ Ã¼Å© »óÅÂ ÀúÀå
+		static bool selected[IM_ARRAYSIZE(items)] = { true, true, true, true };  // ê° í•­ëª©ì˜ ì²´í¬ ìƒíƒœ ì €ì¥
 
 		if (ImGui::BeginCombo("Show Flags", "Select Show Flags"))
 		{
@@ -48,7 +48,7 @@ void ShowFlags::Draw(UWorld* world)
 		currentFlags = ConvertSelectionToFlags(selected);
 
 	}
-	ImGui::End(); // À©µµ¿ì Á¾·á
+	ImGui::End(); // ìœˆë„ìš° ì¢…ë£Œ
 }
 uint64 ShowFlags::ConvertSelectionToFlags(const bool selected[])
 {

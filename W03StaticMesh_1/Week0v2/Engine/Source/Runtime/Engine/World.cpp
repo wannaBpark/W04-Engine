@@ -42,7 +42,7 @@ void UWorld::CreateBaseObject()
 	UObject* tmp = FObjectFactory::ConstructObject<UTransformGizmo>("LocalGizmo");
 	LocalGizmo = static_cast<UTransformGizmo*>(tmp);
 		
-	////Å×½ºÆ®¿ë ÅØ½ºÆ®
+	////í…ŒìŠ¤íŠ¸ìš© í…ìŠ¤íŠ¸
 	
 	UObject* pObj = FObjectFactory::ConstructObject<USkySphereComponent>("SkySphere");
 	USkySphereComponent* skySphere = static_cast<USkySphereComponent*>(pObj);
@@ -53,12 +53,12 @@ void UWorld::CreateBaseObject()
 	GUObjectArray.push_back(skySphere);
 
 
-	//Å×½ºÆ®¿ë ÅØ½ºÆ®
+	//í…ŒìŠ¤íŠ¸ìš© í…ìŠ¤íŠ¸
 	
 	
 /*
 
-	//Å×½ºÆ®¿ë ºôº¸µå. ÇÊ¿ä¾øÀ¸¸é »èÁ¦
+	//í…ŒìŠ¤íŠ¸ìš© ë¹Œë³´ë“œ. í•„ìš”ì—†ìœ¼ë©´ ì‚­ì œ
 	UObject* billboard = FObjectFactory::ConstructObject<UBillboardComponent>();
 	billboard = static_cast<UBillboardComponent*>(billboard);
 	UBillboardComponent* castBillboard = static_cast<UBillboardComponent*>(billboard);
@@ -67,14 +67,14 @@ void UWorld::CreateBaseObject()
 
 
 	/*
-	//Å×½ºÆ®¿ë ÅØ½ºÆ®
+	//í…ŒìŠ¤íŠ¸ìš© í…ìŠ¤íŠ¸
 	UObject* uuid = FObjectFactory::ConstructObject<UTextUUID>();
 	UTextUUID* castUUID = static_cast<UTextUUID*>(uuid);
 	castUUID->SetTexture(L"Assets/Texture/font.png");
 	castUUID->SetRowColumnCount(106, 106);
 	castUUID->SetUUID(sphere->UUID);
 	castUUID->SetScale(FVector(0.25f, 0.25f, 0.25f));
-	//SetTextÀü¿¡ RowColumn ¹İµå½Ã ¼³Á¤
+	//SetTextì „ì— RowColumn ë°˜ë“œì‹œ ì„¤ì •
 	GUObjectArray.push_back(uuid);
 
 	castUUID->SetUUIDParent(sphere);
@@ -182,8 +182,8 @@ void UWorld::SpawnObject(OBJECTS _Obj)
 		UText* castText = static_cast<UText*>(text);
 		castText->SetTexture(L"Assets/Texture/font.png");
 		castText->SetRowColumnCount(106, 106);
-		castText->SetText(L"¾È³çÇÏ¼¼¿ä Jungle 1");
-		//SetTextÀü¿¡ RowColumn ¹İµå½Ã ¼³Á¤
+		castText->SetText(L"ì•ˆë…•í•˜ì„¸ìš” Jungle 1");
+		//SetTextì „ì— RowColumn ë°˜ë“œì‹œ ì„¤ì •
 		GUObjectArray.push_back(text);
 	}
 	break;

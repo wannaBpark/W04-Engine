@@ -9,22 +9,22 @@ void FGraphicsDevice::Initialize(HWND hWindow) {
     CurrentRasterizer = RasterizerStateSOLID;
 }
 void FGraphicsDevice::CreateDeviceAndSwapChain(HWND hWindow) {
-    // Áö¿øÇÏ´Â Direct3D ±â´É ·¹º§À» Á¤ÀÇ
+    // ì§€ì›í•˜ëŠ” Direct3D ê¸°ëŠ¥ ë ˆë²¨ì„ ì •ì˜
     D3D_FEATURE_LEVEL featurelevels[] = { D3D_FEATURE_LEVEL_11_0 };
 
-    // ½º¿Ò Ã¼ÀÎ ¼³Á¤ ±¸Á¶Ã¼ ÃÊ±âÈ­
+    // ìŠ¤ì™‘ ì²´ì¸ ì„¤ì • êµ¬ì¡°ì²´ ì´ˆê¸°í™”
     DXGI_SWAP_CHAIN_DESC swapchaindesc = {};
-    swapchaindesc.BufferDesc.Width = 0; // Ã¢ Å©±â¿¡ ¸Â°Ô ÀÚµ¿À¸·Î ¼³Á¤
-    swapchaindesc.BufferDesc.Height = 0; // Ã¢ Å©±â¿¡ ¸Â°Ô ÀÚµ¿À¸·Î ¼³Á¤
-    swapchaindesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; // »ö»ó Æ÷¸Ë
-    swapchaindesc.SampleDesc.Count = 1; // ¸ÖÆ¼ »ùÇÃ¸µ ºñÈ°¼ºÈ­
-    swapchaindesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // ·»´õ Å¸°ÙÀ¸·Î »ç¿ë
-    swapchaindesc.BufferCount = 2; // ´õºí ¹öÆÛ¸µ
-    swapchaindesc.OutputWindow = hWindow; // ·»´õ¸µÇÒ Ã¢ ÇÚµé
-    swapchaindesc.Windowed = TRUE; // Ã¢ ¸ğµå
-    swapchaindesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // ½º¿Ò ¹æ½Ä
+    swapchaindesc.BufferDesc.Width = 0; // ì°½ í¬ê¸°ì— ë§ê²Œ ìë™ìœ¼ë¡œ ì„¤ì •
+    swapchaindesc.BufferDesc.Height = 0; // ì°½ í¬ê¸°ì— ë§ê²Œ ìë™ìœ¼ë¡œ ì„¤ì •
+    swapchaindesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; // ìƒ‰ìƒ í¬ë§·
+    swapchaindesc.SampleDesc.Count = 1; // ë©€í‹° ìƒ˜í”Œë§ ë¹„í™œì„±í™”
+    swapchaindesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // ë Œë” íƒ€ê²Ÿìœ¼ë¡œ ì‚¬ìš©
+    swapchaindesc.BufferCount = 2; // ë”ë¸” ë²„í¼ë§
+    swapchaindesc.OutputWindow = hWindow; // ë Œë”ë§í•  ì°½ í•¸ë“¤
+    swapchaindesc.Windowed = TRUE; // ì°½ ëª¨ë“œ
+    swapchaindesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // ìŠ¤ì™‘ ë°©ì‹
 
-    // µğ¹ÙÀÌ½º¿Í ½º¿Ò Ã¼ÀÎ »ı¼º
+    // ë””ë°”ì´ìŠ¤ì™€ ìŠ¤ì™‘ ì²´ì¸ ìƒì„±
     HRESULT hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr,
         D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG,
         featurelevels, ARRAYSIZE(featurelevels), D3D11_SDK_VERSION,
@@ -35,10 +35,10 @@ void FGraphicsDevice::CreateDeviceAndSwapChain(HWND hWindow) {
         return;
     }
 
-    // ½º¿Ò Ã¼ÀÎ Á¤º¸ °¡Á®¿À±â (ÀÌÈÄ¿¡ »ç¿ëÀ» À§ÇØ)
+    // ìŠ¤ì™‘ ì²´ì¸ ì •ë³´ ê°€ì ¸ì˜¤ê¸° (ì´í›„ì— ì‚¬ìš©ì„ ìœ„í•´)
     SwapChain->GetDesc(&swapchaindesc);
 
-    // ºäÆ÷Æ® Á¤º¸ ¼³Á¤
+    // ë·°í¬íŠ¸ ì •ë³´ ì„¤ì •
     ViewportInfo = { 0.0f, 0.0f, (float)swapchaindesc.BufferDesc.Width, (float)swapchaindesc.BufferDesc.Height, 0.0f, 1.0f };
 }
 
@@ -52,20 +52,20 @@ void FGraphicsDevice::CreateDepthStencilBuffer(HWND hWindow) {
     UINT width = clientRect.right - clientRect.left;
     UINT height = clientRect.bottom - clientRect.top;
 
-    // ±íÀÌ/½ºÅÙ½Ç ÅØ½ºÃ³ »ı¼º
+    // ê¹Šì´/ìŠ¤í…ì‹¤ í…ìŠ¤ì²˜ ìƒì„±
     D3D11_TEXTURE2D_DESC descDepth;
     ZeroMemory(&descDepth, sizeof(descDepth));
-    descDepth.Width = width; // ÅØ½ºÃ³ ³Êºñ ¼³Á¤
-    descDepth.Height = height; // ÅØ½ºÃ³ ³ôÀÌ ¼³Á¤
-    descDepth.MipLevels = 1; // ¹Ì¸Ê ·¹º§ ¼ö (1·Î ¼³Á¤ÇÏ¿© ¹Ì¸Ê ¾øÀ½)
-    descDepth.ArraySize = 1; // ÅØ½ºÃ³ ¹è¿­ÀÇ Å©±â (1·Î ´ÜÀÏ ÅØ½ºÃ³)
-    descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // 24ºñÆ® ±íÀÌ¿Í 8ºñÆ® ½ºÅÙ½ÇÀ» À§ÇÑ Æ÷¸Ë
-    descDepth.SampleDesc.Count = 1; // ¸ÖÆ¼»ùÇÃ¸µ ¼³Á¤ (1·Î ´ÜÀÏ »ùÇÃ)
-    descDepth.SampleDesc.Quality = 0; // »ùÇÃ Ä÷¸®Æ¼ ¼³Á¤
-    descDepth.Usage = D3D11_USAGE_DEFAULT; // ÅØ½ºÃ³ »ç¿ë ¹æ½Ä
-    descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL; // ±íÀÌ ½ºÅÙ½Ç ºä·Î ¹ÙÀÎµù ¼³Á¤
-    descDepth.CPUAccessFlags = 0; // CPU Á¢±Ù ¹æ½Ä ¼³Á¤
-    descDepth.MiscFlags = 0; // ±âÅ¸ ÇÃ·¡±× ¼³Á¤
+    descDepth.Width = width; // í…ìŠ¤ì²˜ ë„ˆë¹„ ì„¤ì •
+    descDepth.Height = height; // í…ìŠ¤ì²˜ ë†’ì´ ì„¤ì •
+    descDepth.MipLevels = 1; // ë¯¸ë§µ ë ˆë²¨ ìˆ˜ (1ë¡œ ì„¤ì •í•˜ì—¬ ë¯¸ë§µ ì—†ìŒ)
+    descDepth.ArraySize = 1; // í…ìŠ¤ì²˜ ë°°ì—´ì˜ í¬ê¸° (1ë¡œ ë‹¨ì¼ í…ìŠ¤ì²˜)
+    descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // 24ë¹„íŠ¸ ê¹Šì´ì™€ 8ë¹„íŠ¸ ìŠ¤í…ì‹¤ì„ ìœ„í•œ í¬ë§·
+    descDepth.SampleDesc.Count = 1; // ë©€í‹°ìƒ˜í”Œë§ ì„¤ì • (1ë¡œ ë‹¨ì¼ ìƒ˜í”Œ)
+    descDepth.SampleDesc.Quality = 0; // ìƒ˜í”Œ í€„ë¦¬í‹° ì„¤ì •
+    descDepth.Usage = D3D11_USAGE_DEFAULT; // í…ìŠ¤ì²˜ ì‚¬ìš© ë°©ì‹
+    descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL; // ê¹Šì´ ìŠ¤í…ì‹¤ ë·°ë¡œ ë°”ì¸ë”© ì„¤ì •
+    descDepth.CPUAccessFlags = 0; // CPU ì ‘ê·¼ ë°©ì‹ ì„¤ì •
+    descDepth.MiscFlags = 0; // ê¸°íƒ€ í”Œë˜ê·¸ ì„¤ì •
 
     HRESULT hr = Device->CreateTexture2D(&descDepth, NULL, &DepthStencilBuffer);
 
@@ -77,9 +77,9 @@ void FGraphicsDevice::CreateDepthStencilBuffer(HWND hWindow) {
 
     D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
     ZeroMemory(&descDSV, sizeof(descDSV));
-    descDSV.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // ±íÀÌ ½ºÅÙ½Ç Æ÷¸Ë
-    descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D; // ºä Å¸ÀÔ ¼³Á¤ (2D ÅØ½ºÃ³)
-    descDSV.Texture2D.MipSlice = 0; // »ç¿ëÇÒ ¹Ì¸Ê ½½¶óÀÌ½º ¼³Á¤
+    descDSV.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // ê¹Šì´ ìŠ¤í…ì‹¤ í¬ë§·
+    descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D; // ë·° íƒ€ì… ì„¤ì • (2D í…ìŠ¤ì²˜)
+    descDSV.Texture2D.MipSlice = 0; // ì‚¬ìš©í•  ë¯¸ë§µ ìŠ¬ë¼ì´ìŠ¤ ì„¤ì •
 
     hr = Device->CreateDepthStencilView(DepthStencilBuffer, // Depth stencil texture
         &descDSV, // Depth stencil desc
@@ -95,7 +95,7 @@ void FGraphicsDevice::CreateDepthStencilBuffer(HWND hWindow) {
 
 void FGraphicsDevice::CreateDepthStencilState()
 {
-    // DepthStencil »óÅÂ ¼³¸í ¼³Á¤
+    // DepthStencil ìƒíƒœ ì„¤ëª… ì„¤ì •
     D3D11_DEPTH_STENCIL_DESC dsDesc;
 
     // Depth test parameters
@@ -120,17 +120,17 @@ void FGraphicsDevice::CreateDepthStencilState()
     dsDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
     dsDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-    //// DepthStencil »óÅÂ »ı¼º
+    //// DepthStencil ìƒíƒœ ìƒì„±
     HRESULT hr = Device->CreateDepthStencilState(&dsDesc, &DepthStencilState);
     if (FAILED(hr)) {
-        // ¿À·ù Ã³¸®
+        // ì˜¤ë¥˜ ì²˜ë¦¬
         return;
     }
 
     D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
-    depthStencilDesc.DepthEnable = FALSE;  // ±íÀÌ Å×½ºÆ® À¯Áö
-    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;  // ±íÀÌ ¹öÆÛ¿¡ ¾²Áö ¾ÊÀ½
-    depthStencilDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;  // ±íÀÌ ºñ±³¸¦ Ç×»ó Åë°ú
+    depthStencilDesc.DepthEnable = FALSE;  // ê¹Šì´ í…ŒìŠ¤íŠ¸ ìœ ì§€
+    depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;  // ê¹Šì´ ë²„í¼ì— ì“°ì§€ ì•ŠìŒ
+    depthStencilDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;  // ê¹Šì´ ë¹„êµë¥¼ í•­ìƒ í†µê³¼
     Device->CreateDepthStencilState(&depthStencilDesc, &DepthStateDisable);
 
 }
@@ -152,7 +152,7 @@ void FGraphicsDevice::ReleaseDeviceAndSwapChain()
 {
     if (DeviceContext)
     {
-        DeviceContext->Flush(); // ³²¾ÆÀÖ´Â GPU ¸í·É ½ÇÇà
+        DeviceContext->Flush(); // ë‚¨ì•„ìˆëŠ” GPU ëª…ë ¹ ì‹¤í–‰
     }
 
     if (SwapChain)
@@ -176,13 +176,13 @@ void FGraphicsDevice::ReleaseDeviceAndSwapChain()
 
 void FGraphicsDevice::CreateFrameBuffer()
 {
-    // ½º¿Ò Ã¼ÀÎÀ¸·ÎºÎÅÍ ¹é ¹öÆÛ ÅØ½ºÃ³ °¡Á®¿À±â
+    // ìŠ¤ì™‘ ì²´ì¸ìœ¼ë¡œë¶€í„° ë°± ë²„í¼ í…ìŠ¤ì²˜ ê°€ì ¸ì˜¤ê¸°
     SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&FrameBuffer);
 
-    // ·»´õ Å¸°Ù ºä »ı¼º
+    // ë Œë” íƒ€ê²Ÿ ë·° ìƒì„±
     D3D11_RENDER_TARGET_VIEW_DESC framebufferRTVdesc = {};
-    framebufferRTVdesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB; // »ö»ó Æ÷¸Ë
-    framebufferRTVdesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D; // 2D ÅØ½ºÃ³
+    framebufferRTVdesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB; // ìƒ‰ìƒ í¬ë§·
+    framebufferRTVdesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D; // 2D í…ìŠ¤ì²˜
 
     Device->CreateRenderTargetView(FrameBuffer, &framebufferRTVdesc, &FrameBufferRTV);
 }
@@ -223,13 +223,13 @@ void FGraphicsDevice::ReleaseDepthStencilResources()
         DepthStencilView = nullptr;
     }
 
-    // ±íÀÌ/½ºÅÙ½Ç ¹öÆÛ ÇØÁ¦
+    // ê¹Šì´/ìŠ¤í…ì‹¤ ë²„í¼ í•´ì œ
     if (DepthStencilBuffer) {
         DepthStencilBuffer->Release();
         DepthStencilBuffer = nullptr;
     }
 
-    // ±íÀÌ/½ºÅÙ½Ç »óÅÂ ÇØÁ¦
+    // ê¹Šì´/ìŠ¤í…ì‹¤ ìƒíƒœ í•´ì œ
     if (DepthStencilState) {
         DepthStencilState->Release();
         DepthStencilState = nullptr;
@@ -255,18 +255,18 @@ void FGraphicsDevice::SwapBuffer() {
 }
 void FGraphicsDevice::Prepare()
 {
-    DeviceContext->ClearRenderTargetView(FrameBufferRTV, ClearColor); // ·»´õ Å¸°Ù ºä¿¡ ÀúÀåµÈ ÀÌÀü ÇÁ·¹ÀÓ µ¥ÀÌÅÍ¸¦ »èÁ¦
-    DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0); // ±íÀÌ ¹öÆÛ ÃÊ±âÈ­ Ãß°¡
+    DeviceContext->ClearRenderTargetView(FrameBufferRTV, ClearColor); // ë Œë” íƒ€ê²Ÿ ë·°ì— ì €ì¥ëœ ì´ì „ í”„ë ˆì„ ë°ì´í„°ë¥¼ ì‚­ì œ
+    DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0); // ê¹Šì´ ë²„í¼ ì´ˆê¸°í™” ì¶”ê°€
 
-    DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // Á¤Á¤ ¿¬°á ¹æ½Ä ¼³Á¤
+    DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // ì •ì • ì—°ê²° ë°©ì‹ ì„¤ì •
 
-    DeviceContext->RSSetViewports(1, &ViewportInfo); // GPU°¡ È­¸éÀ» ·»´õ¸µÇÒ ¿µ¿ª ¼³Á¤
-    DeviceContext->RSSetState(CurrentRasterizer); //·¹½ºÅÍ ¶óÀÌÀú »óÅÂ ¼³Á¤
+    DeviceContext->RSSetViewports(1, &ViewportInfo); // GPUê°€ í™”ë©´ì„ ë Œë”ë§í•  ì˜ì—­ ì„¤ì •
+    DeviceContext->RSSetState(CurrentRasterizer); //ë ˆìŠ¤í„° ë¼ì´ì € ìƒíƒœ ì„¤ì •
 
     DeviceContext->OMSetDepthStencilState(DepthStencilState, 0);
 
-    DeviceContext->OMSetRenderTargets(1, &FrameBufferRTV, DepthStencilView); // ·»´õ Å¸°Ù ¼³Á¤(¹é¹öÆÛ¸¦ °¡¸£Å´)
-    DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff); // ºí·»µ­ »óÅÂ ¼³Á¤, ±âº»ºí·»µù »óÅÂÀÓ
+    DeviceContext->OMSetRenderTargets(1, &FrameBufferRTV, DepthStencilView); // ë Œë” íƒ€ê²Ÿ ì„¤ì •(ë°±ë²„í¼ë¥¼ ê°€ë¥´í‚´)
+    DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff); // ë¸”ë Œë… ìƒíƒœ ì„¤ì •, ê¸°ë³¸ë¸”ë Œë”© ìƒíƒœì„
 }
 
 void FGraphicsDevice::OnResize(HWND hWindow) {
@@ -281,7 +281,7 @@ void FGraphicsDevice::OnResize(HWND hWindow) {
 
     ReleaseFrameBuffer();
 
-    // À©µµ¿ì Å©±â °¡Á®¿À±â
+    // ìœˆë„ìš° í¬ê¸° ê°€ì ¸ì˜¤ê¸°
     RECT clientRect;
     GetClientRect(hWindow, &clientRect);
     UINT width = clientRect.right - clientRect.left;
@@ -292,9 +292,9 @@ void FGraphicsDevice::OnResize(HWND hWindow) {
         return;
     }
 
-    // SwapChain Å©±â Á¶Á¤
+    // SwapChain í¬ê¸° ì¡°ì •
     HRESULT hr;
-    hr = SwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_B8G8R8A8_UNORM, 0);  // DXGI_FORMAT_B8G8R8A8_UNORMÀ¸·Î ½Ãµµ
+    hr = SwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_B8G8R8A8_UNORM, 0);  // DXGI_FORMAT_B8G8R8A8_UNORMìœ¼ë¡œ ì‹œë„
     if (FAILED(hr)) {
         MessageBox(hWindow, L"failed", L"ResizeBuffers failed ", MB_ICONERROR | MB_OK);
         return;

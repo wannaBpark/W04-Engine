@@ -14,41 +14,41 @@ class FEditorViewportClient;
 class FEngineLoop
 {
 public:
-	FEngineLoop();
-	~FEngineLoop();
+    FEngineLoop();
+    ~FEngineLoop();
 
-	int32 PreInit();
-	int32 Init(HINSTANCE hInstance);
-	void Tick();
-	void Exit();
+    int32 PreInit();
+    int32 Init(HINSTANCE hInstance);
+    void Tick();
+    void Exit();
 	
 private:
-	void WindowInit(HINSTANCE hInstance);
-	void Render();
-	float GetAspectRatio(IDXGISwapChain* swapChain);
+    void WindowInit(HINSTANCE hInstance);
+    void Render();
+    float GetAspectRatio(IDXGISwapChain* swapChain);
 public:
-	static FGraphicsDevice graphicDevice;
-	static FRenderer renderer;
-	static FResourceMgr resourceMgr;
-	static uint32 TotalAllocationBytes;
-	static uint32 TotalAllocationCount;
+    static FGraphicsDevice graphicDevice;
+    static FRenderer renderer;
+    static FResourceMgr resourceMgr;
+    static uint32 TotalAllocationBytes;
+    static uint32 TotalAllocationCount;
 
 	
-	HWND hWnd;
-	FMatrix View;
-	FMatrix Projection;
+    HWND hWnd;
+    FMatrix View;
+    FMatrix Projection;
 private:
-	UImGuiManager* UIMgr;
-	UWorld* GWorld;
-	bool bIsExit = false;
-	const int32 targetFPS = 60;
+    UImGuiManager* UIMgr;
+    UWorld* GWorld;
+    bool bIsExit = false;
+    const int32 targetFPS = 60;
 
-	std::shared_ptr<FEditorViewportClient> viewportClient;
+    std::shared_ptr<FEditorViewportClient> viewportClient;
 public:
-	UWorld* GetWorld(){ return GWorld; }
-	std::shared_ptr<FEditorViewportClient> GetViewportClient() const
-	{
-		return viewportClient;
-	}
+    UWorld* GetWorld(){ return GWorld; }
+    std::shared_ptr<FEditorViewportClient> GetViewportClient() const
+    {
+        return viewportClient;
+    }
 };
 

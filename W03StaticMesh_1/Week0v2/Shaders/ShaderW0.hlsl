@@ -1,21 +1,21 @@
-// MatrixBuffer: º¯È¯ Çà·Ä °ü¸®
+// MatrixBuffer: ë³€í™˜ í–‰ë ¬ ê´€ë¦¬
 cbuffer MatrixBuffer : register(b0)
 {
     row_major float4x4 MVP;
     float flag;
 };
 
-// LightingBuffer: Á¶¸í °ü·Ã ÆÄ¶ó¹ÌÅÍ °ü¸®
+// LightingBuffer: ì¡°ëª… ê´€ë ¨ íŒŒë¼ë¯¸í„° ê´€ë¦¬
 cbuffer LightingBuffer : register(b1)
 {
-    float3 LightDirection; // Á¶¸í ¹æÇâ (´ÜÀ§ º¤ÅÍ; ºûÀÌ µé¾î¿À´Â ¹æÇâÀÇ ¹İ´ë »ç¿ë)
-    float pad1; // 16¹ÙÀÌÆ® Á¤·Ä¿ë ÆĞµù
-    float3 LightColor; // Á¶¸í »ö»ó (¿¹: (1, 1, 1))
-    float pad2; // 16¹ÙÀÌÆ® Á¤·Ä¿ë ÆĞµù
-    float AmbientFactor; // ambient °è¼ö (¿¹: 0.1)
-    float pad3; // 16¹ÙÀÌÆ® Á¤·Ä ¸ÂÃã Ãß°¡ ÆĞµù
-    float pad4; // 16¹ÙÀÌÆ® Á¤·Ä ¸ÂÃã Ãß°¡ ÆĞµù
-    float pad5; // 16¹ÙÀÌÆ® Á¤·Ä ¸ÂÃã Ãß°¡ ÆĞµù
+    float3 LightDirection; // ì¡°ëª… ë°©í–¥ (ë‹¨ìœ„ ë²¡í„°; ë¹›ì´ ë“¤ì–´ì˜¤ëŠ” ë°©í–¥ì˜ ë°˜ëŒ€ ì‚¬ìš©)
+    float pad1; // 16ë°”ì´íŠ¸ ì •ë ¬ìš© íŒ¨ë”©
+    float3 LightColor; // ì¡°ëª… ìƒ‰ìƒ (ì˜ˆ: (1, 1, 1))
+    float pad2; // 16ë°”ì´íŠ¸ ì •ë ¬ìš© íŒ¨ë”©
+    float AmbientFactor; // ambient ê³„ìˆ˜ (ì˜ˆ: 0.1)
+    float pad3; // 16ë°”ì´íŠ¸ ì •ë ¬ ë§ì¶¤ ì¶”ê°€ íŒ¨ë”©
+    float pad4; // 16ë°”ì´íŠ¸ ì •ë ¬ ë§ì¶¤ ì¶”ê°€ íŒ¨ë”©
+    float pad5; // 16ë°”ì´íŠ¸ ì •ë ¬ ë§ì¶¤ ì¶”ê°€ íŒ¨ë”©
 };
 cbuffer FNormalConstants : register(b2)
 {
@@ -28,9 +28,9 @@ cbuffer FLitUnlitConstants : register(b3)
 
 struct VS_INPUT
 {
-    float4 position : POSITION; // ¹öÅØ½º À§Ä¡
-    float4 color : COLOR; // ¹öÅØ½º »ö»ó
-    float3 normal : NORMAL; // ¹öÅØ½º ³ë¸Ö
+    float4 position : POSITION; // ë²„í…ìŠ¤ ìœ„ì¹˜
+    float4 color : COLOR; // ë²„í…ìŠ¤ ìƒ‰ìƒ
+    float3 normal : NORMAL; // ë²„í…ìŠ¤ ë…¸ë©€
     float2 texcoord : TEXCOORD;
 };
 Texture2D Texture : register(t0);
@@ -38,10 +38,10 @@ SamplerState Sampler : register(s0);
 
 struct PS_INPUT
 {
-    float4 position : SV_POSITION; // º¯È¯µÈ È­¸é ÁÂÇ¥
-    float4 color : COLOR; // Àü´ŞÇÒ »ö»ó
-    float3 normal : NORMAL; // Á¤±ÔÈ­µÈ ³ë¸Ö º¤ÅÍ
-    float normalFlag : TEXCOORD0; // ³ë¸Ö À¯È¿¼º ÇÃ·¡±× (1.0: À¯È¿, 0.0: ¹«È¿)
+    float4 position : SV_POSITION; // ë³€í™˜ëœ í™”ë©´ ì¢Œí‘œ
+    float4 color : COLOR; // ì „ë‹¬í•  ìƒ‰ìƒ
+    float3 normal : NORMAL; // ì •ê·œí™”ëœ ë…¸ë©€ ë²¡í„°
+    float normalFlag : TEXCOORD0; // ë…¸ë©€ ìœ íš¨ì„± í”Œë˜ê·¸ (1.0: ìœ íš¨, 0.0: ë¬´íš¨)
     float2 texcoord : TEXCOORD1;
 };
 
@@ -49,12 +49,12 @@ PS_INPUT mainVS(VS_INPUT input)
 {
     PS_INPUT output;
     
-    // À§Ä¡ º¯È¯
+    // ìœ„ì¹˜ ë³€í™˜
     output.position = mul(input.position, MVP);
     output.color = input.color;
     if (flag)
         output.color *= 0.5;
-    // ÀÔ·Â normal °ªÀÇ ±æÀÌ È®ÀÎ
+    // ì…ë ¥ normal ê°’ì˜ ê¸¸ì´ í™•ì¸
     float normalThreshold = 0.001;
     float normalLen = length(input.normal);
     
@@ -79,37 +79,37 @@ float noise(float3 p)
 
 float4 PaperTexture(float3 originalColor)
 {
-    // ÀÔ·Â »ö»óÀ» 0~1 ¹üÀ§·Î Á¦ÇÑ
+    // ì…ë ¥ ìƒ‰ìƒì„ 0~1 ë²”ìœ„ë¡œ ì œí•œ
     float3 color = saturate(originalColor);
     
     float3 paperColor = float3(0.95, 0.95, 0.95);
     float blendFactor = 0.5;
     float3 mixedColor = lerp(color, paperColor, blendFactor);
     
-    // Á¤Àû grain È¿°ú
+    // ì •ì  grain íš¨ê³¼
     float grain = noise(color * 10.0) * 0.1;
     
-    // °ÅÄ£ Áú°¨ È¿°ú: µÎ ´Ü°èÀÇ ³ëÀÌÁî ·¹ÀÌ¾î¸¦ °áÇÕ
-    float rough1 = (noise(color * 20.0) - 0.5) * 0.15;  // Ã¹ ¹øÂ° ·¹ÀÌ¾î: Å« ±Ô¸ğÀÇ ³ëÀÌÁî
-    float rough2 = (noise(color * 40.0) - 0.5) * 0.01;  // µÎ ¹øÂ° ·¹ÀÌ¾î: ¼¼ºÎ Áú°¨ Ãß°¡
+    // ê±°ì¹œ ì§ˆê° íš¨ê³¼: ë‘ ë‹¨ê³„ì˜ ë…¸ì´ì¦ˆ ë ˆì´ì–´ë¥¼ ê²°í•©
+    float rough1 = (noise(color * 20.0) - 0.5) * 0.15;  // ì²« ë²ˆì§¸ ë ˆì´ì–´: í° ê·œëª¨ì˜ ë…¸ì´ì¦ˆ
+    float rough2 = (noise(color * 40.0) - 0.5) * 0.01;  // ë‘ ë²ˆì§¸ ë ˆì´ì–´: ì„¸ë¶€ ì§ˆê° ì¶”ê°€
     float rough = rough1 + rough2;
     
-    // vignette È¿°ú: Áß¾Ó¿¡¼­ ¸Ö¾îÁú¼ö·Ï ¾îµÎ¿öÁö´Â È¿°ú
+    // vignette íš¨ê³¼: ì¤‘ì•™ì—ì„œ ë©€ì–´ì§ˆìˆ˜ë¡ ì–´ë‘ì›Œì§€ëŠ” íš¨ê³¼
     float vignetting = smoothstep(0.4, 1.0, length(color.xy - 0.5) * 2.0);
     
-    // ÃÖÁ¾ »ö»ó °è»ê
+    // ìµœì¢… ìƒ‰ìƒ ê³„ì‚°
     float3 finalColor = mixedColor + grain + rough - vignetting * 0.1;
     return float4(saturate(finalColor), 1.0);
 }
 
 float4 mainPS(PS_INPUT input) : SV_Target
 {
-    // ±âÁ¸ÀÇ »ö»ó°ú ÅØ½ºÃ³ »ö»óÀ» Á¶ÇÕ
+    // ê¸°ì¡´ì˜ ìƒ‰ìƒê³¼ í…ìŠ¤ì²˜ ìƒ‰ìƒì„ ì¡°í•©
     //input.texcoord
     float4 texColor = Texture.Sample(Sampler, input.texcoord);
     //texColor = float4(1, 1, 1, 1);
     float3 color;
-    if (input.texcoord.g == 0) // ÅØ½ºÃ³°¡ ¾øÀ¸¸é ±âº» »ö»ó À¯Áö
+    if (input.texcoord.g == 0) // í…ìŠ¤ì²˜ê°€ ì—†ìœ¼ë©´ ê¸°ë³¸ ìƒ‰ìƒ ìœ ì§€
     {
         color = saturate(input.color.rgb);
     }
@@ -118,7 +118,7 @@ float4 mainPS(PS_INPUT input) : SV_Target
 
     //float3 color = saturate(input.color.rgb);
 
-    if (isLit == 1) // Á¶¸íÀÌ Àû¿ëµÇ´Â °æ¿ì
+    if (isLit == 1) // ì¡°ëª…ì´ ì ìš©ë˜ëŠ” ê²½ìš°
     {
         if (input.normalFlag > 0.5)
         {
@@ -129,7 +129,7 @@ float4 mainPS(PS_INPUT input) : SV_Target
         }
         return float4(color, 1.0);
     }
-    else // unlit »óÅÂÀÏ ¶§ PaperTexture È¿°ú Àû¿ë
+    else // unlit ìƒíƒœì¼ ë•Œ PaperTexture íš¨ê³¼ ì ìš©
     {
         if (input.normalFlag < 0.5)
         {

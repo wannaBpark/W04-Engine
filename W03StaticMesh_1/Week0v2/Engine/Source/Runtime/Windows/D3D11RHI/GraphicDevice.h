@@ -18,11 +18,11 @@ public:
     ID3D11RasterizerState* RasterizerStateSOLID = nullptr;
     ID3D11RasterizerState* RasterizerStateWIREFRAME = nullptr;
 
-    // Depth-Stencil °ü·Ã º¯¼ö
-    ID3D11Texture2D* DepthStencilBuffer = nullptr;  // ±íÀÌ/½ºÅÙ½Ç ÅØ½ºÃ³
-    ID3D11DepthStencilView* DepthStencilView = nullptr;  // ±íÀÌ/½ºÅÙ½Ç ºä
+    // Depth-Stencil ê´€ë ¨ ë³€ìˆ˜
+    ID3D11Texture2D* DepthStencilBuffer = nullptr;  // ê¹Šì´/ìŠ¤í…ì‹¤ í…ìŠ¤ì²˜
+    ID3D11DepthStencilView* DepthStencilView = nullptr;  // ê¹Šì´/ìŠ¤í…ì‹¤ ë·°
     ID3D11DepthStencilState* DepthStencilState = nullptr;
-    FLOAT ClearColor[4] = { 0.025f, 0.025f, 0.025f, 1.0f }; // È­¸éÀ» ÃÊ±âÈ­(clear) ÇÒ ¶§ »ç¿ëÇÒ »ö»ó(RGBA)
+    FLOAT ClearColor[4] = { 0.025f, 0.025f, 0.025f, 1.0f }; // í™”ë©´ì„ ì´ˆê¸°í™”(clear) í•  ë•Œ ì‚¬ìš©í•  ìƒ‰ìƒ(RGBA)
     D3D11_VIEWPORT ViewportInfo;
 
     ID3D11DepthStencilState* DepthStateDisable = nullptr;

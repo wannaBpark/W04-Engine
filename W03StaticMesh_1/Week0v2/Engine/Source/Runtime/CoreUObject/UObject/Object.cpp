@@ -19,7 +19,7 @@ UObject::~UObject()
 
 void UObject::Initialize()
 {
-	InternalIndex = static_cast<uint32>(GetWorld()->GetObjectArr().size() - 1);
+    InternalIndex = static_cast<uint32>(GetWorld()->GetObjectArr().size() - 1);
 
 }
 
@@ -37,11 +37,11 @@ void UObject::RenderUUID()
 }
 bool UObject::IsA(UClass* TargetClass) const
 {
-	UClass* CurrentClass = GetClass();
-	while (CurrentClass) {
-		if (CurrentClass == TargetClass)
-			return true;
-		CurrentClass = CurrentClass->ParentClass;
-	}
-	return false;
+    UClass* CurrentClass = GetClass();
+    while (CurrentClass) {
+        if (CurrentClass == TargetClass)
+            return true;
+        CurrentClass = CurrentClass->ParentClass;
+    }
+    return false;
 }

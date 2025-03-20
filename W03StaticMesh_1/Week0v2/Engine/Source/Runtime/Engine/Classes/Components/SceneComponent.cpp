@@ -13,13 +13,13 @@ USceneComponent::~USceneComponent()
 }
 void USceneComponent::Initialize()
 {
-	//Å×½ºÆ®¿ë ÅØ½ºÆ®
+	//í…ŒìŠ¤íŠ¸ìš© í…ìŠ¤íŠ¸
 	uuidText = new UTextUUID();
 	uuidText->SetTexture(L"Assets/Texture/UUID_Font.dds");
 	uuidText->SetRowColumnCount(1, 11);
 	uuidText->SetUUID(UUID);
 	uuidText->SetUUIDParent(this);
-	//SetTextÀü¿¡ RowColumn ¹İµå½Ã ¼³Á¤
+	//SetTextì „ì— RowColumn ë°˜ë“œì‹œ ì„¤ì •
 
 	Super::Initialize();
 }

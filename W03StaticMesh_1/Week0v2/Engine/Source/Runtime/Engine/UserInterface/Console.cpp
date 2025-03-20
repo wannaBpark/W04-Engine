@@ -3,24 +3,24 @@
 #include <cstdio>
 
 
-// ½Ì±ÛÅæ ÀÎ½ºÅÏ½º ¹İÈ¯
+// ì‹±ê¸€í†¤ ì¸ìŠ¤í„´ìŠ¤ ë°˜í™˜
 Console& Console::GetInstance() {
     static Console instance;
     return instance;
 }
 
-// »ı¼ºÀÚ
+// ìƒì„±ì
 Console::Console() {}
 
-// ¼Ò¸êÀÚ
+// ì†Œë©¸ì
 Console::~Console() {}
 
-// ·Î±× ÃÊ±âÈ­
+// ë¡œê·¸ ì´ˆê¸°í™”
 void Console::Clear() {
     items.clear();
 }
 
-// ·Î±× Ãß°¡
+// ë¡œê·¸ ì¶”ê°€
 void Console::AddLog(LogLevel level, const char* fmt, ...) {
     char buf[1024];
     va_list args;
@@ -33,30 +33,30 @@ void Console::AddLog(LogLevel level, const char* fmt, ...) {
 }
 
 
-// ÄÜ¼Ö Ã¢ ·»´õ¸µ
+// ì½˜ì†” ì°½ ë Œë”ë§
 void Console::Draw() {
     if (!bWasOpen) return;
-    // Ã¢ Å©±â ¹× À§Ä¡ °è»ê
+    // ì°½ í¬ê¸° ë° ìœ„ì¹˜ ê³„ì‚°
     float controllWindowWidth = static_cast<float>(width) * 0.5f;
     float expandedHeight = static_cast<float>(height) * 0.35f;
-    float collapsedHeight = 25.0f; // Á¢¾úÀ» ¶§ ³ôÀÌ
+    float collapsedHeight = 25.0f; // ì ‘ì—ˆì„ ë•Œ ë†’ì´
     float controllWindowHeight = bExpand ? expandedHeight : collapsedHeight;
 
     float controllWindowPosX = (static_cast<float>(width) - controllWindowWidth);
     float controllWindowPosY = (static_cast<float>(height) - controllWindowHeight);
 
-    // Ã¢ Å©±â¿Í À§Ä¡ ¼³Á¤
+    // ì°½ í¬ê¸°ì™€ ìœ„ì¹˜ ì„¤ì •
     ImGui::SetNextWindowPos(ImVec2(controllWindowPosX, controllWindowPosY));
     ImGui::SetNextWindowSize(ImVec2(controllWindowWidth, controllWindowHeight), ImGuiCond_Always);
 
-    // Ã¢À» Ç¥½ÃÇÏ°í ´İÈû ¿©ºÎ È®ÀÎ
+    // ì°½ì„ í‘œì‹œí•˜ê³  ë‹«í˜ ì—¬ë¶€ í™•ì¸
     bExpand = ImGui::Begin("Console", &bWasOpen);
     if (!bExpand) {
         ImGui::End();
         return;
     }
 
-    // Ã¢À» Á¢¾úÀ» °æ¿ì UI¸¦ Ç¥½ÃÇÏÁö ¾ÊÀ½
+    // ì°½ì„ ì ‘ì—ˆì„ ê²½ìš° UIë¥¼ í‘œì‹œí•˜ì§€ ì•ŠìŒ
     if (!bExpand) {
         ImGui::End();
         return;
@@ -64,7 +64,7 @@ void Console::Draw() {
     
 
 
-    // ¹öÆ° UI (·Î±× ¼öÁØº° Ãß°¡)
+    // ë²„íŠ¼ UI (ë¡œê·¸ ìˆ˜ì¤€ë³„ ì¶”ê°€)
     if (ImGui::Button("Add LogTemp")) { AddLog(LogLevel::Display, "LogTemp message"); }
     ImGui::SameLine();
     if (ImGui::Button("Add Warning")) { AddLog(LogLevel::Warning, "Warning message"); }
@@ -77,7 +77,7 @@ void Console::Draw() {
 
     ImGui::Separator();
 
-    // ÇÊÅÍ ÀÔ·Â Ã¢
+    // í•„í„° ì…ë ¥ ì°½
     ImGui::Text("Filter:");
     ImGui::SameLine();
 
@@ -85,7 +85,7 @@ void Console::Draw() {
     
     ImGui::SameLine();
 
-    // ·Î±× ¼öÁØÀ» ¼±ÅÃÇÒ Ã¼Å©¹Ú½º
+    // ë¡œê·¸ ìˆ˜ì¤€ì„ ì„ íƒí•  ì²´í¬ë°•ìŠ¤
     ImGui::Checkbox("Show Display", &showLogTemp);
     ImGui::SameLine();
     ImGui::Checkbox("Show Warning", &showWarning);
@@ -93,24 +93,24 @@ void Console::Draw() {
     ImGui::Checkbox("Show Error", &showError);
 
     ImGui::Separator();
-    // ·Î±× Ãâ·Â (ÇÊÅÍ Àû¿ë)
+    // ë¡œê·¸ ì¶œë ¥ (í•„í„° ì ìš©)
     ImGui::BeginChild("ScrollingRegion", ImVec2(0, -ImGui::GetTextLineHeightWithSpacing()), false, ImGuiWindowFlags_HorizontalScrollbar);
     for (const auto& entry : items) {
         if (!filter.PassFilter(entry.message.c_str())) continue;
 
-        // ·Î±× ¼öÁØ¿¡ ¸Â´Â ÇÊÅÍ¸µ
+        // ë¡œê·¸ ìˆ˜ì¤€ì— ë§ëŠ” í•„í„°ë§
         if ((entry.level == LogLevel::Display && !showLogTemp) ||
             (entry.level == LogLevel::Warning && !showWarning) ||
             (entry.level == LogLevel::Error && !showError)) {
             continue;
         }
 
-        // »ö»ó ÁöÁ¤
+        // ìƒ‰ìƒ ì§€ì •
         ImVec4 color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
         switch (entry.level) {
-        case LogLevel::Display: color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); break;  // ±âº» Èò»ö
-        case LogLevel::Warning: color = ImVec4(1.0f, 1.0f, 0.0f, 1.0f); break; // ³ë¶õ»ö
-        case LogLevel::Error:   color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f); break; // »¡°£»ö
+        case LogLevel::Display: color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); break;  // ê¸°ë³¸ í°ìƒ‰
+        case LogLevel::Warning: color = ImVec4(1.0f, 1.0f, 0.0f, 1.0f); break; // ë…¸ë€ìƒ‰
+        case LogLevel::Error:   color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f); break; // ë¹¨ê°„ìƒ‰
         }
 
         ImGui::TextColored(color, "%s", entry.message.c_str());
@@ -123,20 +123,20 @@ void Console::Draw() {
 
     ImGui::Separator();
 
-    // ÀÔ·ÂÃ¢
+    // ì…ë ¥ì°½
     bool reclaimFocus = false;
     if (ImGui::InputText("Input", inputBuf, IM_ARRAYSIZE(inputBuf), ImGuiInputTextFlags_EnterReturnsTrue)) {
         if (inputBuf[0]) {
             AddLog(LogLevel::Display, ">> %s", inputBuf);
             history.push_back(std::string(inputBuf));
             historyPos = -1;
-            scrollToBottom = true; // ÀÚµ¿ ½ºÅ©·Ñ
+            scrollToBottom = true; // ìë™ ìŠ¤í¬ë¡¤
         }
         inputBuf[0] = '\0';
         reclaimFocus = true;
     }
 
-    // ÀÔ·Â ÇÊµå¿¡ ÀÚµ¿ Æ÷Ä¿½º
+    // ì…ë ¥ í•„ë“œì— ìë™ í¬ì»¤ìŠ¤
     if (reclaimFocus) {
         ImGui::SetKeyboardFocusHere(-1);
     }

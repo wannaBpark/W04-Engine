@@ -6,24 +6,24 @@ class UWorld;
 class ViewModeDropdown : public IWindowToggleable
 {
 public:
-	static ViewModeDropdown& GetInstance();
+    static ViewModeDropdown& GetInstance();
 
-	void Draw(UWorld* world);
-	void OnResize(HWND hWnd);
-	void Toggle() override {
-		if (bWasOpen) {
-			bWasOpen = false;
-		}
-		else {
-			bWasOpen = true;
-		}
-	}
+    void Draw(UWorld* world);
+    void OnResize(HWND hWnd);
+    void Toggle() override {
+        if (bWasOpen) {
+            bWasOpen = false;
+        }
+        else {
+            bWasOpen = true;
+        }
+    }
 private:
-	EViewModeIndex currentViewMode;
+    EViewModeIndex currentViewMode;
 
-	bool bWasOpen = true;
-	UINT width;
-	UINT height;
+    bool bWasOpen = true;
+    UINT width;
+    UINT height;
 };
 
 

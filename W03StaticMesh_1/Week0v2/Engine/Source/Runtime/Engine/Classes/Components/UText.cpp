@@ -114,7 +114,7 @@ int UText::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float
 			idx1 = indices[i * 3 + 2];
 		}
 
-		// °¢ »ï°¢ÇüÀÇ ¹öÅØ½º À§Ä¡¸¦ FVector·Î ºÒ·¯¿É´Ï´Ù.
+		// ê° ì‚¼ê°í˜•ì˜ ë²„í…ìŠ¤ ìœ„ì¹˜ë¥¼ FVectorë¡œ ë¶ˆëŸ¬ì˜µë‹ˆë‹¤.
 		uint32 stride = sizeof(FVertexSimple);
 		FVector v0 = *reinterpret_cast<FVector*>(pbPositions + idx0 * stride);
 		FVector v1 = *reinterpret_cast<FVector*>(pbPositions + idx1 * stride);
@@ -152,7 +152,7 @@ void UText::SetText(FWString _text)
 		vertexTextureArr.clear();
 		quad.clear();
 
-		// ±âÁ¸ ¹öÅØ½º ¹öÆÛ°¡ ÀÖ´Ù¸é ÇØÁ¦
+		// ê¸°ì¡´ ë²„í…ìŠ¤ ë²„í¼ê°€ ìˆë‹¤ë©´ í•´ì œ
 		if (vertexTextBuffer)
 		{
 			vertexTextBuffer->Release();
@@ -220,13 +220,13 @@ void UText::SetText(FWString _text)
 }
 void UText::setStartUV(wchar_t hangul, float& outStartU, float& outStartV)
 {
-	//´ë¹®ÀÚ¸¸ ¹Ş´ÂÁß
+	//ëŒ€ë¬¸ìë§Œ ë°›ëŠ”ì¤‘
 	int StartU = 0;
 	int StartV = 0;
 	int offset = -1;
 
 	if (hangul == L' ') {
-		outStartU = 0;  // Space´Â Æ¯º°È÷ UV ÁÂÇ¥¸¦ (0,0)À¸·Î ¼³Á¤
+		outStartU = 0;  // SpaceëŠ” íŠ¹ë³„íˆ UV ì¢Œí‘œë¥¼ (0,0)ìœ¼ë¡œ ì„¤ì •
 		outStartV = 0;
 		offset = 0;
 		return;
@@ -235,23 +235,23 @@ void UText::setStartUV(wchar_t hangul, float& outStartU, float& outStartV)
 
 		StartU = 11;
 		StartV = 0;
-		offset = hangul - L'A'; // ´ë¹®ÀÚ À§Ä¡
+		offset = hangul - L'A'; // ëŒ€ë¬¸ì ìœ„ì¹˜
 	}
 	else if (hangul >= L'a' && hangul <= L'z') {
 		StartU = 37;
 		StartV = 0;
-		offset = (hangul - L'a'); // ¼Ò¹®ÀÚ´Â ´ë¹®ÀÚ ´ÙÀ½ À§Ä¡
+		offset = (hangul - L'a'); // ì†Œë¬¸ìëŠ” ëŒ€ë¬¸ì ë‹¤ìŒ ìœ„ì¹˜
 	}
 	else if (hangul >= L'0' && hangul <= L'9') {
 		StartU = 1;
 		StartV = 0;
-		offset = (hangul - L'0'); // ¼ıÀÚ´Â ¼Ò¹®ÀÚ ´ÙÀ½ À§Ä¡
+		offset = (hangul - L'0'); // ìˆ«ìëŠ” ì†Œë¬¸ì ë‹¤ìŒ ìœ„ì¹˜
 	}
-	else if (hangul >= L'°¡' && hangul <= L'ÆR')
+	else if (hangul >= L'ê°€' && hangul <= L'í£')
 	{
 		StartU = 63;
 		StartV = 0;
-		offset = hangul - L'°¡'; // ´ë¹®ÀÚ À§Ä¡
+		offset = hangul - L'ê°€'; // ëŒ€ë¬¸ì ìœ„ì¹˜
 	}
 
 	if (offset == -1)
@@ -269,14 +269,14 @@ void UText::setStartUV(wchar_t hangul, float& outStartU, float& outStartV)
 
 void UText::setStartUV(char alphabet, float& outStartU, float& outStartV)
 {
-	//´ë¹®ÀÚ¸¸ ¹Ş´ÂÁß
+	//ëŒ€ë¬¸ìë§Œ ë°›ëŠ”ì¤‘
 	int StartU=0;
 	int StartV=0;
 	int offset = -1;
 
 
 	if (alphabet == ' ') {
-		outStartU = 0;  // Space´Â Æ¯º°È÷ UV ÁÂÇ¥¸¦ (0,0)À¸·Î ¼³Á¤
+		outStartU = 0;  // SpaceëŠ” íŠ¹ë³„íˆ UV ì¢Œí‘œë¥¼ (0,0)ìœ¼ë¡œ ì„¤ì •
 		outStartV = 0;
 		offset = 0;
 		return;
@@ -285,17 +285,17 @@ void UText::setStartUV(char alphabet, float& outStartU, float& outStartV)
 
 		StartU = 1;
 		StartV = 4;
-		offset = alphabet - 'A'; // ´ë¹®ÀÚ À§Ä¡
+		offset = alphabet - 'A'; // ëŒ€ë¬¸ì ìœ„ì¹˜
 	}
 	else if (alphabet >= 'a' && alphabet <= 'z') {
 		StartU = 1;
 		StartV = 6;
-		offset = (alphabet - 'a'); // ¼Ò¹®ÀÚ´Â ´ë¹®ÀÚ ´ÙÀ½ À§Ä¡
+		offset = (alphabet - 'a'); // ì†Œë¬¸ìëŠ” ëŒ€ë¬¸ì ë‹¤ìŒ ìœ„ì¹˜
 	}
 	else if (alphabet >= '0' && alphabet <= '9') {
 		StartU = 0;
 		StartV = 3;
-		offset = (alphabet - '0'); // ¼ıÀÚ´Â ¼Ò¹®ÀÚ ´ÙÀ½ À§Ä¡
+		offset = (alphabet - '0'); // ìˆ«ìëŠ” ì†Œë¬¸ì ë‹¤ìŒ ìœ„ì¹˜
 	}
 
 	if (offset == -1)
@@ -346,7 +346,7 @@ void UText::TextMVPRendering()
 	FMatrix M = CreateBillboardMatrix();
 	FMatrix VP = GetEngine().View * GetEngine().Projection;
 
-	// ÃÖÁ¾ MVP Çà·Ä
+	// ìµœì¢… MVP í–‰ë ¬
 	FMatrix MVP = M * VP;
 	if (this == GetWorld()->GetPickingGizmo()) {
 		FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);

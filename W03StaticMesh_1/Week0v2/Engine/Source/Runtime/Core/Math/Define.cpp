@@ -1,6 +1,6 @@
 #include "Define.h"
 
-// ´ÜÀ§ Çà·Ä Á¤ÀÇ
+// ë‹¨ìœ„ í–‰ë ¬ ì •ì˜
 const FMatrix FMatrix::Identity = { {
     {1, 0, 0, 0},
     {0, 1, 0, 0},
@@ -8,7 +8,7 @@ const FMatrix FMatrix::Identity = { {
     {0, 0, 0, 1}
 } };
 
-// Çà·Ä µ¡¼À
+// í–‰ë ¬ ë§ì…ˆ
 FMatrix FMatrix::operator+(const FMatrix& Other) const {
     FMatrix Result;
     for (int32 i = 0; i < 4; i++)
@@ -17,7 +17,7 @@ FMatrix FMatrix::operator+(const FMatrix& Other) const {
     return Result;
 }
 
-// Çà·Ä »¬¼À
+// í–‰ë ¬ ëº„ì…ˆ
 FMatrix FMatrix::operator-(const FMatrix& Other) const {
     FMatrix Result;
     for (int32 i = 0; i < 4; i++)
@@ -26,7 +26,7 @@ FMatrix FMatrix::operator-(const FMatrix& Other) const {
     return Result;
 }
 
-// Çà·Ä °ö¼À
+// í–‰ë ¬ ê³±ì…ˆ
 FMatrix FMatrix::operator*(const FMatrix& Other) const {
     FMatrix Result = {};
     for (int32 i = 0; i < 4; i++)
@@ -36,7 +36,7 @@ FMatrix FMatrix::operator*(const FMatrix& Other) const {
     return Result;
 }
 
-// ½ºÄ®¶ó °ö¼À
+// ìŠ¤ì¹¼ë¼ ê³±ì…ˆ
 FMatrix FMatrix::operator*(float Scalar) const {
     FMatrix Result;
     for (int32 i = 0; i < 4; i++)
@@ -45,7 +45,7 @@ FMatrix FMatrix::operator*(float Scalar) const {
     return Result;
 }
 
-// ½ºÄ®¶ó ³ª´°¼À
+// ìŠ¤ì¹¼ë¼ ë‚˜ëˆ—ì…ˆ
 FMatrix FMatrix::operator/(float Scalar) const {
     FMatrix Result;
     for (int32 i = 0; i < 4; i++)
@@ -63,7 +63,7 @@ const float* FMatrix::operator[](int row) const
     return M[row];
 }
 
-// ÀüÄ¡ Çà·Ä
+// ì „ì¹˜ í–‰ë ¬
 FMatrix FMatrix::Transpose(const FMatrix& Mat) {
     FMatrix Result;
     for (int32 i = 0; i < 4; i++)
@@ -72,7 +72,7 @@ FMatrix FMatrix::Transpose(const FMatrix& Mat) {
     return Result;
 }
 
-// Çà·Ä½Ä °è»ê (¶óÇÃ¶ó½º Àü°³, 4x4 Çà·Ä)
+// í–‰ë ¬ì‹ ê³„ì‚° (ë¼í”Œë¼ìŠ¤ ì „ê°œ, 4x4 í–‰ë ¬)
 float FMatrix::Determinant(const FMatrix& Mat) {
     float det = 0.0f;
     for (int32 i = 0; i < 4; i++) {
@@ -94,7 +94,7 @@ float FMatrix::Determinant(const FMatrix& Mat) {
     return det;
 }
 
-// ¿ªÇà·Ä (°¡¿ì½º-Á¶´ø ¼Ò°Å¹ı)
+// ì—­í–‰ë ¬ (ê°€ìš°ìŠ¤-ì¡°ë˜ ì†Œê±°ë²•)
 FMatrix FMatrix::Inverse(const FMatrix& Mat) {
     float det = Determinant(Mat);
     if (fabs(det) < 1e-6) {
@@ -104,7 +104,7 @@ FMatrix FMatrix::Inverse(const FMatrix& Mat) {
     FMatrix Inv;
     float invDet = 1.0f / det;
 
-    // ¿©ÀÎ¼ö Çà·Ä °è»ê ÈÄ ÀüÄ¡ÇÏ¿© ¿ªÇà·Ä °è»ê
+    // ì—¬ì¸ìˆ˜ í–‰ë ¬ ê³„ì‚° í›„ ì „ì¹˜í•˜ì—¬ ì—­í–‰ë ¬ ê³„ì‚°
     for (int32 i = 0; i < 4; i++) {
         for (int32 j = 0; j < 4; j++) {
             float subMat[3][3];
@@ -140,7 +140,7 @@ FMatrix FMatrix::CreateRotation(float roll, float pitch, float yaw)
     float cosPitch = cos(radPitch), sinPitch = sin(radPitch);
     float cosYaw = cos(radYaw), sinYaw = sin(radYaw);
 
-    // ZÃà (Yaw) È¸Àü
+    // Zì¶• (Yaw) íšŒì „
     FMatrix rotationZ = { {
         { cosYaw, sinYaw, 0, 0 },
         { -sinYaw, cosYaw, 0, 0 },
@@ -148,7 +148,7 @@ FMatrix FMatrix::CreateRotation(float roll, float pitch, float yaw)
         { 0, 0, 0, 1 }
     } };
 
-    // YÃà (Pitch) È¸Àü
+    // Yì¶• (Pitch) íšŒì „
     FMatrix rotationY = { {
         { cosPitch, 0, -sinPitch, 0 },
         { 0, 1, 0, 0 },
@@ -156,7 +156,7 @@ FMatrix FMatrix::CreateRotation(float roll, float pitch, float yaw)
         { 0, 0, 0, 1 }
     } };
 
-    // XÃà (Roll) È¸Àü
+    // Xì¶• (Roll) íšŒì „
     FMatrix rotationX = { {
         { 1, 0, 0, 0 },
         { 0, cosRoll, sinRoll, 0 },
@@ -164,12 +164,12 @@ FMatrix FMatrix::CreateRotation(float roll, float pitch, float yaw)
         { 0, 0, 0, 1 }
     } };
 
-    // DirectX Ç¥ÁØ ¼ø¼­: Z(Yaw) ¡æ Y(Pitch) ¡æ X(Roll)  
-    return rotationX * rotationY * rotationZ;  // ÀÌ·¸°Ô ÇÏ¸é  ¿À¸¥ÂÊ ºÎÅÍ Àû¿ëµÊ
+    // DirectX í‘œì¤€ ìˆœì„œ: Z(Yaw) â†’ Y(Pitch) â†’ X(Roll)  
+    return rotationX * rotationY * rotationZ;  // ì´ë ‡ê²Œ í•˜ë©´  ì˜¤ë¥¸ìª½ ë¶€í„° ì ìš©ë¨
 }
 
 
-// ½ºÄÉÀÏ Çà·Ä »ı¼º
+// ìŠ¤ì¼€ì¼ í–‰ë ¬ ìƒì„±
 FMatrix FMatrix::CreateScale(float scaleX, float scaleY, float scaleZ)
 {
     return { {
@@ -193,7 +193,7 @@ FVector FMatrix::TransformVector(const FVector& v, const FMatrix& m)
 {
     FVector result;
 
-    // 4x4 Çà·ÄÀ» »ç¿ëÇÏ¿© º¤ÅÍ º¯È¯ (W = 0À¸·Î °¡Á¤, ¹æÇâ º¤ÅÍ)
+    // 4x4 í–‰ë ¬ì„ ì‚¬ìš©í•˜ì—¬ ë²¡í„° ë³€í™˜ (W = 0ìœ¼ë¡œ ê°€ì •, ë°©í–¥ ë²¡í„°)
     result.x = v.x * m.M[0][0] + v.y * m.M[1][0] + v.z * m.M[2][0] + 0.0f * m.M[3][0];
     result.y = v.x * m.M[0][1] + v.y * m.M[1][1] + v.z * m.M[2][1] + 0.0f * m.M[3][1];
     result.z = v.x * m.M[0][2] + v.y * m.M[1][2] + v.z * m.M[2][2] + 0.0f * m.M[3][2];
@@ -202,7 +202,7 @@ FVector FMatrix::TransformVector(const FVector& v, const FMatrix& m)
     return result;
 }
 
-// FVector4¸¦ º¯È¯ÇÏ´Â ÇÔ¼ö
+// FVector4ë¥¼ ë³€í™˜í•˜ëŠ” í•¨ìˆ˜
 FVector4 FMatrix::TransformVector(const FVector4& v, const FMatrix& m)
 {
     FVector4 result;

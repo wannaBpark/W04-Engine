@@ -67,7 +67,7 @@ int UPrimitiveComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
             idx1 = indices[i * 3 + 2];
         }
 
-        // °¢ »ï°¢ÇüÀÇ ¹öÅØ½º À§Ä¡¸¦ FVector·Î ºÒ·¯¿É´Ï´Ù.
+        // ê° ì‚¼ê°í˜•ì˜ ë²„í…ìŠ¤ ìœ„ì¹˜ë¥¼ FVectorë¡œ ë¶ˆëŸ¬ì˜µë‹ˆë‹¤.
         uint32 stride = sizeof(FVertexSimple);
         FVector v0 = *reinterpret_cast<FVector*>(pbPositions + idx0 * stride);
         FVector v1 = *reinterpret_cast<FVector*>(pbPositions + idx1 * stride);
@@ -95,7 +95,7 @@ bool UPrimitiveComponent::IntersectRayTriangle(const FVector& rayOrigin, const F
     float a = edge1.Dot(h);
 
     if (fabs(a) < epsilon)
-        return false; // Ray¿Í »ï°¢ÇüÀÌ ÆòÇàÇÑ °æ¿ì
+        return false; // Rayì™€ ì‚¼ê°í˜•ì´ í‰í–‰í•œ ê²½ìš°
 
     float f = 1.0f / a;
     FVector s = rayOrigin - v0;
