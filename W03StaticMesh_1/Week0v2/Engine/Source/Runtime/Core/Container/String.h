@@ -47,8 +47,10 @@ enum Type : uint8
 
 class FString
 {
+public:
+    using ElementType = TCHAR;
+
 private:
-	using ElementType = TCHAR;
     using BaseStringType = std::basic_string<
         ElementType,
         std::char_traits<ElementType>,
@@ -58,6 +60,8 @@ private:
     BaseStringType PrivateString;
 
 	friend struct std::hash<FString>;
+    friend ElementType* GetData(FString&);
+    friend const ElementType* GetData(const FString&);
 
 public:
     FString() = default;
@@ -172,8 +176,6 @@ public:
         ESearchDir::Type SearchDir = ESearchDir::FromStart, int32 StartPosition = -1
     ) const;
 
-	const FString::ElementType* GetData() const;
-
 public:
     /** ElementType* 로 반환하는 연산자 */
     FORCEINLINE const ElementType* operator*() const;
@@ -239,11 +241,6 @@ FORCEINLINE FString& FString::operator+=(const FString& SubStr)
     return *this;
 }
 
-FORCEINLINE const FString::ElementType* FString::GetData() const
-{
-	return PrivateString.data();
-}
-
 template<>
 struct std::hash<FString>
 {
@@ -252,4 +249,15 @@ struct std::hash<FString>
 		return hash<FString::BaseStringType>()(Key.PrivateString);
 	}
 };
+
+
+inline FString::ElementType* GetData(FString& String)
+{
+    return String.PrivateString.data();
+}
+
+inline const FString::ElementType* GetData(const FString& String)
+{
+    return String.PrivateString.data();
+}
 

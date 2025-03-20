@@ -28,11 +28,7 @@ FString FString::SanitizeFloat(float InFloat)
 
 float FString::ToFloat(const FString& InString)
 {
-#if USE_WIDECHAR
-	return std::stof(InString.GetData());
-#else
-	return std::stof(InString.GetData());
-#endif
+	return std::stof(*InString);
 }
 
 void FString::Empty()
