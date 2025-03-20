@@ -93,7 +93,7 @@ void FRenderer::ResetPixelShader()
 }
 void FRenderer::SetVertexShader(const FWString filename, FString funcname, FString version)
 {
-    // ¿¡·¯ ¹ß»ýÀÇ °¡´É¼ºÀÌ ÀÖÀ½
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ß»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½É¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     if (Graphics == nullptr)
         assert(0);
     if (VertexShader != nullptr)
@@ -108,7 +108,7 @@ void FRenderer::SetVertexShader(const FWString filename, FString funcname, FStri
 }
 void FRenderer::SetPixelShader(const FWString filename, FString funcname, FString version)
 {
-    // ¿¡·¯ ¹ß»ýÀÇ °¡´É¼ºÀÌ ÀÖÀ½
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ß»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½É¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     if (Graphics == nullptr)
         assert(0);
     if (VertexShader != nullptr)
@@ -208,10 +208,10 @@ ID3D11Buffer* FRenderer::CreateVertexBuffer(const TArray<FVertexSimple>& vertice
 
 ID3D11Buffer* FRenderer::CreateIndexBuffer(uint32* indices, UINT byteWidth)
 {
-    D3D11_BUFFER_DESC indexbufferdesc = {};						// bufferÀÇ Á¾·ù, ¿ëµµ µîÀ» ÁöÁ¤
-    indexbufferdesc.Usage = D3D11_USAGE_IMMUTABLE;			        // immutable: gpu°¡ ÀÐ±â Àü¿ëÀ¸·Î Á¢±ÙÇÒ ¼ö ÀÖ´Ù.
-    indexbufferdesc.BindFlags = D3D11_BIND_INDEX_BUFFER;	        // index buffer·Î »ç¿ëÇÏ°Ú´Ù.
-    indexbufferdesc.ByteWidth = byteWidth;	// buffer Å©±â ÁöÁ¤
+    D3D11_BUFFER_DESC indexbufferdesc = {};						// bufferï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ëµµ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    indexbufferdesc.Usage = D3D11_USAGE_IMMUTABLE;			        // immutable: gpuï¿½ï¿½ ï¿½Ð±ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö´ï¿½.
+    indexbufferdesc.BindFlags = D3D11_BIND_INDEX_BUFFER;	        // index bufferï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï°Ú´ï¿½.
+    indexbufferdesc.ByteWidth = byteWidth;	// buffer Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
     D3D11_SUBRESOURCE_DATA indexbufferSRD = { indices };
 
@@ -227,10 +227,10 @@ ID3D11Buffer* FRenderer::CreateIndexBuffer(uint32* indices, UINT byteWidth)
 
 ID3D11Buffer* FRenderer::CreateIndexBuffer(const TArray<uint32>& indices, UINT byteWidth)
 {
-    D3D11_BUFFER_DESC indexbufferdesc = {};						// bufferÀÇ Á¾·ù, ¿ëµµ µîÀ» ÁöÁ¤
-    indexbufferdesc.Usage = D3D11_USAGE_IMMUTABLE;			        // immutable: gpu°¡ ÀÐ±â Àü¿ëÀ¸·Î Á¢±ÙÇÒ ¼ö ÀÖ´Ù.
-    indexbufferdesc.BindFlags = D3D11_BIND_INDEX_BUFFER;	        // index buffer·Î »ç¿ëÇÏ°Ú´Ù.
-    indexbufferdesc.ByteWidth = byteWidth;	// buffer Å©±â ÁöÁ¤
+    D3D11_BUFFER_DESC indexbufferdesc = {};						// bufferï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ëµµ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    indexbufferdesc.Usage = D3D11_USAGE_IMMUTABLE;			        // immutable: gpuï¿½ï¿½ ï¿½Ð±ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö´ï¿½.
+    indexbufferdesc.BindFlags = D3D11_BIND_INDEX_BUFFER;	        // index bufferï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï°Ú´ï¿½.
+    indexbufferdesc.ByteWidth = byteWidth;	// buffer Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
     D3D11_SUBRESOURCE_DATA indexbufferSRD;
     indexbufferSRD.pSysMem = indices.data();
@@ -315,9 +315,9 @@ void FRenderer::UpdateLightBuffer()
     HRESULT result = Graphics->DeviceContext->Map(LightingBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     FLighting* constants = (FLighting*)mappedResource.pData;
     {
-        constants->lightDirX = 1.0f; // ¿¹: ºûÀÌ À§¿¡¼­ ¾Æ·¡·Î ³»·Á¿À´Â °æ¿ì
-        constants->lightDirY = 1.0f; // ¿¹: ºûÀÌ À§¿¡¼­ ¾Æ·¡·Î ³»·Á¿À´Â °æ¿ì
-        constants->lightDirZ = 1.0f; // ¿¹: ºûÀÌ À§¿¡¼­ ¾Æ·¡·Î ³»·Á¿À´Â °æ¿ì
+        constants->lightDirX = 1.0f; // ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+        constants->lightDirY = 1.0f; // ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+        constants->lightDirZ = 1.0f; // ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
         constants->lightColorX = 1.0f;
         constants->lightColorY = 1.0f;
         constants->lightColorZ = 1.0f;
@@ -331,15 +331,15 @@ void FRenderer::UpdateConstant(FMatrix _MVP, float _Flag)
 {
     if (ConstantBuffer)
     {
-        D3D11_MAPPED_SUBRESOURCE constantbufferMSR;// GPUÀÇ ¸Þ¸ð¸® ÁÖ¼Ò ¸ÅÇÎ
+        D3D11_MAPPED_SUBRESOURCE constantbufferMSR;// GPUï¿½ï¿½ ï¿½Þ¸ï¿½ ï¿½Ö¼ï¿½ ï¿½ï¿½ï¿½ï¿½
 
         Graphics->DeviceContext->Map(ConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR); // update constant buffer every frame
-        FConstants* constants = (FConstants*)constantbufferMSR.pData; //GPU ¸Þ¸ð¸® Á÷Á¢ Á¢±Ù
+        FConstants* constants = (FConstants*)constantbufferMSR.pData; //GPU ï¿½Þ¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         {
             constants->MVP = _MVP;
             constants->Flag = _Flag;
         }
-        Graphics->DeviceContext->Unmap(ConstantBuffer, 0); // GPU°¡ ´Ù½Ã »ç¿ë°¡´ÉÇÏ°Ô ¸¸µé±â
+        Graphics->DeviceContext->Unmap(ConstantBuffer, 0); // GPUï¿½ï¿½ ï¿½Ù½ï¿½ ï¿½ï¿½ë°¡ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
     }
 }
 
@@ -347,26 +347,26 @@ void FRenderer::UpdateNormalConstantBuffer(FMatrix _Model)
 {
     if (NormalConstantBuffer)
     {
-        D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU ÀÇ ¸Þ¸ð¸® ÁÖ¼Ò ¸ÅÇÎ
+        D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU ï¿½ï¿½ ï¿½Þ¸ï¿½ ï¿½Ö¼ï¿½ ï¿½ï¿½ï¿½ï¿½
 
         Graphics->DeviceContext->Map(NormalConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR); // update constant buffer every frame
 
         FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(_Model));
 
-        FNormalConstants* constants = (FNormalConstants*)constantbufferMSR.pData; //GPU ¸Þ¸ð¸® Á÷Á¢ Á¢±Ù
+        FNormalConstants* constants = (FNormalConstants*)constantbufferMSR.pData; //GPU ï¿½Þ¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         {
             constants->ModelMatrixInverseTranspose = NormalMatrix;
         }
-        Graphics->DeviceContext->Unmap(NormalConstantBuffer, 0); // GPU °¡ ´Ù½Ã »ç¿ë°¡´ÉÇÏ°Ô ¸¸µé±â. 
+        Graphics->DeviceContext->Unmap(NormalConstantBuffer, 0); // GPU ï¿½ï¿½ ï¿½Ù½ï¿½ ï¿½ï¿½ë°¡ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½. 
 
     }
 }
 void FRenderer::UpdateLitUnlitConstantBuffer(int isLit)
 {
     if (LitUnlitBuffer) {
-        D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU ÀÇ ¸Þ¸ð¸® ÁÖ¼Ò ¸ÅÇÎ
+        D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU ï¿½ï¿½ ï¿½Þ¸ï¿½ ï¿½Ö¼ï¿½ ï¿½ï¿½ï¿½ï¿½
         Graphics->DeviceContext->Map(LitUnlitBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR);
-        FLitUnlitConstants* constants = (FLitUnlitConstants*)constantbufferMSR.pData; //GPU ¸Þ¸ð¸® Á÷Á¢ Á¢±Ù
+        FLitUnlitConstants* constants = (FLitUnlitConstants*)constantbufferMSR.pData; //GPU ï¿½Þ¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         {
             constants->isLit = isLit;
         }
@@ -400,7 +400,7 @@ void FRenderer::CreateTextureShader()
     };
     Graphics->Device->CreateInputLayout(layout, ARRAYSIZE(layout), vertextextureshaderCSO->GetBufferPointer(), vertextextureshaderCSO->GetBufferSize(), &TextureInputLayout);
 
-    //ÀÚ·á±¸Á¶ º¯°æ ÇÊ¿ä
+    //ï¿½Ú·á±¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½
     TextureStride = sizeof(FVertexTexture);
     vertextextureshaderCSO->Release();
     pixeltextureshaderCSO->Release();
@@ -441,7 +441,7 @@ void FRenderer::PrepareTextureShader()
     Graphics->DeviceContext->PSSetShader(PixelTextureShader, nullptr, 0);
     Graphics->DeviceContext->IASetInputLayout(TextureInputLayout);
     
-    //ÅØ½ºÃÄ¿ë ConstantBuffer Ãß°¡ÇÊ¿äÇÒ¼öµµ
+    //ï¿½Ø½ï¿½ï¿½Ä¿ï¿½ ConstantBuffer ï¿½ß°ï¿½ï¿½Ê¿ï¿½ï¿½Ò¼ï¿½ï¿½ï¿½
     if (ConstantBuffer)
     {
         Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &ConstantBuffer);
@@ -508,7 +508,7 @@ void FRenderer::RenderTexturePrimitive(ID3D11Buffer* pVertexBuffer, UINT numVert
     Graphics->DeviceContext->DrawIndexed(numIndices, 0, 0);
 }
 
-//ÆùÆ® ¹èÄ¡·£´õ¸µ
+//ï¿½ï¿½Æ® ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void FRenderer::RenderTextPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11ShaderResourceView* _TextureSRV, ID3D11SamplerState* _SamplerState)
 {
     if (!_TextureSRV || !_SamplerState) {
@@ -517,12 +517,12 @@ void FRenderer::RenderTextPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertice
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &TextureStride, &offset);
 
-    // ÀÔ·Â ·¹ÀÌ¾Æ¿ô ¹× ±âº» ¼³Á¤
+    // ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½Ì¾Æ¿ï¿½ ï¿½ï¿½ ï¿½âº» ï¿½ï¿½ï¿½ï¿½
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     Graphics->DeviceContext->PSSetShaderResources(0, 1, &_TextureSRV);
     Graphics->DeviceContext->PSSetSamplers(0, 1, &_SamplerState);
 
-    // µå·Î¿ì È£Ãâ (6°³ÀÇ ÀÎµ¦½º »ç¿ë)
+    // ï¿½ï¿½Î¿ï¿½ È£ï¿½ï¿½ (6ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½)
     Graphics->DeviceContext->Draw(numVertices, 0);
 }
 
@@ -552,15 +552,15 @@ void FRenderer::UpdateSubUVConstant(float _indexU, float _indexV)
 {
     if (SubUVConstantBuffer)
     {
-        D3D11_MAPPED_SUBRESOURCE constantbufferMSR;// GPUÀÇ ¸Þ¸ð¸® ÁÖ¼Ò ¸ÅÇÎ
+        D3D11_MAPPED_SUBRESOURCE constantbufferMSR;// GPUï¿½ï¿½ ï¿½Þ¸ï¿½ ï¿½Ö¼ï¿½ ï¿½ï¿½ï¿½ï¿½
 
         Graphics->DeviceContext->Map(SubUVConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR); // update constant buffer every frame
-        FSubUVConstant* constants = (FSubUVConstant*)constantbufferMSR.pData; //GPU ¸Þ¸ð¸® Á÷Á¢ Á¢±Ù
+        FSubUVConstant* constants = (FSubUVConstant*)constantbufferMSR.pData; //GPU ï¿½Þ¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         {
             constants->indexU = _indexU;
             constants->indexV = _indexV;
         }
-        Graphics->DeviceContext->Unmap(SubUVConstantBuffer, 0); // GPU°¡ ´Ù½Ã »ç¿ë°¡´ÉÇÏ°Ô ¸¸µé±â
+        Graphics->DeviceContext->Unmap(SubUVConstantBuffer, 0); // GPUï¿½ï¿½ ï¿½Ù½ï¿½ ï¿½ï¿½ë°¡ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
     }
 }
 
@@ -575,13 +575,13 @@ void FRenderer::PrepareSubUVConstant()
 
 void FRenderer::PrepareLineShader()
 {
-    // ¼ÎÀÌ´õ¿Í ÀÔ·Â ·¹ÀÌ¾Æ¿ô ¼³Á¤
+    // ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½Ì¾Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½
     Graphics->DeviceContext->VSSetShader(VertexLineShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(PixelLineShader, nullptr, 0);
   
-    // »ó¼ö ¹öÆÛ ¹ÙÀÎµù: 
-    // - MatrixBuffer´Â register(b0)·Î, Vertex Shader¿¡ ¹ÙÀÎµù
-    // - GridConstantBuffer´Â register(b1)·Î, Vertex¿Í Pixel Shader¿¡ ¹ÙÀÎµù (ÇÈ¼¿ ¼ÎÀÌ´õ´Â ÇÊ¿ä¿¡ µû¶ó)
+    // ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Îµï¿½: 
+    // - MatrixBufferï¿½ï¿½ register(b0)ï¿½ï¿½, Vertex Shaderï¿½ï¿½ ï¿½ï¿½ï¿½Îµï¿½
+    // - GridConstantBufferï¿½ï¿½ register(b1)ï¿½ï¿½, Vertexï¿½ï¿½ Pixel Shaderï¿½ï¿½ ï¿½ï¿½ï¿½Îµï¿½ (ï¿½È¼ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½Ê¿ä¿¡ ï¿½ï¿½ï¿½ï¿½)
     if (ConstantBuffer && GridConstantBuffer)
     {
         Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &ConstantBuffer);       // MatrixBuffer (b0)
@@ -648,7 +648,7 @@ ID3D11Buffer* FRenderer::CreateStaticVerticesBuffer()
 ID3D11Buffer* FRenderer::CreateBoundingBoxBuffer(UINT numBoundingBoxes)
 {
     D3D11_BUFFER_DESC bufferDesc = {};
-    bufferDesc.Usage = D3D11_USAGE_DYNAMIC; // ÀÚÁÖ ¾÷µ¥ÀÌÆ®ÇÒ °æ¿ì DYNAMIC, ±×·¸Áö ¾ÊÀ¸¸é DEFAULT
+    bufferDesc.Usage = D3D11_USAGE_DYNAMIC; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ DYNAMIC, ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ DEFAULT
     bufferDesc.ByteWidth = sizeof(FBoundingBox) * numBoundingBoxes;
     bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
     bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -663,7 +663,7 @@ ID3D11Buffer* FRenderer::CreateBoundingBoxBuffer(UINT numBoundingBoxes)
 ID3D11Buffer* FRenderer::CreateOBBBuffer(UINT numBoundingBoxes)
 {
     D3D11_BUFFER_DESC bufferDesc = {};
-    bufferDesc.Usage = D3D11_USAGE_DYNAMIC; // ÀÚÁÖ ¾÷µ¥ÀÌÆ®ÇÒ °æ¿ì DYNAMIC, ±×·¸Áö ¾ÊÀ¸¸é DEFAULT
+    bufferDesc.Usage = D3D11_USAGE_DYNAMIC; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ DYNAMIC, ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ DEFAULT
     bufferDesc.ByteWidth = sizeof(FOBB) * numBoundingBoxes;
     bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
     bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -693,7 +693,7 @@ ID3D11Buffer* FRenderer::CreateConeBuffer(UINT numCones)
 ID3D11ShaderResourceView* FRenderer::CreateBoundingBoxSRV(ID3D11Buffer* pBoundingBoxBuffer, UINT numBoundingBoxes)
 {
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-    srvDesc.Format = DXGI_FORMAT_UNKNOWN; // ±¸Á¶Ã¼ ¹öÆÛÀÇ °æ¿ì UNKNOWN
+    srvDesc.Format = DXGI_FORMAT_UNKNOWN; // ï¿½ï¿½ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ UNKNOWN
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
     srvDesc.Buffer.ElementOffset = 0;
     srvDesc.Buffer.NumElements = numBoundingBoxes;
@@ -706,7 +706,7 @@ ID3D11ShaderResourceView* FRenderer::CreateBoundingBoxSRV(ID3D11Buffer* pBoundin
 ID3D11ShaderResourceView* FRenderer::CreateOBBSRV(ID3D11Buffer* pBoundingBoxBuffer, UINT numBoundingBoxes)
 {
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-    srvDesc.Format = DXGI_FORMAT_UNKNOWN; // ±¸Á¶Ã¼ ¹öÆÛÀÇ °æ¿ì UNKNOWN
+    srvDesc.Format = DXGI_FORMAT_UNKNOWN; // ï¿½ï¿½ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ UNKNOWN
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
     srvDesc.Buffer.ElementOffset = 0;
     srvDesc.Buffer.NumElements = numBoundingBoxes;
@@ -717,7 +717,7 @@ ID3D11ShaderResourceView* FRenderer::CreateOBBSRV(ID3D11Buffer* pBoundingBoxBuff
 ID3D11ShaderResourceView* FRenderer::CreateConeSRV(ID3D11Buffer* pConeBuffer, UINT numCones)
 {
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-    srvDesc.Format = DXGI_FORMAT_UNKNOWN; // ±¸Á¶Ã¼ ¹öÆÛÀÇ °æ¿ì UNKNOWN
+    srvDesc.Format = DXGI_FORMAT_UNKNOWN; // ï¿½ï¿½ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ UNKNOWN
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
     srvDesc.Buffer.ElementOffset = 0;
     srvDesc.Buffer.NumElements = numCones;
@@ -775,7 +775,7 @@ void FRenderer::UpdateGridConstantBuffer(const FGridParameters& gridParams)
         Graphics->DeviceContext->Unmap(GridConstantBuffer, 0);
     }
     else {
-        UE_LOG(LogLevel::Warning, "gridParams ¸ÅÇÎ ½ÇÆÐ");
+        UE_LOG(LogLevel::Warning, "gridParams ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
     }
 
 }
