@@ -13,6 +13,6 @@
 using FString = std::string;
 using FWString = std::wstring;
 
-#define TArray std::vector
+//#define TArray std::vector
 #define TDoubleLinkedList std::list
 #define TMap std::unordered_map

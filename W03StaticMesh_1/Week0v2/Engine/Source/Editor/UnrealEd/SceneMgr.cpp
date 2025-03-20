@@ -62,15 +62,15 @@ SceneData FSceneMgr::ParseSceneData(const std::string& jsonStr)
                
             }
             USceneComponent* sceneComp = static_cast<USceneComponent*>(obj);
-            if (value.contains("Location")) sceneComp->SetLocation(FVector(value["Location"].get<TArray<float>>()[0],
-                value["Location"].get<TArray<float>>()[1],
-                value["Location"].get<TArray<float>>()[2]));
-            if (value.contains("Rotation")) sceneComp->SetRotation(FVector(value["Rotation"].get<TArray<float>>()[0],
-                value["Rotation"].get<TArray<float>>()[1],
-                value["Rotation"].get<TArray<float>>()[2]));
-            if (value.contains("Scale")) sceneComp->SetScale(FVector(value["Scale"].get<TArray<float>>()[0],
-                value["Scale"].get<TArray<float>>()[1],
-                value["Scale"].get<TArray<float>>()[2]));
+            if (value.contains("Location")) sceneComp->SetLocation(FVector(value["Location"].get<std::vector<float>>()[0],
+                value["Location"].get<std::vector<float>>()[1],
+                value["Location"].get<std::vector<float>>()[2]));
+            if (value.contains("Rotation")) sceneComp->SetRotation(FVector(value["Rotation"].get<std::vector<float>>()[0],
+                value["Rotation"].get<std::vector<float>>()[1],
+                value["Rotation"].get<std::vector<float>>()[2]));
+            if (value.contains("Scale")) sceneComp->SetScale(FVector(value["Scale"].get<std::vector<float>>()[0],
+                value["Scale"].get<std::vector<float>>()[1],
+                value["Scale"].get<std::vector<float>>()[2]));
             if (value.contains("Type")) {
                 UPrimitiveComponent* primitiveComp = dynamic_cast<UPrimitiveComponent*>(sceneComp);
                 if (primitiveComp) {
@@ -129,9 +129,9 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
     for (auto it = sceneData.Primitives.begin(); it != sceneData.Primitives.end(); ++it) {
         int id = it->first;
         USceneComponent* primitive = static_cast<USceneComponent*>(it->second);
-        TArray<float> Location = { primitive->GetWorldLocation().x,primitive->GetWorldLocation().y,primitive->GetWorldLocation().z };
-        TArray<float> Rotation = { primitive->GetWorldRotation().x,primitive->GetWorldRotation().y,primitive->GetWorldRotation().z };
-        TArray<float> Scale = { primitive->GetWorldScale().x,primitive->GetWorldScale().y,primitive->GetWorldScale().z };
+        std::vector<float> Location = { primitive->GetWorldLocation().x,primitive->GetWorldLocation().y,primitive->GetWorldLocation().z };
+        std::vector<float> Rotation = { primitive->GetWorldRotation().x,primitive->GetWorldRotation().y,primitive->GetWorldRotation().z };
+        std::vector<float> Scale = { primitive->GetWorldScale().x,primitive->GetWorldScale().y,primitive->GetWorldScale().z };
 
         FString primitiveName = static_cast<USceneComponent*>(primitive)->GetName().ToString();
          size_t pos = primitiveName.rfind('_');

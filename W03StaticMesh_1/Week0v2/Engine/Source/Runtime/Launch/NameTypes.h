@@ -3,6 +3,7 @@
 #include <ostream>
 #include <iostream>
 
+#include "Core/Container/Array.h"
 #include "Core/HAL/PlatformType.h"
 
 class FNameEntry
@@ -42,8 +43,8 @@ public:
         if (it != NameToIndex.end())
             return it->second;
 
-        int32 newid = static_cast<int32>(Entries.size());
-        Entries.push_back(new FNameEntry(Name));
+        int32 newid = static_cast<int32>(Entries.Num());
+        Entries.Add(new FNameEntry(Name));
         NameToIndex[Name] = newid;
         return newid;
     }

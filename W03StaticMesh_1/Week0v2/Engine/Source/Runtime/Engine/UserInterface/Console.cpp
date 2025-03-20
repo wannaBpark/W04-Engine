@@ -17,7 +17,7 @@ Console::~Console() {}
 
 // 로그 초기화
 void Console::Clear() {
-    items.clear();
+    items.Empty();
 }
 
 // 로그 추가
@@ -28,7 +28,7 @@ void Console::AddLog(LogLevel level, const char* fmt, ...) {
     vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
 
-    items.push_back({ level, std::string(buf) });
+    items.Add({ level, std::string(buf) });
     scrollToBottom = true;
 }
 
@@ -128,7 +128,7 @@ void Console::Draw() {
     if (ImGui::InputText("Input", inputBuf, IM_ARRAYSIZE(inputBuf), ImGuiInputTextFlags_EnterReturnsTrue)) {
         if (inputBuf[0]) {
             AddLog(LogLevel::Display, ">> %s", inputBuf);
-            history.push_back(std::string(inputBuf));
+            history.Add(std::string(inputBuf));
             historyPos = -1;
             scrollToBottom = true; // 자동 스크롤
         }

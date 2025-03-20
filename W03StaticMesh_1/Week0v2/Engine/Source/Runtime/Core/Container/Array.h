@@ -34,6 +34,9 @@ public:
     TArray();
     ~TArray() = default;
 
+    // 이니셜라이저 생성자
+    TArray(std::initializer_list<T> InitList);
+
     // 복사 생성자
     TArray(const TArray& Other);
 
@@ -55,6 +58,9 @@ public:
 	template <typename... Args>
     SizeType Emplace(Args&&... Item);
 
+    /** Array가 비어있는지 확인합니다. */
+    bool IsEmpty() const;
+
 	/** Array를 비웁니다 */
     void Empty();
 
@@ -73,6 +79,7 @@ public:
     SizeType RemoveAll(const Predicate& Pred);
 
     T* GetData();
+    const T* GetData() const;
 
     /**
      * Array에서 Item을 찾습니다.
@@ -120,17 +127,26 @@ void TArray<T, Allocator>::operator+(const TArray& OtherArray)
 }
 
 template <typename T, typename Allocator>
-TArray<T, Allocator>::TArray(): ContainerPrivate()
+TArray<T, Allocator>::TArray()
+    : ContainerPrivate()
 {
 }
 
 template <typename T, typename Allocator>
-TArray<T, Allocator>::TArray(const TArray& Other): ContainerPrivate(Other.ContainerPrivate)
+TArray<T, Allocator>::TArray(std::initializer_list<T> InitList)
+    : ContainerPrivate(InitList)
 {
 }
 
 template <typename T, typename Allocator>
-TArray<T, Allocator>::TArray(TArray&& Other) noexcept: ContainerPrivate(std::move(Other.ContainerPrivate))
+TArray<T, Allocator>::TArray(const TArray& Other)
+    : ContainerPrivate(Other.ContainerPrivate)
+{
+}
+
+template <typename T, typename Allocator>
+TArray<T, Allocator>::TArray(TArray&& Other) noexcept
+    : ContainerPrivate(std::move(Other.ContainerPrivate))
 {
 }
 
@@ -191,6 +207,12 @@ typename TArray<T, Allocator>::SizeType TArray<T, Allocator>::Emplace(Args&&... 
 }
 
 template <typename T, typename Allocator>
+bool TArray<T, Allocator>::IsEmpty() const
+{
+    return ContainerPrivate.empty();
+}
+
+template <typename T, typename Allocator>
 void TArray<T, Allocator>::Empty()
 {
     ContainerPrivate.clear();
@@ -237,6 +259,12 @@ typename TArray<T, Allocator>::SizeType TArray<T, Allocator>::RemoveAll(const Pr
 
 template <typename T, typename Allocator>
 T* TArray<T, Allocator>::GetData()
+{
+    return ContainerPrivate.data();
+}
+
+template <typename T, typename Allocator>
+const T* TArray<T, Allocator>::GetData() const
 {
     return ContainerPrivate.data();
 }

@@ -35,7 +35,7 @@ void Outliner::Draw(UWorld* world)
             static int selected = -1; // 선택된 항목 저장용 변수
 
             // 오브젝트 리스트
-            for (int32 i = 0; i < world->GetObjectArr().size();i++)
+            for (int32 i = 0; i < world->GetObjectArr().Num();i++)
             {
                 if(!world->GetObjectArr()[i]->IsA(USceneComponent::StaticClass()))
                     continue;

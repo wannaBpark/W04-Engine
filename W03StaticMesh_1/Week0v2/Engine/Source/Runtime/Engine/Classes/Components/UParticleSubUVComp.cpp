@@ -107,7 +107,7 @@ void UParticleSubUVComp::UpdateVertexBuffer(const TArray<FVertexTexture>& vertic
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 
 	context->Map(vertexTextureBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	memcpy(mappedResource.pData, vertices.data(), vertices.size() * sizeof(FVertexTexture));
+	memcpy(mappedResource.pData, vertices.GetData(), vertices.Num() * sizeof(FVertexTexture));
 	context->Unmap(vertexTextureBuffer, 0);
 	*/
 
@@ -127,13 +127,12 @@ void UParticleSubUVComp::CreateSubUVVertexBuffer()
 		{ 1.0f,1.0f,0.0f,1,0},
 		{-1.0f,-1.0f,0.0f,0,1},
 		{ 1.0f,-1.0f,0.0f,1,1}
-
 	};
 	vertices[1].u = normalWidthOffset;
 	vertices[2].v = normalHeightOffset;
 	vertices[3].u = normalWidthOffset;
 	vertices[3].v = normalHeightOffset;
 
-	vertexSubUVBuffer = FEngineLoop::renderer.CreateVertexBuffer(vertices.data(), static_cast<UINT>(vertices.size() * sizeof(FVertexTexture)));
-	numTextVertices = static_cast<UINT>(vertices.size());
+	vertexSubUVBuffer = FEngineLoop::renderer.CreateVertexBuffer(vertices.GetData(), static_cast<UINT>(vertices.Num() * sizeof(FVertexTexture)));
+	numTextVertices = static_cast<UINT>(vertices.Num());
 }

@@ -15,7 +15,7 @@ UGizmoCircleComponent::UGizmoCircleComponent(EPrimitiveColor color, float innerR
     //FVector color3 = Colors[color];
     //TArray<FVertexSimple> vertices;
     //TArray<uint32>  indices;
-    //if (vertices.empty())
+    //if (vertices.IsEmpty())
     //{
     //    float angleStep = 2.0f * 3.1415926535f / DISC_RESOLUTION;
 
@@ -24,39 +24,39 @@ UGizmoCircleComponent::UGizmoCircleComponent(EPrimitiveColor color, float innerR
     //        float angle = i * angleStep;
     //        float x = cos(angle);
     //        float z = sin(angle);
-    //        vertices.push_back({ x, 0.0f, z ,color3.x, color3.y, color3.z, 1 });
+    //        vertices.Add({ x, 0.0f, z ,color3.x, color3.y, color3.z, 1 });
 
     //        x *= innerRadius;
     //        z *= innerRadius;
-    //        vertices.push_back({ x, 0.0f, z ,color3.x, color3.y, color3.z, 1 });
+    //        vertices.Add({ x, 0.0f, z ,color3.x, color3.y, color3.z, 1 });
     //    }
 
     //    // 인덱스 설정 (삼각형 리스트)
     //    for (int i = 0; i <= DISC_RESOLUTION + 1; ++i) {
     //        int pivot = 2 * i;
-    //        indices.push_back(pivot);      // 중심점
-    //        indices.push_back(pivot + 3);      // 현재 점
-    //        indices.push_back(pivot + 2);  // 다음 점 (마지막 점 예외 처리)
+    //        indices.Add(pivot);      // 중심점
+    //        indices.Add(pivot + 3);      // 현재 점
+    //        indices.Add(pivot + 2);  // 다음 점 (마지막 점 예외 처리)
 
-    //        indices.push_back(pivot);      // 중심점
-    //        indices.push_back(pivot + 1);      // 현재 점
-    //        indices.push_back(pivot + 3);  // 다음 점 (마지막 점 예외 처리)
+    //        indices.Add(pivot);      // 중심점
+    //        indices.Add(pivot + 1);      // 현재 점
+    //        indices.Add(pivot + 3);  // 다음 점 (마지막 점 예외 처리)
     //    }
     //    for (int i = 0; i <= DISC_RESOLUTION + 1; ++i) {
     //        int pivot = 2 * i;
-    //        indices.push_back(pivot);      // 중심점
-    //        indices.push_back(pivot + 2);      // 현재 점
-    //        indices.push_back(pivot + 3);  // 다음 점 (마지막 점 예외 처리)
+    //        indices.Add(pivot);      // 중심점
+    //        indices.Add(pivot + 2);      // 현재 점
+    //        indices.Add(pivot + 3);  // 다음 점 (마지막 점 예외 처리)
 
-    //        indices.push_back(pivot);      // 중심점
-    //        indices.push_back(pivot + 3);      // 현재 점
-    //        indices.push_back(pivot + 1);  // 다음 점 (마지막 점 예외 처리)
+    //        indices.Add(pivot);      // 중심점
+    //        indices.Add(pivot + 3);      // 현재 점
+    //        indices.Add(pivot + 1);  // 다음 점 (마지막 점 예외 처리)
     //    }
 
     //}
 
     //FEngineLoop::resourceMgr.RegisterMesh(&FEngineLoop::renderer,
-    //    type, vertices, vertices.size(), indices, indices.size());
+    //    type, vertices, vertices.Num(), indices, indices.Num());
 
 }
 
@@ -66,7 +66,7 @@ UGizmoCircleComponent::UGizmoCircleComponent()
     //TArray<FVertexSimple> vertices;
     //TArray<uint32>  indices;
 
-    //if (vertices.empty())
+    //if (vertices.IsEmpty())
     //{
     //    float angleStep = 2.0f * 3.1415926535f / DISC_RESOLUTION;
 
@@ -75,29 +75,29 @@ UGizmoCircleComponent::UGizmoCircleComponent()
     //        float angle = i * angleStep;
     //        float x = cos(angle);
     //        float z = sin(angle);
-    //        vertices.push_back({ x, 0.0f, z ,1,1,1, 1 });
+    //        vertices.Add({ x, 0.0f, z ,1,1,1, 1 });
 
     //        x *= 0.5;
     //        z *= 0.5;
-    //        vertices.push_back({ x, 0.0f, z ,1,1,1, 1 });
+    //        vertices.Add({ x, 0.0f, z ,1,1,1, 1 });
     //    }
 
     //    // 인덱스 설정 (삼각형 리스트)
     //    for (int i = 0; i <= DISC_RESOLUTION + 1; ++i) {
     //        int pivot = 2 * i;
-    //        indices.push_back(pivot);      // 중심점
-    //        indices.push_back(pivot + 3);      // 현재 점
-    //        indices.push_back(pivot + 2);  // 다음 점 (마지막 점 예외 처리)
+    //        indices.Add(pivot);      // 중심점
+    //        indices.Add(pivot + 3);      // 현재 점
+    //        indices.Add(pivot + 2);  // 다음 점 (마지막 점 예외 처리)
 
-    //        indices.push_back(pivot);      // 중심점
-    //        indices.push_back(pivot + 1);      // 현재 점
-    //        indices.push_back(pivot + 3);  // 다음 점 (마지막 점 예외 처리)
+    //        indices.Add(pivot);      // 중심점
+    //        indices.Add(pivot + 1);      // 현재 점
+    //        indices.Add(pivot + 3);  // 다음 점 (마지막 점 예외 처리)
 
     //    }
     //}
 
     //FEngineLoop::resourceMgr.RegisterMesh(&FEngineLoop::renderer,
-    //    FString("Disc"), vertices, vertices.size(), indices, indices.size());
+    //    FString("Disc"), vertices, vertices.Num(), indices, indices.Num());
 
 }
 

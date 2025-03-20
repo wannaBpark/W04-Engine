@@ -40,7 +40,7 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
 	const char* primitives[] = { "Sphere", "Cube", "SpotLight","Particle","Text"};
 	ImGui::Combo("Primitive", &primitiveType, primitives, IM_ARRAYSIZE(primitives));
 
-	int SpawnCount = static_cast<int>(world->GetObjectArr().size());
+	int SpawnCount = static_cast<int>(world->GetObjectArr().Num());
 	ImGui::InputInt("Number of Spawn", &SpawnCount, 0, 0);
 	if (ImGui::Button("Spawn"))
 	{
