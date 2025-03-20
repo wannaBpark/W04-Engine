@@ -1,4 +1,4 @@
-﻿#include "Engine/Source/Runtime/Engine/Camera/CameraComponent.h"
+#include "Engine/Source/Runtime/Engine/Camera/CameraComponent.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 #include "Engine/Source/Runtime/Engine/World.h"
 #include "Engine/Source/Editor/UnrealEd/EditorViewportClient.h"
@@ -99,12 +99,12 @@ void UCameraComponent::MoveRight(float _Value)
 
 void UCameraComponent::MoveUp(float _Value)
 {
-	RelativeLocation.z += _Value *0.5f;
+	RelativeLocation.z += _Value * GetEngine().GetViewportClient()->GetCameraSpeedScalar();
 }
 
 void UCameraComponent::RotateYaw(float _Value)
 {
-	RelativeRotation.z += _Value;
+	RelativeRotation.z += _Value * GetEngine().GetViewportClient()->GetCameraSpeedScalar();
 }
 
 void UCameraComponent::RotatePitch(float _Value)

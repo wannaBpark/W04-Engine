@@ -16,6 +16,9 @@ private:
     ID3D11Buffer* vertexSubUVBuffer;
     UINT numTextVertices;
 
+    int indexU = 0;
+    int indexV = 0;
+    float second = 0;
 
     int CellsPerRow;
     int CellsPerColumn;
