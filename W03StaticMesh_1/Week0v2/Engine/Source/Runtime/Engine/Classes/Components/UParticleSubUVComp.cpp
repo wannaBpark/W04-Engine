@@ -29,9 +29,7 @@ void UParticleSubUVComp::Update(double deltaTime)
 	uint32 CellWidth = Texture->width / CellsPerColumn;
 	uint32 CellHeight = Texture->height / CellsPerColumn;
 
-	static int indexU = 0;
-	static int indexV = 0;
-	static float second = 0;
+
 	second += static_cast<float>(deltaTime);
 	if (second >= 75)
 	{

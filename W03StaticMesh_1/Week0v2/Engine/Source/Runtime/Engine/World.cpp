@@ -25,32 +25,37 @@ UWorld::~UWorld()
 
 void UWorld::Initialize()
 {
-	CreateBaseObject();
+    SceneData loadData = FSceneMgr::ParseSceneData(FSceneMgr::LoadSceneFromFile(defaultMapName));
+    LoadData(loadData);
+    CreateBaseObject();
 }
 
 void UWorld::CreateBaseObject()
 {
-	UObject* player = FObjectFactory::ConstructObject<UPlayer>("LocalPlayer");
-	localPlayer = static_cast<UPlayer*>(player);
+    if (localPlayer == nullptr) {
+        UObject* player = FObjectFactory::ConstructObject<UPlayer>("LocalPlayer");
+        localPlayer = static_cast<UPlayer*>(player);
+    }
+    if (camera == nullptr) {
+        UObject* Camera = FObjectFactory::ConstructObject<UCameraComponent>("MainCamere");
+        camera = static_cast<UCameraComponent*>(Camera);
+        camera->SetLocation(FVector(8.0f, 8.0f, 8.f));
+        camera->SetRotation(FVector(0.0f, 45.0f, -135.0f));
+    }
 
-	UObject* Camera = FObjectFactory::ConstructObject<UCameraComponent>("MainCamere");
-	camera = static_cast<UCameraComponent*>(Camera);
-	camera->SetLocation(FVector(8.0f, 8.0f, 8.f));
-	camera->SetRotation(FVector(0.0f,45.0f, -135.0f));
-
-
-	UObject* tmp = FObjectFactory::ConstructObject<UTransformGizmo>("LocalGizmo");
-	LocalGizmo = static_cast<UTransformGizmo*>(tmp);
-		
+    if (LocalGizmo == nullptr) {
+        UObject* pLocalGizmo = FObjectFactory::ConstructObject<UTransformGizmo>("LocalGizmo");
+        LocalGizmo = static_cast<UTransformGizmo*>(pLocalGizmo);
+    }
 	////테스트용 텍스트
 	
-	UObject* pObj = FObjectFactory::ConstructObject<USkySphereComponent>("SkySphere");
+	/*UObject* pObj = FObjectFactory::ConstructObject<USkySphereComponent>("SkySphere");
 	USkySphereComponent* skySphere = static_cast<USkySphereComponent*>(pObj);
 	skySphere->SetTexture(L"Assets/Texture/ocean_sky.jpg");
 	skySphere->SetScale(FVector( -300.0f, -300.0f, -300.0f));
 	skySphere->SetRotation(FVector(-167.0f, 25.0f, -135.0f));
 
-	GUObjectArray.Add(skySphere);
+	GUObjectArray.Add(skySphere);*/
 
 
 	//테스트용 텍스트
@@ -196,11 +201,14 @@ void UWorld::SpawnObject(OBJECTS _Obj)
 void UWorld::LoadData(SceneData& _Data)
 {
 	Release();
-	Initialize();
+	CreateBaseObject();
 	for (auto iter : _Data.Primitives)
 	{
 		GUObjectArray.Add(iter.Value);
 	}
+
+    camera = static_cast<UCameraComponent*>(_Data.Cameras[0]);
+
 }
 
 SceneData UWorld::SaveData()
@@ -209,7 +217,6 @@ SceneData UWorld::SaveData()
 	int32 Count = 0;
 	for (auto iter : GUObjectArray)
 	{
-
 		USceneComponent* Primitive = nullptr;
 		if (iter->IsA(USceneComponent::StaticClass())) {
 			Primitive = static_cast<USceneComponent*>(iter);
@@ -219,6 +226,9 @@ SceneData UWorld::SaveData()
 				Count++;
 		}
 	}
+    // TODO :
+    // 이후 카메라가 여러 대로 바뀌면 루프로 바꾸기
+    Save.Cameras[0] = GetCamera();
 	Save.Version = 1;
 	Save.NextUUID = Count;
 	
@@ -228,7 +238,7 @@ SceneData UWorld::SaveData()
 void UWorld::NewScene()
 {
 	Release();
-	Initialize();
+	CreateBaseObject();
 }
 
 void UWorld::SetPickingObj(UObject* _Obj)

@@ -33,7 +33,7 @@ public:
     void	Render();
 	
 private:
-
+    const FString defaultMapName = "Default";
     TArray<UObject*> GUObjectArray;
     TArray<UObject*> Trashbin;
 

@@ -130,7 +130,7 @@ void FEngineLoop::Tick()
 			GWorld->GetCamera()->GetWorldLocation() + GWorld->GetCamera()->GetForwardVector(),
 			{ 0, 0, 1 });
 		Projection = JungleMath::CreateProjectionMatrix(
-			Camera->GetFov() * (3.141592f / 180.0f),
+			Camera->GetFOV() * (3.141592f / 180.0f),
 			GetAspectRatio(graphicDevice.SwapChain), 
 			0.1f,
 			1000.0f
