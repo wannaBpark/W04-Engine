@@ -35,11 +35,11 @@ private:
     float farClip = 1000.f;
 public:
     void SetFOV(float _fov) { FOV = _fov; }
-    float GetFOV() const { return FOV; }
+    float& GetFOV() { return FOV; }
     void SetNearClip(float _Value) { nearClip = _Value; }
-    float GetNearClip() const { return nearClip; }
+    float& GetNearClip() { return nearClip; }
     void SetFarClip(float _Value) { farClip = _Value; }
-    float GetFarClip() const { return farClip; }
+    float& GetFarClip() { return farClip; }
     void SetMouseSpeed(float _Value) { mouseSpeed = _Value; }
     float GetMouseSpeed() const { return mouseSpeed; }
 };

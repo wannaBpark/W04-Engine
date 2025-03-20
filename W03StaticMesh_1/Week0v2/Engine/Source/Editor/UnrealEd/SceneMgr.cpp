@@ -89,15 +89,15 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
             const json& value = it.value();
             UObject* obj = FObjectFactory::ConstructObject<UCameraComponent>("Camera");
             UCameraComponent* camera = static_cast<UCameraComponent*>(obj);
-            if (value.contains("Location")) camera->SetLocation(FVector(value["Location"].get<TArray<float>>()[0],
-                    value["Location"].get<TArray<float>>()[1],
-                    value["Location"].get<TArray<float>>()[2]));
-            if (value.contains("Rotation")) camera->SetRotation(FVector(value["Rotation"].get<TArray<float>>()[0],
-                value["Rotation"].get<TArray<float>>()[1],
-                value["Rotation"].get<TArray<float>>()[2]));
-            if (value.contains("Rotation")) camera->SetRotation(FVector(value["Rotation"].get<TArray<float>>()[0],
-                value["Rotation"].get<TArray<float>>()[1],
-                value["Rotation"].get<TArray<float>>()[2]));
+            if (value.contains("Location")) camera->SetLocation(FVector(value["Location"].get<std::vector<float>>()[0],
+                    value["Location"].get<std::vector<float>>()[1],
+                    value["Location"].get<std::vector<float>>()[2]));
+            if (value.contains("Rotation")) camera->SetRotation(FVector(value["Rotation"].get<std::vector<float>>()[0],
+                value["Rotation"].get<std::vector<float>>()[1],
+                value["Rotation"].get<std::vector<float>>()[2]));
+            if (value.contains("Rotation")) camera->SetRotation(FVector(value["Rotation"].get<std::vector<float>>()[0],
+                value["Rotation"].get<std::vector<float>>()[1],
+                value["Rotation"].get<std::vector<float>>()[2]));
             if (value.contains("FOV")) camera->SetFOV(value["FOV"].get<float>());
             if (value.contains("NearClip")) camera->SetNearClip(value["NearClip"].get<float>());
             if (value.contains("FarClip")) camera->SetNearClip(value["FarClip"].get<float>());
@@ -164,23 +164,25 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
             {"Type",primitiveName}
         };
     }
-    for (auto it = sceneData.Cameras.begin(); it != sceneData.Cameras.end(); ++it)
+
+    for (const auto& [id, camera] : sceneData.Cameras)
     {
-        int id = it->first;
-        UCameraComponent* camera = static_cast<UCameraComponent*>(it->second);
-        TArray<float> Location = { camera->GetWorldLocation().x,camera->GetWorldLocation().y,camera->GetWorldLocation().z };
-        TArray<float> Rotation = { 0,camera->GetWorldRotation().y,camera->GetWorldRotation().z };
-        float FOV = camera->GetFOV();
-        float nearClip = camera->GetNearClip();
-        float farClip = camera->GetFarClip();
+        UCameraComponent* cameraComponent = static_cast<UCameraComponent*>(camera);
+        TArray<float> Location = { cameraComponent->GetWorldLocation().x, cameraComponent->GetWorldLocation().y, cameraComponent->GetWorldLocation().z };
+        TArray<float> Rotation = { 0.0f, cameraComponent->GetWorldRotation().y, cameraComponent->GetWorldRotation().z };
+        float FOV = cameraComponent->GetFOV();
+        float nearClip = cameraComponent->GetNearClip();
+        float farClip = cameraComponent->GetFarClip();
+    
         j["PerspectiveCamera"][std::to_string(id)] = {
-        {"Location", Location},
-        {"Rotation", Rotation},
-        {"FOV",FOV},
-        {"NearClip",nearClip },
-        {"FarClip",farClip}
+            {"Location", Location},
+            {"Rotation", Rotation},
+            {"FOV", FOV},
+            {"NearClip", nearClip},
+            {"FarClip", farClip}
         };
     }
+
 
     return j.dump(4); // 4는 들여쓰기 수준
 }
