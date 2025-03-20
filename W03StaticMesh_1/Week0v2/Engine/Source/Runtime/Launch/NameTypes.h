@@ -3,6 +3,7 @@
 #include <ostream>
 #include <iostream>
 
+#include "Container/Map.h"
 #include "Core/Container/Array.h"
 #include "Core/HAL/PlatformType.h"
 
@@ -39,9 +40,10 @@ public:
     int AddEntry(const FString& Name)
     {
         FString lowName = ToLowerCase(Name);
-        auto it = NameToIndex.find(Name);
-        if (it != NameToIndex.end())
-            return it->second;
+        if (const int32* Value = NameToIndex.Find(Name))
+        {
+            return *Value;
+        }
 
         int32 newid = static_cast<int32>(Entries.Num());
         Entries.Add(new FNameEntry(Name));

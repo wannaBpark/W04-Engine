@@ -1,5 +1,6 @@
 #pragma once
 #include "Define.h"
+#include "Container/Map.h"
 
 class UObject;
 struct SceneData {

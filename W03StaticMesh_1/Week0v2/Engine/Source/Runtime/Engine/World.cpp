@@ -199,7 +199,7 @@ void UWorld::LoadData(SceneData& _Data)
 	Initialize();
 	for (auto iter : _Data.Primitives)
 	{
-		GUObjectArray.Add(iter.second);
+		GUObjectArray.Add(iter.Value);
 	}
 }
 

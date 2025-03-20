@@ -124,11 +124,10 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
     j["Version"] = sceneData.Version;
     j["NextUUID"] = sceneData.NextUUID;
 
-    // Primitives 처리 (C++14 스타일)
-    
-    for (auto it = sceneData.Primitives.begin(); it != sceneData.Primitives.end(); ++it) {
-        int id = it->first;
-        USceneComponent* primitive = static_cast<USceneComponent*>(it->second);
+    // Primitives 처리 (C++17 스타일)
+    for (const auto& [Id, Obj] : sceneData.Primitives)
+    {
+        USceneComponent* primitive = static_cast<USceneComponent*>(Obj);
         std::vector<float> Location = { primitive->GetWorldLocation().x,primitive->GetWorldLocation().y,primitive->GetWorldLocation().z };
         std::vector<float> Rotation = { primitive->GetWorldRotation().x,primitive->GetWorldRotation().y,primitive->GetWorldRotation().z };
         std::vector<float> Scale = { primitive->GetWorldScale().x,primitive->GetWorldScale().y,primitive->GetWorldScale().z };
@@ -138,7 +137,7 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
         if (pos != std::string::npos) {
             primitiveName = primitiveName.substr(0, pos);
         }
-        j["Primitives"][std::to_string(id)] = {
+        j["Primitives"][std::to_string(Id)] = {
             {"Location", Location},
             {"Rotation", Rotation},
             {"Scale", Scale},

@@ -1,12 +1,15 @@
 ﻿#include "ResourceMgr.h"
-#include "D3D11RHI/GraphicDevice.h"
 #include <fstream>
 #include <sstream>
-#include "Renderer/Renderer.h"
+#include <wincodec.h>
+#include <ranges>
 #include "Define.h"
 #include "Components/Quad.h"
-#include <wincodec.h>
+#include "D3D11RHI/GraphicDevice.h"
 #include "DirectXTK/Include/DDSTextureLoader.h"
+#include "Renderer/Renderer.h"
+
+
 void FResourceMgr::Initialize(FRenderer* renderer, FGraphicsDevice* device)
 {
 	//GenerateSphere();
@@ -43,15 +46,20 @@ void FResourceMgr::Initialize(FRenderer* renderer, FGraphicsDevice* device)
 }
 
 void FResourceMgr::Release(FRenderer* renderer) {
-    for (auto& pair : meshMap) {
-        FStaticMesh* mesh = pair.second.get();
+    for (const auto& Pair : meshMap)
+    {
+        FStaticMesh* mesh = Pair.Value.get();
         renderer->ReleaseBuffer(mesh->vertexBuffer);
         renderer->ReleaseBuffer(mesh->indexBuffer);
     }
-	for (auto& pair : textureMap) {
-		FTexture* texture =	pair.second.get();
+    meshMap.Empty();
+
+	for (const auto& Pair : textureMap)
+    {
+		FTexture* texture =	Pair.Value.get();
 		texture->Release();
 	}
+    textureMap.Empty();
 }
 
 #include <unordered_map>
@@ -475,14 +483,14 @@ void FResourceMgr::RegisterMesh(FRenderer* renderer, const std::string& name, TA
 
 std::shared_ptr<FStaticMesh> FResourceMgr::GetMesh(const FString& name) const
 {
-    auto it = meshMap.find(name);
-    return (it != meshMap.end()) ? it->second : nullptr;
+    auto* TempValue = meshMap.Find(name);
+    return TempValue ? *TempValue : nullptr;
 }
 
 std::shared_ptr<FTexture> FResourceMgr::GetTexture(const FWString& name) const
 {
-	auto it = textureMap.find(name);
-	return (it != textureMap.end()) ? it->second : nullptr;
+    auto* TempValue = textureMap.Find(name);
+    return TempValue ? *TempValue : nullptr;
 }
 
 void FResourceMgr::RegisterMesh(FRenderer* renderer, const std::string& name, TArray<FVertexTexture>& vertices, uint32 vCount, TArray<uint32>& indices, uint32 iCount)

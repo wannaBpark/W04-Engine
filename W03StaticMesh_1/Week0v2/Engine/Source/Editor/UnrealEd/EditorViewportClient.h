@@ -1,4 +1,6 @@
 #pragma once
+#include <sstream>
+
 #include "Define.h"
 
 class FEditorViewportClient
@@ -22,21 +24,22 @@ private :
     const FString IniFilePath = "editor.ini";
 private:
     TMap<FString, FString> ReadIniFile(const FString& filePath);
-    void WriteIniFile(const FString& filePath, const std::unordered_map<FString, FString>& config);
+    void WriteIniFile(const FString& filePath, const TMap<FString, FString>& config);
 	
 public:
     PROPERTY(int32, CameraSpeedSetting)
     PROPERTY(float, GridSize)
-    float GetCameraSpeedScalar(){ return CameraSpeedScalar; };
+    float GetCameraSpeedScalar() const { return CameraSpeedScalar; };
     void SetCameraSpeedScalar(float value);
 private:
     template <typename T>
-    T GetValueFromConfig(const std::unordered_map<std::string, std::string>& config, const std::string& key, T defaultValue) {
-        auto it = config.find(key);
-        if (it != config.end()) {
-            std::istringstream ss(it->second);
+    T GetValueFromConfig(const TMap<std::string, std::string>& config, const std::string& key, T defaultValue) {
+        if (const std::string* Value = config.Find(key))
+        {
+            std::istringstream iss(*Value);
             T value;
-            if (ss >> value) {
+            if (iss >> value)
+            {
                 return value;
             }
         }
