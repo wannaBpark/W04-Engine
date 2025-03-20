@@ -1,4 +1,5 @@
 #pragma once
+
 enum EViewModeIndex
 {
     VMI_Lit,

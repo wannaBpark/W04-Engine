@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cstdint>
 
 //~ Windows.h
@@ -51,3 +51,7 @@ typedef wchar_t WIDECHAR;
 #else
     typedef ANSICHAR TCHAR;
 #endif
+
+// 임시로 사용
+#include <string>
+using FWString = std::wstring;
