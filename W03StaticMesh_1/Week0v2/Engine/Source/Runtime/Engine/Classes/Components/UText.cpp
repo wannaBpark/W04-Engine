@@ -1,4 +1,6 @@
 #include "UText.h"
+
+#include "World.h"
 #include "Engine/Source/Runtime/Engine/Camera/CameraComponent.h"
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"

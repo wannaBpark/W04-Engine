@@ -1,4 +1,6 @@
 ﻿#include "GizmoCircleComponent.h"
+
+#include "World.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 #include "Components/Player.h"
 #define DISC_RESOLUTION 128

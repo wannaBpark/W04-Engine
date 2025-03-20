@@ -16,7 +16,7 @@ public:
 protected:
     std::shared_ptr<FTexture> Texture;
 public:
-    void SetTexture(FWString filename)
+    void SetTexture(const FWString& filename)
     {
         Texture = FEngineLoop::resourceMgr.GetTexture(filename);
     }

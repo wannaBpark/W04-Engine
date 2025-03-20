@@ -1,6 +1,8 @@
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "UParticleSubUVComp.h"
 
+#include "World.h"
+
 UParticleSubUVComp::UParticleSubUVComp() :UBillboardComponent("Quad")
 {
 }

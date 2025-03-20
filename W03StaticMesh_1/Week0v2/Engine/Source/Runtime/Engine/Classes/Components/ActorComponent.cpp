@@ -1,25 +1,25 @@
 #include "ActorComponent.h"
 
-ActorComponent::ActorComponent()
+UActorComponent::UActorComponent()
 {
 }
 
-ActorComponent::~ActorComponent()
+UActorComponent::~UActorComponent()
 {
 }
 
-void ActorComponent::Initialize()
+void UActorComponent::Initialize()
 {
 }
 
-void ActorComponent::Update(double deltaTime)
+void UActorComponent::Update(double deltaTime)
 {
 }
 
-void ActorComponent::Release()
+void UActorComponent::Release()
 {
 }
 
-void ActorComponent::Render()
+void UActorComponent::Render()
 {
 }

@@ -1,16 +1,18 @@
 #pragma once
 #include "UText.h"
-class UTextUUID :
-    public UText
+
+class UTextUUID : public UText
 {
+    DECLARE_CLASS(UTextUUID, UText)
+
 public:
     UTextUUID();
-    ~UTextUUID();
+    virtual ~UTextUUID() override;
 
-    virtual void		Render()					override;
-    virtual int			CheckRayIntersection(FVector& rayOrigin,
-        FVector& rayDirection, float& pfNearHitDistance) override;
+    virtual void Render() override;
+    virtual int CheckRayIntersection(
+        FVector& rayOrigin,
+        FVector& rayDirection, float& pfNearHitDistance
+    ) override;
     void SetUUID(uint32 UUID);
-private:
 };
-

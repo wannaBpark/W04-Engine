@@ -1,4 +1,6 @@
 #include "GizmoRectangleComponent.h"
+
+#include "World.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 #include "Components/Player.h"
 UGizmoRectangleComponent::UGizmoRectangleComponent()

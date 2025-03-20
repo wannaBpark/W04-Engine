@@ -6,10 +6,11 @@
 #include "Define.h"
 #include <DirectXMath.h>
 
+#include "World.h"
 #include "Math/MathUtility.h"
 
-UBillboardComponent::UBillboardComponent() : 
-                                           UPrimitiveComponent("Quad")
+UBillboardComponent::UBillboardComponent()
+    : UPrimitiveComponent("Quad")
 {
 }
 

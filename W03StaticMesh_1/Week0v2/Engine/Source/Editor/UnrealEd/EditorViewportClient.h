@@ -3,6 +3,7 @@
 
 #include "Define.h"
 #include "Container/Map.h"
+#include "UObject/ObjectMacros.h"
 
 class FEditorViewportClient
 {

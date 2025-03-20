@@ -5,6 +5,8 @@
 #include "GizmoCircleComponent.h"
 #include "Components/Player.h"
 #include "GizmoRectangleComponent.h"
+#include "World.h"
+
 UTransformGizmo::UTransformGizmo()
 {
 	UObject* obj = FObjectFactory::ConstructObject<UGizmoArrowComponent>();
