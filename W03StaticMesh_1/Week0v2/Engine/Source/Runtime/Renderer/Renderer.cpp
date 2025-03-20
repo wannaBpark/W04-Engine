@@ -91,7 +91,7 @@ void FRenderer::ResetPixelShader()
     Graphics->DeviceContext->PSSetShader(nullptr, nullptr, 0);
     PixelShader->Release();
 }
-void FRenderer::SetVertexShader(const FWString filename, FString funcname, FString version)
+void FRenderer::SetVertexShader(const FWString& filename, const FString& funcname, const FString& version)
 {
     // ���� �߻��� ���ɼ��� ����
     if (Graphics == nullptr)
@@ -102,11 +102,11 @@ void FRenderer::SetVertexShader(const FWString filename, FString funcname, FStri
         InputLayout->Release();
     ID3DBlob* vertexshaderCSO;
 
-    D3DCompileFromFile(filename.c_str(), nullptr, nullptr, funcname.c_str(), version.c_str(), 0, 0, &vertexshaderCSO, nullptr);
+    D3DCompileFromFile(filename.c_str(), nullptr, nullptr, *funcname, *version, 0, 0, &vertexshaderCSO, nullptr);
     Graphics->Device->CreateVertexShader(vertexshaderCSO->GetBufferPointer(), vertexshaderCSO->GetBufferSize(), nullptr, &VertexShader);
     vertexshaderCSO->Release();
 }
-void FRenderer::SetPixelShader(const FWString filename, FString funcname, FString version)
+void FRenderer::SetPixelShader(const FWString& filename, const FString& funcname, const FString& version)
 {
     // ���� �߻��� ���ɼ��� ����
     if (Graphics == nullptr)
@@ -114,7 +114,7 @@ void FRenderer::SetPixelShader(const FWString filename, FString funcname, FStrin
     if (VertexShader != nullptr)
         ResetVertexShader();
     ID3DBlob* pixelshaderCSO;
-    D3DCompileFromFile(filename.c_str(), nullptr, nullptr, funcname.c_str(), version.c_str(), 0, 0, &pixelshaderCSO, nullptr);
+    D3DCompileFromFile(filename.c_str(), nullptr, nullptr, *funcname, *version, 0, 0, &pixelshaderCSO, nullptr);
     Graphics->Device->CreatePixelShader(pixelshaderCSO->GetBufferPointer(), pixelshaderCSO->GetBufferSize(), nullptr, &PixelShader);
 
     pixelshaderCSO->Release();

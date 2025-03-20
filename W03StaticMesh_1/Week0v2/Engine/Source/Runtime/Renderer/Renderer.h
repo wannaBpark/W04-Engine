@@ -65,8 +65,8 @@ public:
     void ResetPixelShader();
     void CreateShader();
 
-    void SetVertexShader(const FWString filename, FString funcname, FString version);
-    void SetPixelShader(const FWString filename, FString funcname, FString version);
+    void SetVertexShader(const FWString& filename, const FString& funcname, const FString& version);
+    void SetPixelShader(const FWString& filename, const FString& funcname, const FString& version);
     
     void ChangeViewMode(EViewModeIndex evi);
     

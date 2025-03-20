@@ -96,7 +96,7 @@ void Console::Draw() {
     // 로그 출력 (필터 적용)
     ImGui::BeginChild("ScrollingRegion", ImVec2(0, -ImGui::GetTextLineHeightWithSpacing()), false, ImGuiWindowFlags_HorizontalScrollbar);
     for (const auto& entry : items) {
-        if (!filter.PassFilter(entry.message.c_str())) continue;
+        if (!filter.PassFilter(*entry.message)) continue;
 
         // 로그 수준에 맞는 필터링
         if ((entry.level == LogLevel::Display && !showLogTemp) ||
@@ -113,7 +113,7 @@ void Console::Draw() {
         case LogLevel::Error:   color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f); break; // 빨간색
         }
 
-        ImGui::TextColored(color, "%s", entry.message.c_str());
+        ImGui::TextColored(color, "%s", *entry.message);
     }
     if (scrollToBottom) {
         ImGui::SetScrollHereY(1.0f);

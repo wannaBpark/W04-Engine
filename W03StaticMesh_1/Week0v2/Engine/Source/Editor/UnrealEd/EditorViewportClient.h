@@ -2,6 +2,7 @@
 #include <sstream>
 
 #include "Define.h"
+#include "Container/Map.h"
 
 class FEditorViewportClient
 {
@@ -33,10 +34,10 @@ public:
     void SetCameraSpeedScalar(float value);
 private:
     template <typename T>
-    T GetValueFromConfig(const TMap<std::string, std::string>& config, const std::string& key, T defaultValue) {
-        if (const std::string* Value = config.Find(key))
+    T GetValueFromConfig(const TMap<FString, FString>& config, const FString& key, T defaultValue) {
+        if (const FString* Value = config.Find(key))
         {
-            std::istringstream iss(*Value);
+            std::istringstream iss(**Value);
             T value;
             if (iss >> value)
             {

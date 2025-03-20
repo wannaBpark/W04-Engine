@@ -24,9 +24,8 @@
 #define UE_LOG Console::GetInstance().AddLog
 #define Super __super
 
-
 #include "UserInterface/Console.h"
-#include "NameTypes.h"
+
 
 struct FVertexSimple
 {

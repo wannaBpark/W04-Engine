@@ -12,12 +12,12 @@
 
 using json = nlohmann::json;
 
-SceneData FSceneMgr::ParseSceneData(const std::string& jsonStr)
+SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
 {
     SceneData sceneData;
 
     try {
-        json j = json::parse(jsonStr);
+        json j = json::parse(*jsonStr);
 
         // 버전과 NextUUID 읽기
         sceneData.Version = j["Version"].get<int>();
@@ -31,27 +31,27 @@ SceneData FSceneMgr::ParseSceneData(const std::string& jsonStr)
             UObject* obj = nullptr;
             if (value.contains("Type"))
             {
-                if (value["Type"].get<FString>() == "Sphere")
+                if (value["Type"].get<std::string>() == "Sphere")
                 {
                     obj = FObjectFactory::ConstructObject<USphereComp>();
                 }
-                else if (value["Type"].get<FString>() == "Cube")
+                else if (value["Type"].get<std::string>() == "Cube")
                 {
                     obj = FObjectFactory::ConstructObject<UCubeComp>();
                 }
-                else if (value["Type"].get<FString>() == "Arrow")
+                else if (value["Type"].get<std::string>() == "Arrow")
                 {
                     obj = FObjectFactory::ConstructObject<UGizmoArrowComponent>();
                 }
-                else if (value["Type"].get<FString>() == "Quad")
+                else if (value["Type"].get<std::string>() == "Quad")
                 {
                     obj = FObjectFactory::ConstructObject<UBillboardComponent>();
                 }  
-                else if (value["Type"].get<FString>() == "SpotLight")
+                else if (value["Type"].get<std::string>() == "SpotLight")
                 {
                     obj = FObjectFactory::ConstructObject<ULightComponentBase>();
                 }
-                else if (value["Type"].get<FString>() == "SkySphere") {
+                else if (value["Type"].get<std::string>() == "SkySphere") {
 
                     obj = FObjectFactory::ConstructObject<USkySphereComponent>();
                     USkySphereComponent* skySphere = static_cast<USkySphereComponent*>(obj);
@@ -74,10 +74,10 @@ SceneData FSceneMgr::ParseSceneData(const std::string& jsonStr)
             if (value.contains("Type")) {
                 UPrimitiveComponent* primitiveComp = dynamic_cast<UPrimitiveComponent*>(sceneComp);
                 if (primitiveComp) {
-                    primitiveComp->SetType(value["Type"].get<FString>());
+                    primitiveComp->SetType(value["Type"].get<std::string>());
                 }
                 else {
-                    FString name = value["Type"].get<FString>();
+                    std::string name = value["Type"].get<std::string>();
                     sceneComp->SetName(name);
                 }
             }
@@ -88,17 +88,17 @@ SceneData FSceneMgr::ParseSceneData(const std::string& jsonStr)
         FString errorMessage = "Error parsing JSON: ";
         errorMessage += e.what();
 
-        MessageBoxA(NULL, errorMessage.c_str(), "Error", MB_OK | MB_ICONERROR);
+        MessageBoxA(NULL, *errorMessage, "Error", MB_OK | MB_ICONERROR);
     }
 
     return sceneData;
 }
 
-FString FSceneMgr::LoadSceneFromFile(const std::string& filename)
+FString FSceneMgr::LoadSceneFromFile(const FString& filename)
 {
-    std::ifstream inFile(filename);
+    std::ifstream inFile(*filename);
     if (!inFile) {
-        UE_LOG(LogLevel::Error, "Failed to open file for reading: %s", filename.c_str());
+        UE_LOG(LogLevel::Error, "Failed to open file for reading: %s", *filename);
         return FString();
     }
 
@@ -132,9 +132,9 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
         std::vector<float> Rotation = { primitive->GetWorldRotation().x,primitive->GetWorldRotation().y,primitive->GetWorldRotation().z };
         std::vector<float> Scale = { primitive->GetWorldScale().x,primitive->GetWorldScale().y,primitive->GetWorldScale().z };
 
-        FString primitiveName = static_cast<USceneComponent*>(primitive)->GetName().ToString();
-         size_t pos = primitiveName.rfind('_');
-        if (pos != std::string::npos) {
+        std::string primitiveName = *static_cast<USceneComponent*>(primitive)->GetName();
+        size_t pos = primitiveName.rfind('_');
+        if (pos != INDEX_NONE) {
             primitiveName = primitiveName.substr(0, pos);
         }
         j["Primitives"][std::to_string(Id)] = {
@@ -148,12 +148,12 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
     return j.dump(4); // 4는 들여쓰기 수준
 }
 
-bool FSceneMgr::SaveSceneToFile(const std::string& filename, const SceneData& sceneData)
+bool FSceneMgr::SaveSceneToFile(const FString& filename, const SceneData& sceneData)
 {
-    std::ofstream outFile(filename);
+    std::ofstream outFile(*filename);
     if (!outFile) {
         FString errorMessage = "Failed to open file for writing: ";
-        MessageBoxA(NULL, errorMessage.c_str(), "Error", MB_OK | MB_ICONERROR);
+        MessageBoxA(NULL, *errorMessage, "Error", MB_OK | MB_ICONERROR);
         return false;
     }
 

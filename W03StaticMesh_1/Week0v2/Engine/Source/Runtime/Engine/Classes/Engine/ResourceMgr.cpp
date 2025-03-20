@@ -91,7 +91,7 @@ void FResourceMgr::LoadObjNormalAsset(FRenderer* renderer, const FString& meshNa
 	TArray<FVector4> Colors;
 	if (objFile)
 	{
-		FString line;
+		std::string line;
 		while (std::getline(objFile, line))
 		{
 			std::istringstream lineStream(line);
@@ -207,7 +207,7 @@ void FResourceMgr::LoadObjNormalAsset(FRenderer* renderer, const FString& meshNa
 	delete[] vertexArray;
 	delete[] indexArray;
 
-	UE_LOG(LogLevel::Error, "OBJ Loaded: %s - %d vertices, %d indices", meshName.c_str(), vertices.Num(), indices.Num());
+	UE_LOG(LogLevel::Error, "OBJ Loaded: %s - %d vertices, %d indices", *meshName, vertices.Num(), indices.Num());
 }
 
 void FResourceMgr::LoadObjNormalTextureAsset(FRenderer* renderer, const FString& meshName, const FWString& filepath)
@@ -223,7 +223,7 @@ void FResourceMgr::LoadObjNormalTextureAsset(FRenderer* renderer, const FString&
 
 	if (objFile)
 	{
-		FString line;
+		std::string line;
 		while (std::getline(objFile, line))
 		{
 			std::istringstream lineStream(line);
@@ -370,7 +370,7 @@ void FResourceMgr::LoadObjNormalTextureAsset(FRenderer* renderer, const FString&
 	delete[] vertexArray;
 	delete[] indexArray;
 
-	UE_LOG(LogLevel::Error, "OBJ Loaded: %s - %d vertices, %d indices", meshName.c_str(), vertices.Num(), indices.Num());
+	UE_LOG(LogLevel::Error, "OBJ Loaded: %s - %d vertices, %d indices", *meshName, vertices.Num(), indices.Num());
 }
 
 void FResourceMgr::LoadObjAsset(FRenderer* renderer, const FString& meshName, const FWString& filepath)
@@ -382,7 +382,7 @@ void FResourceMgr::LoadObjAsset(FRenderer* renderer, const FString& meshName, co
 
 	if (objFile) {
 
-		FString line;
+		std::string line;
 
 		int normalcount = 0;
 		while (std::getline(objFile, line)) {
@@ -448,7 +448,7 @@ void FResourceMgr::LoadObjAsset(FRenderer* renderer, const FString& meshName, co
 	delete[] vertexArray;
 	delete[] indexArray;
 
-	UE_LOG(LogLevel::Error, "OBJ Loaded: %s - %d vertices, %d indices", meshName.c_str(), vertices.Num(), indices.Num());
+	UE_LOG(LogLevel::Error, "OBJ Loaded: %s - %d vertices, %d indices", *meshName, vertices.Num(), indices.Num());
 }
 
 

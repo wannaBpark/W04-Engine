@@ -64,7 +64,7 @@ void PropertyPanel::Draw(UWorld* world)
     USceneComponent* PickObj = static_cast<USceneComponent*>(world->GetPickingObj());
     if (PickObj)
     {
-        FString objectName = PickObj->GetName().ToString();
+        std::string objectName = *PickObj->GetName();
         ImGui::Text("%s", objectName.c_str());
 
         // ��ġ/ȸ��/�������� float[3]�� ��Ƶ�
@@ -190,7 +190,7 @@ void PropertyPanel::Draw(UWorld* world)
                 textOBj->SetRowColumnCount(106, 106);
                 FWString wText = textOBj->GetText();
                 int len = WideCharToMultiByte(CP_UTF8, 0, wText.c_str(), -1, nullptr, 0, nullptr, nullptr);
-                FString u8Text(len, '\0');
+                std::string u8Text(len, '\0');
                 WideCharToMultiByte(CP_UTF8, 0, wText.c_str(), -1, &u8Text[0], len, nullptr, nullptr);
 
                 static char buf[256];

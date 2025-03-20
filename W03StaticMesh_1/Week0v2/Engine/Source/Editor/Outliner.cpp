@@ -40,7 +40,7 @@ void Outliner::Draw(UWorld* world)
                 if(!world->GetObjectArr()[i]->IsA(USceneComponent::StaticClass()))
                     continue;
                 // 선택 가능 항목 (Selectable)
-                if (ImGui::Selectable(world->GetObjectArr()[i]->GetName().ToString().c_str(), selected == i))
+                if (ImGui::Selectable(*world->GetObjectArr()[i]->GetName(), selected == i))
                 {
                     selected = i; // 선택된 아이템 업데이트
                     world->SetPickingObj(world->GetObjectArr()[i]);
