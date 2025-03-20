@@ -14,7 +14,7 @@ void UCameraComponent::Initialize()
 {
 	Super::Initialize();
 	RelativeLocation = FVector(0.0f, 0.0f, 0.5f);
-	fov = 60.f;
+	FOV = 60.f;
 }
 
 void UCameraComponent::Update(double deltaTime)

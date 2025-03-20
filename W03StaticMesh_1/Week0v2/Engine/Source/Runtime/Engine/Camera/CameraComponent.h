@@ -31,11 +31,16 @@ private:
     FVector zAxis;  // DirectX는 LH이므로 -z가 아니라 +z 사용
     FVector xAxis;
     FVector yAxis;
-    float fov;
+    float FOV;
+    float nearClip = 0.1f;
+    float farClip = 1000.f;
 public:
-    void SetFov(float _fov) { fov = _fov; }
-    float& GetFov() { return fov; }
-
+    void                SetFOV(float _fov) { FOV = _fov; }
+    float&              GetFOV() { return FOV; }
+    void                SetNearClip(float _Value) { nearClip = _Value; }
+    float&              GetNearClip() { return nearClip; }
+    void                SetFarClip(float _Value) { farClip = _Value; }
+    float&              GetFarClip() { return farClip; }
     void				SetMouseSpeed(float _Value) { mouseSpeed = _Value; }
     float				GetMouseSpeed() { return  mouseSpeed; }
 

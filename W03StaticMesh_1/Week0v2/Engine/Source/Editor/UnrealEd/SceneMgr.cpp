@@ -1,4 +1,4 @@
-﻿#include "UnrealEd/SceneMgr.h"
+#include "UnrealEd/SceneMgr.h"
 #include "JSON/json.hpp"
 #include "UObject/Object.h"
 #include "Components/SphereComp.h"
@@ -9,6 +9,7 @@
 #include "Components/UBillboardComponent.h"
 #include "Components/LightComponent.h"
 #include "Components/SkySphereComponent.h"
+#include "Camera/CameraComponent.h"
 
 using json = nlohmann::json;
 
@@ -33,11 +34,11 @@ SceneData FSceneMgr::ParseSceneData(const std::string& jsonStr)
             {
                 if (value["Type"].get<FString>() == "Sphere")
                 {
-                    obj = FObjectFactory::ConstructObject<USphereComp>();
+                    obj = FObjectFactory::ConstructObject<USphereComp>("Sphere");
                 }
                 else if (value["Type"].get<FString>() == "Cube")
                 {
-                    obj = FObjectFactory::ConstructObject<UCubeComp>();
+                    obj = FObjectFactory::ConstructObject<UCubeComp>("Cube");
                 }
                 else if (value["Type"].get<FString>() == "Arrow")
                 {
@@ -45,19 +46,17 @@ SceneData FSceneMgr::ParseSceneData(const std::string& jsonStr)
                 }
                 else if (value["Type"].get<FString>() == "Quad")
                 {
-                    obj = FObjectFactory::ConstructObject<UBillboardComponent>();
+                    obj = FObjectFactory::ConstructObject<UBillboardComponent>("Quad");
                 }  
                 else if (value["Type"].get<FString>() == "SpotLight")
                 {
-                    obj = FObjectFactory::ConstructObject<ULightComponentBase>();
+                    obj = FObjectFactory::ConstructObject<ULightComponentBase>("SpotLight");
                 }
                 else if (value["Type"].get<FString>() == "SkySphere") {
 
-                    obj = FObjectFactory::ConstructObject<USkySphereComponent>();
+                    obj = FObjectFactory::ConstructObject<USkySphereComponent>("SkySphere");
                     USkySphereComponent* skySphere = static_cast<USkySphereComponent*>(obj);
                     skySphere->SetTexture(L"Assets/Texture/ocean_sky.jpg");
-                    skySphere->SetScale(FVector(-300.0f, -300.0f, -300.0f));
-                    skySphere->SetRotation(FVector(-167.0f, 25.0f, -135.0f));
                 }
                
             }
@@ -82,6 +81,27 @@ SceneData FSceneMgr::ParseSceneData(const std::string& jsonStr)
                 }
             }
             sceneData.Primitives[id] = sceneComp;
+        }
+
+        auto perspectiveCamera = j["PerspectiveCamera"];
+        for (auto it = perspectiveCamera.begin(); it != perspectiveCamera.end(); ++it) {
+            int id = std::stoi(it.key());  // Key는 문자열, 숫자로 변환
+            const json& value = it.value();
+            UObject* obj = FObjectFactory::ConstructObject<UCameraComponent>("Camera");
+            UCameraComponent* camera = static_cast<UCameraComponent*>(obj);
+            if (value.contains("Location")) camera->SetLocation(FVector(value["Location"].get<TArray<float>>()[0],
+                    value["Location"].get<TArray<float>>()[1],
+                    value["Location"].get<TArray<float>>()[2]));
+            if (value.contains("Rotation")) camera->SetRotation(FVector(value["Rotation"].get<TArray<float>>()[0],
+                value["Rotation"].get<TArray<float>>()[1],
+                value["Rotation"].get<TArray<float>>()[2]));
+            if (value.contains("Rotation")) camera->SetRotation(FVector(value["Rotation"].get<TArray<float>>()[0],
+                value["Rotation"].get<TArray<float>>()[1],
+                value["Rotation"].get<TArray<float>>()[2]));
+            if (value.contains("FOV")) camera->SetFOV(value["FOV"].get<float>());
+            if (value.contains("NearClip")) camera->SetNearClip(value["NearClip"].get<float>());
+            if (value.contains("FarClip")) camera->SetNearClip(value["FarClip"].get<float>());
+            sceneData.Cameras[id] = camera;
         }
     }
     catch (const std::exception& e) {
@@ -143,6 +163,23 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
             {"Rotation", Rotation},
             {"Scale", Scale},
             {"Type",primitiveName}
+        };
+    }
+    for (auto it = sceneData.Cameras.begin(); it != sceneData.Cameras.end(); ++it)
+    {
+        int id = it->first;
+        UCameraComponent* camera = static_cast<UCameraComponent*>(it->second);
+        TArray<float> Location = { camera->GetWorldLocation().x,camera->GetWorldLocation().y,camera->GetWorldLocation().z };
+        TArray<float> Rotation = { 0,camera->GetWorldRotation().y,camera->GetWorldRotation().z };
+        float FOV = camera->GetFOV();
+        float nearClip = camera->GetNearClip();
+        float farClip = camera->GetFarClip();
+        j["PerspectiveCamera"][std::to_string(id)] = {
+        {"Location", Location},
+        {"Rotation", Rotation},
+        {"FOV",FOV},
+        {"NearClip",nearClip },
+        {"FarClip",farClip}
         };
     }
 
