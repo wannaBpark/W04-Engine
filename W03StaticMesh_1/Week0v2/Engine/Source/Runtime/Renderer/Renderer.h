@@ -24,8 +24,6 @@ public:
     ID3D11Buffer* LitUnlitBuffer = nullptr;
     ID3D11Buffer* UUIDBuffer = nullptr;
 
-    D3D11_VIEWPORT ViewportInfo; // 렌더링 영역을 정의하는 뷰포트 정보
-
     FLighting lightingData;
 
     uint32 Stride;

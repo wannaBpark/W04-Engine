@@ -55,4 +55,3 @@ public:
     USceneComponent* GetPickingGizmo() { return pickingGizmo; }
     void	SetPickingGizmo(UObject* _Obj);
 };
-
