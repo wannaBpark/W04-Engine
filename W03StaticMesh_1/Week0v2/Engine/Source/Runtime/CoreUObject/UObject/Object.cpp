@@ -1,10 +1,20 @@
 #include "Engine/Source/Runtime/CoreUObject/UObject/Object.h"
+
+#include "ObjectMacros.h"
+#include "UClass.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
+
+
+UClass* UObject::StaticClass()
+{
+    static UClass ClassInfo{TEXT("UObject"), sizeof(UObject), alignof(UObject), nullptr};
+    return &ClassInfo;
+}
 
 UObject::UObject()
     : UUID(0)
     , InternalIndex(0)
-    , Name(FName("DefaultObjectName"))
+    , NamePrivate("None")
 {
 }
 
@@ -34,13 +44,8 @@ void UObject::RenderUUID()
 {
 }
 
-bool UObject::IsA(const UClass* TargetClass) const
+bool UObject::IsA(const UClass* SomeBase) const
 {
-    const UClass* CurrentClass = GetClass();
-    while (CurrentClass) {
-        if (CurrentClass == TargetClass)
-            return true;
-        CurrentClass = CurrentClass->GetSuperClass();
-    }
-    return false;
+    const UClass* ThisClass = GetClass();
+    return ThisClass->IsChildOf(SomeBase);
 }

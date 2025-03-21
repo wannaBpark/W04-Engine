@@ -77,7 +77,7 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
                 }
                 else {
                     std::string name = value["Type"].get<std::string>();
-                    sceneComp->SetName(name);
+                    sceneComp->NamePrivate = name.c_str();
                 }
             }
             sceneData.Primitives[id] = sceneComp;

@@ -11,7 +11,8 @@ public:
         uint32 id = UEngineStatics::GenUUID();
         FString Name = T::StaticClass()->GetName() + "_" + std::to_string(id);
         T* obj = new T;
-        obj->SetName(Name);
+        obj->ClassPrivate = T::StaticClass();
+        obj->NamePrivate = Name;
         obj->UUID = id;
         obj->Initialize();
 
