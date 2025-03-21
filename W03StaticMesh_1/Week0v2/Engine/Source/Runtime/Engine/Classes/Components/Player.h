@@ -1,14 +1,15 @@
 #pragma once
-#include "Engine/Source/Runtime/CoreUObject/UObject/Object.h"
+#include "GameFramework/Actor.h"
 #include "UObject/ObjectMacros.h"
 #include "UObject/ObjectTypes.h"
+
 class UGizmoArrowComponent;
 class USceneComponent;
 class UPrimitiveComponent;
 
-class UPlayer : public UObject
+class UPlayer : public AActor
 {
-    DECLARE_CLASS(UPlayer, UObject)
+    DECLARE_CLASS(UPlayer, AActor)
 
     UPlayer();
     virtual ~UPlayer() override;
