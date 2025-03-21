@@ -355,6 +355,7 @@ void UText::TextMVPRendering()
 	}
 	else
 		FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
+    FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
 
 	if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
 		FEngineLoop::renderer.RenderTextPrimitive(vertexTextBuffer, numTextVertices,

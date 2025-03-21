@@ -37,6 +37,7 @@ void UCubeComp::Render()
     }
     else
         FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
+    FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
 
     if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_AABB))
         UPrimitiveBatch::GetInstance().RenderAABB(AABB, GetWorldLocation(), Model);

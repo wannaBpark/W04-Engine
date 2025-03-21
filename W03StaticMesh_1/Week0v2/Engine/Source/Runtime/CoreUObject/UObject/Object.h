@@ -81,5 +81,15 @@ public:
         return &ClassInfo;
     }
 
+    FVector4 EncodeUUID() const {
+        FVector4 result;
+
+        result.x = UUID % 0xFF;
+        result.y = UUID >> 8 & 0xFF;
+        result.z = UUID >> 16 & 0xFF;
+        result.a = UUID >> 24 & 0xFF;
+
+        return result;
+    }
 private:
 };
