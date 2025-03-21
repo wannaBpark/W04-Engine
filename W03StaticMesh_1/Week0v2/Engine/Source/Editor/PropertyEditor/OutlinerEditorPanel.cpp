@@ -17,10 +17,10 @@ void OutlinerEditorPanel::Render()
     /* Min, Max Size */
     ImGui::SetNextWindowSizeConstraints(MinSize, MaxSize);
     
-    /* Set Panel Position */
+    /* Panel Position */
     ImGui::SetNextWindowPos(ImVec2(PanelPosX, PanelPosY), ImGuiCond_Always);
 
-    /* Set Panel Size */
+    /* Panel Size */
     ImGui::SetNextWindowSize(ImVec2(PanelWidth, PanelHeight), ImGuiCond_Always);
 
     /* Panel Flags */

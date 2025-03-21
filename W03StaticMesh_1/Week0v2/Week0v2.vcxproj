@@ -169,6 +169,7 @@
     <ClCompile Include="Engine\Source\Editor\PropertyEditor\OutlinerEditorPanel.cpp" />
     <ClCompile Include="Engine\Source\Editor\PropertyEditor\PropertyEditorPanel.cpp" />
     <ClCompile Include="Engine\Source\Editor\UnrealEd\UnrealEd.cpp" />
+    <ClCompile Include="Engine\Source\Editor\UnrealEd\UnrealEdEventRouter.cpp" />
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Casts.cpp" />
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\NameTypes.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Container\String.cpp" />
@@ -247,6 +248,7 @@
     <ClInclude Include="Engine\Source\Editor\PropertyEditor\OutlinerEditorPanel.h" />
     <ClInclude Include="Engine\Source\Editor\PropertyEditor\PropertyEditorPanel.h" />
     <ClInclude Include="Engine\Source\Editor\UnrealEd\UnrealEd.h" />
+    <ClInclude Include="Engine\Source\Editor\UnrealEd\UnrealEdEventRouter.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\EngineStatics.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\HAL\PlatformMemory.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\HAL\PlatformType.h" />
