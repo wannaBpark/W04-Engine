@@ -83,7 +83,7 @@ void UWorld::CreateBaseObject()
 	GUObjectArray.Add(uuid);
 
 	castUUID->SetUUIDParent(sphere);
-	//castBillboard->SetParent(sphere);
+	//castBillboard->SetupAttachment(sphere);
 	//sphere->AddChild(castBillboard);
 	//cube->AddChild(sphere);
 */

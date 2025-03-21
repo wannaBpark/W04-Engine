@@ -12,7 +12,7 @@ UTransformGizmo::UTransformGizmo()
 	UObject* obj = FObjectFactory::ConstructObject<UGizmoArrowComponent>();
 	UGizmoArrowComponent* ArrowX = static_cast<UGizmoArrowComponent*>(obj);
 	ArrowX->SetType("ArrowX");
-	ArrowX->SetParent(this);
+	ArrowX->SetupAttachment(this);
 	AttachChildren.Add(ArrowX);
 	ArrowArr.Add(ArrowX);
 
@@ -20,7 +20,7 @@ UTransformGizmo::UTransformGizmo()
 	UGizmoArrowComponent* ArrowY = static_cast<UGizmoArrowComponent*>(obj);
 	ArrowY->SetType("ArrowY");
 
-	ArrowY->SetParent(this);
+	ArrowY->SetupAttachment(this);
 	ArrowY->SetDir(ARROW_DIR::AD_Y);
 	AttachChildren.Add(ArrowY);
 	ArrowArr.Add(ArrowY);
@@ -30,7 +30,7 @@ UTransformGizmo::UTransformGizmo()
 	UGizmoArrowComponent* ArrowZ = static_cast<UGizmoArrowComponent*>(obj);
 	AttachChildren.Add(ArrowZ);
 	ArrowZ->SetType("ArrowZ");
-	ArrowZ->SetParent(this);
+	ArrowZ->SetupAttachment(this);
 	ArrowZ->SetDir(ARROW_DIR::AD_Z);
 	AttachChildren.Add(ArrowZ);
 	ArrowArr.Add(ArrowZ);
@@ -39,14 +39,14 @@ UTransformGizmo::UTransformGizmo()
 	disc->SetInnerRadius(0.9f);
 	disc->SetType("CircleX");
 	disc->SetRotation(FVector(0.0f,0.0f,0.0f));
-	disc->SetParent(this);
+	disc->SetupAttachment(this);
 	AttachChildren.Add(disc);
 	CircleArr.Add(disc);
 
 	disc = new UGizmoCircleComponent();
 	disc->SetInnerRadius(0.9f);
 	disc->SetType("CircleY");
-	disc->SetParent(this);
+	disc->SetupAttachment(this);
 	AttachChildren.Add(disc);
 	CircleArr.Add(disc);
 
@@ -54,7 +54,7 @@ UTransformGizmo::UTransformGizmo()
 	disc = new UGizmoCircleComponent();
 	disc->SetInnerRadius(0.9f);
 	disc->SetType("CircleZ");
-	disc->SetParent(this);
+	disc->SetupAttachment(this);
 	disc->SetRotation(FVector(0.0f,0.0f,0.0f));
 	AttachChildren.Add(disc);
 	CircleArr.Add(disc);
@@ -68,7 +68,7 @@ UTransformGizmo::UTransformGizmo()
 	UGizmoRectangleComponent* ScaleX = static_cast<UGizmoRectangleComponent*>(obj);
 	AttachChildren.Add(ScaleX);
 	ScaleX->SetType("ScaleX");
-	ScaleX->SetParent(this);
+	ScaleX->SetupAttachment(this);
 	AttachChildren.Add(ScaleX);
 	//GetWorld()->GetObjectArr().Add(ScaleX);
 	RectangleArr.Add(ScaleX);
@@ -77,7 +77,7 @@ UTransformGizmo::UTransformGizmo()
 	UGizmoRectangleComponent* ScaleY = static_cast<UGizmoRectangleComponent*>(obj);
 	AttachChildren.Add(ScaleY);
 	ScaleY->SetType("ScaleY");
-	ScaleY->SetParent(this);
+	ScaleY->SetupAttachment(this);
 	AttachChildren.Add(ScaleY);
 	//GetWorld()->GetObjectArr().Add(ScaleY);
 	RectangleArr.Add(ScaleY);
@@ -86,7 +86,7 @@ UTransformGizmo::UTransformGizmo()
 	UGizmoRectangleComponent* ScaleZ = static_cast<UGizmoRectangleComponent*>(obj);
 	AttachChildren.Add(ScaleZ);
 	ScaleZ->SetType("ScaleZ");
-	ScaleZ->SetParent(this);
+	ScaleZ->SetupAttachment(this);
 	AttachChildren.Add(ScaleZ);
 	//GetWorld()->GetObjectArr().Add(ScaleZ);
 	RectangleArr.Add(ScaleZ);

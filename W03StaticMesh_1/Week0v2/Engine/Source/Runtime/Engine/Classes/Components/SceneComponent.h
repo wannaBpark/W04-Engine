@@ -45,7 +45,7 @@ public:
     virtual void SetRotation(FVector _newRot);
     void SetRotation(FQuat _newRot) { QuatRotation = _newRot; }
     void SetScale(FVector _newScale) { RelativeScale3D = _newScale; }
-    void SetParent(USceneComponent* _parent) { AttachParent = _parent; }
+    void SetupAttachment(USceneComponent* InParent);
 
 private:
     class UTextUUID* uuidText = nullptr;
