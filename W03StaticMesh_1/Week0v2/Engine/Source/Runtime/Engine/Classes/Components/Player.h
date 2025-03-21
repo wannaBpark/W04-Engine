@@ -19,6 +19,8 @@ class UPlayer : public AActor
     virtual void InitializeComponent() {};
     virtual void Tick(float DeltaTime) override;
 
+    // TODO: 삭제 해야함
+    virtual void TickComponent(float DeltaTime) override;
     virtual void Release();
 
     void Input();

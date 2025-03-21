@@ -27,7 +27,14 @@ UPlayer::~UPlayer()
 
 void UPlayer::Tick(float DeltaTime)
 {
+    Super::Tick(DeltaTime);
 	Input();
+}
+
+void UPlayer::TickComponent(float DeltaTime)
+{
+    Super::TickComponent(DeltaTime);
+    Input();
 }
 
 void UPlayer::Release()
