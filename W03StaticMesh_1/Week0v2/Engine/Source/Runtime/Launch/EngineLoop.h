@@ -9,7 +9,7 @@
 class UImGuiManager;
 class UWorld;
 class FEditorViewportClient;
-
+class UnrealEd;
 
 class FEngineLoop
 {
@@ -39,6 +39,7 @@ public:
     FMatrix Projection;
 private:
     UImGuiManager* UIMgr;
+    UnrealEd* UnrealEditor;
     UWorld* GWorld;
     bool bIsExit = false;
     const int32 targetFPS = 60;
@@ -46,6 +47,7 @@ private:
     std::shared_ptr<FEditorViewportClient> viewportClient;
 public:
     UWorld* GetWorld(){ return GWorld; }
+    UnrealEd* GetUnrealEditor() const { return UnrealEditor; }
     std::shared_ptr<FEditorViewportClient> GetViewportClient() const
     {
         return viewportClient;

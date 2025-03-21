@@ -1,6 +1,5 @@
 #pragma once
 
-// 객체 클래스 매크로
 #define DECLARE_CLASS(ClassName, ParentClassName) \
 public: \
     static UClass* StaticClass() { \

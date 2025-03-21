@@ -6,12 +6,12 @@
 #define	FEATHER_FONT		1
 #endif // !__ICON_FONT_INDEX__
 
-// #include "Types/Types.h";
+#include "windows.h"
 
-class UEditorWindow
+class UEditorPanel
 {
 public:
-    virtual ~UEditorWindow() {}
+    virtual ~UEditorPanel() = default;
     virtual void Render() = 0;
-    virtual void OnResize(uint32 Width, uint32 Height) = 0;
+    virtual void OnResize(HWND hWnd) = 0;
 };

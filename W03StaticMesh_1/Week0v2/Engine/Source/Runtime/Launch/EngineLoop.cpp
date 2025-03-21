@@ -9,6 +9,7 @@
 #include "PropertyEditor/ShowFlags.h"
 #include "Outliner.h"
 #include "UnrealEd/EditorViewportClient.h"
+#include "UnrealEd/UnrealEd.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern FEngineLoop GEngineLoop;
@@ -38,6 +39,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		Outliner::GetInstance().OnResize(hWnd);
 		ViewModeDropdown::GetInstance().OnResize(hWnd);
 		ShowFlags::GetInstance().OnResize(hWnd);
+
+	    if (GEngineLoop.GetUnrealEditor())
+	    {
+	        GEngineLoop.GetUnrealEditor()->OnResize(hWnd);
+	    }
 		break;
 	case WM_MOUSEWHEEL:
 		zDelta = GET_WHEEL_DELTA_WPARAM(wParam); // 휠 회전 값 (+120 / -120)
@@ -76,11 +82,14 @@ int32 FEngineLoop::PreInit()
 
 int32 FEngineLoop::Init(HINSTANCE hInstance)
 {
+
+    /* must be initialized before window. */
+    UnrealEditor = new UnrealEd();
+    UnrealEditor->Initialize();
+    
 	WindowInit(hInstance);
 	graphicDevice.Initialize(hWnd);
 	renderer.Initialize(&graphicDevice);
-
-	
 	
 	UIMgr = new UImGuiManager;
 	UIMgr->Initialize(hWnd,graphicDevice.Device, graphicDevice.DeviceContext);
@@ -144,12 +153,14 @@ void FEngineLoop::Tick()
 
 		UIMgr->BeginFrame();
 
-		Console::GetInstance().Draw();
-		ControlPanel::GetInstance().Draw(GetWorld(),elapsedTime);
-		PropertyPanel::GetInstance().Draw(GetWorld());
-		Outliner::GetInstance().Draw(GetWorld());
-		ShowFlags::GetInstance().Draw(GetWorld());
-		ViewModeDropdown::GetInstance().Draw(GetWorld());
+	    UnrealEditor->Render();
+	    
+		// Console::GetInstance().Draw();
+		// ControlPanel::GetInstance().Draw(GetWorld(),elapsedTime);
+		// PropertyPanel::GetInstance().Draw(GetWorld());
+		// Outliner::GetInstance().Draw(GetWorld());
+		// ShowFlags::GetInstance().Draw(GetWorld());
+		// ViewModeDropdown::GetInstance().Draw(GetWorld());
 		UIMgr->EndFrame();
 
 		GWorld->CleanUp();

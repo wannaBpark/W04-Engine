@@ -6,7 +6,7 @@
 #include "UnrealEd/SceneMgr.h"
 #include "Components/Player.h"
 #include "UnrealEd/EditorViewportClient.h"
-#include "UnrealEd/EditorWindow.h"
+#include "UnrealEd/EditorPanel.h"
 // #include "ImGUI\imgui.h"
 #include "IWindowToggleable.h"
 //#include "Font\IconDefs.h"
