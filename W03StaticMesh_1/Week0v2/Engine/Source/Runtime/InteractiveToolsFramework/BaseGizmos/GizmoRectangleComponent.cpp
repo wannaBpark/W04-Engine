@@ -16,9 +16,9 @@ void UGizmoRectangleComponent::Initialize()
     Super::Initialize();
 }
 
-void UGizmoRectangleComponent::Update(double deltaTime)
+void UGizmoRectangleComponent::TickComponent(float DeltaTime)
 {
-    Super::Update(deltaTime);
+    Super::TickComponent(DeltaTime);
 }
 
 void UGizmoRectangleComponent::Release()

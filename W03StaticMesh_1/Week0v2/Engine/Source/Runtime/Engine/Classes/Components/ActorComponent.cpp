@@ -1,18 +1,15 @@
 #include "ActorComponent.h"
 
-UActorComponent::UActorComponent()
-{
-}
-
-UActorComponent::~UActorComponent()
-{
-}
 
 void UActorComponent::Initialize()
 {
 }
 
-void UActorComponent::Update(double deltaTime)
+void UActorComponent::BeginPlay()
+{
+}
+
+void UActorComponent::TickComponent(float DeltaTime)
 {
 }
 

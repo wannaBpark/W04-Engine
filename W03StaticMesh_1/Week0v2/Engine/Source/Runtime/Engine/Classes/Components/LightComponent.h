@@ -12,7 +12,7 @@ public:
     virtual ~ULightComponentBase() override;
 
     virtual void Render() override;
-    virtual void Update(double deltaTim) override;
+    virtual void TickComponent(float DeltaTime) override;
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance);
     void InitializeLight();
     void SetColor(FVector4 newColor);

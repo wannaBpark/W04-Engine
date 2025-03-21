@@ -17,7 +17,7 @@ void UCameraComponent::Initialize()
 	FOV = 60.f;
 }
 
-void UCameraComponent::Update(double deltaTime)
+void UCameraComponent::TickComponent(float DeltaTime)
 {
 	Input();
 	QuatRotation = JungleMath::EulerToQuaternion(RelativeRotation);

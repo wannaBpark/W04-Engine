@@ -24,9 +24,9 @@ void USceneComponent::Initialize()
 	Super::Initialize();
 }
 
-void USceneComponent::Update(double deltaTime)
+void USceneComponent::TickComponent(float DeltaTime)
 {
-	Super::Update(deltaTime);
+	Super::TickComponent(DeltaTime);
 }
 
 

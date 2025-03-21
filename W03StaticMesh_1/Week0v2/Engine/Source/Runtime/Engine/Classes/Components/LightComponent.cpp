@@ -54,9 +54,9 @@ void ULightComponentBase::InitializeLight()
     radius = 5;
 }
 
-void ULightComponentBase::Update(double deltaTime)
+void ULightComponentBase::TickComponent(float DeltaTime)
 {
-    texture2D->Update(deltaTime);
+    texture2D->TickComponent(DeltaTime);
     texture2D->SetLocation(GetWorldLocation());
 
 }

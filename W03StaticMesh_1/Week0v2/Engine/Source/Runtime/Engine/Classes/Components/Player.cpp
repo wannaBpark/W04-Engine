@@ -27,10 +27,9 @@ UPlayer::~UPlayer()
 
 void UPlayer::Initialize()
 {
-	Super::Initialize();
 }
 
-void UPlayer::Update(double deltaTime)
+void UPlayer::TickComponent(float DeltaTime)
 {
 	Input();
 }

@@ -13,22 +13,13 @@ UClass* UObject::StaticClass()
 
 UObject::UObject()
     : UUID(0)
-    , InternalIndex(0)
+    // BUG: Array가 변경될경우 Index가 잘못될 가능성이 있음
+    , InternalIndex(static_cast<uint32>(GetWorld()->GetObjectArr().Num() - 1))
     , NamePrivate("None")
 {
 }
 
 UObject::~UObject()
-{
-}
-
-void UObject::Initialize()
-{
-    // BUG: Array가 변경될경우 Index가 잘못될 가능성이 있음
-    InternalIndex = static_cast<uint32>(GetWorld()->GetObjectArr().Num() - 1);
-}
-
-void UObject::Update(double deltaTime)
 {
 }
 

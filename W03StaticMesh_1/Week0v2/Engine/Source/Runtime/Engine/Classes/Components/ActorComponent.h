@@ -2,16 +2,25 @@
 #include "UObject/Object.h"
 #include "UObject/ObjectMacros.h"
 
+class AActor;
+
 class UActorComponent : public UObject
 {
     DECLARE_CLASS(UActorComponent, UObject)
 
 public:
-    UActorComponent();
-    virtual ~UActorComponent() override;
+    UActorComponent() = default;
 
-    virtual void Initialize() override;
-    virtual void Update(double deltaTime) override;
-    virtual void Release() override;
-    virtual void Render() override;
+    virtual void Initialize();
+    virtual void BeginPlay();
+    virtual void TickComponent(float DeltaTime);
+    // virtual void 
+    virtual void Release();
+    virtual void Render();
+
+
+    AActor* GetOwner() const { return Owner; }
+
+private:
+    AActor* Owner;
 };

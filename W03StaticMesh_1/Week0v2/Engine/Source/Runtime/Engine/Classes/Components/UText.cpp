@@ -23,10 +23,10 @@ void UText::Initialize()
 	Super::Initialize();
 }
 
-void UText::Update(double deltaTime)
+void UText::TickComponent(float DeltaTime)
 {
 
-	Super::Update(deltaTime);
+	Super::TickComponent(DeltaTime);
 
 	//FVector newCamera = GetWorld()->GetCamera()->GetForwardVector();
 	//newCamera.z = 0;

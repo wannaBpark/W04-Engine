@@ -105,9 +105,9 @@ void UTransformGizmo::Initialize()
 	Super::Initialize();
 }
 
-void UTransformGizmo::Update(double deltaTime)
+void UTransformGizmo::TickComponent(float DeltaTime)
 {
-	Super::Update(deltaTime);
+	Super::TickComponent(DeltaTime);
 	if (GetWorld()->GetPickingObj()) {
 		SetLocation(GetWorld()->GetPickingObj()->GetWorldLocation());
 	if (GetWorld()->GetPlayer()->GetCoordiMode() == CoordiMode::CDM_LOCAL)
@@ -119,9 +119,9 @@ void UTransformGizmo::Update(double deltaTime)
 	}
 	for (int i = 0;i < 3;i++)
 	{
-		ArrowArr[i]->Update(deltaTime);
-		CircleArr[i]->Update(deltaTime);
-		RectangleArr[i]->Update(deltaTime);
+		ArrowArr[i]->TickComponent(DeltaTime);
+		CircleArr[i]->TickComponent(DeltaTime);
+		RectangleArr[i]->TickComponent(DeltaTime);
 	}
 }
 

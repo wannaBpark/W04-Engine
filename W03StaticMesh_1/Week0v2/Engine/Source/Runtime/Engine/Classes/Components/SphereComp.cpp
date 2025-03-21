@@ -19,7 +19,7 @@ void USphereComp::Initialize()
     Super::Initialize();
 }
 
-void USphereComp::Update(double deltaTime)
+void USphereComp::TickComponent(float DeltaTime)
 {
 }
 

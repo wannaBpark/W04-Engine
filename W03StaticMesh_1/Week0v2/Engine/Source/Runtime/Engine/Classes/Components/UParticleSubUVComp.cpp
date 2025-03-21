@@ -24,14 +24,14 @@ void UParticleSubUVComp::Initialize()
 	Super::Initialize();
 }
 
-void UParticleSubUVComp::Update(double deltaTime)
+void UParticleSubUVComp::TickComponent(float DeltaTime)
 {
 
 	uint32 CellWidth = Texture->width / CellsPerColumn;
 	uint32 CellHeight = Texture->height / CellsPerColumn;
 
 
-	second += static_cast<float>(deltaTime);
+	second += static_cast<float>(DeltaTime);
 	if (second >= 75)
 	{
 		indexU++;
@@ -58,7 +58,7 @@ void UParticleSubUVComp::Update(double deltaTime)
 	finalIndexV = float(indexV) * normalHeightOffset;
 	
 
-	Super::Update(deltaTime);
+	Super::TickComponent(DeltaTime);
 }
 
 void UParticleSubUVComp::Release()

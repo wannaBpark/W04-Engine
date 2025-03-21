@@ -13,9 +13,9 @@ class UPlayer : public UObject
     UPlayer();
     virtual ~UPlayer() override;
 
-    virtual void Initialize() override;
-    virtual void Update(double deltaTime) override;
-    virtual void Release() override;
+    virtual void Initialize();
+    virtual void TickComponent(float DeltaTime);
+    virtual void Release();
 
     void Input();
     bool PickGizmo(FVector& rayOrigin);

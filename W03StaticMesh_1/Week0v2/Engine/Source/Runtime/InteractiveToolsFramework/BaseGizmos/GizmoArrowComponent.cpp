@@ -16,9 +16,9 @@ void UGizmoArrowComponent::Initialize()
     Super::Initialize();
 }
 
-void UGizmoArrowComponent::Update(double deltaTime)
+void UGizmoArrowComponent::TickComponent(float DeltaTime)
 {
-    Super::Update(deltaTime);
+    Super::TickComponent(DeltaTime);
 
 }
 

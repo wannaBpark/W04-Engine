@@ -108,12 +108,12 @@ void UWorld::RenderBaseObject()
 void UWorld::Tick(double deltaTime)
 {
 	Input();
-	camera->Update(deltaTime);
-	localPlayer->Update(deltaTime);
-	LocalGizmo->Update(deltaTime);
+	camera->TickComponent(deltaTime);
+	localPlayer->TickComponent(deltaTime);
+	LocalGizmo->TickComponent(deltaTime);
 	for (auto iter : GUObjectArray)
 	{
-		iter->Update(deltaTime);
+		iter->TickComponent(deltaTime);
 	}
 	
 }

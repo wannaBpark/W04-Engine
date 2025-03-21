@@ -11,7 +11,7 @@ public:
     virtual ~USceneComponent() override;
 
     virtual void Initialize() override;
-    virtual void Update(double deltaTime) override;
+    virtual void TickComponent(float DeltaTime) override;
     virtual void Release() override;
     virtual void Render() override;
     virtual FVector GetForwardVector();

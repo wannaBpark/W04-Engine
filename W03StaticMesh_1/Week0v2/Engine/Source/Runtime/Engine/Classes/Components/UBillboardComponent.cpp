@@ -36,9 +36,9 @@ void UBillboardComponent::Initialize()
 
 
 
-void UBillboardComponent::Update(double deltaTime)
+void UBillboardComponent::TickComponent(float DeltaTime)
 {
-    Super::Update(deltaTime);
+    Super::TickComponent(DeltaTime);
 }
 
 void UBillboardComponent::Release()

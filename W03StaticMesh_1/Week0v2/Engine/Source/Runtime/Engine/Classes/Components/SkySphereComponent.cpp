@@ -16,7 +16,7 @@ void USkySphereComponent::Initialize()
     Super::Initialize();
 }
 
-void USkySphereComponent::Update(double deltaTime)
+void USkySphereComponent::TickComponent(float DeltaTime)
 {
 }
 

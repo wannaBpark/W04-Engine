@@ -19,7 +19,7 @@ void UCubeComp::Initialize()
     Super::Initialize();
 }
 
-void UCubeComp::Update(double deltaTime)
+void UCubeComp::TickComponent(float DeltaTime)
 {
 }
 

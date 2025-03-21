@@ -15,9 +15,9 @@ void UPrimitiveComponent::Initialize()
     staticMesh = FEngineLoop::resourceMgr.GetMesh(m_Type);
 }
 
-void UPrimitiveComponent::Update(double deltaTime)
+void UPrimitiveComponent::TickComponent(float DeltaTime)
 {
-	Super::Update(deltaTime);
+	Super::TickComponent(DeltaTime);
 }
 
 void UPrimitiveComponent::Release()
