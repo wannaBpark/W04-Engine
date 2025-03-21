@@ -19,10 +19,10 @@ void ControlEditorPanel::Render()
     /* Min, Max Size */
     ImGui::SetNextWindowSizeConstraints(MinSize, MaxSize);
     
-    /* Set Panel Position */
+    /* Panel Position */
     ImGui::SetNextWindowPos(ImVec2(PanelPosX, PanelPosY), ImGuiCond_Always);
 
-    /* Set Panel Size */
+    /* Panel Size */
     ImGui::SetNextWindowSize(ImVec2(PanelWidth, PanelHeight), ImGuiCond_Always);
 
     /* Panel Flags */
@@ -41,10 +41,10 @@ void ControlEditorPanel::Render()
     
     ImGui::SameLine();
 
-    // 현재 윈도우의 콘텐츠 영역 너비를 가져옵니다.
+    /* Get Window Content Region */
     float ContentWidth = ImGui::GetWindowContentRegionMax().x;
 
-    // 오른쪽 정렬을 위해 커서의 X 위치를 설정합니다.
+    /* Move Cursor X Position */
     ImGui::SetCursorPosX(ContentWidth - (IconSize.x * 3.0f + 16.0f));
     
     ImGui::PushFont(IconFont);
