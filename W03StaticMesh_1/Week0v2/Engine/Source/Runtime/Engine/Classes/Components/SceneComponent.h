@@ -36,10 +36,10 @@ public:
     FVector GetWorldScale();
     FVector GetWorldLocation();
     FVector GetLocalRotation();
-    FQuat GetQuat() { return QuatRotation; }
+    FQuat GetQuat() const { return QuatRotation; }
 
-    FVector GetLocalScale() { return RelativeScale3D; }
-    FVector GetLocalLocation() { return RelativeLocation; }
+    FVector GetLocalScale() const { return RelativeScale3D; }
+    FVector GetLocalLocation() const { return RelativeLocation; }
 
     void SetLocation(FVector _newLoc) { RelativeLocation = _newLoc; }
     virtual void SetRotation(FVector _newRot);

@@ -1,15 +1,10 @@
 #include "Engine/Source/Runtime/CoreUObject/UObject/Object.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 
-UObject::UObject() : Name(FName("DefaultObjectName"))
-{
-}
-
-UObject::UObject(FString& name) : Name(FName(name))
-{
-}
-
-UObject::UObject(FString& name, uint32 uuid) : Name(FName(name)), UUID(uuid)
+UObject::UObject()
+    : UUID(0)
+    , InternalIndex(0)
+    , Name(FName("DefaultObjectName"))
 {
 }
 
@@ -19,8 +14,8 @@ UObject::~UObject()
 
 void UObject::Initialize()
 {
+    // BUG: Array가 변경될경우 Index가 잘못될 가능성이 있음
     InternalIndex = static_cast<uint32>(GetWorld()->GetObjectArr().Num() - 1);
-
 }
 
 void UObject::Update(double deltaTime)

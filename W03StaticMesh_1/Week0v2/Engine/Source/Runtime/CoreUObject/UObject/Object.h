@@ -15,8 +15,6 @@ class UObject
 {
 public:
     UObject();
-    UObject(FString& name);
-    UObject(FString& name, uint32 uuid);
     virtual ~UObject();
 
     virtual void Initialize();
