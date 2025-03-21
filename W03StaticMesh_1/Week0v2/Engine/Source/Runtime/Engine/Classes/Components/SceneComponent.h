@@ -1,10 +1,10 @@
 #pragma once
-#include "UObject/Object.h"
+#include "ActorComponent.h"
 #include "UObject/ObjectMacros.h"
 
-class USceneComponent : public UObject
+class USceneComponent : public UActorComponent
 {
-    DECLARE_CLASS(USceneComponent, UObject)
+    DECLARE_CLASS(USceneComponent, UActorComponent)
 
 public:
     USceneComponent();
