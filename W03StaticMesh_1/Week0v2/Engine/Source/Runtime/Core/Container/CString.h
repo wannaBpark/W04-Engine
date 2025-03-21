@@ -3,6 +3,8 @@
 #include <cwchar>
 #include <cctype>
 
+#include "HAL/PlatformType.h"
+
 
 template <typename T>
 struct TCString
@@ -144,3 +146,7 @@ public:
         return count ? std::tolower(static_cast<unsigned char>(*str1)) - std::tolower(static_cast<unsigned char>(*str2)) : 0;
     }
 };
+
+using FCString = TCString<TCHAR>;
+using FCStringAnsi = TCString<ANSICHAR>;
+using FCStringWide = TCString<WIDECHAR>;
