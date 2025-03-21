@@ -88,7 +88,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 	resourceMgr.Initialize(&renderer, &graphicDevice);
 	
 	viewportClient = std::make_shared<FEditorViewportClient>();
-
+    viewportClient->Initialize();
 	GWorld = new UWorld;
 	GWorld->Initialize();
 
@@ -123,18 +123,21 @@ void FEngineLoop::Tick()
 				break;
 			}
 		}
-		GWorld->Tick(elapsedTime);
+        viewportClient->Tick(elapsedTime);
+        View = viewportClient->GetViewMatrix();
+        Projection = viewportClient->GetProjectionMatrix();
 
-		UCameraComponent* Camera = static_cast<UCameraComponent*>(GWorld->GetCamera());
-		View = JungleMath::CreateViewMatrix(GWorld->GetCamera()->GetWorldLocation(),
-			GWorld->GetCamera()->GetWorldLocation() + GWorld->GetCamera()->GetForwardVector(),
-			{ 0, 0, 1 });
-		Projection = JungleMath::CreateProjectionMatrix(
-			Camera->GetFOV() * (3.141592f / 180.0f),
-			GetAspectRatio(graphicDevice.SwapChain), 
-			0.1f,
-			1000.0f
-		);
+		GWorld->Tick(elapsedTime);
+		//UCameraComponent* Camera = static_cast<UCameraComponent*>(GWorld->GetCamera());
+		//View = JungleMath::CreateViewMatrix(GWorld->GetCamera()->GetWorldLocation(),
+		//	GWorld->GetCamera()->GetWorldLocation() + GWorld->GetCamera()->GetForwardVector(),
+		//	{ 0, 0, 1 });
+		//Projection = JungleMath::CreateProjectionMatrix(
+		//	Camera->GetFOV() * (3.141592f / 180.0f),
+		//	GetAspectRatio(graphicDevice.SwapChain), 
+		//	0.1f,
+		//	1000.0f
+		//);
 
 		graphicDevice.Prepare();
 		renderer.PrepareShader();

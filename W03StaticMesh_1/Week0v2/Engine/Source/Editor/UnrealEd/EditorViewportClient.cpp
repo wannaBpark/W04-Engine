@@ -1,10 +1,15 @@
-#include "Engine/Source/Editor/UnrealEd/EditorViewportClient.h"
+#include "UnrealEd/EditorViewportClient.h"
 #include "fstream"
 #include "sstream"
 #include "ostream"
+#include "Math/JungleMath.h"
+#include "EngineLoop.h"
+
 FEditorViewportClient::FEditorViewportClient()
+    : Viewport(nullptr)
+    
 {
-    Initialize();
+
 }
 
 FEditorViewportClient::~FEditorViewportClient()
@@ -12,13 +17,28 @@ FEditorViewportClient::~FEditorViewportClient()
     Release();
 }
 
+void FEditorViewportClient::Draw(FViewport* Viewport)
+{
+}
+
 void FEditorViewportClient::Initialize()
 {
     LoadConfig();
+    ViewTransformPerspective.SetLocation(FVector(8.0f, 8.0f, 8.f));
+    ViewTransformPerspective.SetRotation(FVector(0.0f, 45.0f, -135.0f));
+}
+
+void FEditorViewportClient::Tick(float DeltaTime)
+{
+    Input();
+    UpdateViewMatrix();
+    UpdateProjectionMatrix();
 }
 
 void FEditorViewportClient::Release()
 {
+    if (Viewport)
+        delete Viewport;
     SaveConfig();
 }
 
@@ -38,6 +58,123 @@ void FEditorViewportClient::SaveConfig()
     config["GridSize"] = std::to_string(GridSize);
     WriteIniFile(IniFilePath, config);
 }
+
+void FEditorViewportClient::Input()
+{
+    if (GetAsyncKeyState(VK_RBUTTON) & 0x8000) // VK_RBUTTON은 마우스 오른쪽 버튼을 나타냄
+    {
+        if (!bRightMouseDown)
+        {
+            // 마우스 오른쪽 버튼을 처음 눌렀을 때, 마우스 위치 초기화
+            bRightMouseDown = true;
+            GetCursorPos(&lastMousePos);
+        }
+        else
+        {
+            // 마우스 이동량 계산
+            POINT currentMousePos;
+            GetCursorPos(&currentMousePos);
+
+            // 마우스 이동 차이 계산
+            int32 deltaX = currentMousePos.x - lastMousePos.x;
+            int32 deltaY = currentMousePos.y - lastMousePos.y;
+
+            // Yaw(좌우 회전) 및 Pitch(상하 회전) 값 변경
+            CameraRotateYaw(deltaX * 0.1f);  // X 이동에 따라 좌우 회전
+            CameraRotatePitch(deltaY * 0.1f);  // Y 이동에 따라 상하 회전
+
+            // 새로운 마우스 위치 저장
+            lastMousePos = currentMousePos;
+        }
+        if (GetAsyncKeyState('A') & 0x8000)
+        {
+            CameraMoveRigth(-1.f);
+        }
+        if (GetAsyncKeyState('D') & 0x8000)
+        {
+            CameraMoveRigth(1.f);
+        }
+        if (GetAsyncKeyState('W') & 0x8000)
+        {
+            CameraMoveForward(1.f);
+        }
+        if (GetAsyncKeyState('S') & 0x8000)
+        {
+            CameraMoveForward(-1.f);
+        }
+        if (GetAsyncKeyState('E') & 0x8000)
+        {
+            CameraMoveUp(1.f);
+        }
+        if (GetAsyncKeyState('Q') & 0x8000)
+        {
+            CameraMoveUp(-1.f);
+        }
+    }
+    else
+    {
+        bRightMouseDown = false; // 마우스 오른쪽 버튼을 떼면 상태 초기화
+    }
+}
+void FEditorViewportClient::CameraMoveForward(float _Value)
+{
+    FVector curCameraLoc = ViewTransformPerspective.GetLocation();
+    curCameraLoc = curCameraLoc +  ViewTransformPerspective.GetForwardVector() * GetCameraSpeedScalar() * _Value;
+    ViewTransformPerspective.SetLocation(curCameraLoc);
+}
+
+void FEditorViewportClient::CameraMoveRigth(float _Value)
+{
+    FVector curCameraLoc = ViewTransformPerspective.GetLocation();
+    curCameraLoc = curCameraLoc + ViewTransformPerspective.GetRightVector() * GetCameraSpeedScalar() * _Value;
+    ViewTransformPerspective.SetLocation(curCameraLoc);
+}
+
+void FEditorViewportClient::CameraMoveUp(float _Value)
+{
+    FVector curCameraLoc = ViewTransformPerspective.GetLocation();
+    curCameraLoc.z = curCameraLoc.z +  GetCameraSpeedScalar() * _Value;
+    ViewTransformPerspective.SetLocation(curCameraLoc);
+}
+
+void FEditorViewportClient::CameraRotateYaw(float _Value)
+{
+    UE_LOG(LogLevel::Error, "Rotate %f %f %f", ViewTransformPerspective.GetRotation().x,
+        ViewTransformPerspective.GetRotation().y,
+        ViewTransformPerspective.GetRotation().z);
+    FVector curCameraRot = ViewTransformPerspective.GetRotation();
+    curCameraRot.z += _Value ;
+    ViewTransformPerspective.SetRotation(curCameraRot);
+}
+
+void FEditorViewportClient::CameraRotatePitch(float _Value)
+{
+    FVector curCameraRot = ViewTransformPerspective.GetRotation();
+    curCameraRot.y += _Value;
+    if (curCameraRot.y < -90.0f)
+        curCameraRot.y = -90.0f;
+    if (curCameraRot.y > 90.0f)
+        curCameraRot.y = 90.0f;
+    ViewTransformPerspective.SetRotation(curCameraRot);
+}
+
+void FEditorViewportClient::UpdateViewMatrix()
+{
+    View = JungleMath::CreateViewMatrix(ViewTransformPerspective.GetLocation(),
+        ViewTransformPerspective.GetLocation() + ViewTransformPerspective.GetForwardVector(),
+        FVector{ 0.0f,0.0f, 1.0f });
+}
+
+void FEditorViewportClient::UpdateProjectionMatrix()
+{
+    Projection = JungleMath::CreateProjectionMatrix(
+        ViewFOV * (3.141592f / 180.0f),
+        GEngineLoop.GetAspectRatio(GEngineLoop.graphicDevice.SwapChain),
+        nearPlane,
+        farPlane
+    );
+}
+
 
 TMap<FString, FString> FEditorViewportClient::ReadIniFile(const FString& filePath)
 {
@@ -71,4 +208,22 @@ void FEditorViewportClient::SetCameraSpeedScalar(float value)
     else if (value > 176.0f)
         value = 176.0f;
     CameraSpeedScalar = value;
+}
+
+
+FVector FViewportCameraTransform::GetForwardVector()
+{
+    FVector Forward = FVector(1.f, 0.f, 0.0f);
+    Forward = JungleMath::FVectorRotate(Forward, ViewRotation);
+    return Forward;
+}
+FVector FViewportCameraTransform::GetRightVector()
+{
+    FVector Right = FVector(0.f, 1.f, 0.0f);
+	Right = JungleMath::FVectorRotate(Right, ViewRotation);
+	return Right;
+}
+
+FViewportCameraTransform::FViewportCameraTransform()
+{
 }

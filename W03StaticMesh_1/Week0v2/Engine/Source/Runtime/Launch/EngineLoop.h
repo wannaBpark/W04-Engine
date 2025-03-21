@@ -21,11 +21,11 @@ public:
     int32 Init(HINSTANCE hInstance);
     void Tick();
     void Exit();
+    float GetAspectRatio(IDXGISwapChain* swapChain);
 	
 private:
     void WindowInit(HINSTANCE hInstance);
     void Render();
-    float GetAspectRatio(IDXGISwapChain* swapChain);
 public:
     static FGraphicsDevice graphicDevice;
     static FRenderer renderer;
@@ -33,7 +33,7 @@ public:
     static uint32 TotalAllocationBytes;
     static uint32 TotalAllocationCount;
 
-	
+    
     HWND hWnd;
     FMatrix View;
     FMatrix Projection;
@@ -42,7 +42,6 @@ private:
     UWorld* GWorld;
     bool bIsExit = false;
     const int32 targetFPS = 60;
-
     std::shared_ptr<FEditorViewportClient> viewportClient;
 public:
     UWorld* GetWorld(){ return GWorld; }

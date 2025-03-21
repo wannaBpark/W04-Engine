@@ -201,14 +201,13 @@ void UWorld::SpawnObject(OBJECTS _Obj)
 void UWorld::LoadData(SceneData& _Data)
 {
 	Release();
-	CreateBaseObject();
 	for (auto iter : _Data.Primitives)
 	{
 		GUObjectArray.Add(iter.Value);
 	}
-
-    camera = static_cast<UCameraComponent*>(_Data.Cameras[0]);
-
+    if(_Data.Cameras[0])
+        camera = static_cast<UCameraComponent*>(_Data.Cameras[0]);
+	CreateBaseObject();
 }
 
 SceneData UWorld::SaveData()

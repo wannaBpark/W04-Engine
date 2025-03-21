@@ -1,4 +1,4 @@
-﻿#include "NameTypes.h"
+#include "NameTypes.h"
 
 #include <atomic>
 #include <cwchar>
@@ -377,7 +377,10 @@ struct FNameHelper
 		}
 		else
 		{
-			static_assert(false, "Invalid Character type");
+			
+			
+			
+			//false, "Invalid Character type");
 			return {};
 		}
 	}

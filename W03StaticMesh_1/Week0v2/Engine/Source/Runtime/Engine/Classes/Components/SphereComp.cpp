@@ -2,7 +2,7 @@
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 #include "Engine/Source/Runtime/Engine/World.h"
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
-
+#include "UnrealEd/EditorViewportClient.h"
 USphereComp::USphereComp() : UPrimitiveComponent("Sphere")
 {
     AABB.max = { 1,1,1 };
@@ -32,6 +32,7 @@ void USphereComp::Render()
 
     // 최종 MVP 행렬
     FMatrix MVP = Model * GetEngine().View * GetEngine().Projection;
+    //FMatrix MVP = Model * GetEngine().GetViewportClient()->GetViewMatrix() * GetEngine().GetViewportClient()->GetPerspectiveMatrix();
     FEngineLoop::renderer.UpdateNormalConstantBuffer(Model);
     if (this == GetWorld()->GetPickingObj()) {
         FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);

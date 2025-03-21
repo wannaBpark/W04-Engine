@@ -354,9 +354,6 @@
     <ClCompile Include="Engine\Source\Runtime\Launch\Launch.cpp">
       <Filter>Engine\Source\Runtime\Launch</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Launch\NameTypes.h">
-      <Filter>Engine\Source\Runtime\Launch</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Renderer\Renderer.cpp">
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClCompile>
@@ -424,10 +421,29 @@
       <Filter>Font</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Launch\ImGuiManager.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\NameTypes.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Container\String.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\HAL\PlatformMemory.cpp" />
+    <ClCompile Include="UnrealClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\ThirdParty\DirectXTK\Include\DDSTextureLoader.h" />
     <ClInclude Include="Engine\Source\Runtime\Launch\ImGuiManager.h" />
+    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\NameTypes.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\Array.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\ContainerAllocator.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\CString.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\Map.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\Pair.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\Set.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\String.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\HAL\PlatformMemory.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\HAL\PlatformType.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\MathUtility.h" />
+    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\ObjectMacros.h" />
+    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\ObjectTypes.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\ViewportClient.h" />
+    <ClInclude Include="UnrealClient.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PixelTextureShader.hlsl">
