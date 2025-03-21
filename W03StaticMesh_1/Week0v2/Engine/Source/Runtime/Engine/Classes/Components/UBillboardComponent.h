@@ -9,6 +9,7 @@ class UBillboardComponent : public UPrimitiveComponent
 public:
     UBillboardComponent();
     virtual ~UBillboardComponent() override;
+
     virtual void Initialize() override;
     virtual void Update(double deltaTime) override;
     virtual void Release() override;

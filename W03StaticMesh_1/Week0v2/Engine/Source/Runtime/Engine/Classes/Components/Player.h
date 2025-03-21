@@ -10,13 +10,12 @@ class UPlayer : public UObject
 {
     DECLARE_CLASS(UPlayer, UObject)
 
-public:
     UPlayer();
-    virtual ~UPlayer();
+    virtual ~UPlayer() override;
 
-    virtual void Initialize();
-    virtual void Update(double deltaTime);
-    virtual void Release();
+    virtual void Initialize() override;
+    virtual void Update(double deltaTime) override;
+    virtual void Release() override;
 
     void Input();
     bool PickGizmo(FVector& rayOrigin);
@@ -42,6 +41,6 @@ private:
 
 public:
     void SetMode(ControlMode _Mode) { cMode = _Mode; }
-    ControlMode GetControlMode() { return cMode; }
-    CoordiMode GetCoordiMode() { return cdMode; }
+    ControlMode GetControlMode() const { return cMode; }
+    CoordiMode GetCoordiMode() const { return cdMode; }
 };
