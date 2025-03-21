@@ -22,13 +22,18 @@ public:
     virtual void Destroy();
 
 public:
+    /**
+     * Actor에 컴포넌트를 새로 추가합니다.
+     * @tparam T UActorComponent를 상속받은 Component
+     * @return 생성된 Component
+     */
     template <typename T>
         requires std::derived_from<T, UActorComponent>
     T* AddComponent()
     {
         T* ObjectInstance = FObjectFactory::ConstructObject<T>();
-        Components.Add(ObjectInstance);
-        ObjectInstance->SetOwner(this);
+        OwnedComponents.Add(ObjectInstance);
+        ObjectInstance->Owner = this;
 
         USceneComponent* NewSceneComp = dynamic_cast<USceneComponent*>(ObjectInstance);
         if (NewSceneComp != nullptr)
@@ -41,11 +46,12 @@ public:
             {
                 NewSceneComp->SetupAttachment(RootComponent);
             }
-
         }
-
         return ObjectInstance;
     }
+
+    /** Actor가 가지고 있는 Component를 제거합니다. */
+    void RemoveOwnedComponent(UActorComponent* Component);
 
 public:
     USceneComponent* GetRootComponent() const { return RootComponent; }
@@ -55,7 +61,7 @@ private:
     USceneComponent* RootComponent = nullptr;
 
     AActor* Owner = nullptr;
-    TSet<UActorComponent*> Components;
+    TSet<UActorComponent*> OwnedComponents;
 
 #if 1 // TODO: WITH_EDITOR 추가
 public:

@@ -16,6 +16,11 @@ void AActor::Destroy()
 {
 }
 
+void AActor::RemoveOwnedComponent(UActorComponent* Component)
+{
+    OwnedComponents.Remove(Component);
+}
+
 void AActor::SetRootComponent(USceneComponent* NewRootComponent)
 {
     if (NewRootComponent != nullptr || NewRootComponent->GetOwner() == this)

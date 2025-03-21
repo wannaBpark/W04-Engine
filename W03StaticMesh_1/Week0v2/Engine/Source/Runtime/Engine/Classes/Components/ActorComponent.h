@@ -24,15 +24,22 @@ public:
     virtual void TickComponent(float DeltaTime);
 
     /** Component가 제거되었을 때 호출됩니다. */
-    virtual void Destroyed();
+    virtual void OnComponentDestroyed();
 
     // TODO: 나중에 삭제 예정
     virtual void Release();
     virtual void Render();
 
+public:
     /** 이 컴포넌트를 소유하고 있는 Actor를 반환합니다. */
     AActor* GetOwner() const { return Owner; }
 
+    /** 이 컴포넌트를 제거합니다. */
+    virtual void DestroyComponent();
+
 private:
     AActor* Owner;
+
+    /** 현재 컴포넌트가 삭제 처리중인지 여부 */
+    uint8 bIsBeingDestroyed : 1;
 };
