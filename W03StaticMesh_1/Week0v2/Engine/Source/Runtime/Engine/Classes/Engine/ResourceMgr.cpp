@@ -1,4 +1,4 @@
-﻿#include "ResourceMgr.h"
+#include "ResourceMgr.h"
 #include <fstream>
 #include <sstream>
 #include <wincodec.h>
