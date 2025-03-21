@@ -318,6 +318,9 @@
   <ItemGroup>
     <Content Include=".editorconfig" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="Week0v2.natvis" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>
