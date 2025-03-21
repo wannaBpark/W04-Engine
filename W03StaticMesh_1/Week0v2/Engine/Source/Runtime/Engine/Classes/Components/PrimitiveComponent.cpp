@@ -8,9 +8,9 @@ UPrimitiveComponent::~UPrimitiveComponent()
 {
 }
 
-void UPrimitiveComponent::Initialize()
+void UPrimitiveComponent::InitializeComponent()
 {
-	Super::Initialize();
+	Super::InitializeComponent();
 
     staticMesh = FEngineLoop::resourceMgr.GetMesh(m_Type);
 }

@@ -18,9 +18,9 @@ UText::~UText()
 	}
 }
 
-void UText::Initialize()
+void UText::InitializeComponent()
 {
-	Super::Initialize();
+	Super::InitializeComponent();
 }
 
 void UText::TickComponent(float DeltaTime)

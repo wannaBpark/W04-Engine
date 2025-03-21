@@ -28,9 +28,9 @@ UBillboardComponent::~UBillboardComponent()
 	}
 }
 
-void UBillboardComponent::Initialize()
+void UBillboardComponent::InitializeComponent()
 {
-    Super::Initialize();
+    Super::InitializeComponent();
 	CreateQuadTextureVertexBuffer();
 }
 

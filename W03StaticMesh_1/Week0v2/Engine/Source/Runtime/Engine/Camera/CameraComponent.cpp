@@ -10,9 +10,9 @@ UCameraComponent::~UCameraComponent()
 {
 }
 
-void UCameraComponent::Initialize()
+void UCameraComponent::InitializeComponent()
 {
-	Super::Initialize();
+	Super::InitializeComponent();
 	RelativeLocation = FVector(0.0f, 0.0f, 0.5f);
 	FOV = 60.f;
 }

@@ -11,7 +11,7 @@ USceneComponent::~USceneComponent()
 {
 	if (uuidText) delete uuidText;
 }
-void USceneComponent::Initialize()
+void USceneComponent::InitializeComponent()
 {
 	//테스트용 텍스트
 	uuidText = new UTextUUID();
@@ -21,7 +21,7 @@ void USceneComponent::Initialize()
 	uuidText->SetUUIDParent(this);
 	//SetText전에 RowColumn 반드시 설정
 
-	Super::Initialize();
+	Super::InitializeComponent();
 }
 
 void USceneComponent::TickComponent(float DeltaTime)

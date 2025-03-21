@@ -17,11 +17,11 @@ UParticleSubUVComp::~UParticleSubUVComp()
 	}
 }
 
-void UParticleSubUVComp::Initialize()
+void UParticleSubUVComp::InitializeComponent()
 {
+	Super::InitializeComponent();
 	FEngineLoop::renderer.UpdateSubUVConstant(0, 0);
 	FEngineLoop::renderer.PrepareSubUVConstant();
-	Super::Initialize();
 }
 
 void UParticleSubUVComp::TickComponent(float DeltaTime)

@@ -11,9 +11,9 @@ UGizmoRectangleComponent::~UGizmoRectangleComponent()
 {
 }
 
-void UGizmoRectangleComponent::Initialize()
+void UGizmoRectangleComponent::InitializeComponent()
 {
-    Super::Initialize();
+    Super::InitializeComponent();
 }
 
 void UGizmoRectangleComponent::TickComponent(float DeltaTime)

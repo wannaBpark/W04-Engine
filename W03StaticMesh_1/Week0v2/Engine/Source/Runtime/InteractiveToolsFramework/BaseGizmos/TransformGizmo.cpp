@@ -100,9 +100,9 @@ UTransformGizmo::~UTransformGizmo()
 
 }
 
-void UTransformGizmo::Initialize()
+void UTransformGizmo::InitializeComponent()
 {
-	Super::Initialize();
+	Super::InitializeComponent();
 }
 
 void UTransformGizmo::TickComponent(float DeltaTime)

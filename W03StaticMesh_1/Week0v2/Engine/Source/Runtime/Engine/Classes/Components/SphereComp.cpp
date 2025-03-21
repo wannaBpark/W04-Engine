@@ -14,9 +14,9 @@ USphereComp::~USphereComp()
 {
 }
 
-void USphereComp::Initialize()
+void USphereComp::InitializeComponent()
 {
-    Super::Initialize();
+    Super::InitializeComponent();
 }
 
 void USphereComp::TickComponent(float DeltaTime)

@@ -14,9 +14,9 @@ UCubeComp::~UCubeComp()
 {
 }
 
-void UCubeComp::Initialize()
+void UCubeComp::InitializeComponent()
 {
-    Super::Initialize();
+    Super::InitializeComponent();
 }
 
 void UCubeComp::TickComponent(float DeltaTime)
