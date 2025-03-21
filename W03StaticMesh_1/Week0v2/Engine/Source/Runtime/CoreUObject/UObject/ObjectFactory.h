@@ -14,7 +14,7 @@ public:
         obj->ClassPrivate = T::StaticClass();
         obj->NamePrivate = Name;
         obj->UUID = id;
-        obj->Initialize();
+        obj->InitializeComponent();  // TODO: 나중에 호출 위치 수정
 
         UE_LOG(LogLevel::Display, "Created New Object : %s", Name);
         return obj;
