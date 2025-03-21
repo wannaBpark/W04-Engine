@@ -1,12 +1,15 @@
 ﻿#include "ResourceMgr.h"
-#include "D3D11RHI/GraphicDevice.h"
 #include <fstream>
 #include <sstream>
-#include "Renderer/Renderer.h"
+#include <wincodec.h>
+#include <ranges>
 #include "Define.h"
 #include "Components/Quad.h"
-#include <wincodec.h>
+#include "D3D11RHI/GraphicDevice.h"
 #include "DirectXTK/Include/DDSTextureLoader.h"
+#include "Renderer/Renderer.h"
+
+
 void FResourceMgr::Initialize(FRenderer* renderer, FGraphicsDevice* device)
 {
 	//GenerateSphere();
@@ -43,15 +46,20 @@ void FResourceMgr::Initialize(FRenderer* renderer, FGraphicsDevice* device)
 }
 
 void FResourceMgr::Release(FRenderer* renderer) {
-    for (auto& pair : meshMap) {
-        FStaticMesh* mesh = pair.second.get();
+    for (const auto& Pair : meshMap)
+    {
+        FStaticMesh* mesh = Pair.Value.get();
         renderer->ReleaseBuffer(mesh->vertexBuffer);
         renderer->ReleaseBuffer(mesh->indexBuffer);
     }
-	for (auto& pair : textureMap) {
-		FTexture* texture =	pair.second.get();
+    meshMap.Empty();
+
+	for (const auto& Pair : textureMap)
+    {
+		FTexture* texture =	Pair.Value.get();
 		texture->Release();
 	}
+    textureMap.Empty();
 }
 
 #include <unordered_map>
@@ -83,7 +91,7 @@ void FResourceMgr::LoadObjNormalAsset(FRenderer* renderer, const FString& meshNa
 	TArray<FVector4> Colors;
 	if (objFile)
 	{
-		FString line;
+		std::string line;
 		while (std::getline(objFile, line))
 		{
 			std::istringstream lineStream(line);
@@ -96,20 +104,20 @@ void FResourceMgr::LoadObjNormalAsset(FRenderer* renderer, const FString& meshNa
 				FVector color;
 				lineStream >> vertex.x >> vertex.y >> vertex.z >> color.x >> color.y >> color.z;
 
-				positions.push_back(vertex);
-				Colors.push_back(FVector4(color.x,color.y,color.z, 1.0f));
+				positions.Add(vertex);
+				Colors.Add(FVector4(color.x,color.y,color.z, 1.0f));
 			}
 			else if (type == "vn")
 			{
 				FVector normal;
 				lineStream >> normal.x >> normal.y >> normal.z;
-				normals.push_back(normal);
+				normals.Add(normal);
 			}
 			else if (type == "f")
 			{
-				std::vector<uint32> faceIndices;
-				std::vector<uint32> normalIndices;
-				std::vector<uint32> uvIndices;
+				TArray<uint32> faceIndices;
+				TArray<uint32> normalIndices;
+				TArray<uint32> uvIndices;
 				std::string vertexInfo;
 
 				while (lineStream >> vertexInfo)
@@ -120,14 +128,14 @@ void FResourceMgr::LoadObjNormalAsset(FRenderer* renderer, const FString& meshNa
 						int vIdx = std::stoi(vertexInfo.substr(0, firstSlash)) - 1;
 						int nIdx = std::stoi(vertexInfo.substr(firstSlash + 2)) - 1;
 
-						faceIndices.push_back(vIdx);
-						normalIndices.push_back(nIdx);
+						faceIndices.Add(vIdx);
+						normalIndices.Add(nIdx);
 					}
 				}
 
 				std::unordered_map<std::pair<int, int>, uint32_t, PairHash> vertexCache;
 
-				for (size_t i = 1; i + 1 < faceIndices.size(); ++i)
+				for (size_t i = 1; i + 1 < faceIndices.Num(); ++i)
 				{
 					uint32 triangleIndices[3];
 					for (size_t j = 0; j < 3; j++)
@@ -153,39 +161,39 @@ void FResourceMgr::LoadObjNormalAsset(FRenderer* renderer, const FString& meshNa
 								normal.x, normal.y, normal.z
 							};
 
-							uint32 newIndex = static_cast<uint32>(vertices.size());
-							vertices.push_back(vertexSimple);
+							uint32 newIndex = static_cast<uint32>(vertices.Num());
+							vertices.Add(vertexSimple);
 							vertexCache[key] = newIndex;
 							triangleIndices[j] = newIndex;
 						}
 					}
 
-					indices.push_back(triangleIndices[0]);
-					indices.push_back(triangleIndices[1]);
-					indices.push_back(triangleIndices[2]);
+					indices.Add(triangleIndices[0]);
+					indices.Add(triangleIndices[1]);
+					indices.Add(triangleIndices[2]);
 				}
 			}
 		}
 	}
 
 
-	if (vertices.empty()) {
+	if (vertices.IsEmpty()) {
 		UE_LOG(LogLevel::Error, "Error: OBJ file is empty or failed to parse!");
 		return;
 	}
 
-	FVertexSimple* vertexArray = new FVertexSimple[vertices.size()];
-	std::memcpy(vertexArray, vertices.data(), vertices.size() * sizeof(FVertexSimple));
+	FVertexSimple* vertexArray = new FVertexSimple[vertices.Num()];
+	std::memcpy(vertexArray, vertices.GetData(), vertices.Num() * sizeof(FVertexSimple));
 
 	UINT* indexArray = nullptr;
-	if (!indices.empty()) {
-		indexArray = new UINT[indices.size()];
-		std::memcpy(indexArray, indices.data(), indices.size() * sizeof(UINT));
+	if (!indices.IsEmpty()) {
+		indexArray = new UINT[indices.Num()];
+		std::memcpy(indexArray, indices.GetData(), indices.Num() * sizeof(UINT));
 	}
 
-	UE_LOG(LogLevel::Error, "Arrow Vertex Size : %d", vertices.size());
-	ID3D11Buffer* vertexBuffer = renderer->CreateVertexBuffer(vertexArray, static_cast<UINT>(vertices.size() * sizeof(FVertexSimple)));
-	ID3D11Buffer* indexBuffer = (indexArray) ? renderer->CreateIndexBuffer(indexArray, static_cast<UINT>(indices.size() * sizeof(UINT))) : nullptr;
+	UE_LOG(LogLevel::Error, "Arrow Vertex Size : %d", vertices.Num());
+	ID3D11Buffer* vertexBuffer = renderer->CreateVertexBuffer(vertexArray, static_cast<UINT>(vertices.Num() * sizeof(FVertexSimple)));
+	ID3D11Buffer* indexBuffer = (indexArray) ? renderer->CreateIndexBuffer(indexArray, static_cast<UINT>(indices.Num() * sizeof(UINT))) : nullptr;
 
 	if (!vertexBuffer || !indexBuffer) {
 		UE_LOG(LogLevel::Error, "Error: Failed to create buffers for OBJ: %s", filepath.c_str());
@@ -194,12 +202,12 @@ void FResourceMgr::LoadObjNormalAsset(FRenderer* renderer, const FString& meshNa
 		return;
 	}
 
-	meshMap[meshName] = std::make_shared<FStaticMesh>(vertexBuffer, static_cast<UINT>(vertices.size()), vertexArray, indexBuffer, static_cast<UINT>(indices.size()), indexArray);
+	meshMap[meshName] = std::make_shared<FStaticMesh>(vertexBuffer, static_cast<UINT>(vertices.Num()), vertexArray, indexBuffer, static_cast<UINT>(indices.Num()), indexArray);
 
 	delete[] vertexArray;
 	delete[] indexArray;
 
-	UE_LOG(LogLevel::Error, "OBJ Loaded: %s - %d vertices, %d indices", meshName.c_str(), vertices.size(), indices.size());
+	UE_LOG(LogLevel::Error, "OBJ Loaded: %s - %d vertices, %d indices", *meshName, vertices.Num(), indices.Num());
 }
 
 void FResourceMgr::LoadObjNormalTextureAsset(FRenderer* renderer, const FString& meshName, const FWString& filepath)
@@ -215,7 +223,7 @@ void FResourceMgr::LoadObjNormalTextureAsset(FRenderer* renderer, const FString&
 
 	if (objFile)
 	{
-		FString line;
+		std::string line;
 		while (std::getline(objFile, line))
 		{
 			std::istringstream lineStream(line);
@@ -232,26 +240,26 @@ void FResourceMgr::LoadObjNormalTextureAsset(FRenderer* renderer, const FString&
 					color = FVector(1.0f, 1.0f, 1.0f); // 색상이 없으면 기본값 유지
 				}
 
-				positions.push_back(vertex);
-				Colors.push_back(FVector4(color.x, color.y, color.z, 1.0f));
+				positions.Add(vertex);
+				Colors.Add(FVector4(color.x, color.y, color.z, 1.0f));
 			}
 			else if (type == "vn")
 			{
 				FVector normal;
 				lineStream >> normal.x >> normal.y >> normal.z;
-				normals.push_back(normal);
+				normals.Add(normal);
 			}
 			else if (type == "vt")
 			{
 				std::pair<float, float> texcoord;
 				lineStream >> texcoord.first >> texcoord.second;
-				UVs.push_back(texcoord);
+				UVs.Add(texcoord);
 			}
 			else if (type == "f")
 			{
-				std::vector<uint32> faceIndices;
-				std::vector<uint32> normalIndices;
-				std::vector<uint32> uvIndices;
+				TArray<uint32> faceIndices;
+				TArray<uint32> normalIndices;
+				TArray<uint32> uvIndices;
 				std::string vertexInfo;
 
 				while (lineStream >> vertexInfo)
@@ -264,26 +272,26 @@ void FResourceMgr::LoadObjNormalTextureAsset(FRenderer* renderer, const FString&
 						int vIdx = std::stoi(vertexInfo.substr(0, firstSlash)) - 1;
 						int uvIdx = std::stoi(vertexInfo.substr(firstSlash + 1, secondSlash - firstSlash - 1)) - 1;
 
-						faceIndices.push_back(vIdx);
-						uvIndices.push_back(uvIdx);
+						faceIndices.Add(vIdx);
+						uvIndices.Add(uvIdx);
 					}
 					if (secondSlash != std::string::npos)
 					{
 						int nIdx = std::stoi(vertexInfo.substr(secondSlash + 1)) - 1;
-						normalIndices.push_back(nIdx);
+						normalIndices.Add(nIdx);
 					}
 					else
 					{
-						normalIndices.push_back(0);
+						normalIndices.Add(0);
 					}
 				}
 
-				if (faceIndices.size() < 3) continue; // 유효한 삼각형이 아닐 경우 무시
+				if (faceIndices.Num() < 3) continue; // 유효한 삼각형이 아닐 경우 무시
 
 				std::unordered_map<std::tuple<int, int, int>, uint32_t, TupleHash> vertexCache;
 
 				// 삼각형을 여러 개로 나누어 저장
-				for (size_t i = 1; i + 1 < faceIndices.size(); ++i)
+				for (size_t i = 1; i + 1 < faceIndices.Num(); ++i)
 				{
 					uint32 triangleIndices[3] = { faceIndices[0], faceIndices[i], faceIndices[i + 1] };
 
@@ -303,9 +311,9 @@ void FResourceMgr::LoadObjNormalTextureAsset(FRenderer* renderer, const FString&
 						else
 						{
 							FVector position = positions[vIdx];
-							FVector normal = (nIdx >= 0 && nIdx < normals.size()) ? normals[nIdx] : FVector(0, 0, 0);
-							FVector4 color = (vIdx >= 0 && vIdx < Colors.size()) ? Colors[vIdx] : FVector4(1, 1, 1, 1);
-							std::pair<float, float> uv = (uvIdx >= 0 && uvIdx < UVs.size()) ? UVs[uvIdx] : std::pair<float, float>(0.f, 0.f);
+							FVector normal = (nIdx >= 0 && nIdx < normals.Num()) ? normals[nIdx] : FVector(0, 0, 0);
+							FVector4 color = (vIdx >= 0 && vIdx < Colors.Num()) ? Colors[vIdx] : FVector4(1, 1, 1, 1);
+							std::pair<float, float> uv = (uvIdx >= 0 && uvIdx < UVs.Num()) ? UVs[uvIdx] : std::pair<float, float>(0.f, 0.f);
 
 							FVertexSimple vertexSimple{
 								position.x, position.y, position.z,
@@ -314,40 +322,40 @@ void FResourceMgr::LoadObjNormalTextureAsset(FRenderer* renderer, const FString&
 								uv.first, uv.second
 							};
 
-							uint32 newIndex = static_cast<uint32>(vertices.size());
-							vertices.push_back(vertexSimple);
+							uint32 newIndex = static_cast<uint32>(vertices.Num());
+							vertices.Add(vertexSimple);
 							vertexCache[key] = newIndex;
 							triangleIndices[j] = newIndex;
 						}
 					}
 
 					// 삼각형 추가
-					indices.push_back(triangleIndices[0]);
-					indices.push_back(triangleIndices[1]);
-					indices.push_back(triangleIndices[2]);
+					indices.Add(triangleIndices[0]);
+					indices.Add(triangleIndices[1]);
+					indices.Add(triangleIndices[2]);
 				}
 			}
 		}
 	}
 
 
-	if (vertices.empty()) {
+	if (vertices.IsEmpty()) {
 		UE_LOG(LogLevel::Error, "Error: OBJ file is empty or failed to parse!");
 		return;
 	}
 
-	FVertexSimple* vertexArray = new FVertexSimple[vertices.size()];
-	std::memcpy(vertexArray, vertices.data(), vertices.size() * sizeof(FVertexSimple));
+	FVertexSimple* vertexArray = new FVertexSimple[vertices.Num()];
+	std::memcpy(vertexArray, vertices.GetData(), vertices.Num() * sizeof(FVertexSimple));
 
 	UINT* indexArray = nullptr;
-	if (!indices.empty()) {
-		indexArray = new UINT[indices.size()];
-		std::memcpy(indexArray, indices.data(), indices.size() * sizeof(UINT));
+	if (!indices.IsEmpty()) {
+		indexArray = new UINT[indices.Num()];
+		std::memcpy(indexArray, indices.GetData(), indices.Num() * sizeof(UINT));
 	}
 
-	UE_LOG(LogLevel::Error, "Arrow Vertex Size : %d", vertices.size());
-	ID3D11Buffer* vertexBuffer = renderer->CreateVertexBuffer(vertexArray, static_cast<UINT>(vertices.size() * sizeof(FVertexSimple)));
-	ID3D11Buffer* indexBuffer = (indexArray) ? renderer->CreateIndexBuffer(indexArray, static_cast<UINT>(indices.size() * sizeof(UINT))) : nullptr;
+	UE_LOG(LogLevel::Error, "Arrow Vertex Size : %d", vertices.Num());
+	ID3D11Buffer* vertexBuffer = renderer->CreateVertexBuffer(vertexArray, static_cast<UINT>(vertices.Num() * sizeof(FVertexSimple)));
+	ID3D11Buffer* indexBuffer = (indexArray) ? renderer->CreateIndexBuffer(indexArray, static_cast<UINT>(indices.Num() * sizeof(UINT))) : nullptr;
 
 	if (!vertexBuffer || !indexBuffer) {
 		UE_LOG(LogLevel::Error, "Error: Failed to create buffers for OBJ: %s", filepath.c_str());
@@ -356,13 +364,13 @@ void FResourceMgr::LoadObjNormalTextureAsset(FRenderer* renderer, const FString&
 		return;
 	}
 
-	meshMap[meshName] = std::make_shared<FStaticMesh>(vertexBuffer, static_cast<UINT>(vertices.size()), vertexArray, indexBuffer, static_cast<UINT>(indices.size()), indexArray);
+	meshMap[meshName] = std::make_shared<FStaticMesh>(vertexBuffer, static_cast<UINT>(vertices.Num()), vertexArray, indexBuffer, static_cast<UINT>(indices.Num()), indexArray);
 
 
 	delete[] vertexArray;
 	delete[] indexArray;
 
-	UE_LOG(LogLevel::Error, "OBJ Loaded: %s - %d vertices, %d indices", meshName.c_str(), vertices.size(), indices.size());
+	UE_LOG(LogLevel::Error, "OBJ Loaded: %s - %d vertices, %d indices", *meshName, vertices.Num(), indices.Num());
 }
 
 void FResourceMgr::LoadObjAsset(FRenderer* renderer, const FString& meshName, const FWString& filepath)
@@ -374,7 +382,7 @@ void FResourceMgr::LoadObjAsset(FRenderer* renderer, const FString& meshName, co
 
 	if (objFile) {
 
-		FString line;
+		std::string line;
 
 		int normalcount = 0;
 		while (std::getline(objFile, line)) {
@@ -388,59 +396,59 @@ void FResourceMgr::LoadObjAsset(FRenderer* renderer, const FString& meshName, co
 				lineStream >> vertex.x >> vertex.y >> vertex.z >> color.x >> color.y >> color.z;
 
 				FVertexSimple vertexSimple{ vertex.x, vertex.y, vertex.z, color.x, color.y , color.z, 0.0f,0.0f,0.0f };
-				vertices.push_back(vertexSimple);
-				positions.push_back(vertex);
+				vertices.Add(vertexSimple);
+				positions.Add(vertex);
 			}
 
 			else if (type == "f") // Face
 			{
-				std::vector<uint32_t> faceIndices;
+				TArray<uint32_t> faceIndices;
 				uint32_t index;
 
 				while (lineStream >> index) {
-					faceIndices.push_back(index - 1);
+					faceIndices.Add(index - 1);
 				}
 
-				for (size_t i = 1; i + 1 < faceIndices.size(); ++i) {
-					indices.push_back(faceIndices[0]);    // ù ��° ����
-					indices.push_back(faceIndices[i]);    // �� ��° ����
-					indices.push_back(faceIndices[i + 1]); // �� ��° ����
+				for (size_t i = 1; i + 1 < faceIndices.Num(); ++i) {
+					indices.Add(faceIndices[0]);    // ù ��° ����
+					indices.Add(faceIndices[i]);    // �� ��° ����
+					indices.Add(faceIndices[i + 1]); // �� ��° ����
 				}
 			}
 
 		}
 	}
-	if (vertices.empty()) {
+	if (vertices.IsEmpty()) {
 		UE_LOG(LogLevel::Error, "Error: OBJ file is empty or failed to parse!");
 		return;
 	}
 
 	// **버텍스 및 인덱스 데이터를 배열로 변환**
-	FVertexSimple* vertexArray = new FVertexSimple[vertices.size()];
-	std::memcpy(vertexArray, vertices.data(), vertices.size() * sizeof(FVertexSimple));
+	FVertexSimple* vertexArray = new FVertexSimple[vertices.Num()];
+	std::memcpy(vertexArray, vertices.GetData(), vertices.Num() * sizeof(FVertexSimple));
 
 	UINT* indexArray = nullptr;
-	if (!indices.empty()) {
-		indexArray = new UINT[indices.size()];
-		std::memcpy(indexArray, indices.data(), indices.size() * sizeof(UINT));
+	if (!indices.IsEmpty()) {
+		indexArray = new UINT[indices.Num()];
+		std::memcpy(indexArray, indices.GetData(), indices.Num() * sizeof(UINT));
 	}
 
 
-	UE_LOG(LogLevel::Error, "Arrow Vertex Size : %d", vertices.size());
-	ID3D11Buffer* vertexBuffer = renderer->CreateVertexBuffer(vertexArray, static_cast<UINT>(vertices.size() * sizeof(FVertexSimple)));
-	ID3D11Buffer* indexBuffer = (indexArray) ? renderer->CreateIndexBuffer(indexArray, static_cast<UINT>(indices.size() * sizeof(UINT))) : nullptr;
+	UE_LOG(LogLevel::Error, "Arrow Vertex Size : %d", vertices.Num());
+	ID3D11Buffer* vertexBuffer = renderer->CreateVertexBuffer(vertexArray, static_cast<UINT>(vertices.Num() * sizeof(FVertexSimple)));
+	ID3D11Buffer* indexBuffer = (indexArray) ? renderer->CreateIndexBuffer(indexArray, static_cast<UINT>(indices.Num() * sizeof(UINT))) : nullptr;
 	if (!vertexBuffer) {
 		UE_LOG(LogLevel::Error, "Error: Failed to create buffers for OBJ: %s", filepath.c_str());
 		delete[] vertexArray;
 		delete[] indexArray;
 		return;
 	}
-	meshMap[meshName] = std::make_shared<FStaticMesh>(vertexBuffer, static_cast<UINT>(vertices.size()), vertexArray, indexBuffer, static_cast<UINT>(indices.size()), indexArray);
+	meshMap[meshName] = std::make_shared<FStaticMesh>(vertexBuffer, static_cast<UINT>(vertices.Num()), vertexArray, indexBuffer, static_cast<UINT>(indices.Num()), indexArray);
 
 	delete[] vertexArray;
 	delete[] indexArray;
 
-	UE_LOG(LogLevel::Error, "OBJ Loaded: %s - %d vertices, %d indices", meshName.c_str(), vertices.size(), indices.size());
+	UE_LOG(LogLevel::Error, "OBJ Loaded: %s - %d vertices, %d indices", *meshName, vertices.Num(), indices.Num());
 }
 
 
@@ -459,30 +467,30 @@ void FResourceMgr::RegisterMesh(FRenderer* renderer, const std::string& name, TA
 	INT numVertices = vCount;
 	UINT numIndices = iCount;
 
-	FVertexSimple* vertexArray = new FVertexSimple[vertices.size()];
-	std::memcpy(vertexArray, vertices.data(), vertices.size() * sizeof(FVertexSimple));
+	FVertexSimple* vertexArray = new FVertexSimple[vertices.Num()];
+	std::memcpy(vertexArray, vertices.GetData(), vertices.Num() * sizeof(FVertexSimple));
 
 	UINT* indexArray = nullptr;
-	if (!indices.empty()) {
-		indexArray = new UINT[indices.size()];
-		std::memcpy(indexArray, indices.data(), indices.size() * sizeof(UINT));
+	if (!indices.IsEmpty()) {
+		indexArray = new UINT[indices.Num()];
+		std::memcpy(indexArray, indices.GetData(), indices.Num() * sizeof(UINT));
 	}
 
 	ID3D11Buffer* vertexBuffer = renderer->CreateVertexBuffer(vertices, vCount * sizeof(FVertexSimple));
-	ID3D11Buffer* indexBuffer = (!indices.empty() && iCount > 0) ? renderer->CreateIndexBuffer(indices, iCount * sizeof(UINT)) : nullptr;
+	ID3D11Buffer* indexBuffer = (!indices.IsEmpty() && iCount > 0) ? renderer->CreateIndexBuffer(indices, iCount * sizeof(UINT)) : nullptr;
 	meshMap[name] = std::make_shared<FStaticMesh>(vertexBuffer, vCount, vertexArray, indexBuffer, iCount, indexArray);
 }
 
 std::shared_ptr<FStaticMesh> FResourceMgr::GetMesh(const FString& name) const
 {
-    auto it = meshMap.find(name);
-    return (it != meshMap.end()) ? it->second : nullptr;
+    auto* TempValue = meshMap.Find(name);
+    return TempValue ? *TempValue : nullptr;
 }
 
 std::shared_ptr<FTexture> FResourceMgr::GetTexture(const FWString& name) const
 {
-	auto it = textureMap.find(name);
-	return (it != textureMap.end()) ? it->second : nullptr;
+    auto* TempValue = textureMap.Find(name);
+    return TempValue ? *TempValue : nullptr;
 }
 
 void FResourceMgr::RegisterMesh(FRenderer* renderer, const std::string& name, TArray<FVertexTexture>& vertices, uint32 vCount, TArray<uint32>& indices, uint32 iCount)
@@ -490,17 +498,17 @@ void FResourceMgr::RegisterMesh(FRenderer* renderer, const std::string& name, TA
 	INT numVertices = vCount;
 	UINT numIndices = iCount;
 
-	FVertexSimple* vertexArray = new FVertexSimple[vertices.size()];
-	std::memcpy(vertexArray, vertices.data(), vertices.size() * sizeof(FVertexSimple));
+	FVertexSimple* vertexArray = new FVertexSimple[vertices.Num()];
+	std::memcpy(vertexArray, vertices.GetData(), vertices.Num() * sizeof(FVertexSimple));
 
 	UINT* indexArray = nullptr;
-	if (!indices.empty()) {
-		indexArray = new UINT[indices.size()];
-		std::memcpy(indexArray, indices.data(), indices.size() * sizeof(UINT));
+	if (!indices.IsEmpty()) {
+		indexArray = new UINT[indices.Num()];
+		std::memcpy(indexArray, indices.GetData(), indices.Num() * sizeof(UINT));
 	}
 
-	ID3D11Buffer* vertexBuffer = renderer->CreateVertexTextureBuffer(vertices.data(), vCount * sizeof(FVertexTexture));
-	ID3D11Buffer* indexBuffer = (!indices.empty() && iCount > 0) ? renderer->CreateIndexBuffer(indices, iCount * sizeof(UINT)) : nullptr;
+	ID3D11Buffer* vertexBuffer = renderer->CreateVertexTextureBuffer(vertices.GetData(), vCount * sizeof(FVertexTexture));
+	ID3D11Buffer* indexBuffer = (!indices.IsEmpty() && iCount > 0) ? renderer->CreateIndexBuffer(indices, iCount * sizeof(UINT)) : nullptr;
 	meshMap[name] = std::make_shared<FStaticMesh>(vertexBuffer, vCount, vertexArray, indexBuffer, iCount, indexArray);
 }
 

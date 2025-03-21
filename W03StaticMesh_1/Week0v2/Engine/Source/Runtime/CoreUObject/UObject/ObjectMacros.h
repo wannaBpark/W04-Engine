@@ -1,10 +1,12 @@
 #pragma once
 
-// °´Ã¼ Å¬·¡½º ¸ÅÅ©·Î
-#define DECLARE_CLASS(ClassName, ParentClassName) \
+// ï¿½ï¿½Ã¼ Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½ï¿½
+#define DECLARE_CLASS(TClass, TSuperClass) \
 public: \
+    using Super = TSuperClass; \
+    using ThisClass = TClass; \
     static UClass* StaticClass() { \
-        static UClass ClassInfo(#ClassName, ParentClassName::StaticClass()); \
+        static UClass ClassInfo(#TClass, TSuperClass::StaticClass()); \
         return &ClassInfo; \
     } \
     virtual UClass* GetClass() const override { return StaticClass(); }

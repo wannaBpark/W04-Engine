@@ -1,6 +1,7 @@
 #pragma once
 #include "Define.h"
 #include "UnrealEd/SceneMgr.h"
+#include "UObject/ObjectTypes.h"
 class UObject;
 class UGizmoArrowComponent;
 class UCameraComponent;

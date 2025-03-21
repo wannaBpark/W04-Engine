@@ -1,14 +1,17 @@
 #pragma once
 #include "UObject/Object.h"
-class ActorComponent : public UObject
+#include "UObject/ObjectMacros.h"
+
+class UActorComponent : public UObject
 {
+    DECLARE_CLASS(UActorComponent, UObject)
+
 public:
-    ActorComponent();
-    virtual				~ActorComponent();
+    UActorComponent();
+    virtual ~UActorComponent();
 
-    virtual void		Initialize();
-    virtual void		Update(double deltaTime);
-    virtual void		Release();
-    virtual void		Render();
+    virtual void Initialize();
+    virtual void Update(double deltaTime);
+    virtual void Release();
+    virtual void Render();
 };
-

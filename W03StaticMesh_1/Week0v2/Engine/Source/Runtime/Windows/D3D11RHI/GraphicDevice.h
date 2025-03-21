@@ -3,7 +3,7 @@
 #pragma comment(lib, "d3d11")
 #pragma comment(lib, "d3dcompiler")
 
-#include <windows.h>
+#define _TCHAR_DEFINED
 #include <d3d11.h>
 
 #include "EngineBaseTypes.h"

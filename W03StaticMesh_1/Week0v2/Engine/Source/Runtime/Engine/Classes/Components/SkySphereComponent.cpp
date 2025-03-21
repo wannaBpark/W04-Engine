@@ -1,4 +1,6 @@
 #include "SkySphereComponent.h"
+
+#include "World.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 USkySphereComponent::USkySphereComponent() : UPrimitiveComponent("SkySphere")
 {

@@ -32,7 +32,7 @@ void FEditorViewportClient::LoadConfig()
 
 void FEditorViewportClient::SaveConfig()
 {
-    std::unordered_map<std::string, std::string> config;
+    TMap<FString, FString> config;
     config["CameraSpeedSetting"] = std::to_string(CameraSpeedSetting);
     config["CameraSpeedScalar"] = std::to_string(CameraSpeedScalar);
     config["GridSize"] = std::to_string(GridSize);
@@ -42,8 +42,8 @@ void FEditorViewportClient::SaveConfig()
 TMap<FString, FString> FEditorViewportClient::ReadIniFile(const FString& filePath)
 {
     TMap<FString, FString> config;
-    std::ifstream file(filePath);
-    FString line;
+    std::ifstream file(*filePath);
+    std::string line;
 
     while (std::getline(file, line)) {
         if (line.empty() || line[0] == '[' || line[0] == ';') continue;
@@ -56,11 +56,11 @@ TMap<FString, FString> FEditorViewportClient::ReadIniFile(const FString& filePat
     return config;
 }
 
-void FEditorViewportClient::WriteIniFile(const FString& filePath, const std::unordered_map<FString, FString>& config)
+void FEditorViewportClient::WriteIniFile(const FString& filePath, const TMap<FString, FString>& config)
 {
-    std::ofstream file(filePath);
+    std::ofstream file(*filePath);
     for (const auto& pair : config) {
-        file << pair.first << "=" << pair.second << "\n";
+        file << *pair.Key << "=" << *pair.Value << "\n";
     }
 }
 

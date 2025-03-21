@@ -41,14 +41,14 @@ void UPrimitiveBatch::RenderBatch(const FMatrix& View, const FMatrix& Projection
     UpdateBoundingBoxResources();
     UpdateConeResources();
     UpdateOBBResources();
-    int boundingBoxSize = static_cast<int>(BoundingBoxes.size());
-    int coneSize = static_cast<int>(Cones.size());
-    int obbSize = static_cast<int>(OrientedBoundingBoxes.size());
+    int boundingBoxSize = static_cast<int>(BoundingBoxes.Num());
+    int coneSize = static_cast<int>(Cones.Num());
+    int obbSize = static_cast<int>(OrientedBoundingBoxes.Num());
     FEngineLoop::renderer.UpdateLinePrimitveCountBuffer(boundingBoxSize, coneSize);
     FEngineLoop::renderer.RenderBatch(GridParam, pVertexBuffer, boundingBoxSize, coneSize, ConeSegmentCount, obbSize);
-    BoundingBoxes.clear();
-    Cones.clear();
-    OrientedBoundingBoxes.clear();
+    BoundingBoxes.Empty();
+    Cones.Empty();
+    OrientedBoundingBoxes.Empty();
     FEngineLoop::renderer.PrepareShader();
 }
 void UPrimitiveBatch::InitializeVertexBuffer()
@@ -59,8 +59,8 @@ void UPrimitiveBatch::InitializeVertexBuffer()
 
 void UPrimitiveBatch::UpdateBoundingBoxResources()
 {
-    if (BoundingBoxes.size() > allocatedBoundingBoxCapacity) {
-        allocatedBoundingBoxCapacity = BoundingBoxes.size();
+    if (BoundingBoxes.Num() > allocatedBoundingBoxCapacity) {
+        allocatedBoundingBoxCapacity = BoundingBoxes.Num();
 
         ReleaseBoundingBoxResources();
 
@@ -69,7 +69,7 @@ void UPrimitiveBatch::UpdateBoundingBoxResources()
     }
 
     if (pBoundingBoxBuffer && pBoundingBoxSRV){
-        int boundingBoxCount = static_cast<int>(BoundingBoxes.size());
+        int boundingBoxCount = static_cast<int>(BoundingBoxes.Num());
         FEngineLoop::renderer.UpdateBoundingBoxBuffer(pBoundingBoxBuffer, BoundingBoxes, boundingBoxCount);
     }
 }
@@ -82,8 +82,8 @@ void UPrimitiveBatch::ReleaseBoundingBoxResources()
 
 void UPrimitiveBatch::UpdateConeResources()
 {
-    if (Cones.size() > allocatedConeCapacity) {
-        allocatedConeCapacity = Cones.size();
+    if (Cones.Num() > allocatedConeCapacity) {
+        allocatedConeCapacity = Cones.Num();
 
         ReleaseConeResources();
 
@@ -92,7 +92,7 @@ void UPrimitiveBatch::UpdateConeResources()
     }
 
     if (pConesBuffer && pConesSRV) {
-        int coneCount = static_cast<int>(Cones.size());
+        int coneCount = static_cast<int>(Cones.Num());
         FEngineLoop::renderer.UpdateConesBuffer(pConesBuffer, Cones, coneCount);
     }
 }
@@ -105,8 +105,8 @@ void UPrimitiveBatch::ReleaseConeResources()
 
 void UPrimitiveBatch::UpdateOBBResources()
 {
-    if (OrientedBoundingBoxes.size() > allocatedOBBCapacity) {
-        allocatedOBBCapacity = OrientedBoundingBoxes.size();
+    if (OrientedBoundingBoxes.Num() > allocatedOBBCapacity) {
+        allocatedOBBCapacity = OrientedBoundingBoxes.Num();
 
         ReleaseOBBResources();
 
@@ -115,7 +115,7 @@ void UPrimitiveBatch::UpdateOBBResources()
     }
 
     if (pOBBBuffer && pOBBSRV) {
-        int obbCount = static_cast<int>(OrientedBoundingBoxes.size());
+        int obbCount = static_cast<int>(OrientedBoundingBoxes.Num());
         FEngineLoop::renderer.UpdateOBBBuffer(pOBBBuffer, OrientedBoundingBoxes, obbCount);
     }
 }
@@ -158,7 +158,7 @@ void UPrimitiveBatch::RenderAABB(const FBoundingBox& localAABB, const FVector& c
     FBoundingBox BoundingBox;
     BoundingBox.min = min;
     BoundingBox.max = max;
-    BoundingBoxes.push_back(BoundingBox);
+    BoundingBoxes.Add(BoundingBox);
 }
 void UPrimitiveBatch::RenderOBB(const FBoundingBox& localAABB, const FVector& center, const FMatrix& modelMatrix)
 {
@@ -181,7 +181,7 @@ void UPrimitiveBatch::RenderOBB(const FBoundingBox& localAABB, const FVector& ce
         faceBB.corners[i] =  center + FMatrix::TransformVector(localVertices[i], modelMatrix);
     }
 
-    OrientedBoundingBoxes.push_back(faceBB);
+    OrientedBoundingBoxes.Add(faceBB);
 
 }
 
@@ -197,6 +197,6 @@ void UPrimitiveBatch::AddCone(const FVector& center, float radius, float height,
     cone.ConeHeight = height;
     cone.Color = color;
     cone.ConeSegmentCount = ConeSegmentCount;
-    Cones.push_back(cone);
+    Cones.Add(cone);
 }
 

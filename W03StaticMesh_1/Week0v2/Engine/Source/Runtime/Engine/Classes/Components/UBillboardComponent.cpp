@@ -6,8 +6,11 @@
 #include "Define.h"
 #include <DirectXMath.h>
 
-UBillboardComponent::UBillboardComponent() : 
-	UPrimitiveComponent("Quad")
+#include "World.h"
+#include "Math/MathUtility.h"
+
+UBillboardComponent::UBillboardComponent()
+    : UPrimitiveComponent("Quad")
 {
 }
 
@@ -113,7 +116,7 @@ int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 	TArray<FVector> quad;
 	for (int i = 0; i < 4; i++)
 	{
-		quad.push_back(FVector(quadTextureVertices[i].x, 
+		quad.Add(FVector(quadTextureVertices[i].x, 
 			quadTextureVertices[i].y, quadTextureVertices[i].z));
 	}
 	return CheckPickingOnNDC(quad,pfNearHitDistance);
@@ -209,21 +212,21 @@ bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& checkQuad, fl
 	float minY = FLT_MAX;
 	float maxY = FLT_MIN;
 	float avgZ = 0.0f;
-	for (int i = 0; i < checkQuad.size(); i++)
+	for (int i = 0; i < checkQuad.Num(); i++)
 	{
 		FVector4 v = FVector4(checkQuad[i].x, checkQuad[i].y, checkQuad[i].z, 1.0f);
 		FVector4 clipPos = FMatrix::TransformVector(v, MVP);
 		
 		if (clipPos.a != 0)	clipPos = clipPos/clipPos.a;
 
-		minX = min(minX, clipPos.x);
-		maxX = max(maxX, clipPos.x);
-		minY = min(minY, clipPos.y);
-		maxY = max(maxY, clipPos.y);
+		minX = FMath::Min(minX, clipPos.x);
+		maxX = FMath::Max(maxX, clipPos.x);
+		minY = FMath::Min(minY, clipPos.y);
+		maxY = FMath::Max(maxY, clipPos.y);
 		avgZ += clipPos.z;
 	}
 
-	avgZ /= checkQuad.size();
+	avgZ /= checkQuad.Num();
 
 	if (pickPosition.x >= minX && pickPosition.x <= maxX &&
 		pickPosition.y >= minY && pickPosition.y <= maxY)

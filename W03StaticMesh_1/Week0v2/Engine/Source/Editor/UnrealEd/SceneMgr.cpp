@@ -13,12 +13,12 @@
 
 using json = nlohmann::json;
 
-SceneData FSceneMgr::ParseSceneData(const std::string& jsonStr)
+SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
 {
     SceneData sceneData;
 
     try {
-        json j = json::parse(jsonStr);
+        json j = json::parse(*jsonStr);
 
         // 버전과 NextUUID 읽기
         sceneData.Version = j["Version"].get<int>();
@@ -32,27 +32,27 @@ SceneData FSceneMgr::ParseSceneData(const std::string& jsonStr)
             UObject* obj = nullptr;
             if (value.contains("Type"))
             {
-                if (value["Type"].get<FString>() == "Sphere")
+                if (value["Type"].get<std::string>() == "Sphere")
                 {
                     obj = FObjectFactory::ConstructObject<USphereComp>("Sphere");
                 }
-                else if (value["Type"].get<FString>() == "Cube")
+                else if (value["Type"].get<std::string>() == "Cube")
                 {
                     obj = FObjectFactory::ConstructObject<UCubeComp>("Cube");
                 }
-                else if (value["Type"].get<FString>() == "Arrow")
+                else if (value["Type"].get<std::string>() == "Arrow")
                 {
                     obj = FObjectFactory::ConstructObject<UGizmoArrowComponent>();
                 }
-                else if (value["Type"].get<FString>() == "Quad")
+                else if (value["Type"].get<std::string>() == "Quad")
                 {
                     obj = FObjectFactory::ConstructObject<UBillboardComponent>("Quad");
                 }  
-                else if (value["Type"].get<FString>() == "SpotLight")
+                else if (value["Type"].get<std::string>() == "SpotLight")
                 {
                     obj = FObjectFactory::ConstructObject<ULightComponentBase>("SpotLight");
                 }
-                else if (value["Type"].get<FString>() == "SkySphere") {
+                else if (value["Type"].get<std::string>() == "SkySphere") {
 
                     obj = FObjectFactory::ConstructObject<USkySphereComponent>("SkySphere");
                     USkySphereComponent* skySphere = static_cast<USkySphereComponent*>(obj);
@@ -61,22 +61,22 @@ SceneData FSceneMgr::ParseSceneData(const std::string& jsonStr)
                
             }
             USceneComponent* sceneComp = static_cast<USceneComponent*>(obj);
-            if (value.contains("Location")) sceneComp->SetLocation(FVector(value["Location"].get<TArray<float>>()[0],
-                value["Location"].get<TArray<float>>()[1],
-                value["Location"].get<TArray<float>>()[2]));
-            if (value.contains("Rotation")) sceneComp->SetRotation(FVector(value["Rotation"].get<TArray<float>>()[0],
-                value["Rotation"].get<TArray<float>>()[1],
-                value["Rotation"].get<TArray<float>>()[2]));
-            if (value.contains("Scale")) sceneComp->SetScale(FVector(value["Scale"].get<TArray<float>>()[0],
-                value["Scale"].get<TArray<float>>()[1],
-                value["Scale"].get<TArray<float>>()[2]));
+            if (value.contains("Location")) sceneComp->SetLocation(FVector(value["Location"].get<std::vector<float>>()[0],
+                value["Location"].get<std::vector<float>>()[1],
+                value["Location"].get<std::vector<float>>()[2]));
+            if (value.contains("Rotation")) sceneComp->SetRotation(FVector(value["Rotation"].get<std::vector<float>>()[0],
+                value["Rotation"].get<std::vector<float>>()[1],
+                value["Rotation"].get<std::vector<float>>()[2]));
+            if (value.contains("Scale")) sceneComp->SetScale(FVector(value["Scale"].get<std::vector<float>>()[0],
+                value["Scale"].get<std::vector<float>>()[1],
+                value["Scale"].get<std::vector<float>>()[2]));
             if (value.contains("Type")) {
                 UPrimitiveComponent* primitiveComp = dynamic_cast<UPrimitiveComponent*>(sceneComp);
                 if (primitiveComp) {
-                    primitiveComp->SetType(value["Type"].get<FString>());
+                    primitiveComp->SetType(value["Type"].get<std::string>());
                 }
                 else {
-                    FString name = value["Type"].get<FString>();
+                    std::string name = value["Type"].get<std::string>();
                     sceneComp->SetName(name);
                 }
             }
@@ -89,15 +89,15 @@ SceneData FSceneMgr::ParseSceneData(const std::string& jsonStr)
             const json& value = it.value();
             UObject* obj = FObjectFactory::ConstructObject<UCameraComponent>("Camera");
             UCameraComponent* camera = static_cast<UCameraComponent*>(obj);
-            if (value.contains("Location")) camera->SetLocation(FVector(value["Location"].get<TArray<float>>()[0],
-                    value["Location"].get<TArray<float>>()[1],
-                    value["Location"].get<TArray<float>>()[2]));
-            if (value.contains("Rotation")) camera->SetRotation(FVector(value["Rotation"].get<TArray<float>>()[0],
-                value["Rotation"].get<TArray<float>>()[1],
-                value["Rotation"].get<TArray<float>>()[2]));
-            if (value.contains("Rotation")) camera->SetRotation(FVector(value["Rotation"].get<TArray<float>>()[0],
-                value["Rotation"].get<TArray<float>>()[1],
-                value["Rotation"].get<TArray<float>>()[2]));
+            if (value.contains("Location")) camera->SetLocation(FVector(value["Location"].get<std::vector<float>>()[0],
+                    value["Location"].get<std::vector<float>>()[1],
+                    value["Location"].get<std::vector<float>>()[2]));
+            if (value.contains("Rotation")) camera->SetRotation(FVector(value["Rotation"].get<std::vector<float>>()[0],
+                value["Rotation"].get<std::vector<float>>()[1],
+                value["Rotation"].get<std::vector<float>>()[2]));
+            if (value.contains("Rotation")) camera->SetRotation(FVector(value["Rotation"].get<std::vector<float>>()[0],
+                value["Rotation"].get<std::vector<float>>()[1],
+                value["Rotation"].get<std::vector<float>>()[2]));
             if (value.contains("FOV")) camera->SetFOV(value["FOV"].get<float>());
             if (value.contains("NearClip")) camera->SetNearClip(value["NearClip"].get<float>());
             if (value.contains("FarClip")) camera->SetNearClip(value["FarClip"].get<float>());
@@ -108,17 +108,17 @@ SceneData FSceneMgr::ParseSceneData(const std::string& jsonStr)
         FString errorMessage = "Error parsing JSON: ";
         errorMessage += e.what();
 
-        MessageBoxA(NULL, errorMessage.c_str(), "Error", MB_OK | MB_ICONERROR);
+        MessageBoxA(NULL, *errorMessage, "Error", MB_OK | MB_ICONERROR);
     }
 
     return sceneData;
 }
 
-FString FSceneMgr::LoadSceneFromFile(const std::string& filename)
+FString FSceneMgr::LoadSceneFromFile(const FString& filename)
 {
-    std::ifstream inFile(filename);
+    std::ifstream inFile(*filename);
     if (!inFile) {
-        UE_LOG(LogLevel::Error, "Failed to open file for reading: %s", filename.c_str());
+        UE_LOG(LogLevel::Error, "Failed to open file for reading: %s", *filename);
         return FString();
     }
 
@@ -144,54 +144,55 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
     j["Version"] = sceneData.Version;
     j["NextUUID"] = sceneData.NextUUID;
 
-    // Primitives 처리 (C++14 스타일)
-    
-    for (auto it = sceneData.Primitives.begin(); it != sceneData.Primitives.end(); ++it) {
-        int id = it->first;
-        USceneComponent* primitive = static_cast<USceneComponent*>(it->second);
-        TArray<float> Location = { primitive->GetWorldLocation().x,primitive->GetWorldLocation().y,primitive->GetWorldLocation().z };
-        TArray<float> Rotation = { primitive->GetWorldRotation().x,primitive->GetWorldRotation().y,primitive->GetWorldRotation().z };
-        TArray<float> Scale = { primitive->GetWorldScale().x,primitive->GetWorldScale().y,primitive->GetWorldScale().z };
+    // Primitives 처리 (C++17 스타일)
+    for (const auto& [Id, Obj] : sceneData.Primitives)
+    {
+        USceneComponent* primitive = static_cast<USceneComponent*>(Obj);
+        std::vector<float> Location = { primitive->GetWorldLocation().x,primitive->GetWorldLocation().y,primitive->GetWorldLocation().z };
+        std::vector<float> Rotation = { primitive->GetWorldRotation().x,primitive->GetWorldRotation().y,primitive->GetWorldRotation().z };
+        std::vector<float> Scale = { primitive->GetWorldScale().x,primitive->GetWorldScale().y,primitive->GetWorldScale().z };
 
-        FString primitiveName = static_cast<USceneComponent*>(primitive)->GetName().ToString();
-         size_t pos = primitiveName.rfind('_');
-        if (pos != std::string::npos) {
+        std::string primitiveName = *static_cast<USceneComponent*>(primitive)->GetName();
+        size_t pos = primitiveName.rfind('_');
+        if (pos != INDEX_NONE) {
             primitiveName = primitiveName.substr(0, pos);
         }
-        j["Primitives"][std::to_string(id)] = {
+        j["Primitives"][std::to_string(Id)] = {
             {"Location", Location},
             {"Rotation", Rotation},
             {"Scale", Scale},
             {"Type",primitiveName}
         };
     }
-    for (auto it = sceneData.Cameras.begin(); it != sceneData.Cameras.end(); ++it)
+
+    for (const auto& [id, camera] : sceneData.Cameras)
     {
-        int id = it->first;
-        UCameraComponent* camera = static_cast<UCameraComponent*>(it->second);
-        TArray<float> Location = { camera->GetWorldLocation().x,camera->GetWorldLocation().y,camera->GetWorldLocation().z };
-        TArray<float> Rotation = { 0,camera->GetWorldRotation().y,camera->GetWorldRotation().z };
-        float FOV = camera->GetFOV();
-        float nearClip = camera->GetNearClip();
-        float farClip = camera->GetFarClip();
+        UCameraComponent* cameraComponent = static_cast<UCameraComponent*>(camera);
+        TArray<float> Location = { cameraComponent->GetWorldLocation().x, cameraComponent->GetWorldLocation().y, cameraComponent->GetWorldLocation().z };
+        TArray<float> Rotation = { 0.0f, cameraComponent->GetWorldRotation().y, cameraComponent->GetWorldRotation().z };
+        float FOV = cameraComponent->GetFOV();
+        float nearClip = cameraComponent->GetNearClip();
+        float farClip = cameraComponent->GetFarClip();
+    
         j["PerspectiveCamera"][std::to_string(id)] = {
-        {"Location", Location},
-        {"Rotation", Rotation},
-        {"FOV",FOV},
-        {"NearClip",nearClip },
-        {"FarClip",farClip}
+            {"Location", Location},
+            {"Rotation", Rotation},
+            {"FOV", FOV},
+            {"NearClip", nearClip},
+            {"FarClip", farClip}
         };
     }
+
 
     return j.dump(4); // 4는 들여쓰기 수준
 }
 
-bool FSceneMgr::SaveSceneToFile(const std::string& filename, const SceneData& sceneData)
+bool FSceneMgr::SaveSceneToFile(const FString& filename, const SceneData& sceneData)
 {
-    std::ofstream outFile(filename);
+    std::ofstream outFile(*filename);
     if (!outFile) {
         FString errorMessage = "Failed to open file for writing: ";
-        MessageBoxA(NULL, errorMessage.c_str(), "Error", MB_OK | MB_ICONERROR);
+        MessageBoxA(NULL, *errorMessage, "Error", MB_OK | MB_ICONERROR);
         return false;
     }
 

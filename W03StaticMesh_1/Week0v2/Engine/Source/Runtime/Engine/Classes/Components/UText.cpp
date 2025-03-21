@@ -1,4 +1,6 @@
 #include "UText.h"
+
+#include "World.h"
 #include "Engine/Source/Runtime/Engine/Camera/CameraComponent.h"
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
@@ -47,7 +49,7 @@ void UText::Render()
 }
 void UText::ClearText()
 {
-	vertexTextureArr.clear();
+	vertexTextureArr.Empty();
 }
 void UText::SetRowColumnCount(int _cellsPerRow, int _cellsPerColumn) 
 {
@@ -89,10 +91,10 @@ int UText::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float
 		FVertexSimple tmp ;
 		tmp.x = vtmp.x ;tmp.y = vtmp.y; tmp.z = vtmp.z;
 		//UE_LOG(LogLevel::Warning, "Text x : %f y: %f z : %f", tmp.x, tmp.y, tmp.z);
-		verArr.push_back(tmp);
+		verArr.Add(tmp);
 	}
-	FVertexSimple* vertices = verArr.data();
-	int vCount = verArr.size();
+	FVertexSimple* vertices = verArr.GetData();
+	int vCount = verArr.Num();
 	UINT* indices = nullptr;
 	int iCount = 0;
 
@@ -132,9 +134,9 @@ int UText::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float
 	return nIntersections;
 	*/
 	
-	for (int i = 0; i < vertexTextureArr.size(); i++)
+	for (int i = 0; i < vertexTextureArr.Num(); i++)
 	{
-		quad.push_back(FVector(vertexTextureArr[i].x,
+		quad.Add(FVector(vertexTextureArr[i].x,
 			vertexTextureArr[i].y, vertexTextureArr[i].z));
 	}
 
@@ -149,8 +151,8 @@ void UText::SetText(FWString _text)
 	{
 		Console::GetInstance().AddLog(LogLevel::Warning, "Text is empty");
 
-		vertexTextureArr.clear();
-		quad.clear();
+		vertexTextureArr.Empty();
+		quad.Empty();
 
 		// 기존 버텍스 버퍼가 있다면 해제
 		if (vertexTextBuffer)
@@ -201,20 +203,20 @@ void UText::SetText(FWString _text)
 		rightDown.u += (nTexelUOffset * startU);
 		rightDown.v += (nTexelVOffset * startV);
 
-		vertexTextureArr.push_back(leftUP);
-		vertexTextureArr.push_back(rightUP);
-		vertexTextureArr.push_back(leftDown);
-		vertexTextureArr.push_back(rightUP);
-		vertexTextureArr.push_back(rightDown);
-		vertexTextureArr.push_back(leftDown);
+		vertexTextureArr.Add(leftUP);
+		vertexTextureArr.Add(rightUP);
+		vertexTextureArr.Add(leftDown);
+		vertexTextureArr.Add(rightUP);
+		vertexTextureArr.Add(rightDown);
+		vertexTextureArr.Add(leftDown);
 	}
-	UINT byteWidth = static_cast<UINT>(vertexTextureArr.size() * sizeof(FVertexTexture));
+	UINT byteWidth = static_cast<UINT>(vertexTextureArr.Num() * sizeof(FVertexTexture));
 
-	float lastX = -1.0f + quadSize* _text.size();
-	quad.push_back(FVector(-1.0f,1.0f,0.0f));
-	quad.push_back(FVector(-1.0f,-1.0f,0.0f));
-	quad.push_back(FVector(lastX,1.0f,0.0f));
-	quad.push_back(FVector(lastX,-1.0f,0.0f));
+	float lastX = -1.0f + quadSize * _text.size();
+	quad.Add(FVector(-1.0f,1.0f,0.0f));
+	quad.Add(FVector(-1.0f,-1.0f,0.0f));
+	quad.Add(FVector(lastX,1.0f,0.0f));
+	quad.Add(FVector(lastX,-1.0f,0.0f));
 
 	CreateTextTextureVertexBuffer(vertexTextureArr,byteWidth);
 }
@@ -314,14 +316,14 @@ void UText::setStartUV(char alphabet, float& outStartU, float& outStartV)
 
 void UText::CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex,UINT byteWidth)
 {
-	numTextVertices = static_cast<UINT>(_vertex.size());
+	numTextVertices = static_cast<UINT>(_vertex.Num());
 	// 2. Create a vertex buffer
 	D3D11_BUFFER_DESC vertexbufferdesc = {};
 	vertexbufferdesc.ByteWidth = byteWidth;
 	vertexbufferdesc.Usage = D3D11_USAGE_IMMUTABLE; // will never be updated 
 	vertexbufferdesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
-	D3D11_SUBRESOURCE_DATA vertexbufferSRD = { _vertex.data()};
+	D3D11_SUBRESOURCE_DATA vertexbufferSRD = { _vertex.GetData()};
 
 	ID3D11Buffer* vertexBuffer;
 	
@@ -332,7 +334,7 @@ void UText::CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex,
 	}
 	vertexTextBuffer = vertexBuffer;
 
-	//FEngineLoop::resourceMgr.RegisterMesh(&FEngineLoop::renderer, "JungleText", _vertex, _vertex.size() * sizeof(FVertexTexture),
+	//FEngineLoop::resourceMgr.RegisterMesh(&FEngineLoop::renderer, "JungleText", _vertex, _vertex.Num() * sizeof(FVertexTexture),
 	//	nullptr, 0);
 
 }

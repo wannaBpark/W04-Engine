@@ -1,7 +1,6 @@
 #pragma once
 
 
-// ¿­°ÅÇü
 enum OBJECTS
 {
 	OBJ_SPHERE,

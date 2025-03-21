@@ -80,7 +80,7 @@ void USceneComponent::AddScale(FVector _added)
 
 void USceneComponent::AddChild(USceneComponent* _newChild)
 {
-	AttachChildren.push_back(_newChild);
+	AttachChildren.Add(_newChild);
 }
 
 FVector USceneComponent::GetWorldRotation()

@@ -3,6 +3,7 @@
 #pragma comment(lib, "d3d11")
 #pragma comment(lib, "d3dcompiler")
 
+#define _TCHAR_DEFINED
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include "EngineBaseTypes.h"
@@ -64,8 +65,8 @@ public:
     void ResetPixelShader();
     void CreateShader();
 
-    void SetVertexShader(const FWString filename, FString funcname, FString version);
-    void SetPixelShader(const FWString filename, FString funcname, FString version);
+    void SetVertexShader(const FWString& filename, const FString& funcname, const FString& version);
+    void SetPixelShader(const FWString& filename, const FString& funcname, const FString& version);
     
     void ChangeViewMode(EViewModeIndex evi);
     

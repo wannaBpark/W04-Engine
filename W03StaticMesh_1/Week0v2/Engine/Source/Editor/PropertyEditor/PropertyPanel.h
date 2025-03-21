@@ -1,5 +1,4 @@
 #pragma once
-#include<Windows.h>
 #include "Define.h"
 class UWorld;
 

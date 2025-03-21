@@ -2,10 +2,6 @@
 #include <cmath>
 #include <algorithm>
 
-// 기본 타입 
-#include "CoreTypes.h"
-
-
 // 수학 관련
 #include "Math/MathDefines.h"
 #include "Math/Vector.h"
@@ -13,20 +9,11 @@
 #include "Math/Matrix.h"
 #include "Math/Quat.h"
 
-// 객체 매크로 정의 
-#include "UObject/ObjectMacros.h"
-#include "UObject/ObjectTypes.h"
-
-
-#pragma once
-
 
 #define UE_LOG Console::GetInstance().AddLog
-#define Super __super
-
 
 #include "UserInterface/Console.h"
-#include "NameTypes.h"
+
 
 struct FVertexSimple
 {

@@ -91,7 +91,7 @@ void FRenderer::ResetPixelShader()
     Graphics->DeviceContext->PSSetShader(nullptr, nullptr, 0);
     PixelShader->Release();
 }
-void FRenderer::SetVertexShader(const FWString filename, FString funcname, FString version)
+void FRenderer::SetVertexShader(const FWString& filename, const FString& funcname, const FString& version)
 {
     // ���� �߻��� ���ɼ��� ����
     if (Graphics == nullptr)
@@ -102,11 +102,11 @@ void FRenderer::SetVertexShader(const FWString filename, FString funcname, FStri
         InputLayout->Release();
     ID3DBlob* vertexshaderCSO;
 
-    D3DCompileFromFile(filename.c_str(), nullptr, nullptr, funcname.c_str(), version.c_str(), 0, 0, &vertexshaderCSO, nullptr);
+    D3DCompileFromFile(filename.c_str(), nullptr, nullptr, *funcname, *version, 0, 0, &vertexshaderCSO, nullptr);
     Graphics->Device->CreateVertexShader(vertexshaderCSO->GetBufferPointer(), vertexshaderCSO->GetBufferSize(), nullptr, &VertexShader);
     vertexshaderCSO->Release();
 }
-void FRenderer::SetPixelShader(const FWString filename, FString funcname, FString version)
+void FRenderer::SetPixelShader(const FWString& filename, const FString& funcname, const FString& version)
 {
     // ���� �߻��� ���ɼ��� ����
     if (Graphics == nullptr)
@@ -114,7 +114,7 @@ void FRenderer::SetPixelShader(const FWString filename, FString funcname, FStrin
     if (VertexShader != nullptr)
         ResetVertexShader();
     ID3DBlob* pixelshaderCSO;
-    D3DCompileFromFile(filename.c_str(), nullptr, nullptr, funcname.c_str(), version.c_str(), 0, 0, &pixelshaderCSO, nullptr);
+    D3DCompileFromFile(filename.c_str(), nullptr, nullptr, *funcname, *version, 0, 0, &pixelshaderCSO, nullptr);
     Graphics->Device->CreatePixelShader(pixelshaderCSO->GetBufferPointer(), pixelshaderCSO->GetBufferSize(), nullptr, &PixelShader);
 
     pixelshaderCSO->Release();
@@ -194,7 +194,7 @@ ID3D11Buffer* FRenderer::CreateVertexBuffer(const TArray<FVertexSimple>& vertice
     vertexbufferdesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
     D3D11_SUBRESOURCE_DATA vertexbufferSRD;
-    vertexbufferSRD.pSysMem = vertices.data();
+    vertexbufferSRD.pSysMem = vertices.GetData();
 
     ID3D11Buffer* vertexBuffer;
 
@@ -233,7 +233,7 @@ ID3D11Buffer* FRenderer::CreateIndexBuffer(const TArray<uint32>& indices, UINT b
     indexbufferdesc.ByteWidth = byteWidth;	// buffer ũ�� ����
 
     D3D11_SUBRESOURCE_DATA indexbufferSRD;
-    indexbufferSRD.pSysMem = indices.data();
+    indexbufferSRD.pSysMem = indices.GetData();
 
     ID3D11Buffer* indexBuffer;
 
@@ -733,7 +733,7 @@ void FRenderer::UpdateBoundingBoxBuffer(ID3D11Buffer* pBoundingBoxBuffer,const T
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     Graphics->DeviceContext->Map(pBoundingBoxBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     FBoundingBox* pData = reinterpret_cast<FBoundingBox*>(mappedResource.pData);
-    for (int i = 0; i < BoundingBoxes.size(); ++i)
+    for (int i = 0; i < BoundingBoxes.Num(); ++i)
     {
           pData[i] = BoundingBoxes[i];
     }
@@ -746,7 +746,7 @@ void FRenderer::UpdateOBBBuffer(ID3D11Buffer* pBoundingBoxBuffer, const TArray<F
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     Graphics->DeviceContext->Map(pBoundingBoxBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     FOBB* pData = reinterpret_cast<FOBB*>(mappedResource.pData);
-    for (int i = 0; i < BoundingBoxes.size(); ++i)
+    for (int i = 0; i < BoundingBoxes.Num(); ++i)
     {
         pData[i] = BoundingBoxes[i];
     }
@@ -759,7 +759,7 @@ void FRenderer::UpdateConesBuffer(ID3D11Buffer* pConeBuffer, const TArray<FCone>
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     Graphics->DeviceContext->Map(pConeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     FCone* pData = reinterpret_cast<FCone*>(mappedResource.pData);
-    for (int i = 0; i < Cones.size(); ++i)
+    for (int i = 0; i < Cones.Num(); ++i)
     {
         pData[i] = Cones[i];
     }

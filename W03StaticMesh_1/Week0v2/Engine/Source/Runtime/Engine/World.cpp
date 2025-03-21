@@ -55,7 +55,7 @@ void UWorld::CreateBaseObject()
 	skySphere->SetScale(FVector( -300.0f, -300.0f, -300.0f));
 	skySphere->SetRotation(FVector(-167.0f, 25.0f, -135.0f));
 
-	GUObjectArray.push_back(skySphere);*/
+	GUObjectArray.Add(skySphere);*/
 
 
 	//테스트용 텍스트
@@ -68,7 +68,7 @@ void UWorld::CreateBaseObject()
 	billboard = static_cast<UBillboardComponent*>(billboard);
 	UBillboardComponent* castBillboard = static_cast<UBillboardComponent*>(billboard);
 	castBillboard->SetTexture(L"Assets/Texture/emart.png");
-	GUObjectArray.push_back(billboard);
+	GUObjectArray.Add(billboard);
 
 
 	/*
@@ -80,7 +80,7 @@ void UWorld::CreateBaseObject()
 	castUUID->SetUUID(sphere->UUID);
 	castUUID->SetScale(FVector(0.25f, 0.25f, 0.25f));
 	//SetText전에 RowColumn 반드시 설정
-	GUObjectArray.push_back(uuid);
+	GUObjectArray.Add(uuid);
 
 	castUUID->SetUUIDParent(sphere);
 	//castBillboard->SetParent(sphere);
@@ -125,7 +125,7 @@ void UWorld::Release()
 	{
 		delete iter;
 	}
-	GUObjectArray.clear();
+	GUObjectArray.Empty();
 	pickingObj = nullptr;
 	pickingGizmo = nullptr;
 	ReleaseBaseObject();
@@ -154,13 +154,13 @@ void UWorld::SpawnObject(OBJECTS _Obj)
 	{
 	case OBJ_SPHERE:
 		pObj = FObjectFactory::ConstructObject<USphereComp>("Sphere");
-		GUObjectArray.push_back(pObj);
+		GUObjectArray.Add(pObj);
 		break;
 	case OBJ_TRIANGLE:
 		break;
 	case OBJ_CUBE:
 		pObj = FObjectFactory::ConstructObject<UCubeComp>("Cube");
-		GUObjectArray.push_back(pObj);
+		GUObjectArray.Add(pObj);
 		break;
 	case OBJ_SpotLight:
 	{
@@ -168,7 +168,7 @@ void UWorld::SpawnObject(OBJECTS _Obj)
 		spotLight = static_cast<ULightComponentBase*>(spotLight);
 		ULightComponentBase* castLight = static_cast<ULightComponentBase*>(spotLight);
 
-		GUObjectArray.push_back(spotLight);
+		GUObjectArray.Add(spotLight);
 		break;
 	}
 	case OBJ_PARTICLE:
@@ -178,7 +178,7 @@ void UWorld::SpawnObject(OBJECTS _Obj)
 		castParticle->SetTexture(L"Assets/Texture/T_Explosion_SubUV.png");
 		castParticle->SetRowColumnCount(6, 6);
 		castParticle->SetScale(FVector(10.0f, 10.0f, 1.0f));
-		GUObjectArray.push_back(castParticle);
+		GUObjectArray.Add(castParticle);
 	}
 	break;
 	case OBJ_Text:
@@ -189,7 +189,7 @@ void UWorld::SpawnObject(OBJECTS _Obj)
 		castText->SetRowColumnCount(106, 106);
 		castText->SetText(L"안녕하세요 Jungle 1");
 		//SetText전에 RowColumn 반드시 설정
-		GUObjectArray.push_back(text);
+		GUObjectArray.Add(text);
 	}
 	break;
 	default:
@@ -204,7 +204,7 @@ void UWorld::LoadData(SceneData& _Data)
 	CreateBaseObject();
 	for (auto iter : _Data.Primitives)
 	{
-		GUObjectArray.push_back(iter.second);
+		GUObjectArray.Add(iter.Value);
 	}
 
     camera = static_cast<UCameraComponent*>(_Data.Cameras[0]);
@@ -249,27 +249,26 @@ void UWorld::SetPickingObj(UObject* _Obj)
 void UWorld::DeleteObj(UObject* _Obj)
 {
 	UObject* tmpObj = _Obj;
-	Trashbin.erase(std::find(GUObjectArray.begin(), GUObjectArray.end(), _Obj));
+    Trashbin.Remove(tmpObj);
 	delete tmpObj;
 }
 
 void UWorld::ThrowAwayObj(UObject* _Obj)
 {
-	Trashbin.push_back(_Obj);
+	Trashbin.Add(_Obj);
 }
 
 void UWorld::CleanUp()
 {
-	if (Trashbin.empty())
+	if (Trashbin.IsEmpty())
 		return;
 
-	for (auto it = Trashbin.begin(); it != Trashbin.end();)
-	{
-		/*DeleteObj(it);*/
-		GUObjectArray.erase(std::remove(GUObjectArray.begin(), GUObjectArray.end(), (*it)), GUObjectArray.end());
-		delete (*it);
-		it = Trashbin.erase(it);
-	}
+    for (const auto& Obj : Trashbin)
+    {
+        GUObjectArray.Remove(Obj);
+        delete Obj;
+    }
+    Trashbin.Empty();
 }
 
 void UWorld::SetPickingGizmo(UObject* _Obj)

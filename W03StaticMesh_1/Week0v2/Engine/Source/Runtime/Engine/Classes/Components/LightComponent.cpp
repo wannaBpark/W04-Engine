@@ -5,8 +5,8 @@
 
 ULightComponentBase::ULightComponentBase()
 {
-    FString name = "SpotLight";
-    SetName(name);
+    // FString name = "SpotLight";
+    // SetName(name);
     InitializeLight();
 }
 
@@ -19,12 +19,12 @@ void ULightComponentBase::SetColor(FVector4 newColor)
     color = newColor;
 }
 
-FVector4 ULightComponentBase::GetColor()
+FVector4 ULightComponentBase::GetColor() const
 {
     return color;
 }
 
-float ULightComponentBase::GetRadius()
+float ULightComponentBase::GetRadius() const
 {
     return radius;
 }

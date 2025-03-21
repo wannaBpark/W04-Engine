@@ -50,7 +50,7 @@ public:
     {
         uint32 id = UEngineStatics::GenUUID();
         FString newName = FString(Name) + "_" + std::to_string(id);
-        UE_LOG(LogLevel::Display, "Created New Object : %s", newName.c_str());
+        UE_LOG(LogLevel::Display, "Created New Object : %s", *newName);
         UObject* obj = new T;
         obj->SetName(newName);
         obj->UUID = id;
