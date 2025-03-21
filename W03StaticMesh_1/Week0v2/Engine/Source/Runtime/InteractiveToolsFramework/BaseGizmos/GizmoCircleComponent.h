@@ -8,9 +8,6 @@ class UGizmoCircleComponent : public UGizmoBaseComponent
 public:
     UGizmoCircleComponent();
     virtual ~UGizmoCircleComponent() override;
-    //virtual void Update();
-    //virtual bool Intersects(const FVector& rayOrigin, const FVector& rayDir, float& dist);
-    //virtual bool PickObjectByRayIntersection(const FVector& pickPosition, const FMatrix& viewMatrix, float* hitDistance) override;
     virtual bool IntersectsRay(const FVector& rayOrigin, const FVector& rayDir, float& dist);
     virtual void Render() override;
 

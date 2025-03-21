@@ -34,11 +34,11 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
             {
                 if (value["Type"].get<std::string>() == "Sphere")
                 {
-                    obj = FObjectFactory::ConstructObject<USphereComp>("Sphere");
+                    obj = FObjectFactory::ConstructObject<USphereComp>();
                 }
                 else if (value["Type"].get<std::string>() == "Cube")
                 {
-                    obj = FObjectFactory::ConstructObject<UCubeComp>("Cube");
+                    obj = FObjectFactory::ConstructObject<UCubeComp>();
                 }
                 else if (value["Type"].get<std::string>() == "Arrow")
                 {
@@ -46,15 +46,15 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
                 }
                 else if (value["Type"].get<std::string>() == "Quad")
                 {
-                    obj = FObjectFactory::ConstructObject<UBillboardComponent>("Quad");
+                    obj = FObjectFactory::ConstructObject<UBillboardComponent>();
                 }  
                 else if (value["Type"].get<std::string>() == "SpotLight")
                 {
-                    obj = FObjectFactory::ConstructObject<ULightComponentBase>("SpotLight");
+                    obj = FObjectFactory::ConstructObject<ULightComponentBase>();
                 }
                 else if (value["Type"].get<std::string>() == "SkySphere") {
 
-                    obj = FObjectFactory::ConstructObject<USkySphereComponent>("SkySphere");
+                    obj = FObjectFactory::ConstructObject<USkySphereComponent>();
                     USkySphereComponent* skySphere = static_cast<USkySphereComponent*>(obj);
                     skySphere->SetTexture(L"Assets/Texture/ocean_sky.jpg");
                 }
@@ -87,7 +87,7 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
         for (auto it = perspectiveCamera.begin(); it != perspectiveCamera.end(); ++it) {
             int id = std::stoi(it.key());  // Key는 문자열, 숫자로 변환
             const json& value = it.value();
-            UObject* obj = FObjectFactory::ConstructObject<UCameraComponent>("Camera");
+            UObject* obj = FObjectFactory::ConstructObject<UCameraComponent>();
             UCameraComponent* camera = static_cast<UCameraComponent*>(obj);
             if (value.contains("Location")) camera->SetLocation(FVector(value["Location"].get<std::vector<float>>()[0],
                     value["Location"].get<std::vector<float>>()[1],

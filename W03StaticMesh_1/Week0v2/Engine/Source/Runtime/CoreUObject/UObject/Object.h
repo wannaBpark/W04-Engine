@@ -71,7 +71,7 @@ public:
 
     virtual UClass* GetClass() const = 0;
 
-    bool IsA(UClass* TargetClass) const;
+    bool IsA(const UClass* TargetClass) const;
 
     template <typename T>
         requires std::derived_from<T, UObject>

@@ -1,12 +1,19 @@
 #pragma once
-#include "Define.h"
+#include "Container/String.h"
+
 class UClass
 {
-public:
+private:
     FString Name;
-    UClass* ParentClass;
+    UClass* SuperClass;
+
+public:
 
     UClass(FString InName, UClass* InParent)
-        : Name(InName), ParentClass(InParent) {
+        : Name(std::move(InName))
+        , SuperClass(InParent) {
     }
+
+    FString GetName() const { return Name; }
+    UClass* GetSuperClass() const { return SuperClass; }
 };

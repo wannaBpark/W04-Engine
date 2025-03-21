@@ -33,23 +33,23 @@ void UWorld::Initialize()
 void UWorld::CreateBaseObject()
 {
     if (localPlayer == nullptr) {
-        UObject* player = FObjectFactory::ConstructObject<UPlayer>("LocalPlayer");
+        UObject* player = FObjectFactory::ConstructObject<UPlayer>();
         localPlayer = static_cast<UPlayer*>(player);
     }
     if (camera == nullptr) {
-        UObject* Camera = FObjectFactory::ConstructObject<UCameraComponent>("MainCamere");
+        UObject* Camera = FObjectFactory::ConstructObject<UCameraComponent>();
         camera = static_cast<UCameraComponent*>(Camera);
         camera->SetLocation(FVector(8.0f, 8.0f, 8.f));
         camera->SetRotation(FVector(0.0f, 45.0f, -135.0f));
     }
 
     if (LocalGizmo == nullptr) {
-        UObject* pLocalGizmo = FObjectFactory::ConstructObject<UTransformGizmo>("LocalGizmo");
+        UObject* pLocalGizmo = FObjectFactory::ConstructObject<UTransformGizmo>();
         LocalGizmo = static_cast<UTransformGizmo*>(pLocalGizmo);
     }
 	////테스트용 텍스트
 	
-	/*UObject* pObj = FObjectFactory::ConstructObject<USkySphereComponent>("SkySphere");
+	/*UObject* pObj = FObjectFactory::ConstructObject<USkySphereComponent>();
 	USkySphereComponent* skySphere = static_cast<USkySphereComponent*>(pObj);
 	skySphere->SetTexture(L"Assets/Texture/ocean_sky.jpg");
 	skySphere->SetScale(FVector( -300.0f, -300.0f, -300.0f));
@@ -153,18 +153,18 @@ void UWorld::SpawnObject(OBJECTS _Obj)
 	switch (_Obj)
 	{
 	case OBJ_SPHERE:
-		pObj = FObjectFactory::ConstructObject<USphereComp>("Sphere");
+		pObj = FObjectFactory::ConstructObject<USphereComp>();
 		GUObjectArray.Add(pObj);
 		break;
 	case OBJ_TRIANGLE:
 		break;
 	case OBJ_CUBE:
-		pObj = FObjectFactory::ConstructObject<UCubeComp>("Cube");
+		pObj = FObjectFactory::ConstructObject<UCubeComp>();
 		GUObjectArray.Add(pObj);
 		break;
 	case OBJ_SpotLight:
 	{
-		UObject* spotLight = FObjectFactory::ConstructObject<ULightComponentBase>("SpotLight");
+		UObject* spotLight = FObjectFactory::ConstructObject<ULightComponentBase>();
 		spotLight = static_cast<ULightComponentBase*>(spotLight);
 		ULightComponentBase* castLight = static_cast<ULightComponentBase*>(spotLight);
 
@@ -173,7 +173,7 @@ void UWorld::SpawnObject(OBJECTS _Obj)
 	}
 	case OBJ_PARTICLE:
 	{
-		UObject* particle = FObjectFactory::ConstructObject<UParticleSubUVComp>("FireParticle");
+		UObject* particle = FObjectFactory::ConstructObject<UParticleSubUVComp>();
 		UParticleSubUVComp* castParticle = static_cast<UParticleSubUVComp*>(particle);
 		castParticle->SetTexture(L"Assets/Texture/T_Explosion_SubUV.png");
 		castParticle->SetRowColumnCount(6, 6);
@@ -183,7 +183,7 @@ void UWorld::SpawnObject(OBJECTS _Obj)
 	break;
 	case OBJ_Text:
 	{
-		UObject* text = FObjectFactory::ConstructObject<UText>("Quad");
+		UObject* text = FObjectFactory::ConstructObject<UText>();
 		UText* castText = static_cast<UText*>(text);
 		castText->SetTexture(L"Assets/Texture/font.png");
 		castText->SetRowColumnCount(106, 106);

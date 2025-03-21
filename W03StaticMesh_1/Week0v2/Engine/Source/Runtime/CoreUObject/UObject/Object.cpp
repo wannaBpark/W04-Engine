@@ -21,22 +21,26 @@ void UObject::Initialize()
 void UObject::Update(double deltaTime)
 {
 }
+
 void UObject::Release()
 {
 }
+
 void UObject::Render()
 {
 }
+
 void UObject::RenderUUID()
 {
 }
-bool UObject::IsA(UClass* TargetClass) const
+
+bool UObject::IsA(const UClass* TargetClass) const
 {
-    UClass* CurrentClass = GetClass();
+    const UClass* CurrentClass = GetClass();
     while (CurrentClass) {
         if (CurrentClass == TargetClass)
             return true;
-        CurrentClass = CurrentClass->ParentClass;
+        CurrentClass = CurrentClass->GetSuperClass();
     }
     return false;
 }
