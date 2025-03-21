@@ -73,6 +73,13 @@ public:
 
     bool IsA(UClass* TargetClass) const;
 
+    template <typename T>
+        requires std::derived_from<T, UObject>
+    bool IsA() const
+    {
+        return IsA(T::StaticClass());
+    }
+
     static UClass* StaticClass()
     {
         static UClass ClassInfo("UObject", nullptr);
