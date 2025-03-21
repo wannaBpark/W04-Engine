@@ -14,8 +14,11 @@ class UPlayer : public AActor
     UPlayer();
     virtual ~UPlayer() override;
 
-    virtual void Initialize();
-    virtual void TickComponent(float DeltaTime);
+    // TODO: AActor에 맞게 수정하기
+    // 지금 FObjectFactory에서 T->InitializeComponent()를 호출하고 있음
+    virtual void InitializeComponent() {};
+    virtual void Tick(float DeltaTime) override;
+
     virtual void Release();
 
     void Input();

@@ -25,11 +25,7 @@ UPlayer::~UPlayer()
 {
 }
 
-void UPlayer::Initialize()
-{
-}
-
-void UPlayer::TickComponent(float DeltaTime)
+void UPlayer::Tick(float DeltaTime)
 {
 	Input();
 }
