@@ -26,6 +26,7 @@ public:
 private:
     friend class FObjectFactory;
     friend class FSceneMgr;
+    friend class UClass;
 
     uint32 UUID;
     uint32 InternalIndex; // Index of GUObjectArray
