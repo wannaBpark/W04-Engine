@@ -3,8 +3,9 @@
 #include "Engine/Source/Runtime/Engine/World.h"
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 
-USphereComp::USphereComp() : UPrimitiveComponent("Sphere")
+USphereComp::USphereComp()
 {
+    SetType("Sphere");
     AABB.max = { 1,1,1 };
     AABB.min = { -1,-1,-1 };
 }

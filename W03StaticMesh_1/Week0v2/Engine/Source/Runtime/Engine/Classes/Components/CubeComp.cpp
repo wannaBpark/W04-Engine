@@ -3,8 +3,9 @@
 #include "World.h"
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/PrimitiveBatch.h"
-UCubeComp::UCubeComp() : UPrimitiveComponent("Cube")
+UCubeComp::UCubeComp()
 {
+    SetType("Cube");
     AABB.max = { 1,1,1 };
     AABB.min = { -1,-1,-1 };
 }

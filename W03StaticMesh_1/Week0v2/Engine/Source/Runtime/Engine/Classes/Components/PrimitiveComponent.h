@@ -8,7 +8,6 @@ class UPrimitiveComponent : public USceneComponent
 
 public:
     UPrimitiveComponent();
-    UPrimitiveComponent(FString _Type);
     virtual ~UPrimitiveComponent() override;
 
     virtual void Initialize() override;

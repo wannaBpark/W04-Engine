@@ -8,7 +8,6 @@ class UBillboardComponent : public UPrimitiveComponent
     
 public:
     UBillboardComponent();
-    UBillboardComponent(FString _Type);
     virtual ~UBillboardComponent() override;
     virtual void Initialize() override;
     virtual void Update(double deltaTime) override;
