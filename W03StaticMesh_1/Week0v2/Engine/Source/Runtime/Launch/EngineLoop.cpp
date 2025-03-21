@@ -138,12 +138,19 @@ void FEngineLoop::Tick()
 		//	0.1f,
 		//	1000.0f
 		//);
-
-		graphicDevice.Prepare();
-		renderer.PrepareShader();
-		renderer.UpdateLightBuffer();
-		//GWorld->Render();
-		Render();
+        graphicDevice.Prepare();
+        for(int i=0;i<4;++i)
+        {
+            graphicDevice.DeviceContext->RSSetViewports(1, &graphicDevice.Viewports[i]);
+            renderer.PrepareShader();
+            renderer.UpdateLightBuffer();
+            Render();
+        }
+		//graphicDevice.Prepare();
+		//renderer.PrepareShader();
+		//renderer.UpdateLightBuffer();
+		////GWorld->Render();
+		//Render();
 
 		UIMgr->BeginFrame();
 
@@ -169,9 +176,9 @@ void FEngineLoop::Tick()
 float a = 5;
 void FEngineLoop::Render()
 {
-	UPrimitiveBatch::GetInstance().RenderBatch(View, Projection);
 	GWorld->Render();
 	GWorld->RenderBaseObject();
+	UPrimitiveBatch::GetInstance().RenderBatch(View, Projection);
 }
 float FEngineLoop::GetAspectRatio(IDXGISwapChain* swapChain)
 {
