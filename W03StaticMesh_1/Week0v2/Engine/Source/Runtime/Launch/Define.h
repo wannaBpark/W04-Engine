@@ -3,7 +3,6 @@
 #include <algorithm>
 
 // 수학 관련
-#include "Math/MathDefines.h"
 #include "Math/Vector.h"
 #include "Math/Vector4.h"
 #include "Math/Matrix.h"
