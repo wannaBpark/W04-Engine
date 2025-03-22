@@ -22,6 +22,11 @@ UMaterial* UMeshComponent::GetMaterialByName(FName MaterialSlotName) const
     return GetMaterial(MaterialIndex);
 }
 
+TArray<FName> UMeshComponent::GetMaterialSlotNames() const
+{
+    return TArray<FName>();
+}
+
 void UMeshComponent::SetMaterial(uint32 ElementIndex, UMaterial* Material)
 {
     if (ElementIndex < 0 || OverrideMaterials.IsValidIndex(ElementIndex) == false) return;

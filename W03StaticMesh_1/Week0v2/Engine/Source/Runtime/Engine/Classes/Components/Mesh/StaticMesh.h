@@ -20,6 +20,6 @@ public:
     uint32 GetMaterialIndex(FName MaterialSlotName) const;
     void GetUsedMaterials(TArray<UMaterial*> Out) const;
 private:
-    FStaticMesh staticMeshInfo; // 언리얼의 FStaticMeshRenderData
+    std::shared_ptr<FStaticMesh> staticMeshRenderData; // 언리얼의 FStaticMeshRenderData
     TArray<FStaticMaterial*> materials;
 };
