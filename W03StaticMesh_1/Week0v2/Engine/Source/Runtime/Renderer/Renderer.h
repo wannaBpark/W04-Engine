@@ -22,11 +22,9 @@ public:
     ID3D11Buffer* ConstantBuffer = nullptr;
     ID3D11Buffer* LightingBuffer = nullptr;
     ID3D11Buffer* LitUnlitBuffer = nullptr;
-
-    D3D11_VIEWPORT ViewportInfo; // 렌더링 영역을 정의하는 뷰포트 정보
+    ID3D11Buffer* UUIDBuffer = nullptr;
 
     FLighting lightingData;
-
 
     uint32 Stride;
     uint32 Stride2;
@@ -42,6 +40,9 @@ public:
     struct FLitUnlitConstants {
         int isLit; // 1 = Lit, 0 = Unlit 
         float padding[3];
+    };
+    struct FUUIDConstants {
+        FVector4 UUIDColor; // UUID를 rgba로 변환한 값
     };
 
 public:
@@ -84,6 +85,7 @@ public:
     void UpdateConstant(FMatrix _MVP, float _Flag);
     void UpdateNormalConstantBuffer(FMatrix _Model);
     void UpdateLitUnlitConstantBuffer(int isLit);
+    void UpdateUUIDConstantBuffer(FVector4 UUIDColor);
 
 public://텍스쳐용 기능 추가
     ID3D11VertexShader* VertexTextureShader = nullptr;

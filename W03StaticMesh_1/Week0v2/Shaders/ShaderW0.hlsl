@@ -26,6 +26,11 @@ cbuffer FLitUnlitConstants : register(b3)
     int isLit;
 };
 
+cbuffer UUIDConstant : register(b4)
+{
+    float4 UUID;
+}
+
 struct VS_INPUT
 {
     float4 position : POSITION; // 버텍스 위치
@@ -43,6 +48,12 @@ struct PS_INPUT
     float3 normal : NORMAL; // 정규화된 노멀 벡터
     float normalFlag : TEXCOORD0; // 노멀 유효성 플래그 (1.0: 유효, 0.0: 무효)
     float2 texcoord : TEXCOORD1;
+};
+
+struct PS_OUTPUT
+{
+    float4 color : SV_Target0;
+    float4 UUID : SV_Target1;
 };
 
 PS_INPUT mainVS(VS_INPUT input)
@@ -102,8 +113,12 @@ float4 PaperTexture(float3 originalColor)
     return float4(saturate(finalColor), 1.0);
 }
 
-float4 mainPS(PS_INPUT input) : SV_Target
+PS_OUTPUT mainPS(PS_INPUT input) : SV_Target
 {
+    PS_OUTPUT output;
+    
+    output.UUID = UUID;
+    
     // 기존의 색상과 텍스처 색상을 조합
     //input.texcoord
     float4 texColor = Texture.Sample(Sampler, input.texcoord);
@@ -127,15 +142,21 @@ float4 mainPS(PS_INPUT input) : SV_Target
             float diffuse = saturate(dot(N, L));
             color = AmbientFactor * color + diffuse * LightColor * color;
         }
-        return float4(color, 1.0);
+        output.color = float4(color, 1);
+        return output;
     }
     else // unlit 상태일 때 PaperTexture 효과 적용
     {
         if (input.normalFlag < 0.5)
         {
-            return float4(color, 1.0);
+            output.color = float4(color, 1);
+            return output;
         }
-        return PaperTexture(color);
+        output.color = PaperTexture(color);
+        return output;
     }
-    return float4(color, 1.0);
+    
+    output.color = float4(color, 1.0);
+    
+    return output;
 }
