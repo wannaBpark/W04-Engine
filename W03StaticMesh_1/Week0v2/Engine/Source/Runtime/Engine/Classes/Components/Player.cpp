@@ -1,4 +1,4 @@
-﻿#include "Components/Player.h"
+#include "Components/Player.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Engine/Source/Runtime/Engine/World.h"
 #include "Define.h"
@@ -271,9 +271,18 @@ void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMat
 	UINT numViewports = 1;
 	//FEngineLoop::graphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
 
-	pickPosition.x = ((2.0f * screenX / viewport.Width) - 1) / projectionMatrix[0][0];
-	pickPosition.y = -((2.0f * screenY / viewport.Height) - 1) / projectionMatrix[1][1];
+	//pickPosition.x = ((2.0f * screenX / viewport.Width) - 1) / projectionMatrix[0][0];
+	//pickPosition.y = -((2.0f * screenY / viewport.Height) - 1) / projectionMatrix[1][1];
+
+    float viewportX = screenX - viewport.TopLeftX;
+    float viewportY = screenY - viewport.TopLeftY;
+    //float viewportY = (viewport.TopLeftY + viewport.Height) - screenY;
+
+    pickPosition.x = ((2.0f * viewportX / viewport.Width) - 1) / projectionMatrix[0][0];
+    pickPosition.y = -((2.0f * viewportY / viewport.Height) - 1) / projectionMatrix[1][1];
 	pickPosition.z = 1.0f; // Near Plane
+    UE_LOG(LogLevel::Error, TEXT("LButton Down %f %f"), pickPosition.x, pickPosition.y);
+
 }
 int UPlayer::RayIntersectsObject(const FVector& pickPosition, UPrimitiveComponent* obj, float& hitDistance, int& intersectCount)
 {

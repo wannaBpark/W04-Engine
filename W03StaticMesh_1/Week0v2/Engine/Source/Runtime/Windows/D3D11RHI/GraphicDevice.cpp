@@ -334,13 +334,9 @@ void FGraphicsDevice::OnResize(HWND hWindow) {
 
     ReleaseFrameBuffer();
 
-    // 윈도우 크기 가져오기
-    RECT clientRect;
-    GetClientRect(hWindow, &clientRect);
-    UINT width = clientRect.right - clientRect.left;
-    UINT height = clientRect.bottom - clientRect.top;
 
-    if (width == 0 || height == 0) {
+
+    if (screenWidth == 0 || screenHeight == 0) {
         MessageBox(hWindow, L"Invalid width or height for ResizeBuffers!", L"Error", MB_ICONERROR | MB_OK);
         return;
     }
@@ -353,12 +349,14 @@ void FGraphicsDevice::OnResize(HWND hWindow) {
         return;
     }
     
-    CreateFrameBuffer();
-    CreateDepthStencilBuffer(hWindow);
-
     SwapChain->GetDesc(&SwapchainDesc);
     screenWidth = SwapchainDesc.BufferDesc.Width;
     screenHeight = SwapchainDesc.BufferDesc.Height;
+
+    CreateFrameBuffer();
+    CreateDepthStencilBuffer(hWindow);
+
+
 
 }
 

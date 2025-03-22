@@ -39,6 +39,7 @@ public:
 private:
     void WindowInit(HINSTANCE hInstance);
     void Render();
+    void SelectViewport(POINT point);
 public:
     static FGraphicsDevice graphicDevice;
     static FRenderer renderer;
@@ -47,6 +48,8 @@ public:
     static uint32 TotalAllocationCount;
 
     bool bPDown = false;
+    bool bLRButtonDown = false;
+
     HWND hWnd;
 
 private:

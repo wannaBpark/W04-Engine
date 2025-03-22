@@ -94,6 +94,7 @@ public:
     void SaveConfig();
     void Input();
     void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
+    bool IsSelected(POINT point);
 protected:
     /** Camera speed setting */
     int32 CameraSpeedSetting = 1;

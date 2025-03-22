@@ -184,6 +184,18 @@ void FEngineLoop::Render()
 	UPrimitiveBatch::GetInstance().RenderBatch(GetCurViewportClient()->GetViewMatrix(), GetCurViewportClient()->GetProjectionMatrix());
     //UPrimitiveBatch::GetInstance().RenderBatch(View, Projection);
 }
+void FEngineLoop::SelectViewport(POINT point)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        if (viewportClients[i]->IsSelected(point))
+        {
+            SetViewportClient(i);
+            break;
+        }
+    }
+}
+
 float FEngineLoop::GetAspectRatio(IDXGISwapChain* swapChain)
 {
 	DXGI_SWAP_CHAIN_DESC desc;
@@ -206,6 +218,23 @@ void FEngineLoop::Exit()
 
 void FEngineLoop::Input()
 {
+    if(GetAsyncKeyState(VK_LBUTTON) & 0x8000 || GetAsyncKeyState(VK_RBUTTON) & 0x8000)
+    {
+        if (bLRButtonDown == false)
+        {
+            bLRButtonDown = true;
+            POINT pt;
+            GetCursorPos(&pt);
+            ScreenToClient(hWnd, &pt);
+            //UE_LOG(LogLevel::Error, TEXT("LButton Down %d %d"), pt.x, pt.y);
+          
+            SelectViewport(pt);
+         }
+    }
+    else
+    {
+        bLRButtonDown = false;
+    }
     if (GetAsyncKeyState('P') & 0x8000)
     {
         if (bPDown == false)

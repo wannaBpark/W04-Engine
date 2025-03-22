@@ -131,6 +131,20 @@ void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchain
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
+bool FEditorViewportClient::IsSelected(POINT point)
+{
+    float TopLeftX = Viewport->GetViewport().TopLeftX;
+    float TopLeftY = Viewport->GetViewport().TopLeftY;
+    float Width = Viewport->GetViewport().Width;
+    float Height = Viewport->GetViewport().Height;
+
+    if (point.x >= TopLeftX && point.x <= TopLeftX + Width &&
+        point.y >= TopLeftY && point.y <= TopLeftY + Height)
+    {
+        return true;
+    }
+    return false;
+}
 D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport()
 {
     return Viewport->GetViewport();
