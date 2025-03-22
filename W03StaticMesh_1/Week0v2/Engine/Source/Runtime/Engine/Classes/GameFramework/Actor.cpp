@@ -19,10 +19,11 @@ void AActor::Tick(float DeltaTime)
 
 void AActor::Destroyed()
 {
-    for (UActorComponent* Comp : OwnedComponents)
-    {
-        Comp->DestroyComponent();
-    }
+    // World->Tick에서 컴포넌트 제거
+    // for (UActorComponent* Comp : OwnedComponents)
+    // {
+    //     Comp->DestroyComponent();
+    // }
 }
 
 bool AActor::Destroy()

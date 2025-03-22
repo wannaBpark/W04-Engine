@@ -128,11 +128,15 @@ void UWorld::Tick(double DeltaTime)
 	}
 
     // 제거 대기열에 있는 Actor들 제거
-    // TODO: Component도 생각해야함
-    for (UObject* Object : PendingDestroyActors)
+    for (AActor* Actor : PendingDestroyActors)
     {
-        GUObjectArray.Remove(Object);
-        delete Object;
+        for (UActorComponent* Comp : Actor->GetComponents())
+        {
+            GUObjectArray.Remove(Comp);
+            delete Comp;
+        }
+        GUObjectArray.Remove(Actor);
+        delete Actor;
     }
     PendingDestroyActors.Empty();
 }
