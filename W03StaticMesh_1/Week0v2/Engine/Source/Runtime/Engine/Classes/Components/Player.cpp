@@ -15,6 +15,7 @@
 #include "UBillboardComponent.h"
 #include "LightComponent.h"
 #include "UnrealEd/EditorViewportClient.h"
+#include "UnrealClient.h"
 
 using namespace DirectX;
 
@@ -258,11 +259,9 @@ void UPlayer::DeletePickedObj()
 
 void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& pickPosition)
 {
-	D3D11_VIEWPORT viewport;
+	D3D11_VIEWPORT viewport = GetEngine().GetCurViewportClient()->GetD3DViewport();
 	UINT numViewports = 1;
-	FEngineLoop::graphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
-	float screenWidth = viewport.Width;
-	float screenHeight = viewport.Height;
+	//FEngineLoop::graphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
 
 	pickPosition.x = ((2.0f * screenX / viewport.Width) - 1) / projectionMatrix[0][0];
 	pickPosition.y = -((2.0f * screenY / viewport.Height) - 1) / projectionMatrix[1][1];
@@ -270,7 +269,6 @@ void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMat
 }
 int UPlayer::RayIntersectsObject(const FVector& pickPosition, UPrimitiveComponent* obj, float& hitDistance, int& intersectCount)
 {
-	// ������Ʈ�� ���� ��ȯ ��� ���� (��ġ, ȸ��, ũ�� ����)
 	FMatrix scaleMatrix = FMatrix::CreateScale(
 		obj->GetWorldScale().x,
 		obj->GetWorldScale().y,
