@@ -8,6 +8,7 @@
 #include "Components/SceneComponent.h"
 #include "Components/UText.h"
 #include "Math/MathUtility.h"
+#include "UObject/Casts.h"
 
 
 PropertyPanel::PropertyPanel()
@@ -64,8 +65,7 @@ void PropertyPanel::Draw(UWorld* world)
     USceneComponent* PickObj = static_cast<USceneComponent*>(world->GetPickingObj());
     if (PickObj)
     {
-        std::string objectName = *PickObj->GetName();
-        ImGui::Text("%s", objectName.c_str());
+        ImGui::Text("%s", *PickObj->GetName());
 
         // ��ġ/ȸ��/�������� float[3]�� ��Ƶ�
         float pickObjLoc[3] = {
@@ -115,9 +115,8 @@ void PropertyPanel::Draw(UWorld* world)
         bool reclaimFocus = false;
 
         // -------- SpotLight ó���� ----------
-        if (objectName.rfind("SpotLight_", 0) == 0)
+        if (ULightComponentBase* lightObj = Cast<ULightComponentBase>(PickObj))
         {
-            ULightComponentBase* lightObj = dynamic_cast<ULightComponentBase*>(PickObj);
             FVector4 currColor = lightObj->GetColor();
 
             float r = currColor.x;
@@ -183,8 +182,8 @@ void PropertyPanel::Draw(UWorld* world)
                 lightObj->SetRadius(radiusVal);
             }
         }
-        if (objectName.rfind("Quad", 0) == 0) {
-            UText* textOBj = dynamic_cast<UText*>(PickObj);
+        if (UText* textOBj = Cast<UText>(PickObj))
+        {
             if (textOBj) {
                 textOBj->SetTexture(L"Assets/Texture/font.png");
                 textOBj->SetRowColumnCount(106, 106);
