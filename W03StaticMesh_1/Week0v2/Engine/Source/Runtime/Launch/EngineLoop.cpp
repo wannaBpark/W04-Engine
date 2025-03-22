@@ -163,7 +163,7 @@ void FEngineLoop::Tick()
 		} while (elapsedTime < targetFrameTime);
 	}
 }
-float a = 5;
+
 void FEngineLoop::Render()
 {
 	UPrimitiveBatch::GetInstance().RenderBatch(View, Projection);
