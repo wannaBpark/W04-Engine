@@ -11,7 +11,7 @@
 
 UBillboardComponent::UBillboardComponent()
 {
-    SetType("Quad");
+    SetType(StaticClass()->GetName());
 }
 
 UBillboardComponent::~UBillboardComponent()

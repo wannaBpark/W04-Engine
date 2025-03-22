@@ -4,7 +4,7 @@
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 USkySphereComponent::USkySphereComponent()
 {
-    SetType("SkySphere");
+    SetType(StaticClass()->GetName());
 }
 
 USkySphereComponent::~USkySphereComponent()
