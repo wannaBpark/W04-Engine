@@ -8,10 +8,10 @@ class UActorComponent : public UObject
 
 public:
     UActorComponent();
-    virtual ~UActorComponent();
+    virtual ~UActorComponent() override;
 
-    virtual void Initialize();
-    virtual void Update(double deltaTime);
-    virtual void Release();
-    virtual void Render();
+    virtual void Initialize() override;
+    virtual void Update(double deltaTime) override;
+    virtual void Release() override;
+    virtual void Render() override;
 };

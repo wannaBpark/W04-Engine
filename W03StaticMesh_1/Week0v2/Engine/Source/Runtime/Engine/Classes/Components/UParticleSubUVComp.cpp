@@ -3,8 +3,9 @@
 
 #include "World.h"
 
-UParticleSubUVComp::UParticleSubUVComp() :UBillboardComponent("Quad")
+UParticleSubUVComp::UParticleSubUVComp()
 {
+    SetType("Quad");
 }
 
 UParticleSubUVComp::~UParticleSubUVComp()

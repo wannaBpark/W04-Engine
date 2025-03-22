@@ -35,21 +35,24 @@ UTransformGizmo::UTransformGizmo()
 	AttachChildren.Add(ArrowZ);
 	ArrowArr.Add(ArrowZ);
 
-	UGizmoCircleComponent* disc = new UGizmoCircleComponent(EPrimitiveColor::RED_X, 0.9f, "DiscX");;
+	UGizmoCircleComponent* disc = new UGizmoCircleComponent();
+	disc->SetInnerRadius(0.9f);
 	disc->SetType("CircleX");
 	disc->SetRotation(FVector(0.0f,0.0f,0.0f));
 	disc->SetParent(this);
 	AttachChildren.Add(disc);
 	CircleArr.Add(disc);
 
-	disc = new UGizmoCircleComponent(EPrimitiveColor::GREEN_Y, 0.9f, "DiscY");
+	disc = new UGizmoCircleComponent();
+	disc->SetInnerRadius(0.9f);
 	disc->SetType("CircleY");
 	disc->SetParent(this);
 	AttachChildren.Add(disc);
 	CircleArr.Add(disc);
 
 
-	disc = new UGizmoCircleComponent(EPrimitiveColor::BLUE_Z, 0.9f, "DiscZ");
+	disc = new UGizmoCircleComponent();
+	disc->SetInnerRadius(0.9f);
 	disc->SetType("CircleZ");
 	disc->SetParent(this);
 	disc->SetRotation(FVector(0.0f,0.0f,0.0f));

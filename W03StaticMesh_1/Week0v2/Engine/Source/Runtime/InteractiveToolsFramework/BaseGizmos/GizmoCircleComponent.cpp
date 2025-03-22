@@ -11,56 +11,54 @@ static const FVector Colors[] = {
     FVector(0.0f, 0.0f, 1.0f)   // Z��: �Ķ�
 };
 
-UGizmoCircleComponent::UGizmoCircleComponent(EPrimitiveColor color, float innerRadius, FString type) : inner(innerRadius)
-{
-    //inner = innerRadius;
-    //FVector color3 = Colors[color];
-    //TArray<FVertexSimple> vertices;
-    //TArray<uint32>  indices;
-    //if (vertices.IsEmpty())
-    //{
-    //    float angleStep = 2.0f * 3.1415926535f / DISC_RESOLUTION;
-
-    //    // 원의 외곽 버텍스 추가
-    //    for (int i = 0; i <= DISC_RESOLUTION; ++i) {
-    //        float angle = i * angleStep;
-    //        float x = cos(angle);
-    //        float z = sin(angle);
-    //        vertices.Add({ x, 0.0f, z ,color3.x, color3.y, color3.z, 1 });
-
-    //        x *= innerRadius;
-    //        z *= innerRadius;
-    //        vertices.Add({ x, 0.0f, z ,color3.x, color3.y, color3.z, 1 });
-    //    }
-
-    //    // 인덱스 설정 (삼각형 리스트)
-    //    for (int i = 0; i <= DISC_RESOLUTION + 1; ++i) {
-    //        int pivot = 2 * i;
-    //        indices.Add(pivot);      // 중심점
-    //        indices.Add(pivot + 3);      // 현재 점
-    //        indices.Add(pivot + 2);  // 다음 점 (마지막 점 예외 처리)
-
-    //        indices.Add(pivot);      // 중심점
-    //        indices.Add(pivot + 1);      // 현재 점
-    //        indices.Add(pivot + 3);  // 다음 점 (마지막 점 예외 처리)
-    //    }
-    //    for (int i = 0; i <= DISC_RESOLUTION + 1; ++i) {
-    //        int pivot = 2 * i;
-    //        indices.Add(pivot);      // 중심점
-    //        indices.Add(pivot + 2);      // 현재 점
-    //        indices.Add(pivot + 3);  // 다음 점 (마지막 점 예외 처리)
-
-    //        indices.Add(pivot);      // 중심점
-    //        indices.Add(pivot + 3);      // 현재 점
-    //        indices.Add(pivot + 1);  // 다음 점 (마지막 점 예외 처리)
-    //    }
-
-    //}
-
-    //FEngineLoop::resourceMgr.RegisterMesh(&FEngineLoop::renderer,
-    //    type, vertices, vertices.Num(), indices, indices.Num());
-
-}
+// {
+//     inner = innerRadius;
+//     FVector color3 = Colors[color];
+//     TArray<FVertexSimple> vertices;
+//     TArray<uint32>  indices;
+//     if (vertices.IsEmpty())
+//     {
+//         float angleStep = 2.0f * 3.1415926535f / DISC_RESOLUTION;
+//
+//         // 원의 외곽 버텍스 추가
+//         for (int i = 0; i <= DISC_RESOLUTION; ++i) {
+//             float angle = i * angleStep;
+//             float x = cos(angle);
+//             float z = sin(angle);
+//             vertices.Add({ x, 0.0f, z ,color3.x, color3.y, color3.z, 1 });
+//
+//             x *= innerRadius;
+//             z *= innerRadius;
+//             vertices.Add({ x, 0.0f, z ,color3.x, color3.y, color3.z, 1 });
+//         }
+//
+//         // 인덱스 설정 (삼각형 리스트)
+//         for (int i = 0; i <= DISC_RESOLUTION + 1; ++i) {
+//             int pivot = 2 * i;
+//             indices.Add(pivot);      // 중심점
+//             indices.Add(pivot + 3);      // 현재 점
+//             indices.Add(pivot + 2);  // 다음 점 (마지막 점 예외 처리)
+//
+//             indices.Add(pivot);      // 중심점
+//             indices.Add(pivot + 1);      // 현재 점
+//             indices.Add(pivot + 3);  // 다음 점 (마지막 점 예외 처리)
+//         }
+//         for (int i = 0; i <= DISC_RESOLUTION + 1; ++i) {
+//             int pivot = 2 * i;
+//             indices.Add(pivot);      // 중심점
+//             indices.Add(pivot + 2);      // 현재 점
+//             indices.Add(pivot + 3);  // 다음 점 (마지막 점 예외 처리)
+//
+//             indices.Add(pivot);      // 중심점
+//             indices.Add(pivot + 3);      // 현재 점
+//             indices.Add(pivot + 1);  // 다음 점 (마지막 점 예외 처리)
+//         }
+//
+//     }
+//
+//     FEngineLoop::resourceMgr.RegisterMesh(&FEngineLoop::renderer,
+//         type, vertices, vertices.Num(), indices, indices.Num());
+// }
 
 UGizmoCircleComponent::UGizmoCircleComponent()
 {
