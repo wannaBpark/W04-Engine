@@ -13,8 +13,8 @@ UClass* UObject::StaticClass()
 
 UObject::UObject()
     : UUID(0)
-    // BUG: Array가 변경될경우 Index가 잘못될 가능성이 있음
-    , InternalIndex(static_cast<uint32>(GetWorld()->GetObjectArr().Num() - 1))
+    // TODO: Object를 생성할 때 직접 설정하기
+    , InternalIndex(std::numeric_limits<uint32>::max())
     , NamePrivate("None")
 {
 }
