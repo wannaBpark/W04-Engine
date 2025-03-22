@@ -4,6 +4,7 @@
 
 class UMeshComponent : public UPrimitiveComponent
 {
+    DECLARE_CLASS(UMeshComponent, UPrimitiveComponent)
 public:
     virtual void Initialize() override;
     virtual void Update(double deltaTime) override;
