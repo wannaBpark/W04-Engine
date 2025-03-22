@@ -61,10 +61,6 @@ void UParticleSubUVComp::TickComponent(float DeltaTime)
 	Super::TickComponent(DeltaTime);
 }
 
-void UParticleSubUVComp::Release()
-{
-}
-
 void UParticleSubUVComp::Render()
 {
 	FEngineLoop::renderer.PrepareTextureShader();

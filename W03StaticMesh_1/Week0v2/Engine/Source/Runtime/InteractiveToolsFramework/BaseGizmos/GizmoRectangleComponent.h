@@ -12,6 +12,5 @@ public:
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
-    virtual void Release() override;
     virtual void Render() override;
 };

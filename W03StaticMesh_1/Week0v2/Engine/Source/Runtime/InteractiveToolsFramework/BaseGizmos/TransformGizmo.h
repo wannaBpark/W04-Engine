@@ -14,7 +14,6 @@ class UTransformGizmo : public USceneComponent
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
-    virtual void Release() override;
     virtual void Render() override;
 
     TArray<UGizmoArrowComponent*>& GetArrowArr() { return ArrowArr; }

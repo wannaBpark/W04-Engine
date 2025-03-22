@@ -23,10 +23,6 @@ void USphereComp::TickComponent(float DeltaTime)
 {
 }
 
-void USphereComp::Release()
-{
-}
-
 void USphereComp::Render()
 {
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());

@@ -20,10 +20,6 @@ void UPrimitiveComponent::TickComponent(float DeltaTime)
 	Super::TickComponent(DeltaTime);
 }
 
-void UPrimitiveComponent::Release()
-{
-}
-
 void UPrimitiveComponent::Render()
 {
 	if (!staticMesh || !staticMesh->vertexBuffer) return;

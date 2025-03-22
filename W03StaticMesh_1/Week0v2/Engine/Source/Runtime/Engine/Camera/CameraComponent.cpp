@@ -23,10 +23,6 @@ void UCameraComponent::TickComponent(float DeltaTime)
 	QuatRotation = JungleMath::EulerToQuaternion(RelativeRotation);
 }
 
-void UCameraComponent::Release()
-{
-}
-
 void UCameraComponent::Input()
 {
 	if (GetAsyncKeyState(VK_RBUTTON) & 0x8000) // VK_RBUTTON은 마우스 오른쪽 버튼을 나타냄

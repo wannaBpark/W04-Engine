@@ -20,10 +20,6 @@ void USkySphereComponent::TickComponent(float DeltaTime)
 {
 }
 
-void USkySphereComponent::Release()
-{
-}
-
 void USkySphereComponent::Render()
 {
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());

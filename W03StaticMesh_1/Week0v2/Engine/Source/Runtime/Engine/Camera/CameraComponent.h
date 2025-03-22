@@ -11,7 +11,6 @@ public:
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
-    virtual void Release() override;
 
     void Input();
     void MoveForward(float _Value);

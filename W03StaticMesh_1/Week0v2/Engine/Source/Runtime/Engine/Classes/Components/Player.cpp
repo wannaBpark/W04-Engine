@@ -37,10 +37,6 @@ void UPlayer::TickComponent(float DeltaTime)
     Input();
 }
 
-void UPlayer::Release()
-{
-}
-
 void UPlayer::Input()
 {
 

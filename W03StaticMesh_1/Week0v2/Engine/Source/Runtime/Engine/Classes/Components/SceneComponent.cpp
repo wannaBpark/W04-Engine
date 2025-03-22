@@ -30,10 +30,6 @@ void USceneComponent::TickComponent(float DeltaTime)
 }
 
 
-void USceneComponent::Release()
-{
-}
-
 void USceneComponent::Render()
 {
 }

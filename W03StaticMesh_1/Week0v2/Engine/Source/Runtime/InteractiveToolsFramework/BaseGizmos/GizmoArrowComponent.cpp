@@ -22,10 +22,6 @@ void UGizmoArrowComponent::TickComponent(float DeltaTime)
 
 }
 
-void UGizmoArrowComponent::Release()
-{
-}
-
 void UGizmoArrowComponent::Render()
 {
 #pragma region GizmoDepth

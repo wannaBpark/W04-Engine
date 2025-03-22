@@ -21,10 +21,6 @@ void UGizmoRectangleComponent::TickComponent(float DeltaTime)
     Super::TickComponent(DeltaTime);
 }
 
-void UGizmoRectangleComponent::Release()
-{
-}
-
 void UGizmoRectangleComponent::Render()
 {
 #pragma region GizmoDepth

@@ -21,7 +21,6 @@ class UPlayer : public AActor
 
     // TODO: 삭제 해야함
     virtual void TickComponent(float DeltaTime) override;
-    virtual void Release();
 
     void Input();
     bool PickGizmo(FVector& rayOrigin);

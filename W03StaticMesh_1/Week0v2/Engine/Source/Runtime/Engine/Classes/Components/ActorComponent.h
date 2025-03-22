@@ -27,7 +27,6 @@ public:
     virtual void OnComponentDestroyed();
 
     // TODO: 나중에 삭제 예정
-    virtual void Release();
     virtual void Render();
 
 public:

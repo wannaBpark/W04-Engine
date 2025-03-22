@@ -125,10 +125,6 @@ void UTransformGizmo::TickComponent(float DeltaTime)
 	}
 }
 
-void UTransformGizmo::Release()
-{
-}
-
 void UTransformGizmo::Render()
 {
 	for (int i = 0;i < 3;i++)

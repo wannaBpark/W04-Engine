@@ -23,10 +23,6 @@ UObject::~UObject()
 {
 }
 
-void UObject::Release()
-{
-}
-
 void UObject::Render()
 {
 }

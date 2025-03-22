@@ -23,10 +23,6 @@ void UCubeComp::TickComponent(float DeltaTime)
 {
 }
 
-void UCubeComp::Release()
-{
-}
-
 void UCubeComp::Render()
 {
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());

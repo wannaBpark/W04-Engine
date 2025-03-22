@@ -41,10 +41,6 @@ void UBillboardComponent::TickComponent(float DeltaTime)
     Super::TickComponent(DeltaTime);
 }
 
-void UBillboardComponent::Release()
-{
-}
-
 void UBillboardComponent::Render()
 {
 	FEngineLoop::renderer.PrepareTextureShader();
