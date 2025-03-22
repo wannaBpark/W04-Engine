@@ -37,6 +37,9 @@ public:
     void	CleanUp();
     void	Render();
 
+    template <typename T>
+        requires std::derived_from<T, AActor>
+    T* SpawnActor();
     bool DestroyActor(AActor* Actor);
     
 private:
@@ -70,4 +73,14 @@ public:
     USceneComponent* GetPickingGizmo() { return pickingGizmo; }
     void	SetPickingGizmo(UObject* _Obj);
 };
+
+template <typename T>
+    requires std::derived_from<T, AActor>
+T* UWorld::SpawnActor()
+{
+    T* Actor = new T;
+    ActorsArray.Add(Actor);
+    PendingBeginPlayActors.Add(Actor);
+    return Actor;
+}
 

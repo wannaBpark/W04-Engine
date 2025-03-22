@@ -114,7 +114,7 @@ void UWorld::Tick(double DeltaTime)
 	localPlayer->TickComponent(DeltaTime);
 	LocalGizmo->TickComponent(DeltaTime);
 
-    // SpawnActor에 의해 Actor가 생성된 경우, 여기서 BeginPlay 호출
+    // SpawnActor()에 의해 Actor가 생성된 경우, 여기서 BeginPlay 호출
     for (AActor* Actor : PendingBeginPlayActors)
     {
         Actor->BeginPlay();
