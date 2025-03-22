@@ -16,7 +16,7 @@ public:
         obj->UUID = id;
         obj->InitializeComponent();  // TODO: 나중에 호출 위치 수정
 
-        UE_LOG(LogLevel::Display, "Created New Object : %s", Name);
+        UE_LOG(LogLevel::Display, "Created New Object : %s", *Name);
         return obj;
     }
 };
