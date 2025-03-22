@@ -14,6 +14,8 @@
 #include "Components/LightComponent.h"
 #include "Components/UTextUUID.h"
 #include "Components/SkySphereComponent.h"
+#include "UObject/Casts.h"
+
 UWorld::UWorld()
 {
 }
@@ -215,15 +217,15 @@ SceneData UWorld::SaveData()
 {
 	SceneData Save;
 	int32 Count = 0;
-	for (auto iter : GUObjectArray)
+	for (UObject* iter : GUObjectArray)
 	{
-		USceneComponent* Primitive = nullptr;
-		if (iter->IsA(USceneComponent::StaticClass())) {
-			Primitive = static_cast<USceneComponent*>(iter);
-		}
-		if (Primitive && !Primitive->IsA(UBillboardComponent::StaticClass())) {
-				Save.Primitives[Count] = iter;
-				Count++;
+	    if (const USceneComponent* Primitive = Cast<USceneComponent>(iter))
+	    {
+            if (!Primitive->IsA<UBillboardComponent>())
+            {
+                Save.Primitives[Count] = iter;
+                Count++;
+            }
 		}
 	}
     // TODO :
