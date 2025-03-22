@@ -11,13 +11,8 @@
 #include "UnrealEd/EditorViewportClient.h"
 
 UBillboardComponent::UBillboardComponent()
-    : UPrimitiveComponent("Quad")
 {
-}
-
-UBillboardComponent::UBillboardComponent(FString _Type)
-	: UPrimitiveComponent(_Type)
-{
+    SetType(StaticClass()->GetName());
 }
 
 UBillboardComponent::~UBillboardComponent()

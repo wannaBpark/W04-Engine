@@ -4,11 +4,6 @@ UPrimitiveComponent::UPrimitiveComponent()
 {
 }
 
-UPrimitiveComponent::UPrimitiveComponent(FString _Type) : m_Type(_Type)
-{
-
-}
-
 UPrimitiveComponent::~UPrimitiveComponent()
 {
 }

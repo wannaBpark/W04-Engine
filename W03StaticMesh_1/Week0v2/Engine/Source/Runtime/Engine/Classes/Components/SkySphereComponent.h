@@ -7,7 +7,7 @@ class USkySphereComponent : public UPrimitiveComponent
 
 public:
     USkySphereComponent();
-    ~USkySphereComponent();
+    virtual ~USkySphereComponent() override;
 
     virtual void		Initialize()	override;
     virtual void		Update(double deltaTime)		override;

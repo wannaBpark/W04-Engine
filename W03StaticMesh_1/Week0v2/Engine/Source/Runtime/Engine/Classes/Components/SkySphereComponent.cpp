@@ -3,8 +3,9 @@
 #include "World.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 #include "UnrealEd/EditorViewportClient.h"
-USkySphereComponent::USkySphereComponent() : UPrimitiveComponent("SkySphere")
+USkySphereComponent::USkySphereComponent()
 {
+    SetType(StaticClass()->GetName());
 }
 
 USkySphereComponent::~USkySphereComponent()

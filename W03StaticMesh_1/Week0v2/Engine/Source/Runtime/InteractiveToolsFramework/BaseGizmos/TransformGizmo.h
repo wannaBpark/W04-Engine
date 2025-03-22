@@ -9,21 +9,20 @@ class UTransformGizmo : public USceneComponent
 {
     DECLARE_CLASS(UTransformGizmo, USceneComponent)
 
-public:
     UTransformGizmo();
-    virtual				~UTransformGizmo();
+    virtual ~UTransformGizmo() override;
 
-    virtual void		Initialize();
-    virtual void		Update(double deltaTime);
-    virtual void		Release();
-    virtual void		Render();
+    virtual void Initialize() override;
+    virtual void Update(double deltaTime) override;
+    virtual void Release() override;
+    virtual void Render() override;
 
     TArray<UGizmoArrowComponent*>& GetArrowArr() { return ArrowArr; }
     TArray<UGizmoCircleComponent*>& GetDiscArr() { return CircleArr; }
     TArray<UGizmoRectangleComponent*>& GetScaleArr() { return RectangleArr; }
+
 private:
     TArray<UGizmoArrowComponent*> ArrowArr;
     TArray<UGizmoCircleComponent*> CircleArr;
     TArray<UGizmoRectangleComponent*> RectangleArr;
 };
-

@@ -4,8 +4,9 @@
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/PrimitiveBatch.h"
 #include "UnrealEd/EditorViewportClient.h"
-UCubeComp::UCubeComp() : UPrimitiveComponent("Cube")
+UCubeComp::UCubeComp()
 {
+    SetType(StaticClass()->GetName());
     AABB.max = { 1,1,1 };
     AABB.min = { -1,-1,-1 };
 }

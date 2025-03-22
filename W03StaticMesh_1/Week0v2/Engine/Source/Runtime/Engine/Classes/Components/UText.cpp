@@ -5,8 +5,9 @@
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 #include "UnrealEd/EditorViewportClient.h"
-UText::UText() : UBillboardComponent("Quad")
+UText::UText()
 {
+    SetType("Quad");
 }
 
 UText::~UText()

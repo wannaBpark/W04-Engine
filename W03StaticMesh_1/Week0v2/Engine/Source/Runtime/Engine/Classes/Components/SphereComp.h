@@ -6,7 +6,7 @@ class USphereComp :public UPrimitiveComponent
 
 public:
     USphereComp();
-    ~USphereComp();
+    virtual ~USphereComp() override;
 
     virtual void		Initialize()	override;
     virtual void		Update(double deltaTime)		override;

@@ -377,10 +377,7 @@ struct FNameHelper
 		}
 		else
 		{
-			
-			
-			
-			//false, "Invalid Character type");
+			//static_assert(false, "Invalid Character type");
 			return {};
 		}
 	}
