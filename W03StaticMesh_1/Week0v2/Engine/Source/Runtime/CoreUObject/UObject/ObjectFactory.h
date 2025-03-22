@@ -16,7 +16,7 @@ public:
         obj->UUID = id;
         obj->Initialize();
 
-        UE_LOG(LogLevel::Display, "Created New Object : %s", Name);
+        UE_LOG(LogLevel::Display, "Created New Object : %s", *Name);
         return obj;
     }
 };
