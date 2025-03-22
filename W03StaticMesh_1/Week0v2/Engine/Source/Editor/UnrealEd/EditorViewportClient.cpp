@@ -20,13 +20,14 @@ void FEditorViewportClient::Draw(FViewport* Viewport)
 {
 }
 
-void FEditorViewportClient::Initialize()
+void FEditorViewportClient::Initialize(int32 viewportIndex)
 {
     LoadConfig();
     ViewTransformPerspective.SetLocation(FVector(8.0f, 8.0f, 8.f));
     ViewTransformPerspective.SetRotation(FVector(0.0f, 45.0f, -135.0f));
-    Viewport = new FViewport();
+    Viewport = new FViewport(static_cast<EViewScreenLocation>(viewportIndex));
     ResizeViewport(GEngineLoop.graphicDevice.SwapchainDesc);
+    ViewportIndex = viewportIndex;
 }
 
 void FEditorViewportClient::Tick(float DeltaTime)
@@ -121,7 +122,7 @@ void FEditorViewportClient::Input()
 void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc)
 {
     if (Viewport) { 
-    Viewport->ResizeViewport(swapchaindesc);    
+        Viewport->ResizeViewport(swapchaindesc);    
     }
     else {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
@@ -129,6 +130,10 @@ void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchain
     AspectRatio = GEngineLoop.GetAspectRatio(GEngineLoop.graphicDevice.SwapChain);
     UpdateProjectionMatrix();
     UpdateViewMatrix();
+}
+D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport()
+{
+    return Viewport->GetViewport();
 }
 void FEditorViewportClient::CameraMoveForward(float _Value)
 {

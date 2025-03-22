@@ -13,15 +13,15 @@ class FViewport
 {
 public:
     FViewport();
-
+    FViewport(EViewScreenLocation _viewLocation) : viewLocation(_viewLocation) {}
     ~FViewport();
     void Initialize();
     void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
 private:
     D3D11_VIEWPORT viewport;            // 뷰포트 정보
-    //EViewScreenLocation viewLocation;   // 뷰포트 위치
+    EViewScreenLocation viewLocation;   // 뷰포트 위치
 public:
-    D3D11_VIEWPORT GetViewport() { return viewport; }
+    D3D11_VIEWPORT& GetViewport() { return viewport; }
     void SetViewport(D3D11_VIEWPORT _viewport) { viewport = _viewport; }
 };
 

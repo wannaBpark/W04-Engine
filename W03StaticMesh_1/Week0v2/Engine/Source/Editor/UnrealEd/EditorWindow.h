@@ -6,7 +6,7 @@
 #define	FEATHER_FONT		1
 #endif // !__ICON_FONT_INDEX__
 
-#include "HAL/PlatformType.h";
+#include "HAL/PlatformType.h"
 
 
 class UEditorWindow

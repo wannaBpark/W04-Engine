@@ -59,6 +59,7 @@ private:
     std::shared_ptr<FEditorViewportClient> curViewportClient;
 public:
     UWorld* GetWorld(){ return GWorld; }
+    std::shared_ptr<FEditorViewportClient>* GetViewports() { return viewportClients; }
     std::shared_ptr<FEditorViewportClient> GetCurViewportClient() const
     {
         return curViewportClient;

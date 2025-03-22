@@ -32,6 +32,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (FEngineLoop::graphicDevice.SwapChain) {
 				FEngineLoop::graphicDevice.OnResize(hWnd);
 			}
+            for (int i = 0;i < 4;i++) {
+                if (GEngineLoop.GetViewports()[i]) {
+                    GEngineLoop.GetViewports()[i]->ResizeViewport(FEngineLoop::graphicDevice.SwapchainDesc);
+                }
+            }
 		}
 		Console::GetInstance().OnResize(hWnd);
 		ControlPanel::GetInstance().OnResize(hWnd);
@@ -90,7 +95,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     for (size_t i = 0; i < 4; i++)
     {
         viewportClients[i] = std::make_shared<FEditorViewportClient>();
-        viewportClients[i]->Initialize();
+        viewportClients[i]->Initialize(i);
     }
     curViewportClient = viewportClients[0];
 
@@ -138,7 +143,7 @@ void FEngineLoop::Tick()
         for(int i=0;i<4;++i)
         {
             SetViewportClient(i);
-            graphicDevice.DeviceContext->RSSetViewports(1, &graphicDevice.Viewports[i]);
+            graphicDevice.DeviceContext->RSSetViewports(1, &GetViewports()[i]->GetD3DViewport());
             renderer.PrepareShader();
             renderer.UpdateLightBuffer();
             Render();

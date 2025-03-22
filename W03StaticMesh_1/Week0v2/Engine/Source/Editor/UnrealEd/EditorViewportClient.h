@@ -87,7 +87,7 @@ public:
 
     virtual void        Draw(FViewport* Viewport) override;
     virtual UWorld*     GetWorld() const { return NULL; };
-    void Initialize();
+    void Initialize(int32 viewportIndex);
     void Tick(float DeltaTime);
     void Release();
     void LoadConfig();
@@ -103,7 +103,10 @@ protected:
 
 public: 
     FViewport* Viewport;
+    int32 ViewportIndex;
     FViewport* GetViewport() { return Viewport; }
+    D3D11_VIEWPORT& GetD3DViewport();
+
 
 public:
     //카메라
