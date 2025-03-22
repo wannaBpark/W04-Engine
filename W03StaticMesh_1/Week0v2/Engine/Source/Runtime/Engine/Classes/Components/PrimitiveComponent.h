@@ -8,7 +8,6 @@ class UPrimitiveComponent : public USceneComponent
 
 public:
     UPrimitiveComponent();
-    UPrimitiveComponent(FString _Type);
     virtual ~UPrimitiveComponent() override;
 
     virtual void Initialize() override;
@@ -31,7 +30,7 @@ protected:
 public:
     FString GetType() { return m_Type; }
 
-    void SetType(FString _Type)
+    void SetType(const FString& _Type)
     {
         m_Type = _Type;
         staticMesh = FEngineLoop::resourceMgr.GetMesh(m_Type);

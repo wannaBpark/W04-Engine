@@ -10,6 +10,7 @@
 #include "Components/LightComponent.h"
 #include "Components/SkySphereComponent.h"
 #include "Camera/CameraComponent.h"
+#include "UObject/Casts.h"
 
 using json = nlohmann::json;
 
@@ -32,34 +33,35 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
             UObject* obj = nullptr;
             if (value.contains("Type"))
             {
-                if (value["Type"].get<std::string>() == "Sphere")
+                const FString TypeName = value["Type"].get<std::string>();
+                if (TypeName == USphereComp::StaticClass()->GetName())
                 {
-                    obj = FObjectFactory::ConstructObject<USphereComp>("Sphere");
+                    obj = FObjectFactory::ConstructObject<USphereComp>();
                 }
-                else if (value["Type"].get<std::string>() == "Cube")
+                else if (TypeName == UCubeComp::StaticClass()->GetName())
                 {
-                    obj = FObjectFactory::ConstructObject<UCubeComp>("Cube");
+                    obj = FObjectFactory::ConstructObject<UCubeComp>();
                 }
-                else if (value["Type"].get<std::string>() == "Arrow")
+                else if (TypeName == UGizmoArrowComponent::StaticClass()->GetName())
                 {
                     obj = FObjectFactory::ConstructObject<UGizmoArrowComponent>();
                 }
-                else if (value["Type"].get<std::string>() == "Quad")
+                else if (TypeName == UBillboardComponent::StaticClass()->GetName())
                 {
-                    obj = FObjectFactory::ConstructObject<UBillboardComponent>("Quad");
-                }  
-                else if (value["Type"].get<std::string>() == "SpotLight")
-                {
-                    obj = FObjectFactory::ConstructObject<ULightComponentBase>("SpotLight");
+                    obj = FObjectFactory::ConstructObject<UBillboardComponent>();
                 }
-                else if (value["Type"].get<std::string>() == "SkySphere") {
-
-                    obj = FObjectFactory::ConstructObject<USkySphereComponent>("SkySphere");
+                else if (TypeName == ULightComponentBase::StaticClass()->GetName())
+                {
+                    obj = FObjectFactory::ConstructObject<ULightComponentBase>();
+                }
+                else if (TypeName == USkySphereComponent::StaticClass()->GetName())
+                {
+                    obj = FObjectFactory::ConstructObject<USkySphereComponent>();
                     USkySphereComponent* skySphere = static_cast<USkySphereComponent*>(obj);
                     skySphere->SetTexture(L"Assets/Texture/ocean_sky.jpg");
                 }
-               
             }
+
             USceneComponent* sceneComp = static_cast<USceneComponent*>(obj);
             if (value.contains("Location")) sceneComp->SetLocation(FVector(value["Location"].get<std::vector<float>>()[0],
                 value["Location"].get<std::vector<float>>()[1],
@@ -71,13 +73,13 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
                 value["Scale"].get<std::vector<float>>()[1],
                 value["Scale"].get<std::vector<float>>()[2]));
             if (value.contains("Type")) {
-                UPrimitiveComponent* primitiveComp = dynamic_cast<UPrimitiveComponent*>(sceneComp);
+                UPrimitiveComponent* primitiveComp = Cast<UPrimitiveComponent>(sceneComp);
                 if (primitiveComp) {
                     primitiveComp->SetType(value["Type"].get<std::string>());
                 }
                 else {
                     std::string name = value["Type"].get<std::string>();
-                    sceneComp->SetName(name);
+                    sceneComp->NamePrivate = name.c_str();
                 }
             }
             sceneData.Primitives[id] = sceneComp;
@@ -87,7 +89,7 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
         for (auto it = perspectiveCamera.begin(); it != perspectiveCamera.end(); ++it) {
             int id = std::stoi(it.key());  // Key는 문자열, 숫자로 변환
             const json& value = it.value();
-            UObject* obj = FObjectFactory::ConstructObject<UCameraComponent>("Camera");
+            UObject* obj = FObjectFactory::ConstructObject<UCameraComponent>();
             UCameraComponent* camera = static_cast<UCameraComponent*>(obj);
             if (value.contains("Location")) camera->SetLocation(FVector(value["Location"].get<std::vector<float>>()[0],
                     value["Location"].get<std::vector<float>>()[1],

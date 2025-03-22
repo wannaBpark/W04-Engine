@@ -17,7 +17,7 @@ void USceneComponent::Initialize()
 	uuidText = new UTextUUID();
 	uuidText->SetTexture(L"Assets/Texture/UUID_Font.dds");
 	uuidText->SetRowColumnCount(1, 11);
-	uuidText->SetUUID(UUID);
+	uuidText->SetUUID(GetUUID());
 	uuidText->SetUUIDParent(this);
 	//SetText전에 RowColumn 반드시 설정
 

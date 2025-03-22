@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <iostream>
 
 #include "Core/HAL/PlatformType.h"
@@ -25,7 +25,7 @@ struct TBitsToSizeType
 {
     // ReSharper disable once CppStaticAssertFailure
     // IndexSize가 8, 16, 32, 64중에 하나가 아니라면 컴파일 에러
-    static_assert(false, "Unsupported allocator index size.");
+    //static_assert(false, "Unsupported allocator index size.");
 };
 
 template <> struct TBitsToSizeType<8>  { using Type = int8; };

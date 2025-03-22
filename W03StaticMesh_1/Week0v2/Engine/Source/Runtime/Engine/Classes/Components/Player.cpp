@@ -1,4 +1,4 @@
-#include "Components/Player.h"
+﻿#include "Components/Player.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Engine/Source/Runtime/Engine/World.h"
 #include "Define.h"
@@ -55,7 +55,7 @@ void UPlayer::Input()
             uint32 UUID = GetEngine().graphicDevice.GetPixelUUID(mousePos);
             TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
             for (auto obj : objectArr) {
-                if (obj->UUID != UUID) continue;
+                if (obj->GetUUID() != UUID) continue;
 
                 UE_LOG(LogLevel::Display, *obj->GetName());
             }

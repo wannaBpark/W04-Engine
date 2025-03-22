@@ -6,7 +6,7 @@ class UGizmoRectangleComponent : public UGizmoBaseComponent
 
 public:
     UGizmoRectangleComponent();
-    ~UGizmoRectangleComponent();
+    virtual ~UGizmoRectangleComponent() override;
 
     virtual void		Initialize()				override;
     virtual void		Update(double deltaTime)	override;

@@ -8,6 +8,7 @@ class UParticleSubUVComp : public UBillboardComponent
 public:
     UParticleSubUVComp();
     virtual ~UParticleSubUVComp() override;
+
     virtual void Initialize() override;
     virtual void Update(double deltaTime) override;
     virtual void Release() override;
