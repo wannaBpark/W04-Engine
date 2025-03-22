@@ -14,6 +14,8 @@
 #include "Components/LightComponent.h"
 #include "Components/UTextUUID.h"
 #include "Components/SkySphereComponent.h"
+
+
 UWorld::UWorld()
 {
 }
@@ -105,17 +107,34 @@ void UWorld::RenderBaseObject()
 	LocalGizmo->Render();
 }
 
-void UWorld::Tick(double deltaTime)
+void UWorld::Tick(double DeltaTime)
 {
 	Input();
-	camera->TickComponent(deltaTime);
-	localPlayer->TickComponent(deltaTime);
-	LocalGizmo->TickComponent(deltaTime);
-	for (auto iter : GUObjectArray)
+	camera->TickComponent(DeltaTime);
+	localPlayer->TickComponent(DeltaTime);
+	LocalGizmo->TickComponent(DeltaTime);
+
+    // SpawnActor에 의해 Actor가 생성된 경우, 여기서 BeginPlay 호출
+    for (AActor* Actor : PendingBeginPlayActors)
+    {
+        Actor->BeginPlay();
+    }
+    PendingBeginPlayActors.Empty();
+
+    // 매 틱마다 Actor->Tick(...) 호출
+	for (AActor* Actor : ActorsArray)
 	{
-		iter->TickComponent(deltaTime);
+	    Actor->Tick(DeltaTime);
 	}
-	
+
+    // 제거 대기열에 있는 Actor들 제거
+    // TODO: Component도 생각해야함
+    for (UObject* Object : PendingDestroyActors)
+    {
+        GUObjectArray.Remove(Object);
+        delete Object;
+    }
+    PendingDestroyActors.Empty();
 }
 
 void UWorld::Release()
@@ -126,6 +145,7 @@ void UWorld::Release()
 		delete iter;
 	}
 	GUObjectArray.Empty();
+    ActorsArray.Empty();
 	pickingObj = nullptr;
 	pickingGizmo = nullptr;
 	ReleaseBaseObject();
@@ -140,6 +160,29 @@ void UWorld::Render()
 			iter->RenderUUID();
 	}
 
+}
+
+bool UWorld::DestroyActor(AActor* Actor)
+{
+    if (Actor->GetWorld() == nullptr)
+    {
+        return false;
+    }
+
+    if (PendingDestroyActors.Contains(Actor))
+    {
+        return true;
+    }
+
+    // 액터의 Destroyed 호출
+    Actor->Destroyed();
+
+    // World에서 제거
+    ActorsArray.Remove(Actor);
+
+    // 제거 대기열에 추가
+    PendingDestroyActors.Add(Actor);
+    return true;
 }
 
 void UWorld::Input()

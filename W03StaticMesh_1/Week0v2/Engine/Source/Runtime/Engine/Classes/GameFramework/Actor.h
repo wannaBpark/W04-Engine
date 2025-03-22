@@ -15,13 +15,19 @@ class AActor : public UObject
 public:
     AActor() = default;
 
+    /** Actor가 게임에 배치되거나 스폰될 때 호출됩니다. */
     virtual void BeginPlay();
+
+    /** 매 Tick마다 호출됩니다. */
     virtual void Tick(float DeltaTime);
+
+    /** Actor가 제거될 때 호출됩니다. */
     virtual void Destroyed();
 
-    virtual void Destroy();
-
 public:
+    /** 이 Actor를 제거합니다. */
+    virtual bool Destroy();
+
     /**
      * Actor에 컴포넌트를 새로 추가합니다.
      * @tparam T UActorComponent를 상속받은 Component
@@ -57,10 +63,14 @@ public:
     USceneComponent* GetRootComponent() const { return RootComponent; }
     void SetRootComponent(USceneComponent* NewRootComponent);
 
-private:
-    USceneComponent* RootComponent = nullptr;
+    AActor* GetOwner() const { return Owner; }
+    void SetOwner(AActor* NewOwner) { Owner = NewOwner; }
 
+private:
+    /** 이 Actor를 소유하고 있는 다른 Actor의 정보 */
     AActor* Owner = nullptr;
+
+    USceneComponent* RootComponent = nullptr;
     TSet<UActorComponent*> OwnedComponents;
 
 #if 1 // TODO: WITH_EDITOR 추가
@@ -75,7 +85,7 @@ public:
     void SetActorLabel(const FString& NewActorLabel);
 
 private:
-    /** 에디터상에 보이는 액터의 이름 */
+    /** 에디터상에 보이는 Actor의 이름 */
     FString ActorLabel;
 #endif
 };

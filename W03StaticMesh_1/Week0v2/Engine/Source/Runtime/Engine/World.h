@@ -1,13 +1,18 @@
 #pragma once
 #include "Define.h"
+#include "Container/Set.h"
 #include "UnrealEd/SceneMgr.h"
 #include "UObject/ObjectTypes.h"
+
+class AActor;
 class UObject;
 class UGizmoArrowComponent;
 class UCameraComponent;
 class UPlayer;
 class USceneComponent;
 class UTransformGizmo;
+
+
 class UWorld
 {
 public:
@@ -19,7 +24,7 @@ public:
     void CreateBaseObject();
     void ReleaseBaseObject();
     void RenderBaseObject();
-    void Tick(double deltaTime);
+    void Tick(double DeltaTime);
     void Release();
     void Input();
     void SpawnObject(OBJECTS _Obj);
@@ -31,11 +36,21 @@ public:
     void	ThrowAwayObj(UObject* _Obj);
     void	CleanUp();
     void	Render();
-	
+
+    bool DestroyActor(AActor* Actor);
+    
 private:
     const FString defaultMapName = "Default";
     TArray<UObject*> GUObjectArray;
     TArray<UObject*> Trashbin;
+
+    TSet<AActor*> ActorsArray;
+
+    // Actor가 Spawn되었고, 아직 BeginPlay가 호출되지 않은 Actor들
+    TArray<AActor*> PendingBeginPlayActors;
+
+    // Actor 제거 대기열
+    TArray<AActor*> PendingDestroyActors;
 
     USceneComponent* pickingObj = nullptr;
     USceneComponent* pickingGizmo = nullptr;
