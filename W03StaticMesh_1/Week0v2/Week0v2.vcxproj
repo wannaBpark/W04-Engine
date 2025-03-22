@@ -232,6 +232,10 @@
     <ClInclude Include="Engine\Source\Runtime\Core\HAL\PlatformType.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\JungleMath.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\MathUtility.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\Matrix.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\Quat.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\Vector.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\Vector4.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ActorComponent.h" />
     <ClInclude Include="Engine\Source\Editor\UnrealEd\EditorViewportClient.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\GameFramework\Actor.h" />
