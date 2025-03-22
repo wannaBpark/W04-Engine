@@ -172,6 +172,7 @@
     <ClCompile Include="Engine\Source\Runtime\Core\HAL\PlatformMemory.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Math\JungleMath.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\ActorEditor.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Player.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ActorComponent.cpp" />
     <ClCompile Include="Engine\Source\Editor\UnrealEd\EditorViewportClient.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\GameFramework\Actor.cpp" />
@@ -210,7 +211,6 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\SceneComponent.cpp" />
     <ClCompile Include="Engine\Source\Editor\UnrealEd\SceneMgr.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\SphereComp.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Player.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UBillboardComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UParticleSubUVComp.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UText.cpp" />
@@ -238,6 +238,7 @@
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Quat.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Vector.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Vector4.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Player.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ActorComponent.h" />
     <ClInclude Include="Engine\Source\Editor\UnrealEd\EditorViewportClient.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\GameFramework\Actor.h" />
@@ -285,7 +286,6 @@
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Object.h" />
     <ClInclude Include="Engine\Source\Runtime\Renderer\Renderer.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\SphereComp.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Player.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\StaticMesh.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UBillboardComponent.h" />
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\UClass.cpp" />

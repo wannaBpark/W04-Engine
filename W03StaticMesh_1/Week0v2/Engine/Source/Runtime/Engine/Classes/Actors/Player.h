@@ -1,7 +1,7 @@
 #pragma once
 #include "GameFramework/Actor.h"
 #include "UObject/ObjectMacros.h"
-#include "UObject/ObjectTypes.h"
+
 
 class UGizmoArrowComponent;
 class USceneComponent;
@@ -12,7 +12,6 @@ class UPlayer : public AActor
     DECLARE_CLASS(UPlayer, AActor)
 
     UPlayer();
-    virtual ~UPlayer() override;
 
     // TODO: AActor에 맞게 수정하기
     // 지금 FObjectFactory에서 T->InitializeComponent()를 호출하고 있음
