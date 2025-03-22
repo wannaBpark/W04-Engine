@@ -13,22 +13,21 @@ void FGraphicsDevice::CreateDeviceAndSwapChain(HWND hWindow) {
     D3D_FEATURE_LEVEL featurelevels[] = { D3D_FEATURE_LEVEL_11_0 };
 
     // 스왑 체인 설정 구조체 초기화
-    DXGI_SWAP_CHAIN_DESC swapchaindesc = {};
-    swapchaindesc.BufferDesc.Width = 0; // 창 크기에 맞게 자동으로 설정
-    swapchaindesc.BufferDesc.Height = 0; // 창 크기에 맞게 자동으로 설정
-    swapchaindesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; // 색상 포맷
-    swapchaindesc.SampleDesc.Count = 1; // 멀티 샘플링 비활성화
-    swapchaindesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // 렌더 타겟으로 사용
-    swapchaindesc.BufferCount = 2; // 더블 버퍼링
-    swapchaindesc.OutputWindow = hWindow; // 렌더링할 창 핸들
-    swapchaindesc.Windowed = TRUE; // 창 모드
-    swapchaindesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // 스왑 방식
+    SwapchainDesc.BufferDesc.Width = 0; // 창 크기에 맞게 자동으로 설정
+    SwapchainDesc.BufferDesc.Height = 0; // 창 크기에 맞게 자동으로 설정
+    SwapchainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; // 색상 포맷
+    SwapchainDesc.SampleDesc.Count = 1; // 멀티 샘플링 비활성화
+    SwapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // 렌더 타겟으로 사용
+    SwapchainDesc.BufferCount = 2; // 더블 버퍼링
+    SwapchainDesc.OutputWindow = hWindow; // 렌더링할 창 핸들
+    SwapchainDesc.Windowed = TRUE; // 창 모드
+    SwapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // 스왑 방식
 
     // 디바이스와 스왑 체인 생성
     HRESULT hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr,
         D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG,
         featurelevels, ARRAYSIZE(featurelevels), D3D11_SDK_VERSION,
-        &swapchaindesc, &SwapChain, &Device, nullptr, &DeviceContext);
+        &SwapchainDesc, &SwapChain, &Device, nullptr, &DeviceContext);
 
     if (FAILED(hr)) {
         MessageBox(hWindow, L"CreateDeviceAndSwapChain failed!", L"Error", MB_ICONERROR | MB_OK);
@@ -323,12 +322,11 @@ void FGraphicsDevice::OnResize(HWND hWindow) {
 
 void FGraphicsDevice::ViewportResize()
 {
-    DXGI_SWAP_CHAIN_DESC swapchaindesc = {};
-    SwapChain->GetDesc(&swapchaindesc);
+    SwapChain->GetDesc(&SwapchainDesc);
 
 
-    float width = (float)swapchaindesc.BufferDesc.Width;
-    float height = (float)swapchaindesc.BufferDesc.Height;
+    float width = (float)SwapchainDesc.BufferDesc.Width;
+    float height = (float)SwapchainDesc.BufferDesc.Height;
     float halfWidth = width * 0.5f;
     float halfHeight = height * 0.5f;
 

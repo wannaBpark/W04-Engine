@@ -12,6 +12,8 @@
 
 extern FEngineLoop GEngineLoop;
 
+
+
 struct FViewportCameraTransform
 {
 private:
@@ -91,7 +93,7 @@ public:
     void LoadConfig();
     void SaveConfig();
     void Input();
-
+    void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
 protected:
     /** Camera speed setting */
     int32 CameraSpeedSetting = 1;
@@ -101,7 +103,9 @@ protected:
 
 public: 
     FViewport* Viewport;
+    FViewport* GetViewport() { return Viewport; }
 
+public:
     //카메라
     /** Viewport camera transform data for perspective viewports */
     FViewportCameraTransform		ViewTransformPerspective;

@@ -17,6 +17,7 @@ public:
     ID3D11RenderTargetView* FrameBufferRTV = nullptr;
     ID3D11RasterizerState* RasterizerStateSOLID = nullptr;
     ID3D11RasterizerState* RasterizerStateWIREFRAME = nullptr;
+    DXGI_SWAP_CHAIN_DESC SwapchainDesc;
 
     // Depth-Stencil 관련 변수
     ID3D11Texture2D* DepthStencilBuffer = nullptr;  // 깊이/스텐실 텍스처

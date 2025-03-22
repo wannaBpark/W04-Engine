@@ -9,6 +9,7 @@
 #include "PropertyEditor/ShowFlags.h"
 #include "Outliner.h"
 #include "UnrealEd/EditorViewportClient.h"
+#include "UnrealClient.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern FEngineLoop GEngineLoop;

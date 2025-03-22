@@ -1,4 +1,4 @@
-#include "UnrealEd/EditorViewportClient.h"
+#include "EditorViewportClient.h"
 #include "fstream"
 #include "sstream"
 #include "ostream"
@@ -25,9 +25,8 @@ void FEditorViewportClient::Initialize()
     LoadConfig();
     ViewTransformPerspective.SetLocation(FVector(8.0f, 8.0f, 8.f));
     ViewTransformPerspective.SetRotation(FVector(0.0f, 45.0f, -135.0f));
-    UpdateViewMatrix();
-    UpdateProjectionMatrix();
     Viewport = new FViewport();
+    ResizeViewport(GEngineLoop.graphicDevice.SwapchainDesc);
 }
 
 void FEditorViewportClient::Tick(float DeltaTime)
@@ -35,9 +34,7 @@ void FEditorViewportClient::Tick(float DeltaTime)
     Input();
     UpdateViewMatrix();
     UpdateProjectionMatrix();
-    UE_LOG(LogLevel::Error, "Camera %f %f %f", ViewTransformPerspective.GetRotation().x,
-        ViewTransformPerspective.GetRotation().y,
-        ViewTransformPerspective.GetRotation().z);
+
 }
 
 void FEditorViewportClient::Release()
@@ -121,6 +118,18 @@ void FEditorViewportClient::Input()
         bRightMouseDown = false; // 마우스 오른쪽 버튼을 떼면 상태 초기화
     }
 }
+void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc)
+{
+    if (Viewport) { 
+    Viewport->ResizeViewport(swapchaindesc);    
+    }
+    else {
+        UE_LOG(LogLevel::Error, "Viewport is nullptr");
+    }
+    AspectRatio = GEngineLoop.GetAspectRatio(GEngineLoop.graphicDevice.SwapChain);
+    UpdateProjectionMatrix();
+    UpdateViewMatrix();
+}
 void FEditorViewportClient::CameraMoveForward(float _Value)
 {
     FVector curCameraLoc = ViewTransformPerspective.GetLocation();
@@ -144,9 +153,6 @@ void FEditorViewportClient::CameraMoveUp(float _Value)
 
 void FEditorViewportClient::CameraRotateYaw(float _Value)
 {
-    UE_LOG(LogLevel::Error, "Rotate %f %f %f", ViewTransformPerspective.GetRotation().x,
-        ViewTransformPerspective.GetRotation().y,
-        ViewTransformPerspective.GetRotation().z);
     FVector curCameraRot = ViewTransformPerspective.GetRotation();
     curCameraRot.z += _Value ;
     ViewTransformPerspective.SetRotation(curCameraRot);
