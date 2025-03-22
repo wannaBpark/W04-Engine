@@ -108,6 +108,7 @@ void UTransformGizmo::InitializeComponent()
 void UTransformGizmo::TickComponent(float DeltaTime)
 {
 	Super::TickComponent(DeltaTime);
+
 	if (GetWorld()->GetPickingObj()) {
 		SetLocation(GetWorld()->GetPickingObj()->GetWorldLocation());
 	if (GetWorld()->GetPlayer()->GetCoordiMode() == CoordiMode::CDM_LOCAL)

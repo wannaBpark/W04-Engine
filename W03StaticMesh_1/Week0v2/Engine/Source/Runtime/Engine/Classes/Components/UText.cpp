@@ -25,7 +25,6 @@ void UText::InitializeComponent()
 
 void UText::TickComponent(float DeltaTime)
 {
-
 	Super::TickComponent(DeltaTime);
 
 	//FVector newCamera = GetWorld()->GetCamera()->GetForwardVector();

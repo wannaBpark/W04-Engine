@@ -111,7 +111,7 @@ void UWorld::Tick(double DeltaTime)
 {
 	Input();
 	camera->TickComponent(DeltaTime);
-	localPlayer->TickComponent(DeltaTime);
+	localPlayer->Tick(DeltaTime);
 	LocalGizmo->TickComponent(DeltaTime);
 
     // SpawnActor()에 의해 Actor가 생성된 경우, 여기서 BeginPlay 호출

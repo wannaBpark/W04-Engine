@@ -31,12 +31,6 @@ void UPlayer::Tick(float DeltaTime)
 	Input();
 }
 
-void UPlayer::TickComponent(float DeltaTime)
-{
-    Super::TickComponent(DeltaTime);
-    Input();
-}
-
 void UPlayer::Input()
 {
 

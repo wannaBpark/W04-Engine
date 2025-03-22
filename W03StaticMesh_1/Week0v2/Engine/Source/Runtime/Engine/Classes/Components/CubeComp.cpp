@@ -21,6 +21,8 @@ void UCubeComp::InitializeComponent()
 
 void UCubeComp::TickComponent(float DeltaTime)
 {
+    Super::TickComponent(DeltaTime);
+
 }
 
 void UCubeComp::Render()

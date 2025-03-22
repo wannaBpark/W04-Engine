@@ -19,6 +19,8 @@ void UCameraComponent::InitializeComponent()
 
 void UCameraComponent::TickComponent(float DeltaTime)
 {
+    Super::TickComponent(DeltaTime);
+
 	Input();
 	QuatRotation = JungleMath::EulerToQuaternion(RelativeRotation);
 }

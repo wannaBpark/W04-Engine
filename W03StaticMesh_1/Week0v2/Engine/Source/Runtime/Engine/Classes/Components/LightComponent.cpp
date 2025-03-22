@@ -56,6 +56,8 @@ void ULightComponentBase::InitializeLight()
 
 void ULightComponentBase::TickComponent(float DeltaTime)
 {
+    Super::TickComponent(DeltaTime);
+
     texture2D->TickComponent(DeltaTime);
     texture2D->SetLocation(GetWorldLocation());
 

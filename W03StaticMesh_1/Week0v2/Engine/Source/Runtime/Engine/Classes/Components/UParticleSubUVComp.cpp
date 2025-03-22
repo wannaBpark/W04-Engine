@@ -26,6 +26,7 @@ void UParticleSubUVComp::InitializeComponent()
 
 void UParticleSubUVComp::TickComponent(float DeltaTime)
 {
+    Super::TickComponent(DeltaTime);
 
 	uint32 CellWidth = Texture->width / CellsPerColumn;
 	uint32 CellHeight = Texture->height / CellsPerColumn;

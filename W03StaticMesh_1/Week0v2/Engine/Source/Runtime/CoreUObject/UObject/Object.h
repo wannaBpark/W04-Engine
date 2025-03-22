@@ -38,7 +38,6 @@ public:
     UObject();
     virtual ~UObject();
 
-    virtual void TickComponent(float DeltaTime) {}
     virtual void Render();
     virtual void RenderUUID();
 

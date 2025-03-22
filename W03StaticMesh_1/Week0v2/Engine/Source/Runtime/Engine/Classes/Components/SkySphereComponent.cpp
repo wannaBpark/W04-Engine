@@ -18,6 +18,8 @@ void USkySphereComponent::InitializeComponent()
 
 void USkySphereComponent::TickComponent(float DeltaTime)
 {
+    Super::TickComponent(DeltaTime);
+
 }
 
 void USkySphereComponent::Render()
