@@ -59,6 +59,9 @@ public:
     /** Actor가 가지고 있는 Component를 제거합니다. */
     void RemoveOwnedComponent(UActorComponent* Component);
 
+    /** Actor가 가지고 있는 모든 컴포넌트를 가져옵니다. */
+    const TSet<UActorComponent*>& GetComponents() const { return OwnedComponents; }
+
 public:
     USceneComponent* GetRootComponent() const { return RootComponent; }
     void SetRootComponent(USceneComponent* NewRootComponent);

@@ -64,13 +64,13 @@ public:
     TArray<UObject*>& GetObjectArr() { return GUObjectArray; }
 
     UTransformGizmo* LocalGizmo = nullptr;
-    UCameraComponent* GetCamera() { return camera; }
-    UPlayer* GetPlayer() { return localPlayer; }
+    UCameraComponent* GetCamera() const { return camera; }
+    UPlayer* GetPlayer() const { return localPlayer; }
 
 
-    USceneComponent* GetPickingObj() { return pickingObj; }
-    UObject* GetWorldGizmo() { return worldGizmo; }
-    USceneComponent* GetPickingGizmo() { return pickingGizmo; }
+    USceneComponent* GetPickingObj() const { return pickingObj; }
+    UObject* GetWorldGizmo() const { return worldGizmo; }
+    USceneComponent* GetPickingGizmo() const { return pickingGizmo; }
     void	SetPickingGizmo(UObject* _Obj);
 };
 
