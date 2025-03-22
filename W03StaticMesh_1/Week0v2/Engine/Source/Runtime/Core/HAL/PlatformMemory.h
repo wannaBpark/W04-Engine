@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <atomic>
 #include <iostream>
 
@@ -68,7 +68,7 @@ void FPlatformMemory::IncrementStats(size_t Size)
     }
     else
     {
-        static_assert(false, "Unknown allocation type");
+        //static_assert(false, "Unknown allocation type");
     }
 }
 
@@ -91,7 +91,7 @@ void FPlatformMemory::DecrementStats(size_t Size)
     }
     else
     {
-        static_assert(false, "Unknown allocation type");
+        //static_assert(false, "Unknown allocation type");
     }
 }
 
@@ -150,7 +150,7 @@ uint64 FPlatformMemory::GetAllocationBytes()
     }
     else
     {
-        static_assert(false, "Unknown AllocationType");
+        //static_assert(false, "Unknown AllocationType");
         return -1;
     }
 }
@@ -168,7 +168,7 @@ uint64 FPlatformMemory::GetAllocationCount()
     }
     else
     {
-        static_assert(false, "Unknown AllocationType");
+        //static_assert(false, "Unknown AllocationType");
         return -1;
     }
 }
