@@ -107,7 +107,7 @@ void UWorld::RenderBaseObject()
 	LocalGizmo->Render();
 }
 
-void UWorld::Tick(double DeltaTime)
+void UWorld::Tick(float DeltaTime)
 {
 	Input();
 	camera->TickComponent(DeltaTime);

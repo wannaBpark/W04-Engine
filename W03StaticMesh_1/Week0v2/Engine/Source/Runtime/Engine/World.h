@@ -24,7 +24,7 @@ public:
     void CreateBaseObject();
     void ReleaseBaseObject();
     void RenderBaseObject();
-    void Tick(double DeltaTime);
+    void Tick(float DeltaTime);
     void Release();
     void Input();
     void SpawnObject(OBJECTS _Obj);
