@@ -35,9 +35,7 @@ void FGraphicsDevice::CreateDeviceAndSwapChain(HWND hWindow) {
     }
 
     // 스왑 체인 정보 가져오기 (이후에 사용을 위해)
-    ViewportResize();
-    // 뷰포트 정보 설정
-    //ViewportInfo = { 0.0f, 0.0f, (float)swapchaindesc.BufferDesc.Width, (float)swapchaindesc.BufferDesc.Height, 0.0f, 1.0f };
+    SwapChain->GetDesc(&SwapchainDesc);
 }
 
 
@@ -267,14 +265,14 @@ void FGraphicsDevice::Prepare()
     DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff); // 블렌뎅 상태 설정, 기본블렌딩 상태임
 }
 
-void FGraphicsDevice::Prepare(UINT viewportNumber)
+void FGraphicsDevice::Prepare(D3D11_VIEWPORT* viewport)
 {
     DeviceContext->ClearRenderTargetView(FrameBufferRTV, ClearColor); // 렌더 타겟 뷰에 저장된 이전 프레임 데이터를 삭제
     DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0); // 깊이 버퍼 초기화 추가
 
     DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // 정정 연결 방식 설정
 
-    DeviceContext->RSSetViewports(1, &Viewports[viewportNumber]); // GPU가 화면을 렌더링할 영역 설정
+    DeviceContext->RSSetViewports(1, viewport); // GPU가 화면을 렌더링할 영역 설정
     DeviceContext->RSSetState(CurrentRasterizer); //레스터 라이저 상태 설정
 
     DeviceContext->OMSetDepthStencilState(DepthStencilState, 0);
@@ -282,6 +280,7 @@ void FGraphicsDevice::Prepare(UINT viewportNumber)
     DeviceContext->OMSetRenderTargets(1, &FrameBufferRTV, DepthStencilView); // 렌더 타겟 설정(백버퍼를 가르킴)
     DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff); // 블렌뎅 상태 설정, 기본블렌딩 상태임
 }
+
 
 void FGraphicsDevice::OnResize(HWND hWindow) {
     DeviceContext->OMSetRenderTargets(0, 0, 0);
@@ -317,50 +316,9 @@ void FGraphicsDevice::OnResize(HWND hWindow) {
     CreateFrameBuffer();
     CreateDepthStencilBuffer(hWindow);
 
-    ViewportResize();
-}
-
-void FGraphicsDevice::ViewportResize()
-{
     SwapChain->GetDesc(&SwapchainDesc);
-
-
-    float width = (float)SwapchainDesc.BufferDesc.Width;
-    float height = (float)SwapchainDesc.BufferDesc.Height;
-    float halfWidth = width * 0.5f;
-    float halfHeight = height * 0.5f;
-
-    Viewports[0].TopLeftX = 0.0f;
-    Viewports[0].TopLeftY = 0.0f;
-    Viewports[0].Width = halfWidth;
-    Viewports[0].Height = halfHeight;
-    Viewports[0].MinDepth = 0.0f;
-    Viewports[0].MaxDepth = 1.0f;
-
-    // 뷰포트 2: 화면 오른쪽 위
-    Viewports[1].TopLeftX = halfWidth;
-    Viewports[1].TopLeftY = 0.0f;
-    Viewports[1].Width = halfWidth;
-    Viewports[1].Height = halfHeight;
-    Viewports[1].MinDepth = 0.0f;
-    Viewports[1].MaxDepth = 1.0f;
-
-    // 뷰포트 3: 화면 왼쪽 아래
-    Viewports[2].TopLeftX = 0.0f;
-    Viewports[2].TopLeftY = halfHeight;
-    Viewports[2].Width = halfWidth;
-    Viewports[2].Height = halfHeight;
-    Viewports[2].MinDepth = 0.0f;
-    Viewports[2].MaxDepth = 1.0f;
-
-    // 뷰포트 4: 화면 오른쪽 아래
-    Viewports[3].TopLeftX = halfWidth;
-    Viewports[3].TopLeftY = halfHeight;
-    Viewports[3].Width = halfWidth;
-    Viewports[3].Height = halfHeight;
-    Viewports[3].MinDepth = 0.0f;
-    Viewports[3].MaxDepth = 1.0f;
 }
+
 
 void FGraphicsDevice::ChangeRasterizer(EViewModeIndex evi)
 {

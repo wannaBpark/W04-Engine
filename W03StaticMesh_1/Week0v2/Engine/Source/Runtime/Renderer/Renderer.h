@@ -47,7 +47,6 @@ public:
 public:
     void Initialize(FGraphicsDevice* graphics);
    
-    void Prepare();
     void PrepareShader();
     
     //Render
