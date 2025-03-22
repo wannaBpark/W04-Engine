@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Components/SceneComponent.h"
 #include "Container/Set.h"
+#include "UObject/Casts.h"
 #include "UObject/Object.h"
 #include "UObject/ObjectFactory.h"
 #include "UObject/ObjectMacros.h"
@@ -41,7 +42,7 @@ public:
         OwnedComponents.Add(ObjectInstance);
         ObjectInstance->Owner = this;
 
-        USceneComponent* NewSceneComp = dynamic_cast<USceneComponent*>(ObjectInstance);
+        USceneComponent* NewSceneComp = Cast<USceneComponent>(ObjectInstance);
         if (NewSceneComp != nullptr)
         {
             if (RootComponent == nullptr)

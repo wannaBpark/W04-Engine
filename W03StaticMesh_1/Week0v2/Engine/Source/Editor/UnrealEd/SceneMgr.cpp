@@ -10,6 +10,7 @@
 #include "Components/LightComponent.h"
 #include "Components/SkySphereComponent.h"
 #include "Camera/CameraComponent.h"
+#include "UObject/Casts.h"
 
 using json = nlohmann::json;
 
@@ -71,7 +72,7 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
                 value["Scale"].get<std::vector<float>>()[1],
                 value["Scale"].get<std::vector<float>>()[2]));
             if (value.contains("Type")) {
-                UPrimitiveComponent* primitiveComp = dynamic_cast<UPrimitiveComponent*>(sceneComp);
+                UPrimitiveComponent* primitiveComp = Cast<UPrimitiveComponent>(sceneComp);
                 if (primitiveComp) {
                     primitiveComp->SetType(value["Type"].get<std::string>());
                 }
