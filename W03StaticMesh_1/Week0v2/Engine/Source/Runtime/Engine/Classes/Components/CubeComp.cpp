@@ -5,7 +5,7 @@
 #include "UnrealEd/PrimitiveBatch.h"
 UCubeComp::UCubeComp()
 {
-    SetType("Cube");
+    SetType(StaticClass()->GetName());
     AABB.max = { 1,1,1 };
     AABB.min = { -1,-1,-1 };
 }
@@ -36,6 +36,7 @@ void UCubeComp::Render()
     }
     else
         FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
+    FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
 
     if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_AABB))
         UPrimitiveBatch::GetInstance().RenderAABB(AABB, GetWorldLocation(), Model);

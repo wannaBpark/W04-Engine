@@ -74,6 +74,7 @@ public:
     void	SetPickingGizmo(UObject* _Obj);
 };
 
+
 template <typename T>
     requires std::derived_from<T, AActor>
 T* UWorld::SpawnActor()
@@ -83,4 +84,3 @@ T* UWorld::SpawnActor()
     PendingBeginPlayActors.Add(Actor);
     return Actor;
 }
-

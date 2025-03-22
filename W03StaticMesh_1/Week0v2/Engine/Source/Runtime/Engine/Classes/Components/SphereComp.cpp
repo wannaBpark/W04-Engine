@@ -5,7 +5,7 @@
 
 USphereComp::USphereComp()
 {
-    SetType("Sphere");
+    SetType(StaticClass()->GetName());
     AABB.max = { 1,1,1 };
     AABB.min = { -1,-1,-1 };
 }
@@ -37,6 +37,7 @@ void USphereComp::Render()
     }
     else
         FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
+    FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
 
     FVector scale = GetWorldScale();
     FVector r = { 1,1,1 };
