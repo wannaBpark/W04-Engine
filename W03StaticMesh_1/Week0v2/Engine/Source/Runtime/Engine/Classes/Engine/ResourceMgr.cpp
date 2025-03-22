@@ -4,7 +4,10 @@
 #include <wincodec.h>
 #include <ranges>
 #include "Define.h"
+#include "Components/CubeComp.h"
 #include "Components/Quad.h"
+#include "Components/SkySphereComponent.h"
+#include "Components/SphereComp.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "DirectXTK/Include/DDSTextureLoader.h"
 #include "Renderer/Renderer.h"
@@ -28,9 +31,13 @@ void FResourceMgr::Initialize(FRenderer* renderer, FGraphicsDevice* device)
 
 
 
-	LoadObjNormalAsset(renderer, "Cube", L"Assets/Cube.obj");
-	LoadObjNormalAsset(renderer, "Sphere", L"Assets/Sphere.obj");
-	LoadObjNormalTextureAsset(renderer, "SkySphere", L"Assets/skySphere.obj");
+	// LoadObjNormalAsset(renderer, "Cube", L"Assets/Cube.obj");
+	// LoadObjNormalAsset(renderer, "Sphere", L"Assets/Sphere.obj");
+	// LoadObjNormalTextureAsset(renderer, "SkySphere", L"Assets/skySphere.obj");
+
+	LoadObjNormalAsset(renderer, UCubeComp::StaticClass()->GetName(), L"Assets/Cube.obj");
+	LoadObjNormalAsset(renderer, USphereComp::StaticClass()->GetName(), L"Assets/Sphere.obj");
+	LoadObjNormalTextureAsset(renderer, USkySphereComponent::StaticClass()->GetName(), L"Assets/skySphere.obj");
 
 	
 	

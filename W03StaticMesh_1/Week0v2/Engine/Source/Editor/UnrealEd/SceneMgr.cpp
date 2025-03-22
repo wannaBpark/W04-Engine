@@ -33,34 +33,35 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
             UObject* obj = nullptr;
             if (value.contains("Type"))
             {
-                if (value["Type"].get<std::string>() == "Sphere")
+                const FString TypeName = value["Type"].get<std::string>();
+                if (TypeName == USphereComp::StaticClass()->GetName())
                 {
                     obj = FObjectFactory::ConstructObject<USphereComp>();
                 }
-                else if (value["Type"].get<std::string>() == "Cube")
+                else if (TypeName == UCubeComp::StaticClass()->GetName())
                 {
                     obj = FObjectFactory::ConstructObject<UCubeComp>();
                 }
-                else if (value["Type"].get<std::string>() == "Arrow")
+                else if (TypeName == UGizmoArrowComponent::StaticClass()->GetName())
                 {
                     obj = FObjectFactory::ConstructObject<UGizmoArrowComponent>();
                 }
-                else if (value["Type"].get<std::string>() == "Quad")
+                else if (TypeName == UBillboardComponent::StaticClass()->GetName())
                 {
                     obj = FObjectFactory::ConstructObject<UBillboardComponent>();
-                }  
-                else if (value["Type"].get<std::string>() == "SpotLight")
+                }
+                else if (TypeName == ULightComponentBase::StaticClass()->GetName())
                 {
                     obj = FObjectFactory::ConstructObject<ULightComponentBase>();
                 }
-                else if (value["Type"].get<std::string>() == "SkySphere") {
-
+                else if (TypeName == USkySphereComponent::StaticClass()->GetName())
+                {
                     obj = FObjectFactory::ConstructObject<USkySphereComponent>();
                     USkySphereComponent* skySphere = static_cast<USkySphereComponent*>(obj);
                     skySphere->SetTexture(L"Assets/Texture/ocean_sky.jpg");
                 }
-               
             }
+
             USceneComponent* sceneComp = static_cast<USceneComponent*>(obj);
             if (value.contains("Location")) sceneComp->SetLocation(FVector(value["Location"].get<std::vector<float>>()[0],
                 value["Location"].get<std::vector<float>>()[1],

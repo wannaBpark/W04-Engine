@@ -2,6 +2,9 @@
 #pragma once
 #include "UClass.h"
 
+// name을 문자열화 해주는 매크로
+#define INLINE_STRINGIFY(name) #name
+
 
 // RTTI를 위한 클래스 매크로
 #define DECLARE_CLASS(TClass, TSuperClass) \
