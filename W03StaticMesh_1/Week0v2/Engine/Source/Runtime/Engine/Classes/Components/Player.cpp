@@ -54,6 +54,14 @@ void UPlayer::Input()
 			GetCursorPos(&m_LastMousePos);
 
 
+            uint32 UUID = GetEngine().graphicDevice.GetPixelUUID(mousePos);
+            TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
+            for (auto obj : objectArr) {
+                if (obj->UUID != UUID) continue;
+
+                UE_LOG(LogLevel::Display, *obj->GetName());
+            }
+
 			ScreenToClient(GEngineLoop.hWnd, &mousePos);
 
 			FVector pickPosition;

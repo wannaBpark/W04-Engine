@@ -37,6 +37,7 @@ void USkySphereComponent::Render()
     }
     else
         FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
+    FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
 
     FVector scale = GetWorldScale();
     FVector r = { 1,1,1 };

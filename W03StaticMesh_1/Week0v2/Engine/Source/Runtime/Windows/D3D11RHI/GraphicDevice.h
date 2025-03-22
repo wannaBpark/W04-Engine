@@ -8,13 +8,19 @@
 
 #include "EngineBaseTypes.h"
 
+#include "Core/HAL/PlatformType.h"
+#include "Core/Math/Vector4.h"
+
 class FGraphicsDevice {
 public:
     ID3D11Device* Device = nullptr;
     ID3D11DeviceContext* DeviceContext = nullptr;
     IDXGISwapChain* SwapChain = nullptr;
     ID3D11Texture2D* FrameBuffer = nullptr;
+    ID3D11Texture2D* UUIDFrameBuffer = nullptr;
+    ID3D11RenderTargetView* RTVs[2];
     ID3D11RenderTargetView* FrameBufferRTV = nullptr;
+    ID3D11RenderTargetView* UUIDFrameBufferRTV = nullptr;
     ID3D11RasterizerState* RasterizerStateSOLID = nullptr;
     ID3D11RasterizerState* RasterizerStateWIREFRAME = nullptr;
     DXGI_SWAP_CHAIN_DESC SwapchainDesc;
@@ -45,6 +51,9 @@ public:
     ID3D11RasterizerState* GetCurrentRasterizer() { return CurrentRasterizer; }
     void ChangeRasterizer(EViewModeIndex evi);
     void ChangeDepthStencilState(ID3D11DepthStencilState* newDetptStencil);
+
+    uint32 GetPixelUUID(POINT pt);
+    uint32 DecodeUUIDColor(FVector4 UUIDColor);
 private:
     ID3D11RasterizerState* CurrentRasterizer = nullptr;
 };

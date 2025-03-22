@@ -139,6 +139,7 @@ void UGizmoCircleComponent::Render()
     }
     else
         FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
+    FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
 
     FEngineLoop::graphicDevice.DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID); // fill solid로 렌더링.
     Super::Render();

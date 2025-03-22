@@ -15,13 +15,8 @@ void FRenderer::Release() {
     ReleaseShader();
     ReleaseTextureShader();
     ReleaseLineShader();
-    if (ConstantBuffer) ConstantBuffer->Release();
-    if (LightingBuffer) LightingBuffer->Release();
-    if (NormalConstantBuffer) NormalConstantBuffer->Release();
-    if (LitUnlitBuffer) LitUnlitBuffer->Release();
+    ReleaseConstantBuffer();
 }
-
-
 
 void FRenderer::CreateShader() {
     ID3DBlob* vertexshaderCSO;
@@ -78,7 +73,7 @@ void FRenderer::PrepareShader()
         Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &LightingBuffer);
         Graphics->DeviceContext->VSSetConstantBuffers(2, 1, &NormalConstantBuffer);
         Graphics->DeviceContext->PSSetConstantBuffers(3, 1, &LitUnlitBuffer);
-
+        Graphics->DeviceContext->PSSetConstantBuffers(4, 1, &UUIDBuffer);
     }
 }
 void FRenderer::ResetVertexShader()
@@ -277,6 +272,8 @@ void FRenderer::CreateConstantBuffer()
     constantbufferdesc.ByteWidth = sizeof(FPrimitiveCounts) + 0xf & 0xfffffff0;
     Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &LinePrimitiveBuffer);
 
+    constantbufferdesc.ByteWidth = sizeof(FUUIDConstants) + 0xf & 0xfffffff0;;
+    Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &UUIDBuffer);
 }
 
 void FRenderer::CreateLightingBuffer()
@@ -302,11 +299,11 @@ void FRenderer::CreateLitUnlitBuffer()
 
 void FRenderer::ReleaseConstantBuffer()
 {
-    if (ConstantBuffer)
-    {
-        ConstantBuffer->Release();
-        ConstantBuffer = nullptr;
-    }
+    if (ConstantBuffer) ConstantBuffer->Release(); ConstantBuffer = nullptr;
+    if (LightingBuffer) LightingBuffer->Release(); LightingBuffer = nullptr;
+    if (NormalConstantBuffer) NormalConstantBuffer->Release(); NormalConstantBuffer = nullptr;
+    if (LitUnlitBuffer) LitUnlitBuffer->Release(); LitUnlitBuffer = nullptr;
+    if (UUIDBuffer) UUIDBuffer->Release(); UUIDBuffer = nullptr;
 }
 void FRenderer::UpdateLightBuffer()
 {
@@ -371,6 +368,20 @@ void FRenderer::UpdateLitUnlitConstantBuffer(int isLit)
             constants->isLit = isLit;
         }
         Graphics->DeviceContext->Unmap(LitUnlitBuffer, 0);
+    }
+}
+
+void FRenderer::UpdateUUIDConstantBuffer(FVector4 UUIDColor)
+{
+    UUIDColor = UUIDColor / 255.0f;
+    if (UUIDBuffer) {
+        D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU �� �޸� �ּ� ����
+        Graphics->DeviceContext->Map(UUIDBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR);
+        FUUIDConstants* constants = (FUUIDConstants*)constantbufferMSR.pData; //GPU �޸� ���� ����
+        {
+            constants->UUIDColor = UUIDColor;
+        }
+        Graphics->DeviceContext->Unmap(UUIDBuffer, 0);
     }
 }
 
@@ -570,6 +581,7 @@ void FRenderer::PrepareSubUVConstant()
     {
         Graphics->DeviceContext->VSSetConstantBuffers(1, 1, &SubUVConstantBuffer);
         Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &SubUVConstantBuffer);
+        Graphics->DeviceContext->PSSetConstantBuffers(4, 1, &UUIDBuffer);
     }
 }
 
@@ -587,7 +599,7 @@ void FRenderer::PrepareLineShader()
         Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &ConstantBuffer);       // MatrixBuffer (b0)
         Graphics->DeviceContext->VSSetConstantBuffers(1, 1, &GridConstantBuffer);     // GridParameters (b1)
         Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &GridConstantBuffer); 
-        Graphics->DeviceContext->VSSetConstantBuffers(3, 1, &LinePrimitiveBuffer); 
+        Graphics->DeviceContext->VSSetConstantBuffers(3, 1, &LinePrimitiveBuffer);
         Graphics->DeviceContext->VSSetShaderResources(2, 1, &pBBSRV);
         Graphics->DeviceContext->VSSetShaderResources(3, 1, &pConeSRV);
         Graphics->DeviceContext->VSSetShaderResources(4, 1, &pOBBSRV);
