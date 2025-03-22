@@ -5,7 +5,7 @@
 #include <DirectXMath.h>
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 #include "UObject/ObjectFactory.h"
-#include "Components/Player.h"
+#include "Actors/Player.h"
 #include "BaseGizmos/GizmoArrowComponent.h"
 #include "BaseGizmos/TransformGizmo.h"
 #include "Components/UBillboardComponent.h"

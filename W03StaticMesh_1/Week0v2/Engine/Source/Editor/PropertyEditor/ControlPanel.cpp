@@ -2,7 +2,7 @@
 #include "World.h"
 #include "Camera/CameraComponent.h"
 #include "UnrealEd/SceneMgr.h"
-#include "Components/Player.h"
+#include "Actors/Player.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/EditorWindow.h"
 // #include "ImGUI\imgui.h"

@@ -3,7 +3,7 @@
 #include "Define.h"
 #include "UObject/ObjectFactory.h"
 #include "GizmoCircleComponent.h"
-#include "Components/Player.h"
+#include "Actors/Player.h"
 #include "GizmoRectangleComponent.h"
 #include "World.h"
 

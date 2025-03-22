@@ -2,7 +2,7 @@
 
 #include "World.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
-#include "Components/Player.h"
+#include "Actors/Player.h"
 #define DISC_RESOLUTION 128
 
 static const FVector Colors[] = {

@@ -1,6 +1,6 @@
 #include "UBillboardComponent.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
-#include "Components/Player.h"
+#include "Actors/Player.h"
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "QuadTexture.h"
 #include "Define.h"

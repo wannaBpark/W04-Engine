@@ -2,7 +2,7 @@
 #include "World.h"
 #include "ImGuiManager.h"
 #include "UObject/Object.h"
-#include "Components/Player.h"
+#include "Actors/Player.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/LightComponent.h"
 #include "Components/SceneComponent.h"
