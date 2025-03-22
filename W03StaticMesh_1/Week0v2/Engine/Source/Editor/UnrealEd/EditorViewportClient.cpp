@@ -4,10 +4,9 @@
 #include "ostream"
 #include "Math/JungleMath.h"
 #include "EngineLoop.h"
-
+#include "UnrealClient.h"
 FEditorViewportClient::FEditorViewportClient()
     : Viewport(nullptr)
-    
 {
 
 }
@@ -26,6 +25,9 @@ void FEditorViewportClient::Initialize()
     LoadConfig();
     ViewTransformPerspective.SetLocation(FVector(8.0f, 8.0f, 8.f));
     ViewTransformPerspective.SetRotation(FVector(0.0f, 45.0f, -135.0f));
+    UpdateViewMatrix();
+    UpdateProjectionMatrix();
+    Viewport = new FViewport();
 }
 
 void FEditorViewportClient::Tick(float DeltaTime)
@@ -33,6 +35,9 @@ void FEditorViewportClient::Tick(float DeltaTime)
     Input();
     UpdateViewMatrix();
     UpdateProjectionMatrix();
+    UE_LOG(LogLevel::Error, "Camera %f %f %f", ViewTransformPerspective.GetRotation().x,
+        ViewTransformPerspective.GetRotation().y,
+        ViewTransformPerspective.GetRotation().z);
 }
 
 void FEditorViewportClient::Release()
@@ -66,8 +71,8 @@ void FEditorViewportClient::Input()
         if (!bRightMouseDown)
         {
             // 마우스 오른쪽 버튼을 처음 눌렀을 때, 마우스 위치 초기화
-            bRightMouseDown = true;
             GetCursorPos(&lastMousePos);
+            bRightMouseDown = true;
         }
         else
         {

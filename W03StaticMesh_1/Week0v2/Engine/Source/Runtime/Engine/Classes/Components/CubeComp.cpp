@@ -3,6 +3,7 @@
 #include "World.h"
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/PrimitiveBatch.h"
+#include "UnrealEd/EditorViewportClient.h"
 UCubeComp::UCubeComp() : UPrimitiveComponent("Cube")
 {
     AABB.max = { 1,1,1 };
@@ -30,7 +31,7 @@ void UCubeComp::Render()
 {
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());
     // 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().View * GetEngine().Projection;
+    FMatrix MVP = Model * GetEngine().GetCurViewportClient()->GetViewMatrix() * GetEngine().GetCurViewportClient()->GetProjectionMatrix();
     FEngineLoop::renderer.UpdateNormalConstantBuffer(Model);
     if (this == GetWorld()->GetPickingObj()) {
         FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);

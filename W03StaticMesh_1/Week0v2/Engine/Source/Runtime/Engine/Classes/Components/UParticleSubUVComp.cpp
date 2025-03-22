@@ -1,6 +1,6 @@
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "UParticleSubUVComp.h"
-
+#include "UnrealEd/EditorViewportClient.h"
 #include "World.h"
 
 UParticleSubUVComp::UParticleSubUVComp() :UBillboardComponent("Quad")
@@ -70,11 +70,11 @@ void UParticleSubUVComp::Render()
 	FEngineLoop::renderer.UpdateSubUVConstant(finalIndexU, finalIndexV);
 	FEngineLoop::renderer.PrepareSubUVConstant();
 
-	FMatrix M = CreateBillboardMatrix();
-	FMatrix VP = GetEngine().View * GetEngine().Projection;
+	FMatrix Model = CreateBillboardMatrix();
 
 	// 최종 MVP 행렬
-	FMatrix MVP = M * VP;
+    FMatrix MVP = Model * GetEngine().GetCurViewportClient()->GetViewMatrix() * GetEngine().GetCurViewportClient()->GetProjectionMatrix();
+
 	if (this == GetWorld()->GetPickingGizmo()) {
 		FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);
 	}

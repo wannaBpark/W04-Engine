@@ -8,6 +8,7 @@
 
 #include "World.h"
 #include "Math/MathUtility.h"
+#include "UnrealEd/EditorViewportClient.h"
 
 UBillboardComponent::UBillboardComponent()
     : UPrimitiveComponent("Quad")
@@ -56,11 +57,11 @@ void UBillboardComponent::Render()
 	//FEngineLoop::renderer.UpdateSubUVConstant(0, 0);
 	//FEngineLoop::renderer.PrepareSubUVConstant();
 
-	FMatrix M = CreateBillboardMatrix();
-	FMatrix VP = GetEngine().View * GetEngine().Projection;
+	FMatrix Model = CreateBillboardMatrix();
 
 	// 최종 MVP 행렬
-	FMatrix MVP = M * VP;
+    FMatrix MVP = Model * GetEngine().GetCurViewportClient()->GetViewMatrix() * GetEngine().GetCurViewportClient()->GetProjectionMatrix();
+
 	if (this == GetWorld()->GetPickingGizmo()) {
 		FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);
 	}
@@ -137,7 +138,7 @@ void UBillboardComponent::SetUUIDParent(USceneComponent* _parent)
 
 FMatrix UBillboardComponent::CreateBillboardMatrix()
 {
-	FMatrix CameraView = GetEngine().View;
+	FMatrix CameraView = GetEngine().GetCurViewportClient()->GetViewMatrix();
 
 	CameraView.M[0][3] = 0.0f;
 	CameraView.M[1][3] = 0.0f;
@@ -197,13 +198,13 @@ bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& checkQuad, fl
 	FVector pickPosition;
 	int screenX = mousePos.x;
 	int screenY = mousePos.y;
-	FMatrix projectionMatrix = GetEngine().Projection;
+    FMatrix projectionMatrix = GetEngine().GetCurViewportClient()->GetProjectionMatrix();
 	pickPosition.x = ((2.0f * screenX / viewport.Width) - 1);
 	pickPosition.y = -((2.0f * screenY / viewport.Height) - 1);
 	pickPosition.z = 1.0f; // Near Plane
 
 	FMatrix M = CreateBillboardMatrix();
-	FMatrix V = GEngineLoop.View;
+    FMatrix V = GEngineLoop.GetCurViewportClient()->GetViewMatrix();;
 	FMatrix P = projectionMatrix;
 	FMatrix MVP = M * V * P;
 

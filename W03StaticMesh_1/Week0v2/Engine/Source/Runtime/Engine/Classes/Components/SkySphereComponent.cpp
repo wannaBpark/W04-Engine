@@ -2,6 +2,7 @@
 
 #include "World.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
+#include "UnrealEd/EditorViewportClient.h"
 USkySphereComponent::USkySphereComponent() : UPrimitiveComponent("SkySphere")
 {
 }
@@ -28,7 +29,8 @@ void USkySphereComponent::Render()
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());
 
     // 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().View * GetEngine().Projection;
+    FMatrix MVP = Model * GetEngine().GetCurViewportClient()->GetViewMatrix() * GetEngine().GetCurViewportClient()->GetProjectionMatrix();
+
     FEngineLoop::renderer.UpdateNormalConstantBuffer(Model);
     if (this == GetWorld()->GetPickingObj()) {
         FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);

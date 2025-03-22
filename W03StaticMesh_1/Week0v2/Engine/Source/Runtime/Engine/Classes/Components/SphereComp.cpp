@@ -31,7 +31,7 @@ void USphereComp::Render()
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());
 
     // 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().View * GetEngine().Projection;
+    FMatrix MVP = Model *  GetEngine().GetCurViewportClient()->GetViewMatrix() *GetEngine().GetCurViewportClient()->GetProjectionMatrix();
     //FMatrix MVP = Model * GetEngine().GetViewportClient()->GetViewMatrix() * GetEngine().GetViewportClient()->GetPerspectiveMatrix();
     FEngineLoop::renderer.UpdateNormalConstantBuffer(Model);
     if (this == GetWorld()->GetPickingObj()) {

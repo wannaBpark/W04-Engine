@@ -42,7 +42,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEWHEEL:
 		zDelta = GET_WHEEL_DELTA_WPARAM(wParam); // 휠 회전 값 (+120 / -120)
 		if (GEngineLoop.GetWorld()->GetCamera()->IsCameraMode()) {
-			GEngineLoop.GetViewportClient()->SetCameraSpeedScalar(static_cast<float>(GEngineLoop.GetViewportClient()->GetCameraSpeedScalar() + zDelta * 0.01));
+			GEngineLoop.GetCurViewportClient()->SetCameraSpeedScalar(static_cast<float>(GEngineLoop.GetCurViewportClient()->GetCameraSpeedScalar() + zDelta * 0.01));
 		}
 		else
 		{
@@ -86,9 +86,13 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 	UIMgr->Initialize(hWnd,graphicDevice.Device, graphicDevice.DeviceContext);
 	
 	resourceMgr.Initialize(&renderer, &graphicDevice);
-	
-	viewportClient = std::make_shared<FEditorViewportClient>();
-    viewportClient->Initialize();
+    for (size_t i = 0; i < 4; i++)
+    {
+        viewportClients[i] = std::make_shared<FEditorViewportClient>();
+        viewportClients[i]->Initialize();
+    }
+    curViewportClient = viewportClients[0];
+
 	GWorld = new UWorld;
 	GWorld->Initialize();
 
@@ -123,29 +127,22 @@ void FEngineLoop::Tick()
 				break;
 			}
 		}
-        viewportClient->Tick(elapsedTime);
-        View = viewportClient->GetViewMatrix();
-        Projection = viewportClient->GetProjectionMatrix();
+        Input();
+        curViewportClient->Tick(elapsedTime);
 
 		GWorld->Tick(elapsedTime);
-		//UCameraComponent* Camera = static_cast<UCameraComponent*>(GWorld->GetCamera());
-		//View = JungleMath::CreateViewMatrix(GWorld->GetCamera()->GetWorldLocation(),
-		//	GWorld->GetCamera()->GetWorldLocation() + GWorld->GetCamera()->GetForwardVector(),
-		//	{ 0, 0, 1 });
-		//Projection = JungleMath::CreateProjectionMatrix(
-		//	Camera->GetFOV() * (3.141592f / 180.0f),
-		//	GetAspectRatio(graphicDevice.SwapChain), 
-		//	0.1f,
-		//	1000.0f
-		//);
+
         graphicDevice.Prepare();
+        std::shared_ptr<FEditorViewportClient> viewportClient = GEngineLoop.GetCurViewportClient();
         for(int i=0;i<4;++i)
         {
+            SetViewportClient(i);
             graphicDevice.DeviceContext->RSSetViewports(1, &graphicDevice.Viewports[i]);
             renderer.PrepareShader();
             renderer.UpdateLightBuffer();
             Render();
         }
+        curViewportClient = viewportClient;
 		//graphicDevice.Prepare();
 		//renderer.PrepareShader();
 		//renderer.UpdateLightBuffer();
@@ -178,7 +175,8 @@ void FEngineLoop::Render()
 {
 	GWorld->Render();
 	GWorld->RenderBaseObject();
-	UPrimitiveBatch::GetInstance().RenderBatch(View, Projection);
+	UPrimitiveBatch::GetInstance().RenderBatch(GetCurViewportClient()->GetViewMatrix(), GetCurViewportClient()->GetProjectionMatrix());
+    //UPrimitiveBatch::GetInstance().RenderBatch(View, Projection);
 }
 float FEngineLoop::GetAspectRatio(IDXGISwapChain* swapChain)
 {
@@ -198,6 +196,22 @@ void FEngineLoop::Exit()
 	graphicDevice.Release();
 
 
+}
+
+void FEngineLoop::Input()
+{
+    if (GetAsyncKeyState('P') & 0x8000)
+    {
+        if (bPDown == false)
+        {
+            bPDown = true;
+            AddViewportClient();
+        }
+    }
+    else
+    {
+        bPDown = false;
+    }
 }
 
 void FEngineLoop::WindowInit(HINSTANCE hInstance)

@@ -118,14 +118,14 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
 	}
 	ImGui::Separator();
 	
-	float sp = GEngineLoop.GetViewportClient()->GetGridSize();
+	float sp = GEngineLoop.GetCurViewportClient()->GetGridSize();
 	ImGui::SliderFloat("Grid Spacing", &sp, 1.0f, 20.0f);
 	UPrimitiveBatch::GetInstance().GenerateGrid(sp, 5000);
-	GEngineLoop.GetViewportClient()->SetGridSize(sp);
+	GEngineLoop.GetCurViewportClient()->SetGridSize(sp);
 	
-	sp = GEngineLoop.GetViewportClient()->GetCameraSpeedScalar();
+	sp = GEngineLoop.GetCurViewportClient()->GetCameraSpeedScalar();
 	ImGui::SliderFloat("Camera Speed", &sp, 0.198f, 192.0f);
-	GEngineLoop.GetViewportClient()->SetCameraSpeedScalar(sp);
+	GEngineLoop.GetCurViewportClient()->SetCameraSpeedScalar(sp);
 
 	ImGui::Separator();
 

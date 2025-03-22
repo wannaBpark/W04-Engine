@@ -4,6 +4,7 @@
 #include "Engine/Source/Runtime/Engine/Camera/CameraComponent.h"
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
+#include "UnrealEd/EditorViewportClient.h"
 UText::UText() : UBillboardComponent("Quad")
 {
 }
@@ -345,11 +346,12 @@ void UText::TextMVPRendering()
 	//FEngineLoop::renderer.UpdateSubUVConstant(0, 0);
 	//FEngineLoop::renderer.PrepareSubUVConstant();
 
-	FMatrix M = CreateBillboardMatrix();
-	FMatrix VP = GetEngine().View * GetEngine().Projection;
+	FMatrix Model = CreateBillboardMatrix();
+
 
 	// 최종 MVP 행렬
-	FMatrix MVP = M * VP;
+    FMatrix MVP = Model * GetEngine().GetCurViewportClient()->GetViewMatrix() * GetEngine().GetCurViewportClient()->GetProjectionMatrix();
+
 	if (this == GetWorld()->GetPickingGizmo()) {
 		FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);
 	}

@@ -3,6 +3,7 @@
 #include "World.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 #include "Components/Player.h"
+#include "UnrealEd/EditorViewportClient.h"
 UGizmoRectangleComponent::UGizmoRectangleComponent()
 {
 }
@@ -37,7 +38,8 @@ void UGizmoRectangleComponent::Render()
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetQuat(), GetWorldScale());
 
     // 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().View * GetEngine().Projection;
+    FMatrix MVP = Model * GetEngine().GetCurViewportClient()->GetViewMatrix() * GetEngine().GetCurViewportClient()->GetProjectionMatrix();
+
     if (this == GetWorld()->GetPickingGizmo()) {
         FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);
     }

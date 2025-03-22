@@ -22,7 +22,20 @@ public:
     void Tick();
     void Exit();
     float GetAspectRatio(IDXGISwapChain* swapChain);
-	
+    void SetViewportClient(std::shared_ptr<FEditorViewportClient> viewportClient)
+    {
+        curViewportClient = viewportClient;
+    }
+    void SetViewportClient(int index)
+    {
+        curViewportClient = viewportClients[index];
+    }
+    void AddViewportClient()
+    {
+        curViewportIndex = (curViewportIndex + 1) % 4;
+        curViewportClient = viewportClients[curViewportIndex];
+    }
+    void Input();
 private:
     void WindowInit(HINSTANCE hInstance);
     void Render();
@@ -33,21 +46,22 @@ public:
     static uint32 TotalAllocationBytes;
     static uint32 TotalAllocationCount;
 
-    
+    bool bPDown = false;
     HWND hWnd;
-    FMatrix View;
-    FMatrix Projection;
+
 private:
     UImGuiManager* UIMgr;
     UWorld* GWorld;
     bool bIsExit = false;
     const int32 targetFPS = 60;
-    std::shared_ptr<FEditorViewportClient> viewportClient;
+    int32 curViewportIndex = 0;
+    std::shared_ptr<FEditorViewportClient> viewportClients[4];
+    std::shared_ptr<FEditorViewportClient> curViewportClient;
 public:
     UWorld* GetWorld(){ return GWorld; }
-    std::shared_ptr<FEditorViewportClient> GetViewportClient() const
+    std::shared_ptr<FEditorViewportClient> GetCurViewportClient() const
     {
-        return viewportClient;
+        return curViewportClient;
     }
 };
 
