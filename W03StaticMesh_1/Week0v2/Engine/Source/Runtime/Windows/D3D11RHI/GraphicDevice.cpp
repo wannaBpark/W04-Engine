@@ -36,6 +36,8 @@ void FGraphicsDevice::CreateDeviceAndSwapChain(HWND hWindow) {
 
     // 스왑 체인 정보 가져오기 (이후에 사용을 위해)
     SwapChain->GetDesc(&SwapchainDesc);
+    screenWidth = SwapchainDesc.BufferDesc.Width;
+    screenHeight = SwapchainDesc.BufferDesc.Height;
 }
 
 
@@ -183,8 +185,8 @@ void FGraphicsDevice::CreateFrameBuffer()
     Device->CreateRenderTargetView(FrameBuffer, &framebufferRTVdesc, &FrameBufferRTV);
     
     D3D11_TEXTURE2D_DESC textureDesc = {};
-    textureDesc.Width = ViewportInfo.Width;
-    textureDesc.Height = ViewportInfo.Height;
+    textureDesc.Width = screenWidth;
+    textureDesc.Height = screenHeight;
     textureDesc.MipLevels = 1;
     textureDesc.ArraySize = 1;
     textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -355,6 +357,9 @@ void FGraphicsDevice::OnResize(HWND hWindow) {
     CreateDepthStencilBuffer(hWindow);
 
     SwapChain->GetDesc(&SwapchainDesc);
+    screenWidth = SwapchainDesc.BufferDesc.Width;
+    screenHeight = SwapchainDesc.BufferDesc.Height;
+
 }
 
 
@@ -385,16 +390,16 @@ uint32 FGraphicsDevice::GetPixelUUID(POINT pt)
     if (pt.x < 0) {
         pt.x = 0;
     }
-    else if (pt.x > ViewportInfo.Width) {
-        pt.x = ViewportInfo.Width;
+    else if (pt.x > screenWidth) {
+        pt.x = screenWidth;
     }
 
     // pt.y 값 제한하기
     if (pt.y < 0) {
         pt.y = 0;
     }
-    else if (pt.y > ViewportInfo.Height) {
-        pt.y = ViewportInfo.Height;
+    else if (pt.y > screenHeight) {
+        pt.y = screenHeight;
     }
 
     // 1. Staging 텍스처 생성 (1x1 픽셀)
