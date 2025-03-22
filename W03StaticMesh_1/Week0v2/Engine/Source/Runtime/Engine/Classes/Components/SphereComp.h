@@ -1,8 +1,8 @@
 #pragma once
-#include "PrimitiveComponent.h"
-class USphereComp :public UPrimitiveComponent
+#include "StaticMeshComponent.h"
+class USphereComp :public UStaticMeshComponent
 {
-    DECLARE_CLASS(USphereComp, UPrimitiveComponent)
+    DECLARE_CLASS(USphereComp, UStaticMeshComponent)
 
 public:
     USphereComp();

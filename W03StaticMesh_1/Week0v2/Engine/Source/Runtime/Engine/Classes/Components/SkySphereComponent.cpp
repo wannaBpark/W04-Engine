@@ -2,6 +2,7 @@
 
 #include "World.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
+#include "Mesh/StaticMesh.h"
 USkySphereComponent::USkySphereComponent()
 {
     SetType(StaticClass()->GetName());
@@ -47,9 +48,12 @@ void USkySphereComponent::Render()
         UPrimitiveBatch::GetInstance().RenderAABB(AABB, GetWorldLocation(), Model);
         UPrimitiveBatch::GetInstance().RenderOBB(AABB, GetWorldLocation(), Model);
     }
-    if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_Primitives))
-        FEngineLoop::renderer.RenderTexturedModelPrimitive(staticMesh->vertexBuffer,
-            staticMesh->numVertices, staticMesh->indexBuffer, staticMesh->numIndices,
+    if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_Primitives)) {
+        //std::shared_ptr<FStaticMesh> renderData = staticMesh->GetRenderData();
+        std::shared_ptr<FStaticMesh> renderData = FEngineLoop::resourceMgr.GetMesh(GetType());
+        FEngineLoop::renderer.RenderTexturedModelPrimitive(renderData->vertexBuffer,
+            renderData->numVertices, renderData->indexBuffer, renderData->numIndices,
             Texture->TextureSRV, Texture->SamplerState
         );
+    }
 }
