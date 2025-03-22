@@ -75,15 +75,20 @@ public:
     void* operator new(size_t size)
     {
         UE_LOG(LogLevel::Display, "UObject Created : %d", size);
-        FEngineLoop::TotalAllocationBytes += static_cast<uint32>(size);
-        FEngineLoop::TotalAllocationCount++;
 
-        UE_LOG(LogLevel::Display, "TotalAllocationBytes : %d, TotalAllocationCount : %d", FEngineLoop::TotalAllocationBytes, FEngineLoop::TotalAllocationCount);
-        return std::malloc(size);
+        void* RawMemory = FPlatformMemory::Malloc<EAT_Object>(size);
+        UE_LOG(
+            LogLevel::Display,
+            "TotalAllocationBytes : %d, TotalAllocationCount : %d",
+            FPlatformMemory::GetAllocationBytes<EAT_Object>(),
+            FPlatformMemory::GetAllocationCount<EAT_Object>()
+        );
+        return RawMemory;
     }
 
-    void operator delete(void* ptr)
+    void operator delete(void* ptr, size_t size)
     {
-        std::free(ptr);
+        UE_LOG(LogLevel::Display, "UObject Deleted : %d", size);
+        FPlatformMemory::Free<EAT_Object>(ptr, size);
     }
 };
