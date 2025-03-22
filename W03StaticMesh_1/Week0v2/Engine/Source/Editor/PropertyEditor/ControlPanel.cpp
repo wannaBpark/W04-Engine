@@ -45,6 +45,7 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
 	if (ImGui::Button("Spawn"))
 	{
 		world->SpawnObject(static_cast<OBJECTS>(primitiveType));
+	    
 	}
 
 	ImGui::Separator();

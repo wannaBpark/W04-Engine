@@ -291,13 +291,6 @@ void UWorld::SetPickingObj(UObject* _Obj)
 	 pickingObj = static_cast<USceneComponent*>(_Obj); 
 }
 
-void UWorld::DeleteObj(UObject* _Obj)
-{
-	UObject* tmpObj = _Obj;
-    Trashbin.Remove(tmpObj);
-	delete tmpObj;
-}
-
 void UWorld::ThrowAwayObj(UObject* _Obj)
 {
 	Trashbin.Add(_Obj);

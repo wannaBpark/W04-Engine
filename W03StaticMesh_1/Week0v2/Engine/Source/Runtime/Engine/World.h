@@ -27,12 +27,13 @@ public:
     void Tick(float DeltaTime);
     void Release();
     void Input();
+
+    [[deprecated("Use SpawnActor")]]
     void SpawnObject(OBJECTS _Obj);
     void LoadData(SceneData& _Data);
     SceneData SaveData();
     void	NewScene();
-    void	SetPickingObj(UObject* _Obj); 
-    void	DeleteObj(UObject* _Obj);
+    void	SetPickingObj(UObject* _Obj);
     void	ThrowAwayObj(UObject* _Obj);
     void	CleanUp();
     void	Render();
