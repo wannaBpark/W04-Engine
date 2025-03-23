@@ -1,19 +1,18 @@
 #pragma once
-#include "Engine/Source/Runtime/Engine/Classes/Components/SceneComponent.h"
+#include "GameFramework/Actor.h"
+
 
 class UGizmoArrowComponent;
 class UGizmoCircleComponent;
 class UGizmoRectangleComponent;
 
-class UTransformGizmo : public USceneComponent
+class UTransformGizmo : public AActor
 {
-    DECLARE_CLASS(UTransformGizmo, USceneComponent)
+    DECLARE_CLASS(UTransformGizmo, AActor)
 
     UTransformGizmo();
-    virtual ~UTransformGizmo() override;
 
-    virtual void InitializeComponent() override;
-    virtual void TickComponent(float DeltaTime) override;
+    virtual void Tick(float DeltaTime) override;
     virtual void Render() override;
 
     TArray<UGizmoArrowComponent*>& GetArrowArr() { return ArrowArr; }
