@@ -442,6 +442,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Material\Material.cpp">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components\Material</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Casts.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\ThirdParty\DirectXTK\Include\DDSTextureLoader.h" />
@@ -471,6 +472,7 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Material\Material.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components\Material</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Casts.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PixelTextureShader.hlsl">
@@ -485,5 +487,14 @@
     <FxCompile Include="Shaders\VertexTextureShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="VertexMaterialShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelMaterialShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="Week0v2.natvis" />
   </ItemGroup>
 </Project>
