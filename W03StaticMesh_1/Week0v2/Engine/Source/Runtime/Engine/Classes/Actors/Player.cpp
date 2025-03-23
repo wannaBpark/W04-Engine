@@ -101,14 +101,15 @@ void UPlayer::Input()
 
     if (GetAsyncKeyState(VK_DELETE) & 0x8000)
     {
-        DeletePickedObj();
+        UWorld* World = GetWorld();
+        World->DestroyActor(World->GetPickedActor());
     }
 }
 
 bool UPlayer::PickGizmo(FVector& pickPosition)
 {
     bool isPickedGizmo = false;
-    if (GetWorld()->GetPickingObj())
+    if (GetWorld()->GetPickedActor())
     {
         if (cMode == CM_TRANSLATION)
         {
@@ -200,7 +201,7 @@ void UPlayer::PickObj(FVector& pickPosition)
 {
     if (!(ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) return;
 
-    UObject* Possible = nullptr;
+    UActorComponent* Possible = nullptr;
     int maxIntersect = 0;
     float minDistance = FLT_MAX;
     for (auto iter : GetWorld()->GetObjectArr())
@@ -234,7 +235,7 @@ void UPlayer::PickObj(FVector& pickPosition)
     }
     if (Possible)
     {
-        GetWorld()->SetPickingObj(Possible);
+        GetWorld()->SetPickedActor(Possible->GetOwner());
     }
 }
 
@@ -246,12 +247,6 @@ void UPlayer::AddControlMode()
 void UPlayer::AddCoordiMode()
 {
     cdMode = static_cast<CoordiMode>((cdMode + 1) % CDM_END);
-}
-
-void UPlayer::DeletePickedObj()
-{
-    GetWorld()->ThrowAwayObj(GetWorld()->GetPickingObj());
-    GetWorld()->SetPickingObj(nullptr);
 }
 
 void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& pickPosition)
@@ -305,7 +300,7 @@ int UPlayer::RayIntersectsObject(const FVector& pickPosition, UPrimitiveComponen
 void UPlayer::PickedObjControl()
 {
     // ���콺 �̵��� ���
-    if (GetWorld()->GetPickingObj() && GetWorld()->GetPickingGizmo())
+    if (GetWorld()->GetPickedActor() && GetWorld()->GetPickingGizmo())
     {
         POINT currentMousePos;
         GetCursorPos(&currentMousePos);
@@ -313,19 +308,20 @@ void UPlayer::PickedObjControl()
         int32 deltaX = currentMousePos.x - m_LastMousePos.x;
         int32 deltaY = currentMousePos.y - m_LastMousePos.y;
 
-        USceneComponent* pObj = GetWorld()->GetPickingObj();
+        // USceneComponent* pObj = GetWorld()->GetPickingObj();
+        AActor* PickedActor = GetWorld()->GetPickedActor();
         auto Gizmo = static_cast<UPrimitiveComponent*>(GetWorld()->GetPickingGizmo());
         switch (cMode)
         {
         case CM_TRANSLATION:
-            ControlTranslation(pObj, Gizmo, deltaX, deltaY);
+            ControlTranslation(PickedActor->GetRootComponent(), Gizmo, deltaX, deltaY);
             break;
         case CM_SCALE:
-            ControlScale(pObj, Gizmo, deltaX, deltaY);
+            ControlScale(PickedActor->GetRootComponent(), Gizmo, deltaX, deltaY);
 
             break;
         case CM_ROTATION:
-            ControlRotation(pObj, Gizmo, deltaX, deltaY);
+            ControlRotation(PickedActor->GetRootComponent(), Gizmo, deltaX, deltaY);
             break;
         }
         // ���ο� ���콺 ��ġ ����

@@ -124,7 +124,7 @@ void UGizmoCircleComponent::Render()
     FEngineLoop::graphicDevice.DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
 #pragma endregion GizmoDepth
 
-    if (!GetWorld()->GetPickingObj() || GetWorld()->GetPlayer()->GetControlMode() != CM_ROTATION)
+    if (!GetWorld()->GetPickedActor() || GetWorld()->GetPlayer()->GetControlMode() != CM_ROTATION)
         return;
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());
 

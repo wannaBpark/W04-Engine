@@ -149,7 +149,6 @@ void UWorld::Release()
 	}
 	GUObjectArray.Empty();
     ActorsArray.Empty();
-	pickingObj = nullptr;
 	pickingGizmo = nullptr;
 	ReleaseBaseObject();
 }
@@ -236,11 +235,6 @@ void UWorld::NewScene()
 {
 	Release();
 	CreateBaseObject();
-}
-
-void UWorld::SetPickingObj(UObject* _Obj)
-{
-	 pickingObj = static_cast<USceneComponent*>(_Obj); 
 }
 
 void UWorld::ThrowAwayObj(UObject* _Obj)

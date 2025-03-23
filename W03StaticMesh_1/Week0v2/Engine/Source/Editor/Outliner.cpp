@@ -1,6 +1,7 @@
 #include "Editor/Outliner.h"
 #include "World.h"
 #include "Components/PrimitiveComponent.h"
+#include "GameFramework/Actor.h"
 
 Outliner::Outliner()
 {
@@ -16,7 +17,7 @@ Outliner& Outliner::GetInstance()
     return instance;
 }
 
-void Outliner::Draw(UWorld* world)
+void Outliner::Draw(UWorld* World)
 {
     float controllWindowWidth = static_cast<float>(width) * 0.178f;
     float controllWindowHeight = static_cast<float>(height) * 0.15f;
@@ -32,20 +33,32 @@ void Outliner::Draw(UWorld* world)
     {
         if (ImGui::TreeNode("Primitives")) // 트리 노드 생성
         {
-            static int selected = -1; // 선택된 항목 저장용 변수
 
             // 오브젝트 리스트
-            for (int32 i = 0; i < world->GetObjectArr().Num();i++)
+            // for (int32 i = 0; i < World->GetObjectArr().Num();i++)
+            // {
+            //     if(!World->GetObjectArr()[i]->IsA(USceneComponent::StaticClass()))
+            //         continue;
+            //     // 선택 가능 항목 (Selectable)
+            //     if (ImGui::Selectable(*World->GetObjectArr()[i]->GetName(), selected == i))
+            //     {
+            //         selected = i; // 선택된 아이템 업데이트
+            //         World->SetPickingObj(World->GetObjectArr()[i]);
+            //     }
+            // }
+
+            static int Selected = -1; // 선택된 항목 저장용 변수
+            int Index = 0;
+            for (AActor* Actor : World->GetActors())
             {
-                if(!world->GetObjectArr()[i]->IsA(USceneComponent::StaticClass()))
-                    continue;
-                // 선택 가능 항목 (Selectable)
-                if (ImGui::Selectable(*world->GetObjectArr()[i]->GetName(), selected == i))
+                if (ImGui::Selectable(*Actor->GetActorLabel(), Selected == Index))
                 {
-                    selected = i; // 선택된 아이템 업데이트
-                    world->SetPickingObj(world->GetObjectArr()[i]);
+                    Selected = Index;
+                    World->SetPickedActor(Actor);
                 }
+                ++Index;
             }
+
             ImGui::TreePop(); // 트리 닫기
         }
     }

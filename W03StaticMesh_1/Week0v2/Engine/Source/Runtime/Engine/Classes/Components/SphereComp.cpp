@@ -32,7 +32,7 @@ void USphereComp::Render()
     // 최종 MVP 행렬
     FMatrix MVP = Model * GetEngine().View * GetEngine().Projection;
     FEngineLoop::renderer.UpdateNormalConstantBuffer(Model);
-    if (this == GetWorld()->GetPickingObj()) {
+    if (GetWorld()->GetPickedActor() == GetOwner()) {
         FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);
     }
     else

@@ -28,7 +28,7 @@ void UGizmoRectangleComponent::Render()
     FEngineLoop::graphicDevice.DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
 #pragma endregion GizmoDepth
 
-    if (!GetWorld()->GetPickingObj() || GetWorld()->GetPlayer()->GetControlMode() != CM_SCALE)
+    if (!GetWorld()->GetPickedActor() || GetWorld()->GetPlayer()->GetControlMode() != CM_SCALE)
         return;
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetQuat(), GetWorldScale());
 

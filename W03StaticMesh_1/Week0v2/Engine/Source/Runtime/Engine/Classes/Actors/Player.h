@@ -14,8 +14,6 @@ class UPlayer : public AActor
     UPlayer();
 
     // TODO: AActor에 맞게 수정하기
-    // 지금 FObjectFactory에서 T->InitializeComponent()를 호출하고 있음
-    virtual void InitializeComponent() {};
     virtual void Tick(float DeltaTime) override;
 
     void Input();
@@ -23,7 +21,6 @@ class UPlayer : public AActor
     void PickObj(FVector& pickPosition);
     void AddControlMode();
     void AddCoordiMode();
-    void DeletePickedObj();
 
 private:
     int RayIntersectsObject(const FVector& pickPosition, UPrimitiveComponent* obj, float& hitDistance, int& intersectCount);

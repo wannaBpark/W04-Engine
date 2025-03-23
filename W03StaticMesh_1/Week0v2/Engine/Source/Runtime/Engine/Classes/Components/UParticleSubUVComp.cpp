@@ -47,8 +47,11 @@ void UParticleSubUVComp::TickComponent(float DeltaTime)
 	{
 		indexU = 0;
 		indexV = 0;
-		GetWorld()->ThrowAwayObj(this);
-		GetWorld()->SetPickingObj(nullptr);
+
+	    // TODO: 파티클 제거 수정
+	    DestroyComponent();
+		// GetWorld()->ThrowAwayObj(this);
+		// GetWorld()->SetPickingObj(nullptr);
 	}
 
 
@@ -57,9 +60,6 @@ void UParticleSubUVComp::TickComponent(float DeltaTime)
 
 	finalIndexU = float(indexU) * normalWidthOffset;
 	finalIndexV = float(indexV) * normalHeightOffset;
-	
-
-	Super::TickComponent(DeltaTime);
 }
 
 void UParticleSubUVComp::Render()

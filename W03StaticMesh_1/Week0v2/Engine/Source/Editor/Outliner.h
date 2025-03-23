@@ -12,7 +12,7 @@ public:
 
     static Outliner& GetInstance();
 
-    void Draw(UWorld* world);
+    void Draw(UWorld* World);
     void OnResize(HWND hWnd);
     void Toggle() override {
         if (bWasOpen) {

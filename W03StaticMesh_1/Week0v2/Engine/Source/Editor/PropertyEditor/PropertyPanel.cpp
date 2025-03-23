@@ -62,60 +62,50 @@ void PropertyPanel::Draw(UWorld* world)
 		player->AddCoordiMode();
 	}
 
-    USceneComponent* PickObj = static_cast<USceneComponent*>(world->GetPickingObj());
-    if (PickObj)
+    AActor* PickActor = world->GetPickedActor();
+    if (PickActor)
     {
-        ImGui::Text("%s", *PickObj->GetName());
+        ImGui::Text("%s", *PickActor->GetName());
 
         // ��ġ/ȸ��/�������� float[3]�� ��Ƶ�
-        float pickObjLoc[3] = {
-            PickObj->GetWorldLocation().x,
-            PickObj->GetWorldLocation().y,
-            PickObj->GetWorldLocation().z
-        };
-        float pickObjRot[3] = {
-            PickObj->GetWorldRotation().x,
-            PickObj->GetWorldRotation().y,
-            PickObj->GetWorldRotation().z
-        };
-        float pickObjScale[3] = {
-            PickObj->GetWorldScale().x,
-            PickObj->GetWorldScale().y,
-            PickObj->GetWorldScale().z
-        };
+        FVector PickedActorLocation = PickActor->GetActorLocation();
+        FVector PickedActorRotation = PickActor->GetActorRotation();
+        FVector PickedActorScale = PickActor->GetActorScale();
 
         // ---------- ��ġ (X/Y/Z) ----------
         ImGui::Text("Position");
         ImGui::PushItemWidth(50.0f);
-        ImGui::DragFloat("##posX", &pickObjLoc[0], 0.6f, -FLT_MAX, FLT_MAX);
+        ImGui::DragFloat("##posX", &PickedActorLocation.x, 0.6f, -FLT_MAX, FLT_MAX);
         ImGui::SameLine();
-        ImGui::DragFloat("##posY", &pickObjLoc[1], 0.6f, -FLT_MAX, FLT_MAX);
+        ImGui::DragFloat("##posY", &PickedActorLocation.y, 0.6f, -FLT_MAX, FLT_MAX);
         ImGui::SameLine();
-        ImGui::DragFloat("##posZ", &pickObjLoc[2], 0.6f, -FLT_MAX, FLT_MAX);
+        ImGui::DragFloat("##posZ", &PickedActorLocation.z, 0.6f, -FLT_MAX, FLT_MAX);
+
         // ---------- ȸ�� (X/Y/Z) ----------
         ImGui::Text("Rotation");
-        ImGui::DragFloat("##rotX", &pickObjRot[0], 0.6f, -FLT_MAX, FLT_MAX);
+        ImGui::DragFloat("##rotX", &PickedActorRotation.x, 0.6f, -FLT_MAX, FLT_MAX);
         ImGui::SameLine();
-        ImGui::DragFloat("##rotY", &pickObjRot[1], 0.6f, -FLT_MAX, FLT_MAX);
+        ImGui::DragFloat("##rotY", &PickedActorRotation.y, 0.6f, -FLT_MAX, FLT_MAX);
         ImGui::SameLine();
-        ImGui::DragFloat("##rotZ", &pickObjRot[2], 0.6f, -FLT_MAX, FLT_MAX);
+        ImGui::DragFloat("##rotZ", &PickedActorRotation.z, 0.6f, -FLT_MAX, FLT_MAX);
 
         // ---------- ������ (X/Y/Z) ----------
         ImGui::Text("Scale");
-        ImGui::DragFloat("##scaleX", &pickObjScale[0], 0.6f, -FLT_MAX, FLT_MAX);
+        ImGui::DragFloat("##scaleX", &PickedActorScale.x, 0.6f, -FLT_MAX, FLT_MAX);
         ImGui::SameLine();
-        ImGui::DragFloat("##scaleY", &pickObjScale[1], 0.6f, -FLT_MAX, FLT_MAX);
+        ImGui::DragFloat("##scaleY", &PickedActorScale.y, 0.6f, -FLT_MAX, FLT_MAX);
         ImGui::SameLine();
-        ImGui::DragFloat("##scaleZ", &pickObjScale[2], 0.6f, -FLT_MAX, FLT_MAX);
+        ImGui::DragFloat("##scaleZ", &PickedActorScale.z, 0.6f, -FLT_MAX, FLT_MAX);
         ImGui::PopItemWidth();
+
         // ����� �� ����
-        PickObj->SetLocation(FVector(pickObjLoc[0], pickObjLoc[1], pickObjLoc[2]));
-        PickObj->SetRotation(FVector(pickObjRot[0], pickObjRot[1], pickObjRot[2]));
-        PickObj->SetScale(FVector(pickObjScale[0], pickObjScale[1], pickObjScale[2]));
+        PickActor->SetActorLocation(PickedActorLocation);
+        PickActor->SetActorRotation(PickedActorRotation);
+        PickActor->SetActorScale(PickedActorScale);
         bool reclaimFocus = false;
 
         // -------- SpotLight ó���� ----------
-        if (ULightComponentBase* lightObj = Cast<ULightComponentBase>(PickObj))
+        if (ULightComponentBase* lightObj = Cast<ULightComponentBase>(PickActor))
         {
             FVector4 currColor = lightObj->GetColor();
 
@@ -182,7 +172,7 @@ void PropertyPanel::Draw(UWorld* world)
                 lightObj->SetRadius(radiusVal);
             }
         }
-        if (UText* textOBj = Cast<UText>(PickObj))
+        if (UText* textOBj = Cast<UText>(PickActor))
         {
             if (textOBj) {
                 textOBj->SetTexture(L"Assets/Texture/font.png");

@@ -31,7 +31,6 @@ public:
     void LoadData(SceneData& _Data);
     SceneData SaveData();
     void	NewScene();
-    void	SetPickingObj(UObject* _Obj);
     void	ThrowAwayObj(UObject* _Obj);
     void	CleanUp();
     void	Render();
@@ -62,20 +61,25 @@ private:
     /** Actor 제거 대기열 */
     TArray<AActor*> PendingDestroyActors;
 
-    USceneComponent* pickingObj = nullptr;
+    AActor* PickedActor = nullptr;
+
     USceneComponent* pickingGizmo = nullptr;
     UCameraComponent* camera = nullptr;
     UPlayer* localPlayer = nullptr;
 public:
     UObject* worldGizmo = nullptr;
+
     const TArray<UObject*>& GetObjectArr() const { return GUObjectArray; }
+    const TSet<AActor*>& GetActors() const { return ActorsArray; }
 
     UTransformGizmo* LocalGizmo = nullptr;
     UCameraComponent* GetCamera() const { return camera; }
     UPlayer* GetPlayer() const { return localPlayer; }
 
 
-    USceneComponent* GetPickingObj() const { return pickingObj; }
+    AActor* GetPickedActor() const { return PickedActor; }
+    void SetPickedActor(AActor* InActor) { PickedActor = InActor; }
+
     UObject* GetWorldGizmo() const { return worldGizmo; }
     USceneComponent* GetPickingGizmo() const { return pickingGizmo; }
     void	SetPickingGizmo(UObject* _Obj);

@@ -109,15 +109,17 @@ void UTransformGizmo::TickComponent(float DeltaTime)
 {
 	Super::TickComponent(DeltaTime);
 
-	if (GetWorld()->GetPickingObj()) {
-		SetLocation(GetWorld()->GetPickingObj()->GetWorldLocation());
-	if (GetWorld()->GetPlayer()->GetCoordiMode() == CoordiMode::CDM_LOCAL)
-	{
-			SetRotation(GetWorld()->GetPickingObj()->GetQuat());
-	}
-	else if (GetWorld()->GetPlayer()->GetCoordiMode() == CoordiMode::CDM_WORLD)
-			SetRotation(FVector(0.0f,0.0f,0.0f));
-	}
+    if (const AActor* PickedActor = GetWorld()->GetPickedActor())
+    {
+        SetLocation(PickedActor->GetActorLocation());
+        if (GetWorld()->GetPlayer()->GetCoordiMode() == CoordiMode::CDM_LOCAL)
+        {
+            // TODO: 임시로 RootComponent의 정보로 사용
+            SetRotation(PickedActor->GetRootComponent()->GetQuat());
+        }
+        else if (GetWorld()->GetPlayer()->GetCoordiMode() == CoordiMode::CDM_WORLD)
+            SetRotation(FVector(0.0f, 0.0f, 0.0f));
+    }
 	for (int i = 0;i < 3;i++)
 	{
 		ArrowArr[i]->TickComponent(DeltaTime);
