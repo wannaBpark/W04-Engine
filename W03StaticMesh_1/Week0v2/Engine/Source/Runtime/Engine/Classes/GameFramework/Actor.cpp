@@ -1,8 +1,12 @@
 ﻿#include "Actor.h"
 
+#include "World.h"
+
 void AActor::BeginPlay()
 {
-    for (UActorComponent* Comp : OwnedComponents)
+    // TODO: 나중에 삭제를 Pending으로 하던가 해서 복사비용 줄이기
+    const auto CopyComponents = OwnedComponents;
+    for (UActorComponent* Comp : CopyComponents)
     {
         Comp->BeginPlay();
     }
@@ -11,7 +15,9 @@ void AActor::BeginPlay()
 void AActor::Tick(float DeltaTime)
 {
     // TODO: 임시로 Actor에서 Tick 돌리기
-    for (UActorComponent* Comp : OwnedComponents)
+    // TODO: 나중에 삭제를 Pending으로 하던가 해서 복사비용 줄이기
+    const auto CopyComponents = OwnedComponents;
+    for (UActorComponent* Comp : CopyComponents)
     {
         Comp->TickComponent(DeltaTime);
     }
@@ -55,7 +61,7 @@ void AActor::RemoveOwnedComponent(UActorComponent* Component)
 
 void AActor::SetRootComponent(USceneComponent* NewRootComponent)
 {
-    if (NewRootComponent != nullptr || NewRootComponent->GetOwner() == this)
+    if (NewRootComponent != nullptr && NewRootComponent->GetOwner() == this)
     {
         if (RootComponent != NewRootComponent)
         {
