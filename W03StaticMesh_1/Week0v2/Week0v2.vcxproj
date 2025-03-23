@@ -171,6 +171,7 @@
     <ClCompile Include="Engine\Source\Runtime\Core\EngineStatics.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\HAL\PlatformMemory.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Math\JungleMath.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Math\Vector.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\ActorEditor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Player.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ActorComponent.cpp" />
@@ -233,6 +234,7 @@
     <ClInclude Include="Engine\Source\Runtime\Core\HAL\PlatformType.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\JungleMath.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\MathUtility.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\Vector.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\ActorComponent.h" />
     <ClInclude Include="Engine\Source\Editor\UnrealEd\EditorViewportClient.h" />
     <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoArrowComponent.h" />
@@ -286,7 +288,6 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\GameFramework\Actor.cpp" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Matrix.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Quat.h" />
-    <ClInclude Include="Engine\Source\Runtime\Core\Math\Vector.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\Vector4.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Actors\Player.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\GameFramework\Actor.h" />

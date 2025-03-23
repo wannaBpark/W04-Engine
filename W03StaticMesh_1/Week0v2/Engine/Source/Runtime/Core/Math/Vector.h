@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <DirectXMath.h>
 
@@ -56,4 +56,6 @@ struct FVector
         return DirectX::XMFLOAT3(x, y, z);
     }
 
+    static const FVector ZeroVector;
+    static const FVector OneVector;
 };
