@@ -17,6 +17,8 @@ public:
     UClass(UClass&&) = delete;
     UClass& operator=(UClass&&) = delete;
 
+    uint32 GetClassSize() const { return ClassSize; }
+    uint32 GetClassAlignment() const { return ClassAlignment; }
 
     /** SomeBase의 자식 클래스인지 확인합니다. */
     bool IsChildOf(const UClass* SomeBase) const;
