@@ -7,7 +7,7 @@
 #include "UnrealClient.h"
 
 FEditorViewportClient::FEditorViewportClient()
-    : Viewport(nullptr)
+    : Viewport(nullptr), ViewMode(VMI_Lit), CameraMode(VCM_Perspective)
 {
 
 }

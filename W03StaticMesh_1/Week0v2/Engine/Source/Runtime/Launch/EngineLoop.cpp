@@ -50,12 +50,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_MOUSEWHEEL:
 		zDelta = GET_WHEEL_DELTA_WPARAM(wParam); // 휠 회전 값 (+120 / -120)
-		if (GEngineLoop.GetWorld()->GetCamera()->IsCameraMode()) {
+		if (GEngineLoop.GetLevelEditor() && GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetIsOnRBMouseClick()) {
 			GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeedScalar(static_cast<float>(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar() + zDelta * 0.01));
 		}
 		else
 		{
-			GEngineLoop.GetWorld()->GetCamera()->MoveForward(zDelta*0.1f);
+			GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CameraMoveForward(zDelta*0.1f);
 		}
 		break;
 	default:
@@ -142,6 +142,8 @@ void FEngineLoop::Tick()
         {
             LevelEditor->SetViewportClient(i);
             graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetViewports()[i]->GetD3DViewport());
+            graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
+            renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
             renderer.PrepareShader();
             renderer.UpdateLightBuffer();
             Render();
@@ -160,7 +162,7 @@ void FEngineLoop::Tick()
 		PropertyPanel::GetInstance().Draw(GetWorld());
 		Outliner::GetInstance().Draw(GetWorld());
 		ShowFlags::GetInstance().Draw(GetWorld());
-		ViewModeDropdown::GetInstance().Draw(GetWorld());
+		ViewModeDropdown::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
 		UIMgr->EndFrame();
 
 		GWorld->CleanUp();

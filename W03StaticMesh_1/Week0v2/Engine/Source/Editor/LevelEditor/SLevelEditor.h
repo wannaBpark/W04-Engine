@@ -27,6 +27,8 @@ private:
     std::shared_ptr<FEditorViewportClient> ActiveViewportClient;
 
     bool bLRButtonDown = false;
+    bool bTestButtonDown = false;
+
     POINT lastMousePos;
     float EditorWidth;
     float EditorHeight;

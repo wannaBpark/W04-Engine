@@ -98,6 +98,20 @@ void SLevelEditor::Input()
     {
         bLRButtonDown = false;
     }
+    // Flag Test 
+    if (GetAsyncKeyState('P') & 0x8000)
+    {
+        if (!bTestButtonDown)
+        {
+            bTestButtonDown = true;
+
+            ActiveViewportClient->AddViewMode();
+        }
+    }
+    else
+    {
+        bTestButtonDown = false;
+    }
 }
 
 void SLevelEditor::Release()

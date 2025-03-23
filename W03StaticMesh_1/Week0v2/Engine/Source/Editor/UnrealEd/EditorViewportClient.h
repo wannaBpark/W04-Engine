@@ -6,7 +6,7 @@
 #include "UObject/ObjectMacros.h"
 #include "ViewportClient.h"
 #include "EngineLoop.h"
-
+#include "EngineBaseTypes.h"
 
 #define MIN_ORTHOZOOM				1.0							/* 2D ortho viewport zoom >= MIN_ORTHOZOOM */
 #define MAX_ORTHOZOOM				1e25	
@@ -125,6 +125,10 @@ public:
     float nearPlane = 0.1f;
     float farPlane = 1000.0f;
 
+    EViewportCameraMode CameraMode;
+    uint64 ShowFlag;
+    EViewModeIndex ViewMode;
+
     FMatrix View;
     FMatrix Projection;
 public: //Camera Movement
@@ -138,6 +142,22 @@ public: //Camera Movement
     FMatrix& GetProjectionMatrix() { return Projection; }
     void UpdateViewMatrix();
     void UpdateProjectionMatrix();
+
+    EViewportCameraMode GetCameraSetting() { return CameraMode; }
+    void SetCameraSetting(EViewportCameraMode newMode) { CameraMode = newMode; }
+
+    EViewModeIndex GetViewMode() { return ViewMode; }
+    void SetViewMode(EViewModeIndex newMode) { ViewMode = newMode; }
+
+    uint64 GetShowFlag() { return ShowFlag; }
+    void SetShotFlat(uint64 newMode) { ShowFlag = newMode; }
+
+    bool GetIsOnRBMouseClick() { return bRightMouseDown; }
+
+    //Flag Test Code
+    void AddViewMode() {
+        ViewMode = static_cast<EViewModeIndex>((ViewMode + 1) % 3);
+    }
 private: // Input
     POINT lastMousePos;
     bool bRightMouseDown = false;

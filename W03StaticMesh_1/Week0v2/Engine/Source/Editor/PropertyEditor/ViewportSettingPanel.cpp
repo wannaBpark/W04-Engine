@@ -1,15 +1,22 @@
-#include "Engine/Source/Runtime/Engine/World.h"
-#include "ImGuiManager.h"
-#include "EngineLoop.h"
-#include "Engine/Source/Editor/PropertyEditor/ViewModeDropdown.h"
-#include "UnrealEd/EditorViewportClient.h"
+#include "ViewportSettingPanel.h"
 
-ViewModeDropdown& ViewModeDropdown::GetInstance()
+ViewportSettingPanel::ViewportSettingPanel()
 {
-	static ViewModeDropdown Inst;
-	return Inst;
 }
-void ViewModeDropdown::Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport)
+
+ViewportSettingPanel::~ViewportSettingPanel()
+{
+}
+
+ViewportSettingPanel& ViewportSettingPanel::GetInstance()
+{
+    // TODO: 여기에 return 문을 삽입합니다.
+    static ViewportSettingPanel instance;
+    return instance;
+}
+
+
+void ViewportSettingPanel::Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
     float controllWindowWidth = static_cast<float>(width) * 0.2f;
     float controllWindowHeight = static_cast<float>(height) * 0.f;
@@ -44,10 +51,10 @@ void ViewModeDropdown::Draw(std::shared_ptr<FEditorViewportClient> ActiveViewpor
     ImGui::End();
 }
 
-void ViewModeDropdown::OnResize(HWND hWnd)
+void ViewportSettingPanel::OnResize(HWND hWnd)
 {
-	RECT clientRect;
-	GetClientRect(hWnd, &clientRect);
-	width = clientRect.right - clientRect.left;
-	height = clientRect.bottom - clientRect.top;
+    RECT clientRect;
+    GetClientRect(hWnd, &clientRect);
+    width = clientRect.right - clientRect.left;
+    height = clientRect.bottom - clientRect.top;
 }

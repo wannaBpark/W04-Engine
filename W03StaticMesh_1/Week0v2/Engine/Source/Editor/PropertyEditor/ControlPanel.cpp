@@ -61,10 +61,6 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
 	if (!player) return;
 	static ControlMode selectedMode = CM_TRANSLATION;
 
-	//PropertyPanel* propPanel = world->GetPropertyPanel(); // PropertyPanel 가져오기
-	//bool isTranslationActive = (PrimaryGizmo && PrimaryGizmo->GetCurrentGizmo() == EGizmoType::Translation);
-	//if (isTranslationActive)
-	//	ImGui::PushStyleColor(ImGuiCol_Button, ActiveColor); // 활성 상태 색상
 	if (ImGui::Button("\ue9bc", ControlButtonSize))
 	{
 		selectedMode = CM_TRANSLATION;
@@ -133,14 +129,18 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
 	ImGui::Text("Orthogonal");
 	ImGui::SliderFloat("FOV", &world->GetCamera()->GetFOV(), 30.0f, 120.0f);
 
-	float cameraLocation[3] = { world->GetCamera()->GetWorldLocation().x, world->GetCamera()->GetWorldLocation().y, world->GetCamera()->GetWorldLocation().z };
+	float cameraLocation[3] = { GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation().x
+        , GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation().y,
+        GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation().z };
 	ImGui::InputFloat3("Camera Location", cameraLocation);
 
-	float cameraRotation[3] = { world->GetCamera()->GetWorldRotation().x, world->GetCamera()->GetWorldRotation().y, world->GetCamera()->GetWorldRotation().z };
+	float cameraRotation[3] = { GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetRotation().x
+        , GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetRotation().y,
+        GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetRotation().z };
 	ImGui::InputFloat3("Camera Rotation", cameraRotation);
 
-	world->GetCamera()->SetLocation(FVector(cameraLocation[0], cameraLocation[1], cameraLocation[2]));
-	world->GetCamera()->SetRotation(FVector(cameraRotation[0], cameraRotation[1], cameraRotation[2]));
+    GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.SetLocation(FVector(cameraLocation[0], cameraLocation[1], cameraLocation[2]));
+    GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.SetRotation(FVector(cameraRotation[0], cameraRotation[1], cameraRotation[2]));
 
 	ImGui::End();
 }
