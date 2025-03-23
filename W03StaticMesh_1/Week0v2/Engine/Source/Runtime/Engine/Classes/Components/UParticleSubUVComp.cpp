@@ -2,6 +2,8 @@
 #include "UParticleSubUVComp.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "World.h"
+#include "LevelEditor/SLevelEditor.h"
+
 
 UParticleSubUVComp::UParticleSubUVComp()
 {
@@ -74,7 +76,7 @@ void UParticleSubUVComp::Render()
 	FMatrix Model = CreateBillboardMatrix();
 
 	// 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().GetCurViewportClient()->GetViewMatrix() * GetEngine().GetCurViewportClient()->GetProjectionMatrix();
+    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
 
 	if (this == GetWorld()->GetPickingGizmo()) {
 		FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);

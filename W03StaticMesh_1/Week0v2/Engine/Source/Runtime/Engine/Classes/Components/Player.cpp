@@ -16,6 +16,8 @@
 #include "LightComponent.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealClient.h"
+#include "LevelEditor/SLevelEditor.h"
+
 
 using namespace DirectX;
 
@@ -267,7 +269,7 @@ void UPlayer::DeletePickedObj()
 
 void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& pickPosition)
 {
-	D3D11_VIEWPORT viewport = GetEngine().GetCurViewportClient()->GetD3DViewport();
+	D3D11_VIEWPORT viewport = GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetD3DViewport();
 	UINT numViewports = 1;
 	//FEngineLoop::graphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
 

@@ -12,6 +12,7 @@ class UWorld;
 class FEditorViewportClient;
 class SSplitterV;
 class SSplitterH;
+class SLevelEditor;
 class FEngineLoop
 {
 public:
@@ -43,7 +44,6 @@ public:
     static uint32 TotalAllocationBytes;
     static uint32 TotalAllocationCount;
 
-    bool bPDown = false;
     bool bLRButtonDown = false;
     POINT lastMousePos;
 
@@ -52,6 +52,7 @@ public:
 private:
     UImGuiManager* UIMgr;
     UWorld* GWorld;
+    SLevelEditor* LevelEditor;
     bool bIsExit = false;
     const int32 targetFPS = 60;
     int32 curViewportIndex = 0;
@@ -64,6 +65,7 @@ public:
     {
         return curViewportClient;
     }
+    SLevelEditor* GetLevelEditor() { return LevelEditor; }
     // test variable and function
 private:
     SSplitterV* VSplitter;

@@ -3,6 +3,8 @@
 #include "Engine/Source/Runtime/Engine/World.h"
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
+#include "LevelEditor/SLevelEditor.h"
+
 USphereComp::USphereComp()
 {
     SetType(StaticClass()->GetName());
@@ -32,7 +34,7 @@ void USphereComp::Render()
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());
 
     // 최종 MVP 행렬
-    FMatrix MVP = Model *  GetEngine().GetCurViewportClient()->GetViewMatrix() *GetEngine().GetCurViewportClient()->GetProjectionMatrix();
+    FMatrix MVP = Model *  GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() *GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
     //FMatrix MVP = Model * GetEngine().GetViewportClient()->GetViewMatrix() * GetEngine().GetViewportClient()->GetPerspectiveMatrix();
     FEngineLoop::renderer.UpdateNormalConstantBuffer(Model);
     if (this == GetWorld()->GetPickingObj()) {

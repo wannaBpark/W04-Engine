@@ -5,6 +5,8 @@
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 #include "UnrealEd/EditorViewportClient.h"
+#include "LevelEditor/SLevelEditor.h"
+
 UText::UText()
 {
     SetType("Quad");
@@ -351,7 +353,7 @@ void UText::TextMVPRendering()
 
 
 	// 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().GetCurViewportClient()->GetViewMatrix() * GetEngine().GetCurViewportClient()->GetProjectionMatrix();
+    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
 
 	if (this == GetWorld()->GetPickingGizmo()) {
 		FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);

@@ -65,7 +65,7 @@ void SSplitterV::OnResize(float width, float height)
     UE_LOG(LogLevel::Warning, "width %f height %f", width, height);
     Rect.width = width;
     float resize = width/prevWidth;
-
+   
     if (SideLT)
     {
         SideLT->Rect.width *= resize;

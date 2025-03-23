@@ -33,8 +33,7 @@ public:
     void OnDrag(const FPoint& delta) override {
         // 수평 스플리터의 경우, 좌우로 이동
         Rect.leftTopX += delta.x;
-        //SideRB->Rect.leftT += delta.x;
-        //SideRB->Rect.width -= delta.x;
+
         UpdateChildRects();
     }
 

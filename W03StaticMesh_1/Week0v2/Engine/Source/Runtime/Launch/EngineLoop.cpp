@@ -11,6 +11,7 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealClient.h"
 #include "slate/Widgets/Layout/SSplitter.h"
+#include "LevelEditor/SLevelEditor.h"
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern FEngineLoop GEngineLoop;
 
@@ -92,15 +93,18 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 	UIMgr->Initialize(hWnd,graphicDevice.Device, graphicDevice.DeviceContext);
 	
 	resourceMgr.Initialize(&renderer, &graphicDevice);
+    LevelEditor = new SLevelEditor();
+    LevelEditor->Initialize();
+
+	GWorld = new UWorld;
+	GWorld->Initialize();
+
     for (size_t i = 0; i < 4; i++)
     {
         viewportClients[i] = std::make_shared<FEditorViewportClient>();
         viewportClients[i]->Initialize(i);
     }
     curViewportClient = viewportClients[0];
-
-	GWorld = new UWorld;
-	GWorld->Initialize();
 
     //Splitter Test Code
     VSplitter = new SSplitterV();
@@ -159,19 +163,27 @@ void FEngineLoop::Tick()
         curViewportClient->Tick(elapsedTime);
 
 		GWorld->Tick(elapsedTime);
+        LevelEditor->Tick(elapsedTime);
 
         graphicDevice.Prepare();
-        std::shared_ptr<FEditorViewportClient> viewportClient = GEngineLoop.GetCurViewportClient();
-        for(int i=0;i<4;++i)
+        std::shared_ptr<FEditorViewportClient> viewportClient = GetLevelEditor()->GetActiveViewportClient();
+        //for(int i=0;i<4;++i)
+        //{
+        //    SetViewportClient(i);
+        //    graphicDevice.DeviceContext->RSSetViewports(1, &GetViewports()[i]->GetD3DViewport());
+        //    renderer.PrepareShader();
+        //    renderer.UpdateLightBuffer();
+        //    Render();
+        //}
+        for (int i = 0;i < 4;++i)
         {
-
-            SetViewportClient(i);
-            graphicDevice.DeviceContext->RSSetViewports(1, &GetViewports()[i]->GetD3DViewport());
+            LevelEditor->SetViewportClient(i);
+            graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetViewports()[i]->GetD3DViewport());
             renderer.PrepareShader();
             renderer.UpdateLightBuffer();
             Render();
         }
-        curViewportClient = viewportClient;
+        GetLevelEditor()->SetViewportClient(viewportClient);
 		//graphicDevice.Prepare();
 		//renderer.PrepareShader();
 		//renderer.UpdateLightBuffer();
@@ -204,7 +216,7 @@ void FEngineLoop::Render()
 {
 	GWorld->Render();
 	GWorld->RenderBaseObject();
-	UPrimitiveBatch::GetInstance().RenderBatch(GetCurViewportClient()->GetViewMatrix(), GetCurViewportClient()->GetProjectionMatrix());
+	UPrimitiveBatch::GetInstance().RenderBatch(GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix(), GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix());
     //UPrimitiveBatch::GetInstance().RenderBatch(View, Projection);
 }
 void FEngineLoop::SelectViewport(POINT point)

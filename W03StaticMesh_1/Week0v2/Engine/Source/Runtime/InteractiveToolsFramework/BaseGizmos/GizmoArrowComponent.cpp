@@ -4,6 +4,8 @@
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 #include "Components/Player.h"
 #include "UnrealEd/EditorViewportClient.h"
+#include "LevelEditor/SLevelEditor.h"
+
 UGizmoArrowComponent::UGizmoArrowComponent()
 {
 }
@@ -39,7 +41,7 @@ void UGizmoArrowComponent::Render()
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());
 
     // 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().GetCurViewportClient()->GetViewMatrix() * GetEngine().GetCurViewportClient()->GetProjectionMatrix();
+    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
 
 	
 	
