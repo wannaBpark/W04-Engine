@@ -1,6 +1,7 @@
 #pragma once
 #include "GameFramework/Actor.h"
 #include "UObject/ObjectMacros.h"
+#include "UObject/ObjectTypes.h"
 
 
 class UGizmoArrowComponent;

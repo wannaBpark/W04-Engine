@@ -5,18 +5,19 @@
 class FObjectFactory
 {
 public:
-    template<typename T> 
+    template<typename T>
+        requires std::derived_from<T, UObject>
     static T* ConstructObject()
     {
         uint32 id = UEngineStatics::GenUUID();
         FString Name = T::StaticClass()->GetName() + "_" + std::to_string(id);
-        T* obj = new T;
-        obj->ClassPrivate = T::StaticClass();
-        obj->NamePrivate = Name;
-        obj->UUID = id;
-        obj->InitializeComponent();  // TODO: 나중에 호출 위치 수정
+
+        T* Obj = ::new T;  // TODO: FPlatformMemory::Malloc으로 변경, placement new 사용시 Free방법 생각하기
+        Obj->ClassPrivate = T::StaticClass();
+        Obj->NamePrivate = Name;
+        Obj->UUID = id;
 
         UE_LOG(LogLevel::Display, "Created New Object : %s", *Name);
-        return obj;
+        return Obj;
     }
 };

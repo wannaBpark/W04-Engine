@@ -1,7 +1,6 @@
 #pragma once
 #include "EngineLoop.h"
 #include "NameTypes.h"
-#include "Engine/Source/Runtime/Engine/World.h"
 
 extern FEngineLoop GEngineLoop;
 

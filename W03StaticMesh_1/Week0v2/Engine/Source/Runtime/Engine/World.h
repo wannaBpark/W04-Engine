@@ -2,8 +2,10 @@
 #include "Define.h"
 #include "Container/Set.h"
 #include "UnrealEd/SceneMgr.h"
+#include "UObject/ObjectFactory.h"
 #include "UObject/ObjectTypes.h"
 
+class FObjectFactory;
 class AActor;
 class UObject;
 class UGizmoArrowComponent;
@@ -90,7 +92,7 @@ template <typename T>
     requires std::derived_from<T, AActor>
 T* UWorld::SpawnActor()
 {
-    T* Actor = new T;
+    T* Actor = FObjectFactory::ConstructObject<T>();
     ActorsArray.Add(Actor);
     PendingBeginPlayActors.Add(Actor);
     return Actor;
