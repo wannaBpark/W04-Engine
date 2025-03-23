@@ -4,7 +4,7 @@ int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 {
     int nIntersections = 0;
     if (staticMesh == nullptr) return 0;
-    std::shared_ptr<FStaticMesh> renderData = staticMesh->GetRenderData();
+    std::shared_ptr<FStaticMeshRenderData> renderData = staticMesh->GetRenderData();
     FVertexSimple* vertices = renderData->vertices.get();
     int vCount = renderData->numVertices;
     UINT* indices = renderData->indices.get();

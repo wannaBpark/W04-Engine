@@ -20,9 +20,9 @@ public:
     TArray<FStaticMaterial*> GetMaterials() const { return materials; }
     uint32 GetMaterialIndex(FName MaterialSlotName) const;
     void GetUsedMaterials(TArray<UMaterial*> Out) const;
-    std::shared_ptr<FStaticMesh> GetRenderData() const { return staticMeshRenderData; }
+    std::shared_ptr<FStaticMeshRenderData> GetRenderData() const { return staticMeshRenderData; }
 private:
-    std::shared_ptr<FStaticMesh> staticMeshRenderData = FEngineLoop::resourceMgr.GetMesh("UCubeComp"); // 언리얼의 FStaticMeshRenderData
+    std::shared_ptr<FStaticMeshRenderData> staticMeshRenderData = FEngineLoop::resourceMgr.GetMesh("UCubeComp");
     TArray<FStaticMaterial*> materials;
 
 };

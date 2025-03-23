@@ -55,7 +55,7 @@ void FResourceMgr::Initialize(FRenderer* renderer, FGraphicsDevice* device)
 void FResourceMgr::Release(FRenderer* renderer) {
     for (const auto& Pair : meshMap)
     {
-        FStaticMesh* mesh = Pair.Value.get();
+        FStaticMeshRenderData* mesh = Pair.Value.get();
         renderer->ReleaseBuffer(mesh->vertexBuffer);
         renderer->ReleaseBuffer(mesh->indexBuffer);
     }
@@ -209,7 +209,7 @@ void FResourceMgr::LoadObjNormalAsset(FRenderer* renderer, const FString& meshNa
 		return;
 	}
 
-	meshMap[meshName] = std::make_shared<FStaticMesh>(vertexBuffer, static_cast<UINT>(vertices.Num()), vertexArray, indexBuffer, static_cast<UINT>(indices.Num()), indexArray);
+	meshMap[meshName] = std::make_shared<FStaticMeshRenderData>(vertexBuffer, static_cast<UINT>(vertices.Num()), vertexArray, indexBuffer, static_cast<UINT>(indices.Num()), indexArray);
 
 	delete[] vertexArray;
 	delete[] indexArray;
@@ -371,7 +371,7 @@ void FResourceMgr::LoadObjNormalTextureAsset(FRenderer* renderer, const FString&
 		return;
 	}
 
-	meshMap[meshName] = std::make_shared<FStaticMesh>(vertexBuffer, static_cast<UINT>(vertices.Num()), vertexArray, indexBuffer, static_cast<UINT>(indices.Num()), indexArray);
+	meshMap[meshName] = std::make_shared<FStaticMeshRenderData>(vertexBuffer, static_cast<UINT>(vertices.Num()), vertexArray, indexBuffer, static_cast<UINT>(indices.Num()), indexArray);
 
 
 	delete[] vertexArray;
@@ -450,7 +450,7 @@ void FResourceMgr::LoadObjAsset(FRenderer* renderer, const FString& meshName, co
 		delete[] indexArray;
 		return;
 	}
-	meshMap[meshName] = std::make_shared<FStaticMesh>(vertexBuffer, static_cast<UINT>(vertices.Num()), vertexArray, indexBuffer, static_cast<UINT>(indices.Num()), indexArray);
+	meshMap[meshName] = std::make_shared<FStaticMeshRenderData>(vertexBuffer, static_cast<UINT>(vertices.Num()), vertexArray, indexBuffer, static_cast<UINT>(indices.Num()), indexArray);
 
 	delete[] vertexArray;
 	delete[] indexArray;
@@ -466,7 +466,7 @@ void FResourceMgr::RegisterMesh(FRenderer* renderer, const std::string& name, FV
 
     ID3D11Buffer* vertexBuffer = renderer->CreateVertexBuffer(vertices, vCount * sizeof(FVertexSimple));
     ID3D11Buffer* indexBuffer = (indices && iCount > 0) ? renderer->CreateIndexBuffer(indices, iCount * sizeof(UINT)) : nullptr;
-    meshMap[name] = std::make_shared<FStaticMesh>(vertexBuffer, vCount, vertices, indexBuffer, iCount, indices);
+    meshMap[name] = std::make_shared<FStaticMeshRenderData>(vertexBuffer, vCount, vertices, indexBuffer, iCount, indices);
 }
 
 void FResourceMgr::RegisterMesh(FRenderer* renderer, const std::string& name, TArray<FVertexSimple>& vertices, uint32 vCount, TArray<uint32>& indices, uint32 iCount)
@@ -485,10 +485,10 @@ void FResourceMgr::RegisterMesh(FRenderer* renderer, const std::string& name, TA
 
 	ID3D11Buffer* vertexBuffer = renderer->CreateVertexBuffer(vertices, vCount * sizeof(FVertexSimple));
 	ID3D11Buffer* indexBuffer = (!indices.IsEmpty() && iCount > 0) ? renderer->CreateIndexBuffer(indices, iCount * sizeof(UINT)) : nullptr;
-	meshMap[name] = std::make_shared<FStaticMesh>(vertexBuffer, vCount, vertexArray, indexBuffer, iCount, indexArray);
+	meshMap[name] = std::make_shared<FStaticMeshRenderData>(vertexBuffer, vCount, vertexArray, indexBuffer, iCount, indexArray);
 }
 
-std::shared_ptr<FStaticMesh> FResourceMgr::GetMesh(const FString& name) const
+std::shared_ptr<FStaticMeshRenderData> FResourceMgr::GetMesh(const FString& name) const
 {
     auto* TempValue = meshMap.Find(name);
     return TempValue ? *TempValue : nullptr;
@@ -516,7 +516,7 @@ void FResourceMgr::RegisterMesh(FRenderer* renderer, const std::string& name, TA
 
 	ID3D11Buffer* vertexBuffer = renderer->CreateVertexTextureBuffer(vertices.GetData(), vCount * sizeof(FVertexTexture));
 	ID3D11Buffer* indexBuffer = (!indices.IsEmpty() && iCount > 0) ? renderer->CreateIndexBuffer(indices, iCount * sizeof(UINT)) : nullptr;
-	meshMap[name] = std::make_shared<FStaticMesh>(vertexBuffer, vCount, vertexArray, indexBuffer, iCount, indexArray);
+	meshMap[name] = std::make_shared<FStaticMeshRenderData>(vertexBuffer, vCount, vertexArray, indexBuffer, iCount, indexArray);
 }
 
 HRESULT FResourceMgr::LoadTextureFromFile(ID3D11Device* device, ID3D11DeviceContext* context, const wchar_t* filename)

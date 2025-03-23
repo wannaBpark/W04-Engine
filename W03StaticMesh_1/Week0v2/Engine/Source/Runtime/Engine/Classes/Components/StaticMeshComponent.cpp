@@ -5,7 +5,7 @@ void UStaticMeshComponent::Render()
 {
     if (!staticMesh) return;
 
-    std::shared_ptr<FStaticMesh> renderData = staticMesh->GetRenderData();
+    std::shared_ptr<FStaticMeshRenderData> renderData = staticMesh->GetRenderData();
     if (renderData == nullptr) return;
 
     if (renderData->indexBuffer)
@@ -67,7 +67,7 @@ int UStaticMeshComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayD
     int nIntersections = 0;
     if (staticMesh == nullptr) return 0;
 
-    std::shared_ptr<FStaticMesh> renderData = staticMesh->GetRenderData();
+    std::shared_ptr<FStaticMeshRenderData> renderData = staticMesh->GetRenderData();
 
     FVertexSimple* vertices = renderData->vertices.get();
     int vCount = renderData->numVertices;

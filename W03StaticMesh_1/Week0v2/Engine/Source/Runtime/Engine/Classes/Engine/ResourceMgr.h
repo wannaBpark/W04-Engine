@@ -23,10 +23,10 @@ public:
     HRESULT LoadTextureFromFile(ID3D11Device* device, ID3D11DeviceContext* context, const wchar_t* filename);
     HRESULT LoadTextureFromDDS(ID3D11Device* device, ID3D11DeviceContext* context, const wchar_t* filename);
 
-    std::shared_ptr<FStaticMesh> GetMesh(const FString& name) const;
+    std::shared_ptr<FStaticMeshRenderData> GetMesh(const FString& name) const;
     std::shared_ptr<FTexture> GetTexture(const FWString& name) const;
 private:
-    TMap<FString, std::shared_ptr<FStaticMesh>> meshMap;
+    TMap<FString, std::shared_ptr<FStaticMeshRenderData>> meshMap;
     TMap<FWString, std::shared_ptr<FTexture>> textureMap;
 };
 
