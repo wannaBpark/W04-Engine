@@ -49,9 +49,6 @@
     <Filter Include="Engine\Source\Runtime\Engine\Classes\Components">
       <UniqueIdentifier>{201902C8-7FEC-4177-972A-84EC81033BA2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Source\Runtime\Engine\Classes\Engine">
-      <UniqueIdentifier>{550B8085-C0C6-47E2-88A5-F19E1F9CF245}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Source\Runtime\Engine\UserInterface">
       <UniqueIdentifier>{F67C2BFA-65AB-4031-8222-0180B8AFEA07}</UniqueIdentifier>
     </Filter>
@@ -111,6 +108,15 @@
     </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{3ED2C61B-0456-4321-9887-29E9AC4422B9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Source\Runtime\Engine\Classes\Components\Engine">
+      <UniqueIdentifier>{550B8085-C0C6-47E2-88A5-F19E1F9CF245}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh">
+      <UniqueIdentifier>{bd711ec2-6e67-4726-8ef3-773d4f3d19a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Source\Runtime\Engine\Classes\Components\Material">
+      <UniqueIdentifier>{057033e1-bf99-4de4-b992-4d13d03f2103}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -295,16 +301,16 @@
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.cpp">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Engine</Filter>
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components\Engine</Filter>
     </ClCompile>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.h">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Engine</Filter>
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components\Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\StaticMesh.h">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Engine</Filter>
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components\Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\Texture.h">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Engine</Filter>
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components\Engine</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Engine\UserInterface\Console.cpp">
       <Filter>Engine\Source\Runtime\Engine\UserInterface</Filter>
@@ -354,9 +360,6 @@
     <ClCompile Include="Engine\Source\Runtime\Launch\Launch.cpp">
       <Filter>Engine\Source\Runtime\Launch</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Launch\NameTypes.h">
-      <Filter>Engine\Source\Runtime\Launch</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Renderer\Renderer.cpp">
       <Filter>Engine\Source\Runtime\Renderer</Filter>
     </ClCompile>
@@ -424,10 +427,50 @@
       <Filter>Font</Filter>
     </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Launch\ImGuiManager.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\NameTypes.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Container\String.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\HAL\PlatformMemory.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\StaticMeshComponent.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\MeshComponent.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\StaticMesh.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Material\Material.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components\Material</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\ThirdParty\DirectXTK\Include\DDSTextureLoader.h" />
     <ClInclude Include="Engine\Source\Runtime\Launch\ImGuiManager.h" />
+    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\NameTypes.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\Array.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\ContainerAllocator.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\CString.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\Map.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\Pair.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\Set.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Container\String.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\HAL\PlatformMemory.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\HAL\PlatformType.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\MathUtility.h" />
+    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\ObjectMacros.h" />
+    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\ObjectTypes.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\MeshComponent.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\StaticMeshComponent.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\StaticMesh.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Material\Material.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components\Material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PixelTextureShader.hlsl">

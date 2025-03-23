@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cassert>
 #include <concepts>
 #include "Object.h"
@@ -8,7 +8,7 @@ template<typename To, typename From>
 FORCEINLINE To* Cast(From* Src)
 {
 	// 불완전한 타입 걸러내는 용도
-	static_assert(sizeof(From) > 0 && sizeof(To) > 0, "Attempting to cast between incomplete types");
+	//static_assert(sizeof(From) > 0 && sizeof(To) > 0, "Attempting to cast between incomplete types");
 
 	if (Src)
 	{
@@ -33,7 +33,7 @@ FORCEINLINE To* Cast(From* Src)
 template<typename To, typename From>
 FORCEINLINE To* CastChecked(From* Src)
 {
-	static_assert(sizeof(From) > 0 && sizeof(To) > 0, "Attempting to cast between incomplete types");
+	//static_assert(sizeof(From) > 0 && sizeof(To) > 0, "Attempting to cast between incomplete types");
 	assert(Src);    // nullptr!
 
 	To* Result = Cast<To>(Src);

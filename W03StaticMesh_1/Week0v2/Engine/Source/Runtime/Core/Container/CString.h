@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cstring>
 #include <cwchar>
 #include <cctype>
@@ -24,7 +24,7 @@ public:
         }
         else
         {
-            static_assert(false, "Unsupported character type!");
+            //static_assert(false, "Unsupported character type!");
             return nullptr;
         }
     }
@@ -41,7 +41,7 @@ public:
         }
         else
         {
-            static_assert(false, "Unsupported character type!");
+            //static_assert(false, "Unsupported character type!");
             return nullptr;
         }
     }
@@ -58,7 +58,7 @@ public:
         }
         else
         {
-            static_assert(false, "Unsupported character type!");
+            //static_assert(false, "Unsupported character type!");
             return nullptr;
         }
     }
@@ -104,7 +104,7 @@ public:
         }
         else
         {
-            static_assert(false, "Unsupported character type!");
+            //static_assert(false, "Unsupported character type!");
             return 0;
         }
     }
@@ -121,7 +121,7 @@ public:
         }
         else
         {
-            static_assert(false, "Unsupported character type!");
+            //static_assert(false, "Unsupported character type!");
             return 0;
         }
     }

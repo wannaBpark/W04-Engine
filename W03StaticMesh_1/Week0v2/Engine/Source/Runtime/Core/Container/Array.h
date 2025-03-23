@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <algorithm>
 #include <utility>
 #include <vector>
@@ -108,6 +108,12 @@ public:
     template <typename Compare>
         requires std::is_invocable_r_v<bool, Compare, const T&, const T&>
     void Sort(const Compare& CompFn);
+
+    bool IsValidIndex(uint32 ElementIndex) const {
+        if (ElementIndex < 0 || ElementIndex >= Len()) return false;
+
+        return true;
+    }
 };
 
 
