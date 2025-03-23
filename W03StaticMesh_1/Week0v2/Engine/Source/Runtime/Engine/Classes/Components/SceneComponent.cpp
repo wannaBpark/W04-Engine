@@ -13,6 +13,8 @@ USceneComponent::~USceneComponent()
 }
 void USceneComponent::InitializeComponent()
 {
+    Super::InitializeComponent();
+
 	//테스트용 텍스트
 	uuidText = new UTextUUID();
 	uuidText->SetTexture(L"Assets/Texture/UUID_Font.dds");
@@ -20,8 +22,6 @@ void USceneComponent::InitializeComponent()
 	uuidText->SetUUID(GetUUID());
 	uuidText->SetUUIDParent(this);
 	//SetText전에 RowColumn 반드시 설정
-
-	Super::InitializeComponent();
 }
 
 void USceneComponent::TickComponent(float DeltaTime)
