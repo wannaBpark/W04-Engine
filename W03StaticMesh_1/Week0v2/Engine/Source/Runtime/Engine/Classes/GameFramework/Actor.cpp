@@ -26,6 +26,18 @@ void AActor::Destroyed()
     // }
 }
 
+// TODO: 추후 제거해야 함
+void AActor::Render()
+{
+    for (UActorComponent* Comp : OwnedComponents)
+    {
+        if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+        {
+            SceneComp->Render();
+        }
+    }
+}
+
 bool AActor::Destroy()
 {
     if (UWorld* World = GetWorld())

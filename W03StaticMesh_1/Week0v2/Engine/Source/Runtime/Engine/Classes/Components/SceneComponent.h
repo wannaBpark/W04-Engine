@@ -12,7 +12,7 @@ public:
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
-    virtual void Render() override;
+    virtual void Render();
     virtual FVector GetForwardVector();
     virtual FVector GetRightVector();
     virtual FVector GetUpVector();
@@ -27,6 +27,7 @@ protected:
     FVector RelativeRotation;
     FQuat QuatRotation;
     FVector RelativeScale3D;
+
     USceneComponent* AttachParent = nullptr;
     TArray<USceneComponent*> AttachChildren;
 

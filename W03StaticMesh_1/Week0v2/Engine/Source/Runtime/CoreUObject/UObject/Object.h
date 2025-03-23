@@ -38,7 +38,6 @@ public:
     UObject();
     virtual ~UObject();
 
-    virtual void Render();
     virtual void RenderUUID();
 
     UWorld* GetWorld()

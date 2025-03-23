@@ -25,6 +25,9 @@ public:
     /** Actor가 제거될 때 호출됩니다. */
     virtual void Destroyed();
 
+    // TODO: 추후 제거해야 함
+    virtual void Render();
+
 public:
     /** 이 Actor를 제거합니다. */
     virtual bool Destroy();

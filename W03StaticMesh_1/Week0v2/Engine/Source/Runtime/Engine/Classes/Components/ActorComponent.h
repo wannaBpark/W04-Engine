@@ -26,9 +26,6 @@ public:
     /** Component가 제거되었을 때 호출됩니다. */
     virtual void OnComponentDestroyed();
 
-    // TODO: 나중에 삭제 예정
-    virtual void Render();
-
 public:
     /** 이 컴포넌트를 소유하고 있는 Actor를 반환합니다. */
     AActor* GetOwner() const { return Owner; }

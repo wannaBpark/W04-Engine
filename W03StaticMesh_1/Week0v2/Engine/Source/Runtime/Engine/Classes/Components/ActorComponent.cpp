@@ -19,10 +19,6 @@ void UActorComponent::OnComponentDestroyed()
 {
 }
 
-void UActorComponent::Render()
-{
-}
-
 void UActorComponent::DestroyComponent()
 {
     if (bIsBeingDestroyed)

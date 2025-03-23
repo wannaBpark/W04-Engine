@@ -23,10 +23,6 @@ UObject::~UObject()
 {
 }
 
-void UObject::Render()
-{
-}
-
 void UObject::RenderUUID()
 {
 }
