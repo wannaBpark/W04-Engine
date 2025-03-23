@@ -132,6 +132,7 @@ void USceneComponent::SetupAttachment(USceneComponent* InParent)
         ) 
     ) {
         AttachParent = InParent;
+        InParent->AttachChildren.AddUnique(this);
     }
 }
 

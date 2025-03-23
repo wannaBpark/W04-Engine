@@ -67,11 +67,13 @@ public:
     bool SetActorRotation(const FVector& NewRotation);
     bool SetActorScale(const FVector& NewScale);
 
+protected:
+    USceneComponent* RootComponent = nullptr;
+
 private:
     /** 이 Actor를 소유하고 있는 다른 Actor의 정보 */
     AActor* Owner = nullptr;
 
-    USceneComponent* RootComponent = nullptr;
     TSet<UActorComponent*> OwnedComponents;
 
 #if 1 // TODO: WITH_EDITOR 추가
