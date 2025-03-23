@@ -7,6 +7,7 @@
 #include "ViewportClient.h"
 #include "EngineLoop.h"
 
+
 #define MIN_ORTHOZOOM				1.0							/* 2D ortho viewport zoom >= MIN_ORTHOZOOM */
 #define MAX_ORTHOZOOM				1e25	
 
@@ -94,6 +95,8 @@ public:
     void SaveConfig();
     void Input();
     void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
+    void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
+
     bool IsSelected(POINT point);
 protected:
     /** Camera speed setting */

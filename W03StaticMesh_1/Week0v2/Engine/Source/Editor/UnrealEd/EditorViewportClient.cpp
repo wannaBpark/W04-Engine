@@ -5,6 +5,7 @@
 #include "Math/JungleMath.h"
 #include "EngineLoop.h"
 #include "UnrealClient.h"
+
 FEditorViewportClient::FEditorViewportClient()
     : Viewport(nullptr)
 {
@@ -123,6 +124,18 @@ void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchain
 {
     if (Viewport) { 
         Viewport->ResizeViewport(swapchaindesc);    
+    }
+    else {
+        UE_LOG(LogLevel::Error, "Viewport is nullptr");
+    }
+    AspectRatio = GEngineLoop.GetAspectRatio(GEngineLoop.graphicDevice.SwapChain);
+    UpdateProjectionMatrix();
+    UpdateViewMatrix();
+}
+void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right)
+{
+    if (Viewport) {
+        Viewport->ResizeViewport(Top, Bottom, Left, Right);
     }
     else {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");

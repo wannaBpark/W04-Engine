@@ -281,7 +281,6 @@ void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMat
     pickPosition.x = ((2.0f * viewportX / viewport.Width) - 1) / projectionMatrix[0][0];
     pickPosition.y = -((2.0f * viewportY / viewport.Height) - 1) / projectionMatrix[1][1];
 	pickPosition.z = 1.0f; // Near Plane
-    UE_LOG(LogLevel::Error, TEXT("LButton Down %f %f"), pickPosition.x, pickPosition.y);
 
 }
 int UPlayer::RayIntersectsObject(const FVector& pickPosition, UPrimitiveComponent* obj, float& hitDistance, int& intersectCount)
@@ -343,7 +342,6 @@ void UPlayer::PickedObjControl()
 			ControlRotation(pObj, Gizmo, deltaX, deltaY);
 			break;
 		}
-		// ���ο� ���콺 ��ġ ����
 		m_LastMousePos = currentMousePos;
 	}
 }
@@ -355,7 +353,6 @@ void UPlayer::ControlRotation(USceneComponent* pObj, UPrimitiveComponent* Gizmo,
 		FVector cameraRight = GetWorld()->GetCamera()->GetRightVector();
 		FVector cameraUp = GetWorld()->GetCamera()->GetUpVector();
 
-		// ���� ���� ȸ���� ��������
 		FQuat currentRotation = pObj->GetQuat();
 
 		FQuat rotationDelta;

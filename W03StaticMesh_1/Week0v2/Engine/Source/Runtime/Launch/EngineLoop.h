@@ -6,11 +6,12 @@
 #include "UnrealEd/PrimitiveBatch.h"
 #include "Engine/ResourceMgr.h"
 //#include "Engine/Source/Editor/UnrealEd/EditorViewportClient.h"
+
 class UImGuiManager;
 class UWorld;
 class FEditorViewportClient;
-
-
+class SSplitterV;
+class SSplitterH;
 class FEngineLoop
 {
 public:
@@ -30,11 +31,6 @@ public:
     {
         curViewportClient = viewportClients[index];
     }
-    void AddViewportClient()
-    {
-        curViewportIndex = (curViewportIndex + 1) % 4;
-        curViewportClient = viewportClients[curViewportIndex];
-    }
     void Input();
 private:
     void WindowInit(HINSTANCE hInstance);
@@ -49,6 +45,7 @@ public:
 
     bool bPDown = false;
     bool bLRButtonDown = false;
+    POINT lastMousePos;
 
     HWND hWnd;
 
@@ -67,5 +64,9 @@ public:
     {
         return curViewportClient;
     }
+    // test variable and function
+private:
+    SSplitterV* VSplitter;
+    SSplitterH* HSplitter;
 };
 

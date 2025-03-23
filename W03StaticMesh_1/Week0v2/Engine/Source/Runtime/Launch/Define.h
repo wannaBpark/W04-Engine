@@ -42,6 +42,18 @@ struct FSimpleVertex
 struct FOBB {
     FVector corners[8];
 };
+struct FRect
+{
+    FRect() : leftTopX(0), leftTopY(0), width(0), height(0) {}
+    FRect(float x, float y, float w, float h) : leftTopX(x), leftTopY(y), width(w), height(h) {}
+    float leftTopX, leftTopY, width, height;
+};
+struct FPoint
+{
+    FPoint() : x(0), y(0) {}
+    FPoint(float x, float y) : x(x), y(y) {}
+    float x, y;
+};
 struct FBoundingBox
 {
 	FVector min; // Minimum extents

@@ -1,6 +1,7 @@
 #pragma once
 #include "UnrealClient.h"
 //#include "UnrealEd/EditorViewportClient.h"
+
 FViewport::FViewport()
 {
 }
@@ -52,5 +53,38 @@ void FViewport::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc)
     }
     viewport.MinDepth = 0.0f;
     viewport.MaxDepth = 1.0f;
+}
+
+void FViewport::ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right)
+{
+    switch (viewLocation)
+    {
+    case EViewScreenLocation::TopLeft:
+        viewport.TopLeftX = Left.leftTopX;
+        viewport.TopLeftY = Top.leftTopY;
+        viewport.Width = Left.width;
+        viewport.Height = Top.height;
+        break;
+    case EViewScreenLocation::TopRight:
+        viewport.TopLeftX = Right.leftTopX;
+        viewport.TopLeftY = Top.leftTopY;
+        viewport.Width = Right.width;
+        viewport.Height = Top.height;
+        break;
+    case EViewScreenLocation::BottomLeft:
+        viewport.TopLeftX = Left.leftTopX;
+        viewport.TopLeftY = Bottom.leftTopY;
+        viewport.Width = Left.width;
+        viewport.Height = Bottom.height;
+        break;
+    case EViewScreenLocation::BottomRight:
+        viewport.TopLeftX = Right.leftTopX;
+        viewport.TopLeftY = Bottom.leftTopY;
+        viewport.Width = Right.width;
+        viewport.Height = Bottom.height;
+        break;
+    default:
+        break;
+    }
 }
 

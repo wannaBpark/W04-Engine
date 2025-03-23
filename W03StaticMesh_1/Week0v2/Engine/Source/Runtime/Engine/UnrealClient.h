@@ -1,6 +1,6 @@
 #pragma once
+#include "Define.h" 
 #include <d3d11.h>
-
 enum class EViewScreenLocation
 {
     TopLeft,
@@ -17,6 +17,8 @@ public:
     ~FViewport();
     void Initialize();
     void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
+    void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
+
 private:
     D3D11_VIEWPORT viewport;            // 뷰포트 정보
     EViewScreenLocation viewLocation;   // 뷰포트 위치
