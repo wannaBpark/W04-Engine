@@ -30,7 +30,7 @@ void AActor::SetActorLabel(const FString& NewActorLabel)
     // NewActorLabel != GetActorLabel
     if (FCString::Strcmp(*NewActorLabel, *GetActorLabel()) != 0)
     {
-        ActorLabel = NewActorLabel;
+        ActorLabel = NewActorLabel + "_" + FString::FromInt(GetUUID());
     }
 }
 

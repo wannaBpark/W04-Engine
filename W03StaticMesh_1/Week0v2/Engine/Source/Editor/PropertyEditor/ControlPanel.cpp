@@ -57,12 +57,14 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
         case OBJ_SPHERE:
         {
             SpawnedActor = world->SpawnActor<AActor>();
+            SpawnedActor->SetActorLabel(TEXT("OBJ_SPHERE"));
             SpawnedActor->AddComponent<USphereComp>();
             break;
         }
         case OBJ_CUBE:
         {
             SpawnedActor = world->SpawnActor<AActor>();
+            SpawnedActor->SetActorLabel(TEXT("OBJ_CUBE"));
             UCubeComp* CubeComp = SpawnedActor->AddComponent<UCubeComp>();
             USphereComp* SphereComp = SpawnedActor->AddComponent<USphereComp>();
             SphereComp->SetLocation({10, 0, 0});
@@ -72,12 +74,14 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
         case OBJ_SpotLight:
         {
             SpawnedActor = world->SpawnActor<AActor>();
+            SpawnedActor->SetActorLabel(TEXT("OBJ_SpotLight"));
             SpawnedActor->AddComponent<ULightComponentBase>();
             break;
         }
         case OBJ_PARTICLE:
         {
             SpawnedActor = world->SpawnActor<AActor>();
+            SpawnedActor->SetActorLabel(TEXT("OBJ_PARTICLE"));
             UParticleSubUVComp* ParticleComponent = SpawnedActor->AddComponent<UParticleSubUVComp>();
             ParticleComponent->SetTexture(L"Assets/Texture/T_Explosion_SubUV.png");
             ParticleComponent->SetRowColumnCount(6, 6);
@@ -87,6 +91,7 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
         case OBJ_Text:
         {
             SpawnedActor = world->SpawnActor<AActor>();
+            SpawnedActor->SetActorLabel(TEXT("OBJ_Text"));
             UText* TextComponent = SpawnedActor->AddComponent<UText>();
             TextComponent->SetTexture(L"Assets/Texture/font.png");
             TextComponent->SetRowColumnCount(106, 106);
