@@ -36,26 +36,7 @@ public:
      */
     template <typename T>
         requires std::derived_from<T, UActorComponent>
-    T* AddComponent()
-    {
-        T* ObjectInstance = FObjectFactory::ConstructObject<T>();
-        OwnedComponents.Add(ObjectInstance);
-        ObjectInstance->Owner = this;
-
-        USceneComponent* NewSceneComp = Cast<USceneComponent>(ObjectInstance);
-        if (NewSceneComp != nullptr)
-        {
-            if (RootComponent == nullptr)
-            {
-                RootComponent = NewSceneComp;
-            }
-            else
-            {
-                NewSceneComp->SetupAttachment(RootComponent);
-            }
-        }
-        return ObjectInstance;
-    }
+    T* AddComponent();
 
     /** Actor가 가지고 있는 Component를 제거합니다. */
     void RemoveOwnedComponent(UActorComponent* Component);
@@ -93,3 +74,26 @@ private:
     FString ActorLabel;
 #endif
 };
+
+
+template <typename T> requires std::derived_from<T, UActorComponent>
+T* AActor::AddComponent()
+{
+    T* Component = FObjectFactory::ConstructObject<T>();
+    OwnedComponents.Add(Component);
+    Component->Owner = this;
+
+    // 만약 SceneComponent를 상속 받았다면
+    if (USceneComponent* NewSceneComp = Cast<USceneComponent>(Component))
+    {
+        if (RootComponent == nullptr)
+        {
+            RootComponent = NewSceneComp;
+        }
+        else
+        {
+            NewSceneComp->SetupAttachment(RootComponent);
+        }
+    }
+    return Component;
+}
