@@ -71,9 +71,7 @@ void FRenderer::PrepareShader()
     {
         Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &ConstantBuffer);
         Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &LightingBuffer);
-        Graphics->DeviceContext->VSSetConstantBuffers(2, 1, &NormalConstantBuffer);
-        Graphics->DeviceContext->PSSetConstantBuffers(3, 1, &LitUnlitBuffer);
-        Graphics->DeviceContext->PSSetConstantBuffers(4, 1, &UUIDBuffer);
+        Graphics->DeviceContext->PSSetConstantBuffers(2, 1, &FlagBuffer);
     }
 }
 void FRenderer::ResetVertexShader()
@@ -261,19 +259,12 @@ void FRenderer::CreateConstantBuffer()
 
     constantbufferdesc.ByteWidth = sizeof(FSubUVConstant) + 0xf & 0xfffffff0;
     Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &SubUVConstantBuffer);
-
-    // create FNormalConstans buffer 
-    constantbufferdesc.ByteWidth = sizeof(FNormalConstants) + 0xf & 0xfffffff0;
-    Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &NormalConstantBuffer);
     
     constantbufferdesc.ByteWidth = sizeof(FGridParameters) + 0xf & 0xfffffff0;
     Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &GridConstantBuffer);
     
     constantbufferdesc.ByteWidth = sizeof(FPrimitiveCounts) + 0xf & 0xfffffff0;
     Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &LinePrimitiveBuffer);
-
-    constantbufferdesc.ByteWidth = sizeof(FUUIDConstants) + 0xf & 0xfffffff0;;
-    Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &UUIDBuffer);
 }
 
 void FRenderer::CreateLightingBuffer()
@@ -294,16 +285,14 @@ void FRenderer::CreateLitUnlitBuffer()
     constantbufferdesc.Usage = D3D11_USAGE_DYNAMIC;
     constantbufferdesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     constantbufferdesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &LitUnlitBuffer);
+    Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &FlagBuffer);
 }
 
 void FRenderer::ReleaseConstantBuffer()
 {
     if (ConstantBuffer) ConstantBuffer->Release(); ConstantBuffer = nullptr;
     if (LightingBuffer) LightingBuffer->Release(); LightingBuffer = nullptr;
-    if (NormalConstantBuffer) NormalConstantBuffer->Release(); NormalConstantBuffer = nullptr;
-    if (LitUnlitBuffer) LitUnlitBuffer->Release(); LitUnlitBuffer = nullptr;
-    if (UUIDBuffer) UUIDBuffer->Release(); UUIDBuffer = nullptr;
+    if (FlagBuffer) FlagBuffer->Release(); FlagBuffer = nullptr;
 }
 void FRenderer::UpdateLightBuffer()
 {
@@ -324,7 +313,7 @@ void FRenderer::UpdateLightBuffer()
 
 }
 
-void FRenderer::UpdateConstant(FMatrix _MVP, float _Flag)
+void FRenderer::UpdateConstant(FMatrix _MVP, FMatrix _NormalMatrix, FVector4 _UUIDColor, float _IsSelected)
 {
     if (ConstantBuffer)
     {
@@ -334,54 +323,24 @@ void FRenderer::UpdateConstant(FMatrix _MVP, float _Flag)
         FConstants* constants = (FConstants*)constantbufferMSR.pData; //GPU �޸� ���� ����
         {
             constants->MVP = _MVP;
-            constants->Flag = _Flag;
+            constants->ModelMatrixInverseTranspose = _NormalMatrix;
+            constants->UUIDColor = _UUIDColor;
+            constants->Flag = _IsSelected;
         }
         Graphics->DeviceContext->Unmap(ConstantBuffer, 0); // GPU�� �ٽ� ��밡���ϰ� �����
     }
 }
 
-void FRenderer::UpdateNormalConstantBuffer(FMatrix _Model)
-{
-    if (NormalConstantBuffer)
-    {
-        D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU �� �޸� �ּ� ����
-
-        Graphics->DeviceContext->Map(NormalConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR); // update constant buffer every frame
-
-        FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(_Model));
-
-        FNormalConstants* constants = (FNormalConstants*)constantbufferMSR.pData; //GPU �޸� ���� ����
-        {
-            constants->ModelMatrixInverseTranspose = NormalMatrix;
-        }
-        Graphics->DeviceContext->Unmap(NormalConstantBuffer, 0); // GPU �� �ٽ� ��밡���ϰ� �����. 
-
-    }
-}
 void FRenderer::UpdateLitUnlitConstantBuffer(int isLit)
 {
-    if (LitUnlitBuffer) {
+    if (FlagBuffer) {
         D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU �� �޸� �ּ� ����
-        Graphics->DeviceContext->Map(LitUnlitBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR);
+        Graphics->DeviceContext->Map(FlagBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR);
         FLitUnlitConstants* constants = (FLitUnlitConstants*)constantbufferMSR.pData; //GPU �޸� ���� ����
         {
             constants->isLit = isLit;
         }
-        Graphics->DeviceContext->Unmap(LitUnlitBuffer, 0);
-    }
-}
-
-void FRenderer::UpdateUUIDConstantBuffer(FVector4 UUIDColor)
-{
-    UUIDColor = UUIDColor / 255.0f;
-    if (UUIDBuffer) {
-        D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU �� �޸� �ּ� ����
-        Graphics->DeviceContext->Map(UUIDBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR);
-        FUUIDConstants* constants = (FUUIDConstants*)constantbufferMSR.pData; //GPU �޸� ���� ����
-        {
-            constants->UUIDColor = UUIDColor;
-        }
-        Graphics->DeviceContext->Unmap(UUIDBuffer, 0);
+        Graphics->DeviceContext->Unmap(FlagBuffer, 0);
     }
 }
 
@@ -581,7 +540,6 @@ void FRenderer::PrepareSubUVConstant()
     {
         Graphics->DeviceContext->VSSetConstantBuffers(1, 1, &SubUVConstantBuffer);
         Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &SubUVConstantBuffer);
-        Graphics->DeviceContext->PSSetConstantBuffers(4, 1, &UUIDBuffer);
     }
 }
 

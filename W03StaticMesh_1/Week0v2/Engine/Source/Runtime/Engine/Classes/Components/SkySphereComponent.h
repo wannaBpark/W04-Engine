@@ -20,6 +20,5 @@ public:
     {
         Texture = FEngineLoop::resourceMgr.GetTexture(filename);
     }
-
 };
 

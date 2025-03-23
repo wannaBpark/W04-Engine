@@ -32,13 +32,13 @@ void UCubeComp::Render()
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());
     // 최종 MVP 행렬
     FMatrix MVP = Model * GetEngine().View * GetEngine().Projection;
-    FEngineLoop::renderer.UpdateNormalConstantBuffer(Model);
+    FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
+    FVector4 UUIDColor = EncodeUUID() / 255.0f;
     if (this == GetWorld()->GetPickingObj()) {
-        FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);
+        FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
     }
     else
-        FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
-    FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
+        FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
 
     if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_AABB))
         UPrimitiveBatch::GetInstance().RenderAABB(AABB, GetWorldLocation(), Model);
