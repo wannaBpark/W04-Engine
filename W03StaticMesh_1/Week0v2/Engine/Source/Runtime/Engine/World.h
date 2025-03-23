@@ -30,6 +30,7 @@ public:
 
     [[deprecated("Use SpawnActor")]]
     void SpawnObject(OBJECTS _Obj);
+
     void LoadData(SceneData& _Data);
     SceneData SaveData();
     void	NewScene();
@@ -38,9 +39,16 @@ public:
     void	CleanUp();
     void	Render();
 
+    /**
+     * World에 Actor를 Spawn합니다.
+     * @tparam T AActor를 상속받은 클래스
+     * @return Spawn된 Actor의 포인터
+     */
     template <typename T>
         requires std::derived_from<T, AActor>
     T* SpawnActor();
+
+    /** World에 존재하는 Actor를 제거합니다. */
     bool DestroyActor(AActor* Actor);
     
 private:
@@ -48,12 +56,13 @@ private:
     TArray<UObject*> GUObjectArray;
     TArray<UObject*> Trashbin;
 
+    /** World에서 관리되는 모든 Actor의 목록 */
     TSet<AActor*> ActorsArray;
 
-    // Actor가 Spawn되었고, 아직 BeginPlay가 호출되지 않은 Actor들
+    /** Actor가 Spawn되었고, 아직 BeginPlay가 호출되지 않은 Actor들 */
     TArray<AActor*> PendingBeginPlayActors;
 
-    // Actor 제거 대기열
+    /** Actor 제거 대기열 */
     TArray<AActor*> PendingDestroyActors;
 
     USceneComponent* pickingObj = nullptr;
@@ -62,7 +71,7 @@ private:
     UPlayer* localPlayer = nullptr;
 public:
     UObject* worldGizmo = nullptr;
-    TArray<UObject*>& GetObjectArr() { return GUObjectArray; }
+    const TArray<UObject*>& GetObjectArr() const { return GUObjectArray; }
 
     UTransformGizmo* LocalGizmo = nullptr;
     UCameraComponent* GetCamera() const { return camera; }
