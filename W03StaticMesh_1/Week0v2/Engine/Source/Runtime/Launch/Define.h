@@ -99,13 +99,16 @@ struct FObjMaterialInfo
 // Cooked Data
 namespace OBJ
 {
-    struct FStaticMesh
+    struct FStaticMeshRenderData
     {
         FWString ObjectName;
         FWString PathName;
         
         TArray<FVertexSimple> Vertices;
         TArray<UINT> Indices;
+
+        ID3D11Buffer* VertexBuffer;
+        ID3D11Buffer* IndexBuffer;
         
         TArray<FObjMaterialInfo> Materials;
         TArray<FMaterialSubset> MaterialSubsets;

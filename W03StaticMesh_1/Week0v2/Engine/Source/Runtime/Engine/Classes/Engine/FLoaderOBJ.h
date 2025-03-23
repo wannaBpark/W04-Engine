@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <fstream>
 #include <sstream>
 
@@ -138,7 +138,7 @@ struct FLoaderOBJ
     }
     
     // Material Parsing (*.obj to MaterialInfo)
-    static bool ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMesh& OutFStaticMesh)
+    static bool ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMeshRenderData& OutFStaticMesh)
     {
         // Subset
         OutFStaticMesh.MaterialSubsets = OutObjInfo.MaterialSubsets;
@@ -242,8 +242,8 @@ struct FLoaderOBJ
         return true;
     }
     
-    // Convert the Raw data to Cooked data (FStaticMesh)
-    static bool ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMesh& OutStaticMesh)
+    // Convert the Raw data to Cooked data (FStaticMeshRenderData)
+    static bool ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRenderData& OutStaticMesh)
     {
         OutStaticMesh.ObjectName = RawData.ObjectName;
         OutStaticMesh.PathName = RawData.PathName;
@@ -333,9 +333,9 @@ struct FLoaderOBJ
 struct FManagerOBJ
 {
 public:
-    static OBJ::FStaticMesh* LoadObjStaticMeshAsset(const FString& PathFileName)
+    static OBJ::FStaticMeshRenderData* LoadObjStaticMeshAsset(const FString& PathFileName)
     {
-        OBJ::FStaticMesh* NewStaticMesh = new OBJ::FStaticMesh();
+        OBJ::FStaticMeshRenderData* NewStaticMesh = new OBJ::FStaticMeshRenderData();
         
         if ( const auto It = ObjStaticMeshMap.Find(PathFileName))
         {
@@ -364,7 +364,7 @@ public:
             CombineMaterialIndex(*NewStaticMesh);
         }
         
-        // Convert FStaticMesh
+        // Convert FStaticMeshRenderData
         Result = FLoaderOBJ::ConvertToStaticMesh(NewObjInfo, *NewStaticMesh);
         if (!Result)
         {
@@ -375,7 +375,7 @@ public:
         return NewStaticMesh;
     }
     
-    static void CombineMaterialIndex(OBJ::FStaticMesh& OutFStaticMesh)
+    static void CombineMaterialIndex(OBJ::FStaticMeshRenderData& OutFStaticMesh)
     {
         for (int32 i = 0; i < OutFStaticMesh.MaterialSubsets.Num(); i++)
         {
@@ -392,5 +392,5 @@ public:
     }
 
 private:
-    static TMap<FString, OBJ::FStaticMesh*> ObjStaticMeshMap;
+    inline static TMap<FString, OBJ::FStaticMeshRenderData*> ObjStaticMeshMap;
 };

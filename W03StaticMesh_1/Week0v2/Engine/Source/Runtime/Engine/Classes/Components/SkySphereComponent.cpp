@@ -49,10 +49,10 @@ void USkySphereComponent::Render()
     }
     if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_Primitives)) {
         //std::shared_ptr<FStaticMeshRenderData> renderData = staticMesh->GetRenderData();
-        std::shared_ptr<FStaticMeshRenderData> renderData = FEngineLoop::resourceMgr.GetMesh(GetType());
-        FEngineLoop::renderer.RenderTexturedModelPrimitive(renderData->vertexBuffer,
-            renderData->numVertices, renderData->indexBuffer, renderData->numIndices,
-            Texture->TextureSRV, Texture->SamplerState
-        );
+        //std::shared_ptr<FStaticMeshRenderData> renderData = FEngineLoop::resourceMgr.GetMesh(GetType());
+        //FEngineLoop::renderer.RenderTexturedModelPrimitive(renderData->vertexBuffer,
+        //    renderData->numVertices, renderData->indexBuffer, renderData->numIndices,
+        //    Texture->TextureSRV, Texture->SamplerState
+        //);
     }
 }

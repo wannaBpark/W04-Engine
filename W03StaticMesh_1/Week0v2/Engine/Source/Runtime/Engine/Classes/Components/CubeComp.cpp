@@ -3,8 +3,11 @@
 #include "World.h"
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/PrimitiveBatch.h"
+#include "UObject/ObjectFactory.h"
+
 UCubeComp::UCubeComp()
 {
+    staticMesh = FObjectFactory::ConstructObject<UStaticMesh>();
     SetType(StaticClass()->GetName());
     AABB.max = { 1,1,1 };
     AABB.min = { -1,-1,-1 };

@@ -5,19 +5,19 @@ void UStaticMeshComponent::Render()
 {
     if (!staticMesh) return;
 
-    std::shared_ptr<FStaticMeshRenderData> renderData = staticMesh->GetRenderData();
+    OBJ::FStaticMeshRenderData* renderData = staticMesh->GetRenderData();
     if (renderData == nullptr) return;
 
-    if (renderData->indexBuffer)
-        FEngineLoop::renderer.RenderPrimitive(renderData->vertexBuffer, renderData->numVertices, renderData->indexBuffer, renderData->numIndices);
+    if (renderData->IndexBuffer)
+        FEngineLoop::renderer.RenderPrimitive(renderData->VertexBuffer, renderData->Vertices.Len(), renderData->IndexBuffer, renderData->Indices.Len());
     else
-        FEngineLoop::renderer.RenderPrimitive(renderData->vertexBuffer, renderData->numVertices);
+        FEngineLoop::renderer.RenderPrimitive(renderData->VertexBuffer, renderData->Vertices.Len());
 }
 
 uint32 UStaticMeshComponent::GetNumMaterials() const
 {
     if (staticMesh == nullptr) return 0;
-        
+
     return staticMesh->GetMaterials().Len();
 }
 
@@ -67,15 +67,15 @@ int UStaticMeshComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayD
     int nIntersections = 0;
     if (staticMesh == nullptr) return 0;
 
-    std::shared_ptr<FStaticMeshRenderData> renderData = staticMesh->GetRenderData();
+    OBJ::FStaticMeshRenderData* renderData = staticMesh->GetRenderData();
 
-    FVertexSimple* vertices = renderData->vertices.get();
-    int vCount = renderData->numVertices;
-    UINT* indices = renderData->indices.get();
-    int iCount = renderData->numIndices;
+    FVertexSimple* vertices = renderData->Vertices.GetData();
+    int vCount = renderData->Vertices.Len();
+    UINT* indices = renderData->Indices.GetData();
+    int iCount = renderData->Indices.Len();
 
     if (!vertices) return 0;
-    BYTE* pbPositions = reinterpret_cast<BYTE*>(renderData->vertices.get());
+    BYTE* pbPositions = reinterpret_cast<BYTE*>(renderData->Vertices.GetData());
 
     int nPrimitives = (!indices) ? (vCount / 3) : (iCount / 3);
     float fNearHitDistance = FLT_MAX;
