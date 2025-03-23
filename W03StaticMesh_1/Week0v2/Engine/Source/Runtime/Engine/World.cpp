@@ -158,7 +158,7 @@ void UWorld::Render()
 	for (auto iter : GUObjectArray)
 	{
 		iter->Render();
-		if ((ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_UUIDText))) 
+		if (ShowFlags::GetInstance().currentFlags & EEngineShowFlags::SF_UUIDText) 
 			iter->RenderUUID();
 	}
 
