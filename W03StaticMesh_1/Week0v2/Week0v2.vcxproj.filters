@@ -487,10 +487,10 @@
     <FxCompile Include="Shaders\VertexTextureShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="VertexMaterialShader.hlsl">
+    <FxCompile Include="Shaders\VertexMaterialShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PixelMaterialShader.hlsl">
+    <FxCompile Include="Shaders\PixelMaterialShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
