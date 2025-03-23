@@ -4,6 +4,7 @@
 
 class UMeshComponent : public UPrimitiveComponent
 {
+    DECLARE_CLASS(UMeshComponent, UPrimitiveComponent)
 public:
     UMeshComponent() {}
     ~UMeshComponent() {}
