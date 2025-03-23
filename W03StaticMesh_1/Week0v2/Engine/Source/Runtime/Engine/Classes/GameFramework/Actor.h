@@ -47,12 +47,25 @@ public:
     /** Actor가 가지고 있는 모든 컴포넌트를 가져옵니다. */
     const TSet<UActorComponent*>& GetComponents() const { return OwnedComponents; }
 
+    template<typename T>
+        requires std::derived_from<T, UActorComponent>
+    T* GetComponentByClass();
+
 public:
     USceneComponent* GetRootComponent() const { return RootComponent; }
     void SetRootComponent(USceneComponent* NewRootComponent);
 
     AActor* GetOwner() const { return Owner; }
     void SetOwner(AActor* NewOwner) { Owner = NewOwner; }
+
+public:
+    FVector GetActorLocation() const { return RootComponent ? RootComponent->GetWorldLocation() : FVector::ZeroVector; }
+    FVector GetActorRotation() const { return RootComponent ? RootComponent->GetWorldRotation() : FVector::ZeroVector; }
+    FVector GetActorScale() const { return RootComponent ? RootComponent->GetWorldScale() : FVector::ZeroVector; }
+
+    bool SetActorLocation(const FVector& NewLocation);
+    bool SetActorRotation(const FVector& NewRotation);
+    bool SetActorScale(const FVector& NewScale);
 
 private:
     /** 이 Actor를 소유하고 있는 다른 Actor의 정보 */
@@ -98,5 +111,20 @@ T* AActor::AddComponent()
             NewSceneComp->SetupAttachment(RootComponent);
         }
     }
+
+    Component->InitializeComponent();
     return Component;
+}
+
+template <typename T> requires std::derived_from<T, UActorComponent>
+T* AActor::GetComponentByClass()
+{
+    for (UActorComponent* Component : OwnedComponents)
+    {
+        if (T* CastedComponent = Cast<T>(Component))
+        {
+            return CastedComponent;
+        }
+    }
+    return nullptr;
 }

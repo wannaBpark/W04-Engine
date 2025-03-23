@@ -66,3 +66,33 @@ void AActor::SetRootComponent(USceneComponent* NewRootComponent)
         }
     }
 }
+
+bool AActor::SetActorLocation(const FVector& NewLocation)
+{
+    if (RootComponent)
+    {
+        RootComponent->SetLocation(NewLocation);
+        return true;
+    }
+    return false;
+}
+
+bool AActor::SetActorRotation(const FVector& NewRotation)
+{
+    if (RootComponent)
+    {
+        RootComponent->SetRotation(NewRotation);
+        return true;
+    }
+    return false;
+}
+
+bool AActor::SetActorScale(const FVector& NewScale)
+{
+    if (RootComponent)
+    {
+        RootComponent->SetScale(NewScale);
+        return true;
+    }
+    return false;
+}
