@@ -16,11 +16,12 @@ void USceneComponent::InitializeComponent()
     Super::InitializeComponent();
 
 	//테스트용 텍스트
-	uuidText = new UTextUUID();
-	uuidText->SetTexture(L"Assets/Texture/UUID_Font.dds");
-	uuidText->SetRowColumnCount(1, 11);
-	uuidText->SetUUID(GetUUID());
-	uuidText->SetUUIDParent(this);
+    // TODO: UUID 렌더 부분을 컴포넌트로 분리
+	// uuidText = new UTextUUID();
+	// uuidText->SetTexture(L"Assets/Texture/UUID_Font.dds");
+	// uuidText->SetRowColumnCount(1, 11);
+	// uuidText->SetUUID(GetUUID());
+	// uuidText->SetUUIDParent(this);
 	//SetText전에 RowColumn 반드시 설정
 }
 
