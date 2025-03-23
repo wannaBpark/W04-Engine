@@ -177,6 +177,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\MeshComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\StaticMesh.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\StaticMeshComponent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\FLoaderOBJ.cpp" />
     <ClCompile Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoArrowComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Camera\CameraComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\UserInterface\Console.cpp" />
@@ -242,6 +243,7 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\MeshComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\StaticMesh.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\StaticMeshComponent.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\FLoaderOBJ.h" />
     <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoArrowComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Camera\CameraComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\UserInterface\Console.h" />

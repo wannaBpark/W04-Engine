@@ -2,7 +2,36 @@
 
 #include <DirectXMath.h>
 
-// 3D º¤ÅÍ
+struct FVector2D
+{
+	float x,y;
+	FVector2D(float _x = 0, float _y = 0) : x(_x), y(_y) {}
+
+	FVector2D operator+(const FVector2D& rhs) const
+	{
+		return FVector2D(x + rhs.x, y + rhs.y);
+	}
+	FVector2D operator-(const FVector2D& rhs) const
+	{
+		return FVector2D(x - rhs.x, y - rhs.y);
+	}
+	FVector2D operator*(float rhs) const
+	{
+		return FVector2D(x * rhs, y * rhs);
+	}
+	FVector2D operator/(float rhs) const
+	{
+		return FVector2D(x / rhs, y / rhs);
+	}
+	FVector2D& operator+=(const FVector2D& rhs)
+	{
+		x += rhs.x;
+		y += rhs.y;
+		return *this;
+	}
+};
+
+// 3D ï¿½ï¿½ï¿½ï¿½
 struct FVector
 {
 	float x, y, z;
@@ -15,17 +44,17 @@ struct FVector
 		return FVector(x + other.x, y + other.y, z + other.z);
 	}
 
-	// º¤ÅÍ ³»Àû
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	float Dot(const FVector& other) const {
 		return x * other.x + y * other.y + z * other.z;
 	}
 
-	// º¤ÅÍ Å©±â
+	// ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½
 	float Magnitude() const {
 		return sqrt(x * x + y * y + z * z);
 	}
 
-	// º¤ÅÍ Á¤±ÔÈ­
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­
 	FVector Normalize() const {
 		float mag = Magnitude();
 		return (mag > 0) ? FVector(x / mag, y / mag, z / mag) : FVector(0, 0, 0);
@@ -38,7 +67,7 @@ struct FVector
 			x * Other.y - y * Other.x
 		};
 	}
-	// ½ºÄ®¶ó °ö¼À
+	// ï¿½ï¿½Ä®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	FVector operator*(float scalar) const {
 		return FVector(x * scalar, y * scalar, z * scalar);
 	}
@@ -48,7 +77,7 @@ struct FVector
 	}
 
 	float Distance(const FVector& other) const {
-		// µÎ º¤ÅÍÀÇ Â÷ º¤ÅÍÀÇ Å©±â¸¦ °è»ê
+		// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å©ï¿½â¸¦ ï¿½ï¿½ï¿½
 		return ((*this - other).Magnitude());
 	}
 	DirectX::XMFLOAT3 ToXMFLOAT3() const
