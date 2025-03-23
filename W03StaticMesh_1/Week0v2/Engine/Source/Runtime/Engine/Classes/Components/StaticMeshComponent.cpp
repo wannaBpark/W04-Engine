@@ -1,5 +1,6 @@
 #include "Components/StaticMeshComponent.h"
 
+
 uint32 UStaticMeshComponent::GetNumMaterials() const
 {
     if (staticMesh == nullptr) return 0;

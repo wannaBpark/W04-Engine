@@ -6,9 +6,11 @@ class UMeshComponent : public UPrimitiveComponent
 {
     DECLARE_CLASS(UMeshComponent, UPrimitiveComponent)
 public:
-    virtual void Initialize() override;
-    virtual void Update(double deltaTime) override;
-    virtual void Release() override;
+    UMeshComponent() = default;
+
+    virtual void InitializeComponent() override;
+    virtual void TickComponent(float DeltaTime) override;
+    virtual void DestroyComponent() override;
     virtual void Render() override;
 
 #pragma region Material

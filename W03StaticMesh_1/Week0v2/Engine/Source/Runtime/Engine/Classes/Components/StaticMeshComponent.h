@@ -7,12 +7,11 @@ class UStaticMeshComponent : public UMeshComponent
     DECLARE_CLASS(UStaticMeshComponent, USceneComponent)
 
 public:
-    UStaticMeshComponent();
-    ~UStaticMeshComponent();
+    UStaticMeshComponent() = default;
 
-    virtual void Initialize() override;
-    virtual void Update(double deltaTime) override;
-    virtual void Release() override;
+    virtual void InitializeComponent() override;
+    virtual void TickComponent(float DeltaTime) override;
+    virtual void DestroyComponent() override;
     virtual void Render() override;
 
     virtual uint32 GetNumMaterials() const override ;

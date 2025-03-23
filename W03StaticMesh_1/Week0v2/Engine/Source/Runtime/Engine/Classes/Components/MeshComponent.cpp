@@ -1,5 +1,6 @@
 #include "MeshComponent.h"
 
+
 UMaterial* UMeshComponent::GetMaterial(uint32 ElementIndex) const
 {
     if (OverrideMaterials.IsValidIndex(ElementIndex))
