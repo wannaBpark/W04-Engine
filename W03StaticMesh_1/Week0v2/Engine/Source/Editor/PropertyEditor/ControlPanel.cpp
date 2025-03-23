@@ -5,6 +5,7 @@
 #include "Components/Player.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/EditorWindow.h"
+#include "LevelEditor/SLevelEditor.h"
 // #include "ImGUI\imgui.h"
 //#include "Font\IconDefs.h"
 //#include "Font/RawFonts.h"
@@ -118,14 +119,14 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
 	}
 	ImGui::Separator();
 	
-	float sp = GEngineLoop.GetCurViewportClient()->GetGridSize();
+	float sp = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetGridSize();
 	ImGui::SliderFloat("Grid Spacing", &sp, 1.0f, 20.0f);
 	UPrimitiveBatch::GetInstance().GenerateGrid(sp, 5000);
-	GEngineLoop.GetCurViewportClient()->SetGridSize(sp);
+	GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetGridSize(sp);
 	
-	sp = GEngineLoop.GetCurViewportClient()->GetCameraSpeedScalar();
+	sp = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar();
 	ImGui::SliderFloat("Camera Speed", &sp, 0.198f, 192.0f);
-	GEngineLoop.GetCurViewportClient()->SetCameraSpeedScalar(sp);
+	GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeedScalar(sp);
 
 	ImGui::Separator();
 

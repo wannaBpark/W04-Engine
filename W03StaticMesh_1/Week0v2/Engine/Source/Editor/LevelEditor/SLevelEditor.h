@@ -16,8 +16,10 @@ public:
     void Release();
     
     void SelectViewport(POINT point);
-
+    void OnResize();
+    void ResizeViewports();
 private:
+    bool bInitialize;
     SSplitterH* HSplitter;
     SSplitterV* VSplitter;
     UWorld* World;
@@ -26,7 +28,8 @@ private:
 
     bool bLRButtonDown = false;
     POINT lastMousePos;
-
+    float EditorWidth;
+    float EditorHeight;
 public:
     std::shared_ptr<FEditorViewportClient>* GetViewports() { return viewportClients; }
     std::shared_ptr<FEditorViewportClient> GetActiveViewportClient() const

@@ -8,7 +8,8 @@
 
 extern FEngineLoop GEngineLoop;
 
-SLevelEditor::SLevelEditor()
+SLevelEditor::SLevelEditor() : bInitialize(false), HSplitter(nullptr), VSplitter(nullptr),
+World(nullptr)
 {
 }
 
@@ -24,12 +25,15 @@ void SLevelEditor::Initialize()
         viewportClients[i]->Initialize(i);
     }
     ActiveViewportClient = viewportClients[0];
-
+    OnResize();
     VSplitter = new SSplitterV();
-    VSplitter->Initialize(FRect(0.0f, GEngineLoop.graphicDevice.screenHeight * 0.5f - 10, GEngineLoop.graphicDevice.screenWidth, 20));
+    VSplitter->Initialize(FRect(0.0f, EditorHeight * 0.5f - 10, EditorHeight, 20));
+    VSplitter->OnDrag(FPoint(0, 0));
     HSplitter = new SSplitterH();
-    HSplitter->Initialize(FRect(GEngineLoop.graphicDevice.screenWidth * 0.5f - 10, 0.0f, 20, GEngineLoop.graphicDevice.screenHeight));
-
+    HSplitter->Initialize(FRect(EditorWidth * 0.5f - 10, 0.0f, 20, EditorWidth));
+    HSplitter->OnDrag(FPoint(0, 0));
+    ResizeViewports();
+    bInitialize = true;
 }
 
 void SLevelEditor::Tick(double deltaTime)
@@ -45,8 +49,9 @@ void SLevelEditor::Tick(double deltaTime)
     {
         SetCursor(LoadCursor(NULL, IDC_ARROW));
     }
-    VSplitter->OnResize(GEngineLoop.graphicDevice.screenWidth, GEngineLoop.graphicDevice.screenHeight);
-    HSplitter->OnResize(GEngineLoop.graphicDevice.screenWidth, GEngineLoop.graphicDevice.screenHeight);
+    OnResize();
+    //VSplitter->OnResize(EditorWidth, EditorHeight);
+    //HSplitter->OnResize(EditorWidth, EditorHeight);
     //Test Code Cursor icon End
     Input();
 
@@ -79,25 +84,13 @@ void SLevelEditor::Input()
 
             if (VSplitter->IsHover(FPoint(lastMousePos.x, lastMousePos.y)))
             {
-                UE_LOG(LogLevel::Error, TEXT("VSplitter %f %f %f %f"), VSplitter->Rect.leftTopX
-                    , VSplitter->Rect.leftTopY, VSplitter->Rect.leftTopX + VSplitter->Rect.width
-                    , VSplitter->Rect.leftTopY + VSplitter->Rect.height);
                 VSplitter->OnDrag(FPoint(deltaX, deltaY));
             }
             if (HSplitter->IsHover(FPoint(lastMousePos.x, lastMousePos.y)))
             {
-                UE_LOG(LogLevel::Error, TEXT("HSplitter %f %f %f %f"), HSplitter->Rect.leftTopX
-                    , HSplitter->Rect.leftTopY, HSplitter->Rect.leftTopX + HSplitter->Rect.width
-                    , HSplitter->Rect.leftTopY + HSplitter->Rect.height);
                 HSplitter->OnDrag(FPoint(deltaX, deltaY));
             }
-            for (int i = 0;i < 4;++i)
-            {
-                GetViewports()[i]->ResizeViewport(VSplitter->SideLT->Rect, VSplitter->SideRB->Rect,
-                    HSplitter->SideLT->Rect, HSplitter->SideRB->Rect);
-                /*              GetViewports()[i]->ResizeViewport(FRect(0,0,1200,600), FRect(0,600,1200,600),
-                                  FRect(0,0,600,1200), FRect(600,0,600,1200));*/
-            }
+            ResizeViewports();
             lastMousePos = currentMousePos;
         }
     }
@@ -121,6 +114,32 @@ void SLevelEditor::SelectViewport(POINT point)
         {
             SetViewportClient(i);
             break;
+        }
+    }
+}
+
+void SLevelEditor::OnResize()
+{
+    float PrevWidth = EditorWidth;
+    float PrevHeight = EditorHeight;
+    EditorWidth = GEngineLoop.graphicDevice.screenWidth;
+    EditorHeight = GEngineLoop.graphicDevice.screenHeight;
+    if (bInitialize) {
+        //HSplitter 에는 바뀐 width 비율이 들어감 
+        HSplitter->OnResize(EditorWidth/PrevWidth, EditorHeight);
+        //HSplitter 에는 바뀐 Height 비율이 들어감 
+        VSplitter->OnResize(EditorWidth, EditorHeight/PrevHeight);
+        ResizeViewports();
+    }
+}
+
+void SLevelEditor::ResizeViewports()
+{
+    if (GetViewports()[0]) {
+        for (int i = 0;i < 4;++i)
+        {
+            GetViewports()[i]->ResizeViewport(VSplitter->SideLT->Rect, VSplitter->SideRB->Rect,
+                HSplitter->SideLT->Rect, HSplitter->SideRB->Rect);
         }
     }
 }

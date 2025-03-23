@@ -34,8 +34,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				FEngineLoop::graphicDevice.OnResize(hWnd);
 			}
             for (int i = 0;i < 4;i++) {
-                if (GEngineLoop.GetViewports()[i]) {
-                    GEngineLoop.GetViewports()[i]->ResizeViewport(FEngineLoop::graphicDevice.SwapchainDesc);
+                if (GEngineLoop.GetLevelEditor()){
+                    if (GEngineLoop.GetLevelEditor()->GetViewports()[i]) {
+                        GEngineLoop.GetLevelEditor()->GetViewports()[i]->ResizeViewport(FEngineLoop::graphicDevice.SwapchainDesc);
+                    }
                 }
             }
 		}
@@ -49,7 +51,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEWHEEL:
 		zDelta = GET_WHEEL_DELTA_WPARAM(wParam); // 휠 회전 값 (+120 / -120)
 		if (GEngineLoop.GetWorld()->GetCamera()->IsCameraMode()) {
-			GEngineLoop.GetCurViewportClient()->SetCameraSpeedScalar(static_cast<float>(GEngineLoop.GetCurViewportClient()->GetCameraSpeedScalar() + zDelta * 0.01));
+			GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeedScalar(static_cast<float>(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar() + zDelta * 0.01));
 		}
 		else
 		{
@@ -68,7 +70,8 @@ FRenderer FEngineLoop::renderer;
 FResourceMgr FEngineLoop::resourceMgr;
 uint32 FEngineLoop::TotalAllocationBytes= 0;
 uint32 FEngineLoop::TotalAllocationCount = 0;
-FEngineLoop::FEngineLoop()
+FEngineLoop::FEngineLoop() :
+    UIMgr(nullptr), GWorld(nullptr), LevelEditor(nullptr)
 {
 }
 
@@ -98,19 +101,6 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 
 	GWorld = new UWorld;
 	GWorld->Initialize();
-
-    for (size_t i = 0; i < 4; i++)
-    {
-        viewportClients[i] = std::make_shared<FEditorViewportClient>();
-        viewportClients[i]->Initialize(i);
-    }
-    curViewportClient = viewportClients[0];
-
-    //Splitter Test Code
-    VSplitter = new SSplitterV();
-    VSplitter->Initialize(FRect(0.0f, graphicDevice.screenHeight* 0.5f - 10,graphicDevice.screenWidth, 20 ));
-    HSplitter = new SSplitterH();
-    HSplitter->Initialize(FRect(graphicDevice.screenWidth * 0.5f - 10, 0.0f, 20, graphicDevice.screenHeight));
 
 	return 0;
 }
@@ -143,38 +133,11 @@ void FEngineLoop::Tick()
 				break;
 			}
 		}
-        //Test Code Cursor icon
-        POINT pt;
-        GetCursorPos(&pt);
-        ScreenToClient(hWnd, &pt);
-        if (VSplitter->IsHover(FPoint(pt.x, pt.y))|| HSplitter->IsHover(FPoint(pt.x, pt.y)))
-        {
-            SetCursor(LoadCursor(NULL, IDC_SIZEALL));
-        }
-        else
-        {
-            SetCursor(LoadCursor(NULL, IDC_ARROW));
-        }
-        VSplitter->OnResize(graphicDevice.screenWidth, graphicDevice.screenHeight);
-        HSplitter->OnResize(graphicDevice.screenWidth, graphicDevice.screenHeight);
-        //Test Code Cursor icon End
-        Input();
-        
-        curViewportClient->Tick(elapsedTime);
 
 		GWorld->Tick(elapsedTime);
         LevelEditor->Tick(elapsedTime);
-
         graphicDevice.Prepare();
         std::shared_ptr<FEditorViewportClient> viewportClient = GetLevelEditor()->GetActiveViewportClient();
-        //for(int i=0;i<4;++i)
-        //{
-        //    SetViewportClient(i);
-        //    graphicDevice.DeviceContext->RSSetViewports(1, &GetViewports()[i]->GetD3DViewport());
-        //    renderer.PrepareShader();
-        //    renderer.UpdateLightBuffer();
-        //    Render();
-        //}
         for (int i = 0;i < 4;++i)
         {
             LevelEditor->SetViewportClient(i);
@@ -219,17 +182,7 @@ void FEngineLoop::Render()
 	UPrimitiveBatch::GetInstance().RenderBatch(GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix(), GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix());
     //UPrimitiveBatch::GetInstance().RenderBatch(View, Projection);
 }
-void FEngineLoop::SelectViewport(POINT point)
-{
-    for (int i = 0; i < 4; i++)
-    {
-        if (viewportClients[i]->IsSelected(point))
-        {
-            SetViewportClient(i);
-            break;
-        }
-    }
-}
+
 
 float FEngineLoop::GetAspectRatio(IDXGISwapChain* swapChain)
 {
@@ -251,59 +204,6 @@ void FEngineLoop::Exit()
 
 }
 
-void FEngineLoop::Input()
-{
-    if(GetAsyncKeyState(VK_LBUTTON) & 0x8000 || GetAsyncKeyState(VK_RBUTTON) & 0x8000)
-    {
-        if (bLRButtonDown == false)
-        {
-            bLRButtonDown = true;
-            POINT pt;
-            GetCursorPos(&pt);
-            GetCursorPos(&lastMousePos);
-            ScreenToClient(hWnd, &pt);
-            //UE_LOG(LogLevel::Error, TEXT("LButton Down %d %d"), pt.x, pt.y);
-          
-            SelectViewport(pt);
-         }
-        else
-        {
-            POINT currentMousePos;
-            GetCursorPos(&currentMousePos);
-
-            // 마우스 이동 차이 계산
-            int32 deltaX = currentMousePos.x - lastMousePos.x;
-            int32 deltaY = currentMousePos.y - lastMousePos.y;
-
-            if (VSplitter->IsHover(FPoint(lastMousePos.x, lastMousePos.y)))
-            {
-                UE_LOG(LogLevel::Error, TEXT("VSplitter %f %f %f %f"), VSplitter->Rect.leftTopX
-                    , VSplitter->Rect.leftTopY, VSplitter->Rect.leftTopX + VSplitter->Rect.width
-                    , VSplitter->Rect.leftTopY + VSplitter->Rect.height);
-                VSplitter->OnDrag(FPoint(deltaX, deltaY));
-            }
-            if (HSplitter->IsHover(FPoint(lastMousePos.x, lastMousePos.y)))
-            {
-                UE_LOG(LogLevel::Error, TEXT("HSplitter %f %f %f %f"), HSplitter->Rect.leftTopX
-                    , HSplitter->Rect.leftTopY, HSplitter->Rect.leftTopX + HSplitter->Rect.width
-                    , HSplitter->Rect.leftTopY + HSplitter->Rect.height);
-                HSplitter->OnDrag(FPoint(deltaX, deltaY));
-            }
-            for (int i = 0;i < 4;++i)
-            {
-                    GetViewports()[i]->ResizeViewport(VSplitter->SideLT->Rect, VSplitter->SideRB->Rect,
-                        HSplitter->SideLT->Rect, HSplitter->SideRB->Rect);
-      /*              GetViewports()[i]->ResizeViewport(FRect(0,0,1200,600), FRect(0,600,1200,600),
-                        FRect(0,0,600,1200), FRect(600,0,600,1200));*/
-            }
-            lastMousePos = currentMousePos;
-        }
-    }
-    else
-    {
-        bLRButtonDown = false;
-    }
-}
 
 void FEngineLoop::WindowInit(HINSTANCE hInstance)
 {

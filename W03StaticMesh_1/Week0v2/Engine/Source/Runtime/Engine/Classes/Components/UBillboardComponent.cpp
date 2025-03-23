@@ -202,7 +202,7 @@ bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& checkQuad, fl
 	pickPosition.z = 1.0f; // Near Plane
 
 	FMatrix M = CreateBillboardMatrix();
-    FMatrix V = GEngineLoop.GetCurViewportClient()->GetViewMatrix();;
+    FMatrix V = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();;
 	FMatrix P = projectionMatrix;
 	FMatrix MVP = M * V * P;
 

@@ -5,7 +5,6 @@
 #include "Renderer/Renderer.h"
 #include "UnrealEd/PrimitiveBatch.h"
 #include "Engine/ResourceMgr.h"
-//#include "Engine/Source/Editor/UnrealEd/EditorViewportClient.h"
 
 class UImGuiManager;
 class UWorld;
@@ -24,15 +23,7 @@ public:
     void Tick();
     void Exit();
     float GetAspectRatio(IDXGISwapChain* swapChain);
-    void SetViewportClient(std::shared_ptr<FEditorViewportClient> viewportClient)
-    {
-        curViewportClient = viewportClient;
-    }
-    void SetViewportClient(int index)
-    {
-        curViewportClient = viewportClients[index];
-    }
-    void Input();
+
 private:
     void WindowInit(HINSTANCE hInstance);
     void Render();
@@ -44,8 +35,6 @@ public:
     static uint32 TotalAllocationBytes;
     static uint32 TotalAllocationCount;
 
-    bool bLRButtonDown = false;
-    POINT lastMousePos;
 
     HWND hWnd;
 
@@ -56,19 +45,9 @@ private:
     bool bIsExit = false;
     const int32 targetFPS = 60;
     int32 curViewportIndex = 0;
-    std::shared_ptr<FEditorViewportClient> viewportClients[4];
-    std::shared_ptr<FEditorViewportClient> curViewportClient;
+
 public:
     UWorld* GetWorld(){ return GWorld; }
-    std::shared_ptr<FEditorViewportClient>* GetViewports() { return viewportClients; }
-    std::shared_ptr<FEditorViewportClient> GetCurViewportClient() const
-    {
-        return curViewportClient;
-    }
     SLevelEditor* GetLevelEditor() { return LevelEditor; }
-    // test variable and function
-private:
-    SSplitterV* VSplitter;
-    SSplitterH* HSplitter;
 };
 

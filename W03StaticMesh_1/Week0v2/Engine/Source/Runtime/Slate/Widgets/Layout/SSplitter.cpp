@@ -33,17 +33,20 @@ void SSplitterH::Initialize(FRect initRect)
 
 void SSplitterH::OnResize(float width, float height)
 {
-    float prevHeight = Rect.height;
     Rect.height = height;
-    float resize = height / prevHeight;
+    Rect.leftTopX *= width;
     if (SideLT)
     {
-        SideLT->Rect.height *= resize;
+        SideLT->Rect.height = height;
     }
     if (SideRB)
     {
-        SideRB->Rect.height *= resize;
+        SideRB->Rect.leftTopX *= width;
+        SideRB->Rect.width *= width;
+        SideLT->Rect.height = height;
+
     }
+    UpdateChildRects();
 }
 
 void SSplitterV::Initialize(FRect initRect)
@@ -61,17 +64,19 @@ void SSplitterV::Initialize(FRect initRect)
 
 void SSplitterV::OnResize(float width, float height)
 {
-    float prevWidth = Rect.width;
     UE_LOG(LogLevel::Warning, "width %f height %f", width, height);
     Rect.width = width;
-    float resize = width/prevWidth;
-   
+    Rect.leftTopY *= height;
+    UE_LOG(LogLevel::Warning, "%f ", SideLT->Rect.width);
     if (SideLT)
     {
-        SideLT->Rect.width *= resize;
+        SideLT->Rect.width = width;
     }
     if (SideRB)
     {
-        SideRB->Rect.width *= resize;
+        SideRB->Rect.leftTopY *= height;
+        SideRB->Rect.height *= height;
+        SideRB->Rect.width = width;
     }
+    UpdateChildRects();
 }

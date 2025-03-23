@@ -68,7 +68,7 @@ void UPlayer::Input()
 
 			FVector pickPosition;
 		
-			ScreenToViewSpace (mousePos.x, mousePos.y, GEngineLoop.GetCurViewportClient()->GetViewMatrix(), GEngineLoop.GetCurViewportClient()->GetProjectionMatrix(), pickPosition);
+			ScreenToViewSpace (mousePos.x, mousePos.y, GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix(), GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix(), pickPosition);
 			bool res = PickGizmo(pickPosition);
 			if(!res) PickObj(pickPosition);
 		}
@@ -306,7 +306,7 @@ int UPlayer::RayIntersectsObject(const FVector& pickPosition, UPrimitiveComponen
 	// ���� ��ȯ ���
 	FMatrix worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
 
-	FMatrix ViewMatrix = GEngineLoop.GetCurViewportClient()->GetViewMatrix();
+	FMatrix ViewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
 	FMatrix inverseMatrix = FMatrix::Inverse(worldMatrix * ViewMatrix);
 
 	FVector cameraOrigin = { 0,0,0 };
