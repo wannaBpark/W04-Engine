@@ -28,9 +28,6 @@ public:
     void Release();
     void Input();
 
-    [[deprecated("Use SpawnActor")]]
-    void SpawnObject(OBJECTS _Obj);
-
     void LoadData(SceneData& _Data);
     SceneData SaveData();
     void	NewScene();
@@ -50,7 +47,7 @@ public:
 
     /** World에 존재하는 Actor를 제거합니다. */
     bool DestroyActor(AActor* Actor);
-    
+
 private:
     const FString defaultMapName = "Default";
     TArray<UObject*> GUObjectArray;

@@ -3,6 +3,11 @@
 #include "Camera/CameraComponent.h"
 #include "UnrealEd/SceneMgr.h"
 #include "Actors/Player.h"
+#include "Components/CubeComp.h"
+#include "Components/LightComponent.h"
+#include "Components/SphereComp.h"
+#include "Components/UParticleSubUVComp.h"
+#include "Components/UText.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/EditorWindow.h"
 // #include "ImGUI\imgui.h"
@@ -44,8 +49,61 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
 	ImGui::InputInt("Number of Spawn", &SpawnCount, 0, 0);
 	if (ImGui::Button("Spawn"))
 	{
-		world->SpawnObject(static_cast<OBJECTS>(primitiveType));
-	    
+		// world->SpawnObject(static_cast<OBJECTS>(primitiveType));
+
+	    AActor* SpawnedActor = nullptr;
+        switch (static_cast<OBJECTS>(primitiveType))
+	    {
+        case OBJ_SPHERE:
+        {
+            SpawnedActor = world->SpawnActor<AActor>();
+            SpawnedActor->AddComponent<USphereComp>();
+            break;
+        }
+        case OBJ_CUBE:
+        {
+            SpawnedActor = world->SpawnActor<AActor>();
+            UCubeComp* CubeComp = SpawnedActor->AddComponent<UCubeComp>();
+            USphereComp* SphereComp = SpawnedActor->AddComponent<USphereComp>();
+            SphereComp->SetLocation({10, 0, 0});
+            SphereComp->SetupAttachment(CubeComp);
+            break;
+        }
+        case OBJ_SpotLight:
+        {
+            SpawnedActor = world->SpawnActor<AActor>();
+            SpawnedActor->AddComponent<ULightComponentBase>();
+            break;
+        }
+        case OBJ_PARTICLE:
+        {
+            SpawnedActor = world->SpawnActor<AActor>();
+            UParticleSubUVComp* ParticleComponent = SpawnedActor->AddComponent<UParticleSubUVComp>();
+            ParticleComponent->SetTexture(L"Assets/Texture/T_Explosion_SubUV.png");
+            ParticleComponent->SetRowColumnCount(6, 6);
+            ParticleComponent->SetScale(FVector(10.0f, 10.0f, 1.0f));
+            break;
+        }
+        case OBJ_Text:
+        {
+            SpawnedActor = world->SpawnActor<AActor>();
+            UText* TextComponent = SpawnedActor->AddComponent<UText>();
+            TextComponent->SetTexture(L"Assets/Texture/font.png");
+            TextComponent->SetRowColumnCount(106, 106);
+            TextComponent->SetText(L"안녕하세요 Jungle 1");
+            break;
+        }
+        case OBJ_TRIANGLE:
+        case OBJ_CAMERA:
+        case OBJ_PLAYER:
+        case OBJ_END:
+            break;
+        }
+
+	    if (SpawnedActor)
+	    {
+	        world->SetPickingObj(SpawnedActor->GetRootComponent());
+	    }
 	}
 
 	ImGui::Separator();

@@ -130,6 +130,7 @@ void UWorld::Tick(float DeltaTime)
     {
         for (UActorComponent* Comp : Actor->GetComponents())
         {
+            Comp->DestroyComponent();
             GUObjectArray.Remove(Comp);
             delete Comp;
         }
@@ -155,12 +156,14 @@ void UWorld::Release()
 
 void UWorld::Render()
 {
-	for (auto iter : GUObjectArray)
-	{
-		iter->Render();
-		if (ShowFlags::GetInstance().currentFlags & EEngineShowFlags::SF_UUIDText) 
-			iter->RenderUUID();
-	}
+    for (const auto& Actor : ActorsArray)
+    {
+        Actor->Render();
+        if (ShowFlags::GetInstance().currentFlags & EEngineShowFlags::SF_UUIDText)
+        {
+            Actor->RenderUUID();
+        }
+    }
 
 }
 
@@ -190,57 +193,6 @@ bool UWorld::DestroyActor(AActor* Actor)
 void UWorld::Input()
 {
 
-}
-
-void UWorld::SpawnObject(OBJECTS _Obj)
-{
-	UObject* pObj = nullptr;
-	switch (_Obj)
-	{
-	case OBJ_SPHERE:
-		pObj = FObjectFactory::ConstructObject<USphereComp>();
-		GUObjectArray.Add(pObj);
-		break;
-	case OBJ_TRIANGLE:
-		break;
-	case OBJ_CUBE:
-		pObj = FObjectFactory::ConstructObject<UCubeComp>();
-		GUObjectArray.Add(pObj);
-		break;
-	case OBJ_SpotLight:
-	{
-		UObject* spotLight = FObjectFactory::ConstructObject<ULightComponentBase>();
-		spotLight = static_cast<ULightComponentBase*>(spotLight);
-		ULightComponentBase* castLight = static_cast<ULightComponentBase*>(spotLight);
-
-		GUObjectArray.Add(spotLight);
-		break;
-	}
-	case OBJ_PARTICLE:
-	{
-		UObject* particle = FObjectFactory::ConstructObject<UParticleSubUVComp>();
-		UParticleSubUVComp* castParticle = static_cast<UParticleSubUVComp*>(particle);
-		castParticle->SetTexture(L"Assets/Texture/T_Explosion_SubUV.png");
-		castParticle->SetRowColumnCount(6, 6);
-		castParticle->SetScale(FVector(10.0f, 10.0f, 1.0f));
-		GUObjectArray.Add(castParticle);
-	}
-	break;
-	case OBJ_Text:
-	{
-		UObject* text = FObjectFactory::ConstructObject<UText>();
-		UText* castText = static_cast<UText*>(text);
-		castText->SetTexture(L"Assets/Texture/font.png");
-		castText->SetRowColumnCount(106, 106);
-		castText->SetText(L"안녕하세요 Jungle 1");
-		//SetText전에 RowColumn 반드시 설정
-		GUObjectArray.Add(text);
-	}
-	break;
-	default:
-		break;
-	}
-	pickingObj = static_cast<USceneComponent*>(pObj);
 }
 
 void UWorld::LoadData(SceneData& _Data)
