@@ -242,13 +242,15 @@ void FEngineLoop::Input()
 
 void FEngineLoop::Exit()
 {
-	GWorld->Release();
+    LevelEditor->Release();
+    GWorld->Release();
 	delete GWorld;
 	UIMgr->Shutdown();
 	delete UIMgr;
 	resourceMgr.Release(&renderer);
 	renderer.Release();
 	graphicDevice.Release();
+    
 }
 
 

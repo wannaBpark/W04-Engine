@@ -5,11 +5,13 @@
 #include "UnrealClient.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "EngineLoop.h"
-
+#include "fstream"
+#include "sstream"
+#include "ostream"
 extern FEngineLoop GEngineLoop;
 
 SLevelEditor::SLevelEditor() : bInitialize(false), HSplitter(nullptr), VSplitter(nullptr),
-World(nullptr)
+World(nullptr), bMultiViewportMode(false)
 {
 }
 
@@ -32,6 +34,7 @@ void SLevelEditor::Initialize()
     HSplitter = new SSplitterH();
     HSplitter->Initialize(FRect(EditorWidth * 0.5f - 10, 0.0f, 20, EditorWidth));
     HSplitter->OnDrag(FPoint(0, 0));
+    LoadConfig();
     bInitialize = true;
 }
 
@@ -59,7 +62,6 @@ void SLevelEditor::Tick(double deltaTime)
 
 void SLevelEditor::Input()
 {
-
     ImGuiIO& io = ImGui::GetIO();
     if (io.WantCaptureMouse) return;
     if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
@@ -125,6 +127,7 @@ void SLevelEditor::Input()
 
 void SLevelEditor::Release()
 {
+    SaveConfig();
     delete VSplitter;
     delete HSplitter;
 }
@@ -188,3 +191,62 @@ bool SLevelEditor::IsMultiViewport()
 {
     return bMultiViewportMode;
 }
+
+void SLevelEditor::LoadConfig()
+{
+    auto config = ReadIniFile(IniFilePath);
+    SetViewportClient(GetValueFromConfig(config, "ActiveViewportIndex", 0));
+    bMultiViewportMode = GetValueFromConfig(config, "bMutiView", false);
+    for (size_t i = 0; i < 4; i++)
+    {
+        viewportClients[i]->LoadConfig(config);
+    }
+    if (HSplitter)
+        HSplitter->LoadConfig(config);
+    if (VSplitter)
+        VSplitter->LoadConfig(config);
+
+}
+
+void SLevelEditor::SaveConfig()
+{
+    TMap<FString, FString> config;
+    if (HSplitter)
+        HSplitter->SaveConfig(config);
+    if (VSplitter)
+        VSplitter->SaveConfig(config);
+    for (size_t i = 0; i < 4; i++)
+    {
+        viewportClients[i]->SaveConfig(config);
+    }
+    ActiveViewportClient->SaveConfig(config);
+    config["bMutiView"] = std::to_string(bMultiViewportMode);
+    config["ActiveViewportIndex"] = std::to_string(ActiveViewportClient->ViewportIndex);
+    WriteIniFile(IniFilePath, config);
+}
+
+TMap<FString, FString> SLevelEditor::ReadIniFile(const FString& filePath)
+{
+    TMap<FString, FString> config;
+    std::ifstream file(*filePath);
+    std::string line;
+
+    while (std::getline(file, line)) {
+        if (line.empty() || line[0] == '[' || line[0] == ';') continue;
+        std::istringstream ss(line);
+        std::string key, value;
+        if (std::getline(ss, key, '=') && std::getline(ss, value)) {
+            config[key] = value;
+        }
+    }
+    return config;
+}
+
+void SLevelEditor::WriteIniFile(const FString& filePath, const TMap<FString, FString>& config)
+{
+    std::ofstream file(*filePath);
+    for (const auto& pair : config) {
+        file << *pair.Key << "=" << *pair.Value << "\n";
+    }
+}
+

@@ -25,7 +25,7 @@ void FEditorViewportClient::Draw(FViewport* Viewport)
 
 void FEditorViewportClient::Initialize(int32 viewportIndex)
 {
-    LoadConfig();
+
     ViewTransformPerspective.SetLocation(FVector(8.0f, 8.0f, 8.f));
     ViewTransformPerspective.SetRotation(FVector(0.0f, 45.0f, -135.0f));
     Viewport = new FViewport(static_cast<EViewScreenLocation>(viewportIndex));
@@ -45,25 +45,10 @@ void FEditorViewportClient::Release()
 {
     if (Viewport)
         delete Viewport;
-    SaveConfig();
+ 
 }
 
-void FEditorViewportClient::LoadConfig()
-{
-    auto config = ReadIniFile(IniFilePath);
-    CameraSpeedSetting = GetValueFromConfig(config, "CameraSpeedSetting", 1);
-    CameraSpeedScalar = GetValueFromConfig(config, "CameraSpeedScalar", 1.0f);
-    GridSize = GetValueFromConfig(config, "GridSize", 10.0f);
-}
 
-void FEditorViewportClient::SaveConfig()
-{
-    TMap<FString, FString> config;
-    config["CameraSpeedSetting"] = std::to_string(CameraSpeedSetting);
-    config["CameraSpeedScalar"] = std::to_string(CameraSpeedScalar);
-    config["GridSize"] = std::to_string(GridSize);
-    WriteIniFile(IniFilePath, config);
-}
 
 void FEditorViewportClient::Input()
 {
@@ -265,7 +250,7 @@ void FEditorViewportClient::UpdateProjectionMatrix()
     if (IsPerspective()) {
         Projection = JungleMath::CreateProjectionMatrix(
             ViewFOV * (3.141592f / 180.0f),
-            GEngineLoop.GetAspectRatio(GEngineLoop.graphicDevice.SwapChain),
+            GetViewport()->GetViewport().Width/ GetViewport()->GetViewport().Height,
             nearPlane,
             farPlane
         );
@@ -273,7 +258,7 @@ void FEditorViewportClient::UpdateProjectionMatrix()
     else
     {
         // 스왑체인의 가로세로 비율을 구합니다.
-        float aspectRatio = GEngineLoop.GetAspectRatio(GEngineLoop.graphicDevice.SwapChain);
+        float aspectRatio = GetViewport()->GetViewport().Width / GetViewport()->GetViewport().Height;
 
         // 오쏘그래픽 너비는 줌 값과 가로세로 비율에 따라 결정됩니다.
         float orthoWidth = orthoSize * aspectRatio;
@@ -371,7 +356,38 @@ void FEditorViewportClient::SetOthoSize(float _Value)
     
 }
 
-
+void FEditorViewportClient::LoadConfig(const TMap<FString, FString>& config)
+{
+    FString ViewportNum = std::to_string(ViewportIndex);
+    CameraSpeedSetting = GetValueFromConfig(config, "CameraSpeedSetting" + ViewportNum, 1);
+    CameraSpeedScalar = GetValueFromConfig(config, "CameraSpeedScalar" + ViewportNum, 1.0f);
+    GridSize = GetValueFromConfig(config, "GridSize"+ ViewportNum, 10.0f);
+    ViewTransformPerspective.ViewLocation.x = GetValueFromConfig(config, "PerspectiveCameraLocX" + ViewportNum, 0.0f);
+    ViewTransformPerspective.ViewLocation.y = GetValueFromConfig(config, "PerspectiveCameraLocY" + ViewportNum, 0.0f);
+    ViewTransformPerspective.ViewLocation.z = GetValueFromConfig(config, "PerspectiveCameraLocZ" + ViewportNum, 0.0f);
+    ViewTransformPerspective.ViewRotation.x = GetValueFromConfig(config, "PerspectiveCameraRotX" + ViewportNum, 0.0f);
+    ViewTransformPerspective.ViewRotation.y = GetValueFromConfig(config, "PerspectiveCameraRotY" + ViewportNum, 0.0f);
+    ViewTransformPerspective.ViewRotation.z = GetValueFromConfig(config, "PerspectiveCameraRotZ" + ViewportNum, 0.0f);
+    ShowFlag = GetValueFromConfig(config, "ShowFlag" + ViewportNum, 31.0f);
+    ViewMode = static_cast<EViewModeIndex>(GetValueFromConfig(config, "ViewMode" + ViewportNum, 0));
+    ViewportType = static_cast<ELevelViewportType>(GetValueFromConfig(config, "ViewportType" + ViewportNum, 3));
+}
+void FEditorViewportClient::SaveConfig(TMap<FString, FString>& config)
+{
+    FString ViewportNum = std::to_string(ViewportIndex);
+    config["CameraSpeedSetting"+ ViewportNum] = std::to_string(CameraSpeedSetting);
+    config["CameraSpeedScalar"+ ViewportNum] = std::to_string(CameraSpeedScalar);
+    config["GridSize"+ ViewportNum] = std::to_string(GridSize);
+    config["PerspectiveCameraLocX" + ViewportNum] = std::to_string(ViewTransformPerspective.GetLocation().x);
+    config["PerspectiveCameraLocY" + ViewportNum] = std::to_string(ViewTransformPerspective.GetLocation().y);
+    config["PerspectiveCameraLocZ" + ViewportNum] = std::to_string(ViewTransformPerspective.GetLocation().z);
+    config["PerspectiveCameraRotX" + ViewportNum] = std::to_string(ViewTransformPerspective.GetRotation().x);
+    config["PerspectiveCameraRotY" + ViewportNum] = std::to_string(ViewTransformPerspective.GetRotation().y);
+    config["PerspectiveCameraRotZ" + ViewportNum] = std::to_string(ViewTransformPerspective.GetRotation().z);
+    config["ShowFlag"+ ViewportNum] = std::to_string(ShowFlag);
+    config["ViewMode" + ViewportNum] = std::to_string(int32(ViewMode));
+    config["ViewportType" + ViewportNum] = std::to_string(int32(ViewportType));
+}
 TMap<FString, FString> FEditorViewportClient::ReadIniFile(const FString& filePath)
 {
     TMap<FString, FString> config;
