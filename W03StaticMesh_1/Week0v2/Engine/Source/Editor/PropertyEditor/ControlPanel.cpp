@@ -2,15 +2,11 @@
 #include "ControlPanel.h"
 #include "World.h"
 #include "Camera/CameraComponent.h"
-#include "ImGuiManager.h"
 #include "UnrealEd/SceneMgr.h"
 #include "Components/Player.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/EditorPanel.h"
-// #include "ImGUI\imgui.h"
-#include "IWindowToggleable.h"
-//#include "Font\IconDefs.h"
-//#include "Font/RawFonts.h"
+
 extern FEngineLoop GEngineLoop;
 ControlPanel::ControlPanel()
 {
