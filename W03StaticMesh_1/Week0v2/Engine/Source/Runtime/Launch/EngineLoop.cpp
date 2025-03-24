@@ -146,21 +146,34 @@ void FEngineLoop::Tick()
 			}
 		}
 
+        Input();
 		GWorld->Tick(elapsedTime);
         LevelEditor->Tick(elapsedTime);
         graphicDevice.Prepare();
-        std::shared_ptr<FEditorViewportClient> viewportClient = GetLevelEditor()->GetActiveViewportClient();
-        for (int i = 0;i < 4;++i)
+        if (LevelEditor->IsMultiViewport()) {
+            std::shared_ptr<FEditorViewportClient> viewportClient = GetLevelEditor()->GetActiveViewportClient();
+            for (int i = 0;i < 4;++i)
+            {
+                LevelEditor->SetViewportClient(i);
+                graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetViewports()[i]->GetD3DViewport());
+                graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
+                renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
+                renderer.PrepareShader();
+                renderer.UpdateLightBuffer();
+                Render();
+            }
+            GetLevelEditor()->SetViewportClient(viewportClient);
+        }
+        else
         {
-            LevelEditor->SetViewportClient(i);
-            graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetViewports()[i]->GetD3DViewport());
+            graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetActiveViewportClient()->GetD3DViewport());
             graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
             renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
             renderer.PrepareShader();
             renderer.UpdateLightBuffer();
             Render();
         }
-        GetLevelEditor()->SetViewportClient(viewportClient);
+
 		//graphicDevice.Prepare();
 		//renderer.PrepareShader();
 		//renderer.UpdateLightBuffer();
@@ -204,6 +217,27 @@ float FEngineLoop::GetAspectRatio(IDXGISwapChain* swapChain)
 	DXGI_SWAP_CHAIN_DESC desc;
 	swapChain->GetDesc(&desc);
 	return static_cast<float>(desc.BufferDesc.Width) / static_cast<float>(desc.BufferDesc.Height);
+}
+
+void FEngineLoop::Input()
+{
+    if (GetAsyncKeyState('M') & 0x8000)
+    {
+        if (!bTestInput)
+        {
+            bTestInput = true;
+            if (LevelEditor->IsMultiViewport())
+            {
+                LevelEditor->OffMultiViewport();
+            }
+            else
+                LevelEditor->OnMultiViewport();
+        }
+    }
+    else
+    {
+        bTestInput = false;
+    }
 }
 
 void FEngineLoop::Exit()

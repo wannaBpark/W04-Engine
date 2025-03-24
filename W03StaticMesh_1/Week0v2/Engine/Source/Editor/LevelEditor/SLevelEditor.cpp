@@ -32,32 +32,34 @@ void SLevelEditor::Initialize()
     HSplitter = new SSplitterH();
     HSplitter->Initialize(FRect(EditorWidth * 0.5f - 10, 0.0f, 20, EditorWidth));
     HSplitter->OnDrag(FPoint(0, 0));
-    ResizeViewports();
     bInitialize = true;
 }
 
 void SLevelEditor::Tick(double deltaTime)
 {
-    POINT pt;
-    GetCursorPos(&pt);
-    ScreenToClient(GEngineLoop.hWnd, &pt);
-    if (VSplitter->IsHover(FPoint(pt.x, pt.y)) || HSplitter->IsHover(FPoint(pt.x, pt.y)))
-    {
-        SetCursor(LoadCursor(NULL, IDC_SIZEALL));
+    if (bMultiViewportMode) {
+        POINT pt;
+        GetCursorPos(&pt);
+        ScreenToClient(GEngineLoop.hWnd, &pt);
+        if (VSplitter->IsHover(FPoint(pt.x, pt.y)) || HSplitter->IsHover(FPoint(pt.x, pt.y)))
+        {
+            SetCursor(LoadCursor(NULL, IDC_SIZEALL));
+        }
+        else
+        {
+            SetCursor(LoadCursor(NULL, IDC_ARROW));
+        }
+        Input();
     }
-    else
-    {
-        SetCursor(LoadCursor(NULL, IDC_ARROW));
-    }
-    OnResize();
     //Test Code Cursor icon End
-    Input();
+    OnResize();
 
     ActiveViewportClient->Tick(deltaTime);
 }
 
 void SLevelEditor::Input()
 {
+
     ImGuiIO& io = ImGui::GetIO();
     if (io.WantCaptureMouse) return;
     if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
@@ -156,12 +158,18 @@ void SLevelEditor::OnResize()
 
 void SLevelEditor::ResizeViewports()
 {
-    if (GetViewports()[0]) {
-        for (int i = 0;i < 4;++i)
-        {
-            GetViewports()[i]->ResizeViewport(VSplitter->SideLT->Rect, VSplitter->SideRB->Rect,
-                HSplitter->SideLT->Rect, HSplitter->SideRB->Rect);
+    if (bMultiViewportMode) {
+        if (GetViewports()[0]) {
+            for (int i = 0;i < 4;++i)
+            {
+                GetViewports()[i]->ResizeViewport(VSplitter->SideLT->Rect, VSplitter->SideRB->Rect,
+                    HSplitter->SideLT->Rect, HSplitter->SideRB->Rect);
+            }
         }
+    }
+    else
+    {
+        ActiveViewportClient->GetViewport()->ResizeViewport(FRect(0.0f, 0.0f, EditorWidth, EditorHeight));
     }
 }
 
@@ -174,5 +182,9 @@ void SLevelEditor::OnMultiViewport()
 void SLevelEditor::OffMultiViewport()
 {
     bMultiViewportMode = false;
+}
 
+bool SLevelEditor::IsMultiViewport()
+{
+    return bMultiViewportMode;
 }

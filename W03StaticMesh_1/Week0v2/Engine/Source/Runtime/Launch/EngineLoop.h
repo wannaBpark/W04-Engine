@@ -23,7 +23,7 @@ public:
     void Tick();
     void Exit();
     float GetAspectRatio(IDXGISwapChain* swapChain);
-
+    void Input();
 private:
     void WindowInit(HINSTANCE hInstance);
     void Render();
@@ -43,8 +43,8 @@ private:
     SLevelEditor* LevelEditor;
     bool bIsExit = false;
     const int32 targetFPS = 60;
-    int32 curViewportIndex = 0;
 
+    bool bTestInput = false;
 public:
     UWorld* GetWorld(){ return GWorld; }
     SLevelEditor* GetLevelEditor() { return LevelEditor; }

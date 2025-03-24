@@ -20,6 +20,7 @@ public:
     void ResizeViewports();
     void OnMultiViewport();
     void OffMultiViewport();
+    bool IsMultiViewport();
 private:
     bool bInitialize;
     SSplitterH* HSplitter;
