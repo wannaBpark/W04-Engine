@@ -35,15 +35,15 @@ void Outliner::Draw(UWorld* World)
         {
 
             // 오브젝트 리스트
-            // for (int32 i = 0; i < World->GetObjectArr().Num();i++)
+            // for (int32 i = 0; i < World->GetObjects().Num();i++)
             // {
-            //     if(!World->GetObjectArr()[i]->IsA(USceneComponent::StaticClass()))
+            //     if(!World->GetObjects()[i]->IsA(USceneComponent::StaticClass()))
             //         continue;
             //     // 선택 가능 항목 (Selectable)
-            //     if (ImGui::Selectable(*World->GetObjectArr()[i]->GetName(), selected == i))
+            //     if (ImGui::Selectable(*World->GetObjects()[i]->GetName(), selected == i))
             //     {
             //         selected = i; // 선택된 아이템 업데이트
-            //         World->SetPickingObj(World->GetObjectArr()[i]);
+            //         World->SetPickingObj(World->GetObjects()[i]);
             //     }
             // }
 

@@ -19,7 +19,7 @@ class UPlayer : public AActor
 
     void Input();
     bool PickGizmo(FVector& rayOrigin);
-    void PickObj(FVector& pickPosition);
+    void PickActor(const FVector& pickPosition);
     void AddControlMode();
     void AddCoordiMode();
 

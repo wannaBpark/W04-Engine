@@ -41,7 +41,7 @@ void UPlayer::Input()
 
             ScreenToViewSpace(mousePos.x, mousePos.y, GEngineLoop.View, GEngineLoop.Projection, pickPosition);
             bool res = PickGizmo(pickPosition);
-            if (!res) PickObj(pickPosition);
+            if (!res) PickActor(pickPosition);
         }
         else
         {
@@ -202,23 +202,26 @@ bool UPlayer::PickGizmo(FVector& pickPosition)
     return isPickedGizmo;
 }
 
-void UPlayer::PickObj(FVector& pickPosition)
+void UPlayer::PickActor(const FVector& pickPosition)
 {
-    if (!(ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) return;
+    if (!(ShowFlags::GetInstance().currentFlags & EEngineShowFlags::SF_Primitives)) return;
 
-    UActorComponent* Possible = nullptr;
+    const UActorComponent* Possible = nullptr;
     int maxIntersect = 0;
     float minDistance = FLT_MAX;
-    for (auto iter : GetWorld()->GetObjectArr())
+    for (const auto iter : GetWorld()->GetObjects())
     {
-        UPrimitiveComponent* pObj = nullptr;
-        if (iter->IsA(UPrimitiveComponent::StaticClass()) || iter->IsA(ULightComponentBase::StaticClass()))
+        UPrimitiveComponent* pObj;
+        if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())
         {
             pObj = static_cast<UPrimitiveComponent*>(iter);
         }
         else
+        {
             continue;
-        if (pObj && !pObj->IsA(UGizmoBaseComponent::StaticClass()))
+        }
+
+        if (pObj && !pObj->IsA<UGizmoBaseComponent>())
         {
             float Distance = 0.0f;
             int currentIntersectCount = 0;

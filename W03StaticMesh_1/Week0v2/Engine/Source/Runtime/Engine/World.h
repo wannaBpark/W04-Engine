@@ -71,7 +71,7 @@ private:
 public:
     UObject* worldGizmo = nullptr;
 
-    const TArray<UObject*>& GetObjectArr() const { return GUObjectArray; }
+    const TArray<UObject*>& GetObjects() const { return GUObjectArray; }
     const TSet<AActor*>& GetActors() const { return ActorsArray; }
 
     UTransformGizmo* LocalGizmo = nullptr;
