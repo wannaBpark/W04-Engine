@@ -112,19 +112,20 @@ public:
 #if USE_WIDECHAR
 		return PrivateString;
 #else
-		// Narrow 문자열을 UTF-8로 가정하고 wide 문자열로 변환
-		if (PrivateString.empty())
-		{
-			return std::wstring();
-		}
-		int sizeNeeded = MultiByteToWideChar(CP_UTF8, 0, PrivateString.c_str(), -1, nullptr, 0);
-		if (sizeNeeded <= 0)
-		{
-			return std::wstring();
-		}
-		std::wstring wstr(sizeNeeded, 0);
-		MultiByteToWideChar(CP_UTF8, 0, PrivateString.c_str(), -1, &wstr[0], sizeNeeded);
-		return wstr;
+        // Narrow 문자열을 UTF-8로 가정하고 wide 문자열로 변환
+        if (PrivateString.empty())
+        {
+            return std::wstring();
+        }
+        int sizeNeeded = MultiByteToWideChar(CP_UTF8, 0, PrivateString.c_str(), -1, nullptr, 0);
+        if (sizeNeeded <= 0)
+        {
+            return std::wstring();
+        }
+        // sizeNeeded에는 널 문자를 포함한 길이가 들어 있음
+        std::wstring wstr(sizeNeeded - 1, 0); // 널 문자를 제외한 크기로 초기화
+        MultiByteToWideChar(CP_UTF8, 0, PrivateString.c_str(), -1, wstr.data(), sizeNeeded);
+        return wstr;
 #endif
 	}
 #endif
