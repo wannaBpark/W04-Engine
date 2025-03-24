@@ -103,7 +103,11 @@ void UPlayer::Input()
     if (GetAsyncKeyState(VK_DELETE) & 0x8000)
     {
         UWorld* World = GetWorld();
-        World->DestroyActor(World->GetPickedActor());
+        if (AActor* PickedActor = World->GetPickedActor())
+        {
+            World->DestroyActor(PickedActor);
+            World->SetPickedActor(nullptr);
+        }
     }
 }
 
