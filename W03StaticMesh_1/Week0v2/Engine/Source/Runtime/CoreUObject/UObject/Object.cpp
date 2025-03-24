@@ -2,6 +2,7 @@
 
 #include "ObjectMacros.h"
 #include "UClass.h"
+#include "UObjectHash.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 
 
@@ -21,6 +22,7 @@ UObject::UObject()
 
 UObject::~UObject()
 {
+    RemoveFromClassMap(this);
 }
 
 void UObject::RenderUUID()

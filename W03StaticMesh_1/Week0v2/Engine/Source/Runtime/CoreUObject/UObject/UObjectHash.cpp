@@ -53,30 +53,35 @@ static void RecursivelyPopulateDerivedClasses(FUObjectHashTables& ThreadHash, co
     }
 }
 
-void AddToClassMap(const UObject* Object)
+void AddToClassMap(UObject* Object)
 {
     assert(Object->GetClass());
     FUObjectHashTables& HashTable = FUObjectHashTables::Get();
 
     UClass* Class = Object->GetClass();
-    HashTable.ClassToObjectListMap.FindOrAdd(Class).Add(const_cast<UObject*>(Object));
+    HashTable.ClassToObjectListMap.FindOrAdd(Class).Add(Object);
 
     for (UClass* SuperClass = Class->GetSuperClass(); SuperClass;)
     {
-        TSet<UClass*>& ChildList = HashTable.ClassToChildListMap.FindOrAdd(SuperClass);
-        ChildList.Add(Class);
+        HashTable.ClassToChildListMap.FindOrAdd(SuperClass).Add(Class);
     
         Class = SuperClass;
         SuperClass = SuperClass->GetSuperClass();
     }
 }
 
-void RemoveFromClassMap(const UObject* Object)
+void RemoveFromClassMap(UObject* Object)
 {
     assert(Object->GetClass());
     FUObjectHashTables& HashTable = FUObjectHashTables::Get();
 
-    
+    TSet<UObject*>& ObjectSet = HashTable.ClassToObjectListMap.FindOrAdd(Object->GetClass());
+    int32 NumRemoved = ObjectSet.Remove(Object);
+
+    if (NumRemoved == 0)
+    {
+        HashTable.ClassToObjectListMap.Remove(Object->GetClass());
+    }
 }
 
 void GetObjectsOfClass(const UClass* ClassToLookFor, TArray<UObject*>& Results, bool bIncludeDerivedClasses)
@@ -92,7 +97,7 @@ void GetObjectsOfClass(const UClass* ClassToLookFor, TArray<UObject*>& Results, 
         RecursivelyPopulateDerivedClasses(ThreadHash, ClassToLookFor, ClassesToSearch);
     }
 
-    
+
     for (const UClass* SearchClass : ClassesToSearch)
     {
         if (TSet<UObject*>* List = ThreadHash.ClassToObjectListMap.Find(const_cast<UClass*>(SearchClass)))
