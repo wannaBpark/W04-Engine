@@ -15,7 +15,7 @@
 #include "Components/UTextUUID.h"
 #include "Components/SkySphereComponent.h"
 #include "UObject/Casts.h"
-
+#include "LevelEditor/SLevelEditor.h"
 UWorld::UWorld()
 {
 }
@@ -138,7 +138,7 @@ void UWorld::Render()
 	for (auto iter : GUObjectArray)
 	{
 		iter->Render();
-		if ((ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_UUIDText))) 
+		if ((GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_UUIDText))) 
 			iter->RenderUUID();
 	}
 
@@ -203,14 +203,13 @@ void UWorld::SpawnObject(OBJECTS _Obj)
 void UWorld::LoadData(SceneData& _Data)
 {
 	Release();
-	CreateBaseObject();
 	for (auto iter : _Data.Primitives)
 	{
 		GUObjectArray.Add(iter.Value);
 	}
-
-    camera = static_cast<UCameraComponent*>(_Data.Cameras[0]);
-
+    if(_Data.Cameras[0])
+        camera = static_cast<UCameraComponent*>(_Data.Cameras[0]);
+	CreateBaseObject();
 }
 
 SceneData UWorld::SaveData()
