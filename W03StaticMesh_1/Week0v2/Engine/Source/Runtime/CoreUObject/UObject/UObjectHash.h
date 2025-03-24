@@ -13,3 +13,5 @@ class UClass;
 void GetObjectsOfClass(const UClass* ClassToLookFor, TArray<UObject*>& Results, bool bIncludeDerivedClasses);
 
 void AddToClassMap(const UObject* Object);
+
+void RemoveFromClassMap(const UObject* Object);

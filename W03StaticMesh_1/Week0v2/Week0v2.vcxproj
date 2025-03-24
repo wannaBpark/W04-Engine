@@ -224,6 +224,7 @@
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Casts.h" />
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\NameTypes.h" />
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\UObjectHash.h" />
+    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\UObjectIterator.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Container\Array.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Container\ContainerAllocator.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Container\CString.h" />
