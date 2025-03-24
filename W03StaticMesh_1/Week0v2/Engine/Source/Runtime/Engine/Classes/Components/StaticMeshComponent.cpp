@@ -8,17 +8,14 @@ void UStaticMeshComponent::Render()
     OBJ::FStaticMeshRenderData* renderData = staticMesh->GetRenderData();
     if (renderData == nullptr) return;
 
-    if (renderData->IndexBuffer)
-        FEngineLoop::renderer.RenderPrimitive(renderData->VertexBuffer, renderData->Vertices.Len(), renderData->IndexBuffer, renderData->Indices.Len());
-    else
-        FEngineLoop::renderer.RenderPrimitive(renderData->VertexBuffer, renderData->Vertices.Len());
+    FEngineLoop::renderer.RenderPrimitive(renderData);
 }
 
 uint32 UStaticMeshComponent::GetNumMaterials() const
 {
     if (staticMesh == nullptr) return 0;
 
-    return staticMesh->GetMaterials().Len();
+    return staticMesh->GetMaterials().Num();
 }
 
 UMaterial* UStaticMeshComponent::GetMaterial(uint32 ElementIndex) const
@@ -70,9 +67,9 @@ int UStaticMeshComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayD
     OBJ::FStaticMeshRenderData* renderData = staticMesh->GetRenderData();
 
     FVertexSimple* vertices = renderData->Vertices.GetData();
-    int vCount = renderData->Vertices.Len();
+    int vCount = renderData->Vertices.Num();
     UINT* indices = renderData->Indices.GetData();
-    int iCount = renderData->Indices.Len();
+    int iCount = renderData->Indices.Num();
 
     if (!vertices) return 0;
     BYTE* pbPositions = reinterpret_cast<BYTE*>(renderData->Vertices.GetData());

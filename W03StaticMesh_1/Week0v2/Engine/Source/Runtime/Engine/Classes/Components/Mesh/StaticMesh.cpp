@@ -1,5 +1,6 @@
 #include "StaticMesh.h"
 #include "Engine/FLoaderOBJ.h"
+#include "UObject/ObjectFactory.h"
 
 UStaticMesh::UStaticMesh()
 {
@@ -7,14 +8,22 @@ UStaticMesh::UStaticMesh()
 
     if (staticMeshRenderData == nullptr) return;
     
-    uint32 verticeNum = staticMeshRenderData->Vertices.Len();
+    uint32 verticeNum = staticMeshRenderData->Vertices.Num();
     if(verticeNum <= 0) return;
     staticMeshRenderData->VertexBuffer = GetEngine().renderer.CreateVertexBuffer(staticMeshRenderData->Vertices, verticeNum * sizeof(FVertexSimple));
 
-    
-    uint32 indexNum = staticMeshRenderData->Indices.Len();
+    uint32 indexNum = staticMeshRenderData->Indices.Num();
     if (indexNum <= 0) return;
     staticMeshRenderData->IndexBuffer = GetEngine().renderer.CreateIndexBuffer(staticMeshRenderData->Indices, indexNum * sizeof(FVertexSimple));
+
+    for (int materialIndex = 0; materialIndex < staticMeshRenderData->Materials.Num(); materialIndex++) {
+        FStaticMaterial* newMaterialSlot = new FStaticMaterial();
+        UMaterial* newMaterial = FObjectFactory::ConstructObject<UMaterial>();
+        newMaterialSlot->Material = newMaterial;
+        newMaterialSlot->Material->SetmaterialInfo(staticMeshRenderData->Materials[materialIndex]);
+        newMaterialSlot->MaterialSlotName = staticMeshRenderData->Materials[materialIndex].MTLName;
+        materials.Add(newMaterialSlot);
+    }
 }
 
 UStaticMesh::~UStaticMesh()
@@ -30,11 +39,6 @@ UStaticMesh::~UStaticMesh()
         staticMeshRenderData->IndexBuffer->Release();
         staticMeshRenderData->IndexBuffer = nullptr;
     }
-}
-
-void UStaticMesh::Initialize()
-{
-
 }
 
 uint32 UStaticMesh::GetMaterialIndex(FName MaterialSlotName) const

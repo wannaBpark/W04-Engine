@@ -133,6 +133,12 @@ struct FLoaderOBJ
                 }
             }
         }
+
+        if (!OutObjInfo.MaterialSubsets.IsEmpty())
+        {
+            FMaterialSubset& LastSubset = OutObjInfo.MaterialSubsets[OutObjInfo.MaterialSubsets.Num() - 1];
+            LastSubset.IndexCount = OutObjInfo.VertexIndices.Num() - LastSubset.IndexStart;
+        }
         
         return true;
     }

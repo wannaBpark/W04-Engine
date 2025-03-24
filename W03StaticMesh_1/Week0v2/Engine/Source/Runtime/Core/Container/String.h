@@ -124,6 +124,7 @@ public:
 		}
 		std::wstring wstr(sizeNeeded, 0);
 		MultiByteToWideChar(CP_UTF8, 0, PrivateString.c_str(), -1, &wstr[0], sizeNeeded);
+        wstr = wstr.substr(0, wstr.size() - 1);
 		return wstr;
 #endif
 	}

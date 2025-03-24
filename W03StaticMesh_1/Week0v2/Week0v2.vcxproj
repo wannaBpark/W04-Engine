@@ -181,6 +181,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\StaticMesh.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\StaticMeshComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\FLoaderOBJ.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.cpp" />
     <ClCompile Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoArrowComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Camera\CameraComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\UserInterface\Console.cpp" />
@@ -211,7 +212,6 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\PrimitiveComponent.cpp" />
     <ClCompile Include="Engine\Source\Editor\PropertyEditor\PropertyPanel.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Renderer\Renderer.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.cpp" />
     <ClCompile Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoRectangleComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\SceneComponent.cpp" />
     <ClCompile Include="Engine\Source\Editor\UnrealEd\SceneMgr.cpp" />
@@ -247,6 +247,7 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\StaticMesh.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\StaticMeshComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\FLoaderOBJ.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.h" />
     <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoArrowComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Camera\CameraComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\UserInterface\Console.h" />
@@ -283,7 +284,6 @@
     <ClInclude Include="Engine\Source\Editor\PropertyEditor\PropertyPanel.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Quad.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\QuadTexture.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.h" />
     <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoRectangleComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\SceneComponent.h" />
     <ClInclude Include="Engine\Source\Editor\UnrealEd\SceneMgr.h" />
@@ -292,7 +292,6 @@
     <ClInclude Include="Engine\Source\Runtime\Renderer\Renderer.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\SphereComp.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Player.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\StaticMesh.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UBillboardComponent.h" />
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\UClass.cpp" />
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\ObjectMacros.h" />

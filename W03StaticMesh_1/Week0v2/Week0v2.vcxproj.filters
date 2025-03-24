@@ -300,15 +300,6 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UTextUUID.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.cpp">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Components\Engine</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.h">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Components\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\StaticMesh.h">
-      <Filter>Engine\Source\Runtime\Engine\Classes\Components\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\Texture.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components\Engine</Filter>
     </ClInclude>
@@ -443,6 +434,10 @@
       <Filter>Engine\Source\Runtime\Engine\Classes\Components\Material</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Casts.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\FLoaderOBJ.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.cpp">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components\Engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\ThirdParty\DirectXTK\Include\DDSTextureLoader.h" />
@@ -473,6 +468,10 @@
       <Filter>Engine\Source\Runtime\Engine\Classes\Components\Material</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Casts.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\FLoaderOBJ.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.h">
+      <Filter>Engine\Source\Runtime\Engine\Classes\Components\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PixelTextureShader.hlsl">

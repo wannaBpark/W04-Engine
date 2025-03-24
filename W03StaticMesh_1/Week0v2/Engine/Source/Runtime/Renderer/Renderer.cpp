@@ -1,5 +1,7 @@
 #include "Renderer.h"
 #include "D3D11RHI/GraphicDevice.h"
+#include "Launch/EngineLoop.h"
+
 void FRenderer::Initialize(FGraphicsDevice* graphics) {
     Graphics = graphics;
     CreateShader();
@@ -32,7 +34,8 @@ void FRenderer::CreateShader() {
       { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0,  0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
       { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
       { "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 28,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-      { "TEXCOORD",   0, DXGI_FORMAT_R32G32_FLOAT,    0, 40,  D3D11_INPUT_PER_VERTEX_DATA, 0 }
+      { "TEXCOORD",   0, DXGI_FORMAT_R32G32_FLOAT,    0, 40,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+      { "MATERIAL_INDEX", 0, DXGI_FORMAT_R32_UINT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
 
     Graphics->Device->CreateInputLayout(layout, ARRAYSIZE(layout), vertexshaderCSO->GetBufferPointer(), vertexshaderCSO->GetBufferSize(), &InputLayout);
@@ -70,8 +73,10 @@ void FRenderer::PrepareShader()
     if (ConstantBuffer)
     {
         Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &ConstantBuffer);
-        Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &LightingBuffer);
-        Graphics->DeviceContext->PSSetConstantBuffers(2, 1, &FlagBuffer);
+        Graphics->DeviceContext->PSSetConstantBuffers(0, 1, &ConstantBuffer);
+        Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &MaterialConstantBuffer);
+        Graphics->DeviceContext->PSSetConstantBuffers(2, 1, &LightingBuffer);
+        Graphics->DeviceContext->PSSetConstantBuffers(3, 1, &FlagBuffer);
     }
 }
 void FRenderer::ResetVertexShader()
@@ -138,6 +143,21 @@ void FRenderer::RenderPrimitive(ID3D11Buffer* pVectexBuffer, UINT numVertices, I
     Graphics->DeviceContext->IASetIndexBuffer(pIndexBuffer, DXGI_FORMAT_R32_UINT,0);
 
     Graphics->DeviceContext->DrawIndexed(numIndices, 0, 0);
+}
+
+void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData)
+{
+    UINT offset = 0;
+    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &renderData->VertexBuffer, &Stride, &offset);
+    Graphics->DeviceContext->IASetIndexBuffer(renderData->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+    for (int subMeshIndex = 0; subMeshIndex < renderData->MaterialSubsets.Num(); subMeshIndex++) {
+        UpdateMaterial(renderData->Materials[subMeshIndex]);
+        
+        uint64 startIndex = renderData->MaterialSubsets[subMeshIndex].IndexStart;
+        uint64 indexCount = renderData->MaterialSubsets[subMeshIndex].IndexCount;
+        Graphics->DeviceContext->DrawIndexed(indexCount, startIndex, 0);
+    }
 }
 
 void FRenderer::RenderTexturedModelPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices, ID3D11ShaderResourceView* _TextureSRV, ID3D11SamplerState* _SamplerState)
@@ -264,6 +284,9 @@ void FRenderer::CreateConstantBuffer()
     
     constantbufferdesc.ByteWidth = sizeof(FPrimitiveCounts) + 0xf & 0xfffffff0;
     Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &LinePrimitiveBuffer);
+
+    constantbufferdesc.ByteWidth = sizeof(FMaterialConstants) + 0xf & 0xfffffff0;
+    Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &MaterialConstantBuffer);
 }
 
 void FRenderer::CreateLightingBuffer()
@@ -292,6 +315,7 @@ void FRenderer::ReleaseConstantBuffer()
     if (ConstantBuffer) ConstantBuffer->Release(); ConstantBuffer = nullptr;
     if (LightingBuffer) LightingBuffer->Release(); LightingBuffer = nullptr;
     if (FlagBuffer) FlagBuffer->Release(); FlagBuffer = nullptr;
+    if (MaterialConstantBuffer) MaterialConstantBuffer->Release(); MaterialConstantBuffer = nullptr;
 }
 void FRenderer::UpdateLightBuffer()
 {
@@ -327,6 +351,40 @@ void FRenderer::UpdateConstant(FMatrix _MVP, FMatrix _NormalMatrix, FVector4 _UU
             constants->Flag = _IsSelected;
         }
         Graphics->DeviceContext->Unmap(ConstantBuffer, 0); // GPU�� �ٽ� ��밡���ϰ� �����
+    }
+}
+
+void FRenderer::UpdateMaterial(FObjMaterialInfo materialInfo)
+{
+    if (MaterialConstantBuffer)
+    {
+        D3D11_MAPPED_SUBRESOURCE constantbufferMSR;// GPU�� �޸� �ּ� ����
+
+        Graphics->DeviceContext->Map(MaterialConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR); // update constant buffer every frame
+        FMaterialConstants* constants = (FMaterialConstants*)constantbufferMSR.pData; //GPU �޸� ���� ����
+        {
+            constants->DiffuseColor = materialInfo.Diffuse;
+            constants->TransparencyScalar = materialInfo.TransparencyScalar;
+            constants->AmbientColor = materialInfo.Ambient;
+            constants->DensityScalar = materialInfo.DensityScalar;
+            constants->SpecularColor = materialInfo.Specular;
+            constants->SpecularScalar = materialInfo.SpecularScalar;
+            constants->EmmisiveColor = materialInfo.Emissive;
+        }
+        Graphics->DeviceContext->Unmap(MaterialConstantBuffer, 0); // GPU�� �ٽ� ��밡���ϰ� �����
+    }
+
+    if (materialInfo.bHasTexture == true) {
+        std::shared_ptr<FTexture> texture = FEngineLoop::resourceMgr.GetTexture(materialInfo.DiffuseTexturePath);
+        Graphics->DeviceContext->PSSetShaderResources(0, 1, &texture->TextureSRV);
+        Graphics->DeviceContext->PSSetSamplers(0, 1, &texture->SamplerState);
+    }
+    else {
+        ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
+        ID3D11SamplerState* nullSampler[1] = { nullptr };
+
+        Graphics->DeviceContext->PSSetShaderResources(0, 1, nullSRV);
+        Graphics->DeviceContext->PSSetSamplers(0, 1, nullSampler);
     }
 }
 

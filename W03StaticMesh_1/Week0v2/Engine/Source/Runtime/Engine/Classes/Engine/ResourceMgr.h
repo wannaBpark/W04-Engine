@@ -1,7 +1,6 @@
 #pragma once
 #include <unordered_map>
 #include <memory>
-#include "StaticMesh.h"
 #include "Texture.h"
 #include "Define.h"
 #include "Container/Map.h"

@@ -1,6 +1,4 @@
-#define MAX_MATERIALS 16
-
-Texture2DArray<float4> MaterialTextures : register(t0);
+Texture2D Textures : register(t0);
 SamplerState Sampler : register(s0);
 
 cbuffer MatrixConstants : register(b0)
@@ -12,18 +10,21 @@ cbuffer MatrixConstants : register(b0)
     float3 MatrixPad0;
 };
 
-struct Material
+struct FMaterial
 {
-    float4 DiffuseColor;
-    float4 AmbientColor;
-    float4 SpecularColor;
-    float SpecularPower;
-    float3 MaterialPad0;
+    float3 DiffuseColor;
+    float TransparencyScalar;
+    float3 AmbientColor;
+    float DensityScalar;
+    float3 SpecularColor;
+    float SpecularScalar;
+    float3 EmissiveColor;
+    float MaterialPad0;
 };
 
 cbuffer MaterialConstants : register(b1)
 {
-    Material Materials[MAX_MATERIALS];
+    FMaterial Material;
 }
 
 cbuffer LightingConstants : register(b2)
@@ -49,6 +50,7 @@ struct PS_INPUT
     float3 normal : NORMAL; // 정규화된 노멀 벡터
     bool normalFlag : TEXCOORD0; // 노멀 유효성 플래그 (1.0: 유효, 0.0: 무효)
     float2 texcoord : TEXCOORD1;
+    int materialIndex : MATERIAL_INDEX;
 };
 
 struct PS_OUTPUT
@@ -93,20 +95,20 @@ PS_OUTPUT mainPS(PS_INPUT input)
     
     output.UUID = UUID;
     
-    uint materialIndex = 0;
-    float3 arrayIndex = (input.texcoord, materialIndex);
-    
-    // 기존의 색상과 텍스처 색상을 조합
-    //input.texcoord
-    float4 texColor = MaterialTextures.Sample(Sampler, arrayIndex);
-    //texColor = float4(1, 1, 1, 1);
+    float3 texColor = Textures.Sample(Sampler, input.texcoord);
     float3 color;
-    if (input.texcoord.g == 0) // 텍스처가 없으면 기본 색상 유지
-        color = saturate(input.color.rgb);
+    if(texColor.g == 0)
+        color = saturate(Material.DiffuseColor);
     else
-        color = saturate(input.color.rgb * texColor.rgb);
-
-    //float3 color = saturate(input.color.rgb);
+        color = saturate(texColor * Material.DiffuseColor);
+    
+    if (isSelected)
+    {
+        color += float3(0.2f, 0.2f, 0.0f); // 노란색 틴트로 하이라이트
+    }
+    
+    // 발광 색상 추가
+    color += Material.EmissiveColor;
 
     if (IsLit == 1) // 조명이 적용되는 경우
     {
@@ -114,24 +116,38 @@ PS_OUTPUT mainPS(PS_INPUT input)
         {
             float3 N = normalize(input.normal);
             float3 L = normalize(LightDirection);
+            
+            // 기본 디퓨즈 계산
             float diffuse = saturate(dot(N, L));
-            color = AmbientFactor * color + diffuse * LightColor * color;
+            
+            // 스페큘러 계산 (간단한 Blinn-Phong)
+            float3 V = float3(0, 0, 1); // 카메라가 Z 방향을 향한다고 가정
+            float3 H = normalize(L + V);
+            float specular = pow(saturate(dot(N, H)), Material.SpecularScalar * 32) * Material.SpecularScalar;
+            
+            // 최종 라이팅 계산
+            float3 ambient = Material.AmbientColor * AmbientFactor;
+            float3 diffuseLight = diffuse * LightColor;
+            float3 specularLight = specular * Material.SpecularColor * LightColor;
+            
+            color = ambient + (diffuseLight * color) + specularLight;
         }
-        output.color = float4(color, 1);
+        
+        // 투명도 적용
+        output.color = float4(color, Material.TransparencyScalar);
         return output;
     }
     else // unlit 상태일 때 PaperTexture 효과 적용
     {
         if (input.normalFlag < 0.5)
         {
-            output.color = float4(color, 1);
+            output.color = float4(color, Material.TransparencyScalar);
             return output;
         }
+        
         output.color = PaperTexture(color);
+        // 투명도 적용
+        output.color.a = Material.TransparencyScalar;
         return output;
     }
-    
-    output.color = float4(color, 1.0);
-    
-    return output;
 }
