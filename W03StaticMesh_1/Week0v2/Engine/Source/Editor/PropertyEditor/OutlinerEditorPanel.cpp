@@ -11,7 +11,7 @@ void OutlinerEditorPanel::Render()
     float PanelPosX = (Width) * 0.8f + 5.0f;
     float PanelPosY = 5.0f;
 
-    ImVec2 MinSize(200, 100);
+    ImVec2 MinSize(140, 100);
     ImVec2 MaxSize(FLT_MAX, 500);
     
     /* Min, Max Size */

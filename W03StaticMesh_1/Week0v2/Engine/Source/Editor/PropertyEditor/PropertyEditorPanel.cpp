@@ -9,7 +9,7 @@ void PropertyEditorPanel::Render()
     float PanelPosX = (Width) * 0.8f + 5.0f;
     float PanelPosY = (Height) * 0.3f + 15.0f;
 
-    ImVec2 MinSize(200, 400);
+    ImVec2 MinSize(140, 370);
     ImVec2 MaxSize(FLT_MAX, 900);
     
     /* Min, Max Size */
