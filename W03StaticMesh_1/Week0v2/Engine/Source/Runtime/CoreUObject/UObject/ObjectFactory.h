@@ -1,5 +1,6 @@
 #pragma once
-#include "Engine/Source/Runtime/CoreUObject/UObject/Object.h"
+#include "Object.h"
+#include "UObjectHash.h"
 #include "EngineStatics.h"
 
 class FObjectFactory
@@ -16,6 +17,7 @@ public:
         Obj->ClassPrivate = T::StaticClass();
         Obj->NamePrivate = Name;
         Obj->UUID = id;
+        AddToClassMap(Obj);  // TODO: 등록 위치를 UClass에서 하도록 변경하기
 
         UE_LOG(LogLevel::Display, "Created New Object : %s", *Name);
         return Obj;
