@@ -35,6 +35,6 @@ void AddToClassMap(const UObject* Object)
     }
 }
 
-void GetObjectsOfClass(const UClass* ClassToLookFor, TArray<UObject*>& Results)
+void GetObjectsOfClass(const UClass* ClassToLookFor, TArray<UObject*>& Results, bool bIncludeDerivedClasses)
 {
 }
