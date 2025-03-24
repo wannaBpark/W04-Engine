@@ -2,9 +2,10 @@
 
 #include <CoreTypes.h>
 #include <functional>
+#include <Math/Vector.h>
 
 #define FORWARD_EVENT_GENERIC(LOCAL_EVENT, GLOBAL_EVENT) \
-LOCAL_EVENT.Subscribe([](auto&&... args) { GLOBAL_EVENT.Invoke(std::forward<decltype(args)>(args)...); })
+LOCAL_EVENT.Subscribe([](auto&&... args) { (GLOBAL_EVENT).Invoke(std::forward<decltype(args)>(args)...); })
 
 template<typename... Args>
 class UnrealEdEventRouter {
@@ -42,6 +43,9 @@ public:
     UnrealEdEventRouter<const FString&, int32>      EVENT_ROUTER_INTEGER;
     UnrealEdEventRouter<const FString&, float>      EVENT_ROUTER_FLOAT;
     UnrealEdEventRouter<const FString&, bool>       EVENT_ROUTER_BOOL;
+    UnrealEdEventRouter<const FString&, FString>    EVENT_ROUTER_FString;
+    UnrealEdEventRouter<const FString&, FWString>   EVENT_ROUTER_FWString;
+    UnrealEdEventRouter<const FString&, FVector>    EVENT_ROUTER_FVector;
 
 private:
     UEditorEvent() = default;
