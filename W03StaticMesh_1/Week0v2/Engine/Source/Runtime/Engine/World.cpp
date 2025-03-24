@@ -128,7 +128,8 @@ void UWorld::Tick(float DeltaTime)
     // 제거 대기열에 있는 Actor들 제거
     for (AActor* Actor : PendingDestroyActors)
     {
-        for (UActorComponent* Comp : Actor->GetComponents())
+        const TSet CopiedComponents = Actor->GetComponents();
+        for (UActorComponent* Comp : CopiedComponents)
         {
             Comp->DestroyComponent();
             GUObjectArray.Remove(Comp);
