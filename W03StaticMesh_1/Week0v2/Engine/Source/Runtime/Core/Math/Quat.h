@@ -1,4 +1,3 @@
-#pragma once
 
 // 쿼터니언
 struct FQuat

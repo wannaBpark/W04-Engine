@@ -1,12 +1,16 @@
 #pragma once
-#include "EngineBaseTypes.h"
 #include "IWindowToggleable.h"
-class UWorld;
-class FEditorViewportClient;
-class ViewModeDropdown : public IWindowToggleable
+#include "Define.h"
+#include "EngineBaseTypes.h"
+#include "UnrealEd/EditorViewportClient.h"
+class ViewportTypePanel : public IWindowToggleable
 {
+private:
+    ViewportTypePanel();
 public:
-    static ViewModeDropdown& GetInstance();
+    ~ViewportTypePanel();
+
+    static ViewportTypePanel& GetInstance();
 
     void Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport);
     void OnResize(HWND hWnd);
@@ -14,17 +18,11 @@ public:
         if (bWasOpen) {
             bWasOpen = false;
         }
-        else {
-            bWasOpen = true;
-        }
     }
-private:
-    EViewModeIndex currentViewMode;
 
+private:
     bool bWasOpen = true;
     UINT width;
     UINT height;
 };
-
-
 

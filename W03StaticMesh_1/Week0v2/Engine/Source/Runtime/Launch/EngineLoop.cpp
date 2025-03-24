@@ -7,10 +7,13 @@
 #include "PropertyEditor/PropertyPanel.h"
 #include "PropertyEditor/ViewModeDropdown.h"
 #include "PropertyEditor/ShowFlags.h"
+#include "PropertyEditor/ViewportTypePanel.h"
 #include "Outliner.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/UnrealEd.h"
-
+#include "UnrealClient.h"
+#include "slate/Widgets/Layout/SSplitter.h"
+#include "LevelEditor/SLevelEditor.h"
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern FEngineLoop GEngineLoop;
 
@@ -20,6 +23,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		return true;
 	}
+    //
 	int zDelta = 0;
 	switch (message)
 	{
@@ -32,6 +36,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (FEngineLoop::graphicDevice.SwapChain) {
 				FEngineLoop::graphicDevice.OnResize(hWnd);
 			}
+            for (int i = 0;i < 4;i++) {
+                if (GEngineLoop.GetLevelEditor()){
+                    if (GEngineLoop.GetLevelEditor()->GetViewports()[i]) {
+                        GEngineLoop.GetLevelEditor()->GetViewports()[i]->ResizeViewport(FEngineLoop::graphicDevice.SwapchainDesc);
+                    }
+                }
+            }
 		}
 		Console::GetInstance().OnResize(hWnd);
 		ControlPanel::GetInstance().OnResize(hWnd);
@@ -39,21 +50,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		Outliner::GetInstance().OnResize(hWnd);
 		ViewModeDropdown::GetInstance().OnResize(hWnd);
 		ShowFlags::GetInstance().OnResize(hWnd);
-
 	    if (GEngineLoop.GetUnrealEditor())
 	    {
 	        GEngineLoop.GetUnrealEditor()->OnResize(hWnd);
 	    }
+        ViewportTypePanel::GetInstance().OnResize(hWnd);
 		break;
 	case WM_MOUSEWHEEL:
 		zDelta = GET_WHEEL_DELTA_WPARAM(wParam); // 휠 회전 값 (+120 / -120)
-		if (GEngineLoop.GetWorld()->GetCamera()->IsCameraMode()) {
-			GEngineLoop.GetViewportClient()->SetCameraSpeedScalar(static_cast<float>(GEngineLoop.GetViewportClient()->GetCameraSpeedScalar() + zDelta * 0.01));
-		}
-		else
-		{
-			GEngineLoop.GetWorld()->GetCamera()->MoveForward(zDelta*0.1f);
-		}
+        if (GEngineLoop.GetLevelEditor())
+        {
+            if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->IsPerspective()) {
+                if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetIsOnRBMouseClick()) {
+                    GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeedScalar(static_cast<float>(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar() + zDelta * 0.01));
+                }
+                else
+                {
+                    GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CameraMoveForward(zDelta * 0.1f);
+                }
+            }
+            else
+            {
+                FEditorViewportClient::SetOthoSize(-zDelta * 0.01f);
+            }
+        }
 		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
@@ -67,7 +87,8 @@ FRenderer FEngineLoop::renderer;
 FResourceMgr FEngineLoop::resourceMgr;
 uint32 FEngineLoop::TotalAllocationBytes= 0;
 uint32 FEngineLoop::TotalAllocationCount = 0;
-FEngineLoop::FEngineLoop()
+FEngineLoop::FEngineLoop() :
+    UIMgr(nullptr), GWorld(nullptr), LevelEditor(nullptr)
 {
 }
 
@@ -95,8 +116,8 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 	UIMgr->Initialize(hWnd,graphicDevice.Device, graphicDevice.DeviceContext);
 	
 	resourceMgr.Initialize(&renderer, &graphicDevice);
-	
-	viewportClient = std::make_shared<FEditorViewportClient>();
+    LevelEditor = new SLevelEditor();
+    LevelEditor->Initialize();
 
 	GWorld = new UWorld;
 	GWorld->Initialize();
@@ -132,27 +153,29 @@ void FEngineLoop::Tick()
 				break;
 			}
 		}
+
 		GWorld->Tick(elapsedTime);
-
-		UCameraComponent* Camera = static_cast<UCameraComponent*>(GWorld->GetCamera());
-		View = JungleMath::CreateViewMatrix(GWorld->GetCamera()->GetWorldLocation(),
-			GWorld->GetCamera()->GetWorldLocation() + GWorld->GetCamera()->GetForwardVector(),
-			{ 0, 0, 1 });
-		Projection = JungleMath::CreateProjectionMatrix(
-			Camera->GetFOV() * (3.141592f / 180.0f),
-			GetAspectRatio(graphicDevice.SwapChain), 
-			0.1f,
-			1000.0f
-		);
-
-		graphicDevice.Prepare();
-		renderer.PrepareShader();
-		renderer.UpdateLightBuffer();
-		//GWorld->Render();
-		Render();
+        LevelEditor->Tick(elapsedTime);
+        graphicDevice.Prepare();
+        std::shared_ptr<FEditorViewportClient> viewportClient = GetLevelEditor()->GetActiveViewportClient();
+        for (int i = 0;i < 4;++i)
+        {
+            LevelEditor->SetViewportClient(i);
+            graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetViewports()[i]->GetD3DViewport());
+            graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
+            renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
+            renderer.PrepareShader();
+            renderer.UpdateLightBuffer();
+            Render();
+        }
+        GetLevelEditor()->SetViewportClient(viewportClient);
+		//graphicDevice.Prepare();
+		//renderer.PrepareShader();
+		//renderer.UpdateLightBuffer();
+		////GWorld->Render();
+		//Render();
 
 		UIMgr->BeginFrame();
-
 	    UnrealEditor->Render();
 	    
 		// Console::GetInstance().Draw();
@@ -161,6 +184,13 @@ void FEngineLoop::Tick()
 		// Outliner::GetInstance().Draw(GetWorld());
 		// ShowFlags::GetInstance().Draw(GetWorld());
 		// ViewModeDropdown::GetInstance().Draw(GetWorld());
+		Console::GetInstance().Draw();
+		ControlPanel::GetInstance().Draw(GetWorld(),elapsedTime);
+		PropertyPanel::GetInstance().Draw(GetWorld());
+		Outliner::GetInstance().Draw(GetWorld());
+		ShowFlags::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+		ViewModeDropdown::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+        ViewportTypePanel::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
 		UIMgr->EndFrame();
 
 		GWorld->CleanUp();
@@ -177,10 +207,13 @@ void FEngineLoop::Tick()
 float a = 5;
 void FEngineLoop::Render()
 {
-	UPrimitiveBatch::GetInstance().RenderBatch(View, Projection);
 	GWorld->Render();
 	GWorld->RenderBaseObject();
+	UPrimitiveBatch::GetInstance().RenderBatch(GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix(), GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix());
+    //UPrimitiveBatch::GetInstance().RenderBatch(View, Projection);
 }
+
+
 float FEngineLoop::GetAspectRatio(IDXGISwapChain* swapChain)
 {
 	DXGI_SWAP_CHAIN_DESC desc;
@@ -197,9 +230,8 @@ void FEngineLoop::Exit()
 	resourceMgr.Release(&renderer);
 	renderer.Release();
 	graphicDevice.Release();
-
-
 }
+
 
 void FEngineLoop::WindowInit(HINSTANCE hInstance)
 {
@@ -215,7 +247,7 @@ void FEngineLoop::WindowInit(HINSTANCE hInstance)
 	RegisterClassW(&wndclass);
 
 	hWnd = CreateWindowExW(0, WindowClass, Title, WS_POPUP | WS_VISIBLE | WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT, 1500, 1500,
+		CW_USEDEFAULT, CW_USEDEFAULT, 1000, 1000,
 		nullptr, nullptr, hInstance, nullptr);
 }
 

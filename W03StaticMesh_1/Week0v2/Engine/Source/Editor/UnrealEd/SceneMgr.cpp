@@ -63,6 +63,8 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
             }
 
             USceneComponent* sceneComp = static_cast<USceneComponent*>(obj);
+            //Todo : 여기다가 Obj Maeh저장후 일기
+            //if (value.contains("ObjStaticMeshAsset"))
             if (value.contains("Location")) sceneComp->SetLocation(FVector(value["Location"].get<std::vector<float>>()[0],
                 value["Location"].get<std::vector<float>>()[1],
                 value["Location"].get<std::vector<float>>()[2]));
@@ -103,6 +105,8 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
             if (value.contains("FOV")) camera->SetFOV(value["FOV"].get<float>());
             if (value.contains("NearClip")) camera->SetNearClip(value["NearClip"].get<float>());
             if (value.contains("FarClip")) camera->SetNearClip(value["FarClip"].get<float>());
+            
+            
             sceneData.Cameras[id] = camera;
         }
     }
@@ -110,7 +114,7 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
         FString errorMessage = "Error parsing JSON: ";
         errorMessage += e.what();
 
-        MessageBoxA(NULL, *errorMessage, "Error", MB_OK | MB_ICONERROR);
+        UE_LOG(LogLevel::Error, "No Json file");
     }
 
     return sceneData;
@@ -154,7 +158,7 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
         std::vector<float> Rotation = { primitive->GetWorldRotation().x,primitive->GetWorldRotation().y,primitive->GetWorldRotation().z };
         std::vector<float> Scale = { primitive->GetWorldScale().x,primitive->GetWorldScale().y,primitive->GetWorldScale().z };
 
-        std::string primitiveName = *static_cast<USceneComponent*>(primitive)->GetName();
+        std::string primitiveName = *primitive->GetName();
         size_t pos = primitiveName.rfind('_');
         if (pos != INDEX_NONE) {
             primitiveName = primitiveName.substr(0, pos);
@@ -176,6 +180,7 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
         float nearClip = cameraComponent->GetNearClip();
         float farClip = cameraComponent->GetFarClip();
     
+        //
         j["PerspectiveCamera"][std::to_string(id)] = {
             {"Location", Location},
             {"Rotation", Rotation},
