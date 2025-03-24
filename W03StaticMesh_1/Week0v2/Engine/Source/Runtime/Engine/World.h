@@ -33,10 +33,10 @@ public:
 
     void LoadData(SceneData& _Data);
     SceneData SaveData();
-    void	NewScene();
-    void	ThrowAwayObj(UObject* _Obj);
-    void	CleanUp();
-    void	Render();
+    void NewScene();
+    void ThrowAwayObj(UObject* _Obj);
+    void CleanUp();
+    void Render();
 
     /**
      * World에 Actor를 Spawn합니다.
