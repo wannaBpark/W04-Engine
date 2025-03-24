@@ -224,6 +224,7 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)Engine\Source\Runtime\Engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\QuadTexture.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\Editor\PropertyEditor\ControlEditorPanel.h" />
@@ -246,6 +247,7 @@
     <ClInclude Include="Engine\Source\Runtime\Launch\EngineLoop.h" />
     <ClInclude Include="Engine\Source\Runtime\Launch\ImGuiManager.h" />
     <ClInclude Include="Engine\Source\ThirdParty\DirectXTK\Include\DDSTextureLoader.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.h" />
     <ClInclude Include="Font\IconDefs.h" />
     <ClInclude Include="Font\RawFonts.h" />
     <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoBaseComponent.h" />
