@@ -1,6 +1,5 @@
 ﻿#include "UnrealEd.h"
 #include "EditorPanel.h"
-#include <ranges>
 
 #include "PropertyEditor/ControlEditorPanel.h"
 #include "PropertyEditor/OutlinerEditorPanel.h"
@@ -10,19 +9,19 @@ void UnrealEd::Initialize()
 {
     auto ControlPanel = std::make_shared<ControlEditorPanel>();
     Panels["ControlPanel"] = ControlPanel;
-
+    
     auto OutlinerPanel = std::make_shared<OutlinerEditorPanel>();
     Panels["OutlinerPanel"] = OutlinerPanel;
-
+    
     auto PropertyPanel = std::make_shared<PropertyEditorPanel>();
     Panels["PropertyPanel"] = PropertyPanel;
 }
 
 void UnrealEd::Render() const
 {
-    for (const auto& Value : Panels | std::views::values)
+    for (const auto& Panel : Panels)
     {
-        Value->Render();
+        Panel.Value->Render();
     }
 }
 
@@ -35,7 +34,7 @@ void UnrealEd::OnResize(HWND hWnd) const
 {
     for (auto& Panel : Panels)
     {
-        Panel.second->OnResize(hWnd);
+        Panel.Value->OnResize(hWnd);
     }
 }
 

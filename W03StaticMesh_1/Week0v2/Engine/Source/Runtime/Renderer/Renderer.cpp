@@ -1,7 +1,6 @@
 #include "Renderer.h"
 #include "D3D11RHI/GraphicDevice.h"
-void FRenderer::Initialize(FGraphicsDevice* graphics)
-{
+void FRenderer::Initialize(FGraphicsDevice* graphics) {
     Graphics = graphics;
     CreateShader();
     CreateTextureShader();
@@ -12,21 +11,14 @@ void FRenderer::Initialize(FGraphicsDevice* graphics)
     UpdateLitUnlitConstantBuffer(1);
 }
 
-void FRenderer::Release()
-{
+void FRenderer::Release() {
     ReleaseShader();
     ReleaseTextureShader();
     ReleaseLineShader();
-    if (ConstantBuffer) ConstantBuffer->Release();
-    if (LightingBuffer) LightingBuffer->Release();
-    if (NormalConstantBuffer) NormalConstantBuffer->Release();
-    if (LitUnlitBuffer) LitUnlitBuffer->Release();
+    ReleaseConstantBuffer();
 }
 
-
-
-void FRenderer::CreateShader()
-{
+void FRenderer::CreateShader() {
     ID3DBlob* vertexshaderCSO;
     ID3DBlob* pixelshaderCSO;
 
@@ -81,7 +73,7 @@ void FRenderer::PrepareShader()
         Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &LightingBuffer);
         Graphics->DeviceContext->VSSetConstantBuffers(2, 1, &NormalConstantBuffer);
         Graphics->DeviceContext->PSSetConstantBuffers(3, 1, &LitUnlitBuffer);
-
+        Graphics->DeviceContext->PSSetConstantBuffers(4, 1, &UUIDBuffer);
     }
 }
 void FRenderer::ResetVertexShader()
@@ -94,7 +86,7 @@ void FRenderer::ResetPixelShader()
     Graphics->DeviceContext->PSSetShader(nullptr, nullptr, 0);
     PixelShader->Release();
 }
-void FRenderer::SetVertexShader(const FWString filename, FString funcname, FString version)
+void FRenderer::SetVertexShader(const FWString& filename, const FString& funcname, const FString& version)
 {
     // ���� �߻��� ���ɼ��� ����
     if (Graphics == nullptr)
@@ -105,11 +97,11 @@ void FRenderer::SetVertexShader(const FWString filename, FString funcname, FStri
         InputLayout->Release();
     ID3DBlob* vertexshaderCSO;
 
-    D3DCompileFromFile(filename.c_str(), nullptr, nullptr, funcname.c_str(), version.c_str(), 0, 0, &vertexshaderCSO, nullptr);
+    D3DCompileFromFile(filename.c_str(), nullptr, nullptr, *funcname, *version, 0, 0, &vertexshaderCSO, nullptr);
     Graphics->Device->CreateVertexShader(vertexshaderCSO->GetBufferPointer(), vertexshaderCSO->GetBufferSize(), nullptr, &VertexShader);
     vertexshaderCSO->Release();
 }
-void FRenderer::SetPixelShader(const FWString filename, FString funcname, FString version)
+void FRenderer::SetPixelShader(const FWString& filename, const FString& funcname, const FString& version)
 {
     // ���� �߻��� ���ɼ��� ����
     if (Graphics == nullptr)
@@ -117,7 +109,7 @@ void FRenderer::SetPixelShader(const FWString filename, FString funcname, FStrin
     if (VertexShader != nullptr)
         ResetVertexShader();
     ID3DBlob* pixelshaderCSO;
-    D3DCompileFromFile(filename.c_str(), nullptr, nullptr, funcname.c_str(), version.c_str(), 0, 0, &pixelshaderCSO, nullptr);
+    D3DCompileFromFile(filename.c_str(), nullptr, nullptr, *funcname, *version, 0, 0, &pixelshaderCSO, nullptr);
     Graphics->Device->CreatePixelShader(pixelshaderCSO->GetBufferPointer(), pixelshaderCSO->GetBufferSize(), nullptr, &PixelShader);
 
     pixelshaderCSO->Release();
@@ -135,26 +127,24 @@ void FRenderer::ChangeViewMode(EViewModeIndex evi)
         break;
     }
 }
-void FRenderer::RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices)
-{
+void FRenderer::RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices) {
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &pBuffer, &Stride, &offset);
     Graphics->DeviceContext->Draw(numVertices, 0);
 }
 
-void FRenderer::RenderPrimitive(ID3D11Buffer* pVectexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices)
+void FRenderer::RenderPrimitive(ID3D11Buffer* pVectexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer,  UINT numIndices)
 {
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &pVectexBuffer, &Stride, &offset);
-    Graphics->DeviceContext->IASetIndexBuffer(pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+    Graphics->DeviceContext->IASetIndexBuffer(pIndexBuffer, DXGI_FORMAT_R32_UINT,0);
 
     Graphics->DeviceContext->DrawIndexed(numIndices, 0, 0);
 }
 
 void FRenderer::RenderTexturedModelPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices, ID3D11ShaderResourceView* _TextureSRV, ID3D11SamplerState* _SamplerState)
 {
-    if (!_TextureSRV || !_SamplerState)
-    {
+    if (!_TextureSRV || !_SamplerState) {
         Console::GetInstance().AddLog(LogLevel::Warning, "SRV, Sampler Error");
     }
     if (numIndices <= 0)
@@ -199,7 +189,7 @@ ID3D11Buffer* FRenderer::CreateVertexBuffer(const TArray<FVertexSimple>& vertice
     vertexbufferdesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
     D3D11_SUBRESOURCE_DATA vertexbufferSRD;
-    vertexbufferSRD.pSysMem = vertices.data();
+    vertexbufferSRD.pSysMem = vertices.GetData();
 
     ID3D11Buffer* vertexBuffer;
 
@@ -238,7 +228,7 @@ ID3D11Buffer* FRenderer::CreateIndexBuffer(const TArray<uint32>& indices, UINT b
     indexbufferdesc.ByteWidth = byteWidth;	// buffer ũ�� ����
 
     D3D11_SUBRESOURCE_DATA indexbufferSRD;
-    indexbufferSRD.pSysMem = indices.data();
+    indexbufferSRD.pSysMem = indices.GetData();
 
     ID3D11Buffer* indexBuffer;
 
@@ -252,8 +242,7 @@ ID3D11Buffer* FRenderer::CreateIndexBuffer(const TArray<uint32>& indices, UINT b
 
 void FRenderer::ReleaseBuffer(ID3D11Buffer*& Buffer)
 {
-    if (Buffer)
-    {
+    if (Buffer) {
         Buffer->Release();
         Buffer = nullptr;
     }
@@ -276,13 +265,15 @@ void FRenderer::CreateConstantBuffer()
     // create FNormalConstans buffer 
     constantbufferdesc.ByteWidth = sizeof(FNormalConstants) + 0xf & 0xfffffff0;
     Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &NormalConstantBuffer);
-
+    
     constantbufferdesc.ByteWidth = sizeof(FGridParameters) + 0xf & 0xfffffff0;
     Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &GridConstantBuffer);
-
+    
     constantbufferdesc.ByteWidth = sizeof(FPrimitiveCounts) + 0xf & 0xfffffff0;
     Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &LinePrimitiveBuffer);
 
+    constantbufferdesc.ByteWidth = sizeof(FUUIDConstants) + 0xf & 0xfffffff0;;
+    Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &UUIDBuffer);
 }
 
 void FRenderer::CreateLightingBuffer()
@@ -308,11 +299,11 @@ void FRenderer::CreateLitUnlitBuffer()
 
 void FRenderer::ReleaseConstantBuffer()
 {
-    if (ConstantBuffer)
-    {
-        ConstantBuffer->Release();
-        ConstantBuffer = nullptr;
-    }
+    if (ConstantBuffer) ConstantBuffer->Release(); ConstantBuffer = nullptr;
+    if (LightingBuffer) LightingBuffer->Release(); LightingBuffer = nullptr;
+    if (NormalConstantBuffer) NormalConstantBuffer->Release(); NormalConstantBuffer = nullptr;
+    if (LitUnlitBuffer) LitUnlitBuffer->Release(); LitUnlitBuffer = nullptr;
+    if (UUIDBuffer) UUIDBuffer->Release(); UUIDBuffer = nullptr;
 }
 void FRenderer::UpdateLightBuffer()
 {
@@ -327,7 +318,7 @@ void FRenderer::UpdateLightBuffer()
         constants->lightColorX = 1.0f;
         constants->lightColorY = 1.0f;
         constants->lightColorZ = 1.0f;
-        constants->AmbientFactor = 0.06f;
+        constants->AmbientFactor =0.06f;
     }
     Graphics->DeviceContext->Unmap(LightingBuffer, 0);
 
@@ -369,8 +360,7 @@ void FRenderer::UpdateNormalConstantBuffer(FMatrix _Model)
 }
 void FRenderer::UpdateLitUnlitConstantBuffer(int isLit)
 {
-    if (LitUnlitBuffer)
-    {
+    if (LitUnlitBuffer) {
         D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU �� �޸� �ּ� ����
         Graphics->DeviceContext->Map(LitUnlitBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR);
         FLitUnlitConstants* constants = (FLitUnlitConstants*)constantbufferMSR.pData; //GPU �޸� ���� ����
@@ -378,6 +368,20 @@ void FRenderer::UpdateLitUnlitConstantBuffer(int isLit)
             constants->isLit = isLit;
         }
         Graphics->DeviceContext->Unmap(LitUnlitBuffer, 0);
+    }
+}
+
+void FRenderer::UpdateUUIDConstantBuffer(FVector4 UUIDColor)
+{
+    UUIDColor = UUIDColor / 255.0f;
+    if (UUIDBuffer) {
+        D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU �� �޸� �ּ� ����
+        Graphics->DeviceContext->Map(UUIDBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR);
+        FUUIDConstants* constants = (FUUIDConstants*)constantbufferMSR.pData; //GPU �޸� ���� ����
+        {
+            constants->UUIDColor = UUIDColor;
+        }
+        Graphics->DeviceContext->Unmap(UUIDBuffer, 0);
     }
 }
 
@@ -432,13 +436,11 @@ void FRenderer::ReleaseTextureShader()
         VertexTextureShader->Release();
         VertexTextureShader = nullptr;
     }
-    if (SubUVConstantBuffer)
-    {
+    if (SubUVConstantBuffer) {
         SubUVConstantBuffer->Release();
         SubUVConstantBuffer = nullptr;
     }
-    if (ConstantBuffer)
-    {
+    if (ConstantBuffer) {
         ConstantBuffer->Release();
         ConstantBuffer = nullptr;
     }
@@ -449,17 +451,17 @@ void FRenderer::PrepareTextureShader()
     Graphics->DeviceContext->VSSetShader(VertexTextureShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(PixelTextureShader, nullptr, 0);
     Graphics->DeviceContext->IASetInputLayout(TextureInputLayout);
-
+    
     //�ؽ��Ŀ� ConstantBuffer �߰��ʿ��Ҽ���
     if (ConstantBuffer)
     {
         Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &ConstantBuffer);
     }
-
+    
 }
 
 ID3D11Buffer* FRenderer::CreateVertexTextureBuffer(FVertexTexture* vertices, UINT byteWidth)
-{
+{   
     // 2. Create a vertex buffer
     D3D11_BUFFER_DESC vertexbufferdesc = {};
     vertexbufferdesc.ByteWidth = byteWidth;
@@ -482,14 +484,14 @@ ID3D11Buffer* FRenderer::CreateVertexTextureBuffer(FVertexTexture* vertices, UIN
 ID3D11Buffer* FRenderer::CreateIndexTextureBuffer(uint32* indices, UINT byteWidth)
 {
     D3D11_BUFFER_DESC indexbufferdesc = {};
-    indexbufferdesc.Usage = D3D11_USAGE_DYNAMIC;
+    indexbufferdesc.Usage = D3D11_USAGE_DYNAMIC; 
     indexbufferdesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    indexbufferdesc.ByteWidth = byteWidth;
-    indexbufferdesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    indexbufferdesc.ByteWidth = byteWidth;  
+    indexbufferdesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; 
 
     ID3D11Buffer* indexBuffer;
 
-    HRESULT hr = Graphics->Device->CreateBuffer(&indexbufferdesc, nullptr, &indexBuffer);
+    HRESULT hr = Graphics->Device->CreateBuffer(&indexbufferdesc, nullptr, &indexBuffer); 
     if (FAILED(hr))
     {
         return nullptr;
@@ -499,8 +501,7 @@ ID3D11Buffer* FRenderer::CreateIndexTextureBuffer(uint32* indices, UINT byteWidt
 
 void FRenderer::RenderTexturePrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices, ID3D11ShaderResourceView* _TextureSRV, ID3D11SamplerState* _SamplerState)
 {
-    if (!_TextureSRV || !_SamplerState)
-    {
+    if (!_TextureSRV || !_SamplerState) {
         Console::GetInstance().AddLog(LogLevel::Warning, "SRV, Sampler Error");
     }
     if (numIndices <= 0)
@@ -521,8 +522,7 @@ void FRenderer::RenderTexturePrimitive(ID3D11Buffer* pVertexBuffer, UINT numVert
 //��Ʈ ��ġ������
 void FRenderer::RenderTextPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11ShaderResourceView* _TextureSRV, ID3D11SamplerState* _SamplerState)
 {
-    if (!_TextureSRV || !_SamplerState)
-    {
+    if (!_TextureSRV || !_SamplerState) {
         Console::GetInstance().AddLog(LogLevel::Warning, "SRV, Sampler Error");
     }
     UINT offset = 0;
@@ -581,6 +581,7 @@ void FRenderer::PrepareSubUVConstant()
     {
         Graphics->DeviceContext->VSSetConstantBuffers(1, 1, &SubUVConstantBuffer);
         Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &SubUVConstantBuffer);
+        Graphics->DeviceContext->PSSetConstantBuffers(4, 1, &UUIDBuffer);
     }
 }
 
@@ -589,7 +590,7 @@ void FRenderer::PrepareLineShader()
     // ���̴��� �Է� ���̾ƿ� ����
     Graphics->DeviceContext->VSSetShader(VertexLineShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(PixelLineShader, nullptr, 0);
-
+  
     // ��� ���� ���ε�: 
     // - MatrixBuffer�� register(b0)��, Vertex Shader�� ���ε�
     // - GridConstantBuffer�� register(b1)��, Vertex�� Pixel Shader�� ���ε� (�ȼ� ���̴��� �ʿ信 ����)
@@ -597,7 +598,7 @@ void FRenderer::PrepareLineShader()
     {
         Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &ConstantBuffer);       // MatrixBuffer (b0)
         Graphics->DeviceContext->VSSetConstantBuffers(1, 1, &GridConstantBuffer);     // GridParameters (b1)
-        Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &GridConstantBuffer);
+        Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &GridConstantBuffer); 
         Graphics->DeviceContext->VSSetConstantBuffers(3, 1, &LinePrimitiveBuffer);
         Graphics->DeviceContext->VSSetShaderResources(2, 1, &pBBSRV);
         Graphics->DeviceContext->VSSetShaderResources(3, 1, &pConeSRV);
@@ -625,7 +626,7 @@ void FRenderer::CreateLineShader()
     }
     Graphics->Device->CreatePixelShader(PixelShaderLine->GetBufferPointer(), PixelShaderLine->GetBufferSize(), nullptr, &PixelLineShader);
 
-
+   
     VertexShaderLine->Release();
     PixelShaderLine->Release();
 
@@ -653,7 +654,7 @@ ID3D11Buffer* FRenderer::CreateStaticVerticesBuffer()
     ID3D11Buffer* pVertexBuffer = nullptr;
     HRESULT hr = Graphics->Device->CreateBuffer(&vbDesc, &vbInitData, &pVertexBuffer);
     return pVertexBuffer;
-
+ 
 }
 
 ID3D11Buffer* FRenderer::CreateBoundingBoxBuffer(UINT numBoundingBoxes)
@@ -709,7 +710,7 @@ ID3D11ShaderResourceView* FRenderer::CreateBoundingBoxSRV(ID3D11Buffer* pBoundin
     srvDesc.Buffer.ElementOffset = 0;
     srvDesc.Buffer.NumElements = numBoundingBoxes;
 
-
+   
     Graphics->Device->CreateShaderResourceView(pBoundingBoxBuffer, &srvDesc, &pBBSRV);
     return pBBSRV;
 }
@@ -738,15 +739,15 @@ ID3D11ShaderResourceView* FRenderer::CreateConeSRV(ID3D11Buffer* pConeBuffer, UI
     return pConeSRV;
 }
 
-void FRenderer::UpdateBoundingBoxBuffer(ID3D11Buffer* pBoundingBoxBuffer, const TArray<FBoundingBox>& BoundingBoxes, int numBoundingBoxes)
+void FRenderer::UpdateBoundingBoxBuffer(ID3D11Buffer* pBoundingBoxBuffer,const TArray<FBoundingBox>& BoundingBoxes, int numBoundingBoxes)
 {
     if (!pBoundingBoxBuffer) return;
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     Graphics->DeviceContext->Map(pBoundingBoxBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     FBoundingBox* pData = reinterpret_cast<FBoundingBox*>(mappedResource.pData);
-    for (int i = 0; i < BoundingBoxes.size(); ++i)
+    for (int i = 0; i < BoundingBoxes.Num(); ++i)
     {
-        pData[i] = BoundingBoxes[i];
+          pData[i] = BoundingBoxes[i];
     }
     Graphics->DeviceContext->Unmap(pBoundingBoxBuffer, 0);
 }
@@ -757,7 +758,7 @@ void FRenderer::UpdateOBBBuffer(ID3D11Buffer* pBoundingBoxBuffer, const TArray<F
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     Graphics->DeviceContext->Map(pBoundingBoxBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     FOBB* pData = reinterpret_cast<FOBB*>(mappedResource.pData);
-    for (int i = 0; i < BoundingBoxes.size(); ++i)
+    for (int i = 0; i < BoundingBoxes.Num(); ++i)
     {
         pData[i] = BoundingBoxes[i];
     }
@@ -770,7 +771,7 @@ void FRenderer::UpdateConesBuffer(ID3D11Buffer* pConeBuffer, const TArray<FCone>
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     Graphics->DeviceContext->Map(pConeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     FCone* pData = reinterpret_cast<FCone*>(mappedResource.pData);
-    for (int i = 0; i < Cones.size(); ++i)
+    for (int i = 0; i < Cones.Num(); ++i)
     {
         pData[i] = Cones[i];
     }
@@ -781,13 +782,11 @@ void FRenderer::UpdateGridConstantBuffer(const FGridParameters& gridParams)
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     HRESULT hr = Graphics->DeviceContext->Map(GridConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-    if (SUCCEEDED(hr))
-    {
+    if (SUCCEEDED(hr)) {
         memcpy(mappedResource.pData, &gridParams, sizeof(FGridParameters));
         Graphics->DeviceContext->Unmap(GridConstantBuffer, 0);
     }
-    else
-    {
+    else {
         UE_LOG(LogLevel::Warning, "gridParams ���� ����");
     }
 
@@ -809,7 +808,7 @@ void FRenderer::RenderBatch(const FGridParameters& gridParam, ID3D11Buffer* pVer
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &stride, &offset);
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-
+  
     UINT vertexCountPerInstance = 2;
     UINT instanceCount = gridParam.numGridLines + 3 + (boundingBoxCount * 12) + (coneCount * (2 * coneSegmentCount)) + (12 * obbCount);
     Graphics->DeviceContext->DrawInstanced(vertexCountPerInstance, instanceCount, 0, 0);

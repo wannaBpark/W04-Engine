@@ -8,13 +8,10 @@
 
 #endif // !__ICON_FONT_INDEX__
 
-#include "HAL/PlatformType.h"
-
-
 class UEditorPanel
 {
 public:
-    virtual ~UEditorWindow() = default;
+    virtual ~UEditorPanel() = default;
     virtual void Render() = 0;
     virtual void OnResize(HWND hWnd) = 0;
 };

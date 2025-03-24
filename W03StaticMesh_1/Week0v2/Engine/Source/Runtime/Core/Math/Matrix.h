@@ -2,12 +2,12 @@
 
 #include <DirectXMath.h>
 
-// 4x4 Çà·Ä ¿¬»ê
+// 4x4 í–‰ë ¬ ì—°ì‚°
 struct FMatrix
 {
 	float M[4][4];
 	static const FMatrix Identity;
-	// ±âº» ¿¬»êÀÚ ¿À¹ö·Îµù
+	// ê¸°ë³¸ ì—°ì‚°ì ì˜¤ë²„ë¡œë”©
 	FMatrix operator+(const FMatrix& Other) const;
 	FMatrix operator-(const FMatrix& Other) const;
 	FMatrix operator*(const FMatrix& Other) const;
@@ -16,7 +16,7 @@ struct FMatrix
 	float* operator[](int row);
 	const float* operator[](int row) const;
 	
-	// À¯Æ¿¸®Æ¼ ÇÔ¼ö
+	// ìœ í‹¸ë¦¬í‹° í•¨ìˆ˜
 	static FMatrix Transpose(const FMatrix& Mat);
 	static float Determinant(const FMatrix& Mat);
 	static FMatrix Inverse(const FMatrix& Mat);
@@ -30,10 +30,10 @@ struct FMatrix
 	DirectX::XMMATRIX ToXMMATRIX() const
 	{
 		return DirectX::XMMatrixSet(
-			M[0][0], M[1][0], M[2][0], M[3][0], // Ã¹ ¹øÂ° ¿­
-			M[0][1], M[1][1], M[2][1], M[3][1], // µÎ ¹øÂ° ¿­
-			M[0][2], M[1][2], M[2][2], M[3][2], // ¼¼ ¹øÂ° ¿­
-			M[0][3], M[1][3], M[2][3], M[3][3]  // ³× ¹øÂ° ¿­
+			M[0][0], M[1][0], M[2][0], M[3][0], // ì²« ë²ˆì§¸ ì—´
+			M[0][1], M[1][1], M[2][1], M[3][1], // ë‘ ë²ˆì§¸ ì—´
+			M[0][2], M[1][2], M[2][2], M[3][2], // ì„¸ ë²ˆì§¸ ì—´
+			M[0][3], M[1][3], M[2][3], M[3][3]  // ë„¤ ë²ˆì§¸ ì—´
 		);
 	}
 	FVector4 TransformFVector4(const FVector4& vector)

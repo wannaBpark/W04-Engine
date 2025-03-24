@@ -1,8 +1,10 @@
 ﻿#pragma once
 
-#include <CoreTypes.h>
 #include <functional>
 #include <Math/Vector.h>
+
+#include "Container/Array.h"
+#include "Container/String.h"
 
 #define FORWARD_EVENT_GENERIC(LOCAL_EVENT, GLOBAL_EVENT) \
 LOCAL_EVENT.Subscribe([](auto&&... args) { (GLOBAL_EVENT).Invoke(std::forward<decltype(args)>(args)...); })

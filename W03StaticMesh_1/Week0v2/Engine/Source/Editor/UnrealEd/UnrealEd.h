@@ -1,7 +1,6 @@
 ﻿#pragma once
-#include <CoreTypes.h>
-#include <windows.h>
-#include <memory>
+#include "Container/Map.h"
+#include "Container/String.h"
 
 class UEditorPanel;
 
@@ -12,8 +11,8 @@ public:
     ~UnrealEd() = default;
     void Initialize();
     
-    void Render() const;
-    void OnResize(HWND hWnd) const;
+     void Render() const;
+     void OnResize(HWND hWnd) const;
     
     void AddEditorPanel(const FString& PanelId, const std::shared_ptr<UEditorPanel>& EditorPanel);
     std::shared_ptr<UEditorPanel> GetEditorPanel(const FString& PanelId);
