@@ -215,7 +215,7 @@ bool UPlayer::PickGizmo(FVector& pickPosition)
 }
 void UPlayer::PickObj(FVector& pickPosition)
 {
-	if (!(ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) return;
+	if (!(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) return;
 
 	UObject* Possible = nullptr;
 	int maxIntersect = 0;

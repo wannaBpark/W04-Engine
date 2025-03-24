@@ -150,7 +150,7 @@ public: //Camera Movement
     void SetViewMode(EViewModeIndex newMode) { ViewMode = newMode; }
 
     uint64 GetShowFlag() { return ShowFlag; }
-    void SetShotFlat(uint64 newMode) { ShowFlag = newMode; }
+    void SetShowFlag(uint64 newMode) { ShowFlag = newMode; }
 
     bool GetIsOnRBMouseClick() { return bRightMouseDown; }
 

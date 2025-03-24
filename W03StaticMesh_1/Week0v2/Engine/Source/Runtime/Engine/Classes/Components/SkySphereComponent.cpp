@@ -47,11 +47,11 @@ void USkySphereComponent::Render()
     bool isUniform = (fabs(scale.x - scale.y) < 1e-6f) && (fabs(scale.y - scale.z) < 1e-6f);
     r = { r.x * scale.x,r.y * scale.y,r.z * scale.z };
 
-    if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_AABB)) {
+    if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB)) {
         UPrimitiveBatch::GetInstance().RenderAABB(AABB, GetWorldLocation(), Model);
         UPrimitiveBatch::GetInstance().RenderOBB(AABB, GetWorldLocation(), Model);
     }
-    if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_Primitives))
+    if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))
         FEngineLoop::renderer.RenderTexturedModelPrimitive(staticMesh->vertexBuffer,
             staticMesh->numVertices, staticMesh->indexBuffer, staticMesh->numIndices,
             Texture->TextureSRV, Texture->SamplerState

@@ -15,7 +15,7 @@
 #include "Components/UTextUUID.h"
 #include "Components/SkySphereComponent.h"
 #include "UObject/Casts.h"
-
+#include "LevelEditor/SLevelEditor.h"
 UWorld::UWorld()
 {
 }
@@ -138,7 +138,7 @@ void UWorld::Render()
 	for (auto iter : GUObjectArray)
 	{
 		iter->Render();
-		if ((ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_UUIDText))) 
+		if ((GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_UUIDText))) 
 			iter->RenderUUID();
 	}
 

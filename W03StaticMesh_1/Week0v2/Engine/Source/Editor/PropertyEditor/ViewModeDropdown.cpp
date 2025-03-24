@@ -11,15 +11,15 @@ ViewModeDropdown& ViewModeDropdown::GetInstance()
 }
 void ViewModeDropdown::Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
-    float controllWindowWidth = static_cast<float>(width) * 0.2f;
+    float controllWindowWidth = static_cast<float>(width) * 0.05f;
     float controllWindowHeight = static_cast<float>(height) * 0.f;
 
-    float controllWindowPosX = (static_cast<float>(width) - controllWindowWidth) * 0.46f;
+    float controllWindowPosX = (static_cast<float>(width) - controllWindowWidth) * 0.40f;
     float controllWindowPosY = (static_cast<float>(height) - controllWindowHeight) * 0.f;
     ImGui::SetNextWindowPos(ImVec2(controllWindowPosX, controllWindowPosY));
     ImGui::SetNextWindowSize(ImVec2(controllWindowWidth, controllWindowHeight), ImGuiCond_Always);
 
-    if (ImGui::Begin("Viewport Setting"))
+    if (ImGui::Begin("ViewMode"))
     {
         const char* viewModeNames[] = { "Lit", "Unlit", "Wireframe" };
 

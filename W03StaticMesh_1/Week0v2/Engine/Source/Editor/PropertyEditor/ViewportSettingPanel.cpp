@@ -18,26 +18,26 @@ ViewportSettingPanel& ViewportSettingPanel::GetInstance()
 
 void ViewportSettingPanel::Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
-    float controllWindowWidth = static_cast<float>(width) * 0.2f;
+    float controllWindowWidth = static_cast<float>(width) * 0.05f;
     float controllWindowHeight = static_cast<float>(height) * 0.f;
 
-    float controllWindowPosX = (static_cast<float>(width) - controllWindowWidth) * 0.46f;
+    float controllWindowPosX = (static_cast<float>(width) - controllWindowWidth) * 0.45f;
     float controllWindowPosY = (static_cast<float>(height) - controllWindowHeight) * 0.f;
     ImGui::SetNextWindowPos(ImVec2(controllWindowPosX, controllWindowPosY));
     ImGui::SetNextWindowSize(ImVec2(controllWindowWidth, controllWindowHeight), ImGuiCond_Always);
 
     if (ImGui::Begin("Viewport Setting"))
     {
-        const char* viewModeNames[] = { "Lit", "Unlit", "Wireframe" };
+        const char* cameraModeNames[] = { "Perspective", "Top", "Bottom", "Left", "Right", "Front", "Back"};
 
-        if (ImGui::BeginCombo("##ViewModeCombo", viewModeNames[(int)ActiveViewport->GetViewMode()]))
+        if (ImGui::BeginCombo("##Viewport Camera", cameraModeNames[(int)ActiveViewport->GetCameraSetting()]))
         {
-            for (int i = 0; i < IM_ARRAYSIZE(viewModeNames); i++)
+            for (int i = 0; i < IM_ARRAYSIZE(cameraModeNames); i++)
             {
                 bool isSelected = ((int)ActiveViewport->GetViewMode() == i);
-                if (ImGui::Selectable(viewModeNames[i], isSelected))
+                if (ImGui::Selectable(cameraModeNames[i], isSelected))
                 {
-                    ActiveViewport->SetViewMode((EViewModeIndex)i);
+                    ActiveViewport->SetCameraSetting((EViewportCameraMode)i);
                     FEngineLoop::graphicDevice.ChangeRasterizer(ActiveViewport->GetViewMode());
                     FEngineLoop::renderer.ChangeViewMode(ActiveViewport->GetViewMode());
                 }

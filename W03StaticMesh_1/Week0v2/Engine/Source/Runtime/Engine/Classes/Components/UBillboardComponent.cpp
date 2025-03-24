@@ -66,7 +66,7 @@ void UBillboardComponent::Render()
 		FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
     FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
 
-	if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
+	if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
 
 	FEngineLoop::renderer.RenderTexturePrimitive(vertexTextureBuffer,numVertices,
 		indexTextureBuffer,numIndices,Texture->TextureSRV,Texture->SamplerState);

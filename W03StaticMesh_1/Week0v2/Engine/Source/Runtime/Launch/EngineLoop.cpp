@@ -7,6 +7,7 @@
 #include "PropertyEditor/PropertyPanel.h"
 #include "PropertyEditor/ViewModeDropdown.h"
 #include "PropertyEditor/ShowFlags.h"
+#include "PropertyEditor/ViewportSettingPanel.h"
 #include "Outliner.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealClient.h"
@@ -47,6 +48,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		Outliner::GetInstance().OnResize(hWnd);
 		ViewModeDropdown::GetInstance().OnResize(hWnd);
 		ShowFlags::GetInstance().OnResize(hWnd);
+        ViewportSettingPanel::GetInstance().OnResize(hWnd);
 		break;
 	case WM_MOUSEWHEEL:
 		zDelta = GET_WHEEL_DELTA_WPARAM(wParam); // 휠 회전 값 (+120 / -120)
@@ -161,8 +163,9 @@ void FEngineLoop::Tick()
 		ControlPanel::GetInstance().Draw(GetWorld(),elapsedTime);
 		PropertyPanel::GetInstance().Draw(GetWorld());
 		Outliner::GetInstance().Draw(GetWorld());
-		ShowFlags::GetInstance().Draw(GetWorld());
+		ShowFlags::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
 		ViewModeDropdown::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+        ViewportSettingPanel::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
 		UIMgr->EndFrame();
 
 		GWorld->CleanUp();
@@ -202,8 +205,6 @@ void FEngineLoop::Exit()
 	resourceMgr.Release(&renderer);
 	renderer.Release();
 	graphicDevice.Release();
-
-
 }
 
 

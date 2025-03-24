@@ -42,8 +42,8 @@ void UCubeComp::Render()
         FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
     FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
 
-    if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_AABB))
+    if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
         UPrimitiveBatch::GetInstance().RenderAABB(AABB, GetWorldLocation(), Model);
-    if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_Primitives))
+    if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))
         Super::Render();
 }

@@ -63,7 +63,7 @@ void UText::SetRowColumnCount(int _cellsPerRow, int _cellsPerColumn)
 
 int UText::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
-	if (!(ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))) {
+	if (!(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))) {
 		return 0;
 	}
 	/*
@@ -362,7 +362,7 @@ void UText::TextMVPRendering()
 		FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
     FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
 
-	if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
+	if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
 		FEngineLoop::renderer.RenderTextPrimitive(vertexTextBuffer, numTextVertices,
 			Texture->TextureSRV, Texture->SamplerState);
 	}
