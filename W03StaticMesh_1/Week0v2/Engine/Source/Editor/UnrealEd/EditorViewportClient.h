@@ -23,6 +23,8 @@ public:
 
     FVector GetForwardVector();
     FVector GetRightVector();
+    FVector GetUpVector();
+
 public:
     FViewportCameraTransform();
 
@@ -134,10 +136,12 @@ public:
     FMatrix Projection;
 public: //Camera Movement
     void CameraMoveForward(float _Value);
-    void CameraMoveRigth(float _Value);
+    void CameraMoveRight(float _Value);
     void CameraMoveUp(float _Value);
     void CameraRotateYaw(float _Value);
     void CameraRotatePitch(float _Value);
+    void PivotMoveRight(float _Value);
+    void PivotMoveUp(float _Value);
 
     FMatrix& GetViewMatrix() { return  View; }
     FMatrix& GetProjectionMatrix() { return Projection; }
@@ -163,7 +167,6 @@ public: //Camera Movement
     void AddViewportType()
     {
         ViewportType = static_cast<ELevelViewportType>((ViewportType + 1) % LVT_MAX);
-        UpdateOrthoCameraLoc();
     }
 private: // Input
     POINT lastMousePos;

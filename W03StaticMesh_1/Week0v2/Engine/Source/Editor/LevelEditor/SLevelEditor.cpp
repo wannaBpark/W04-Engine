@@ -60,6 +60,8 @@ void SLevelEditor::Tick(double deltaTime)
 
 void SLevelEditor::Input()
 {
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse) return;
     if (GetAsyncKeyState(VK_LBUTTON) & 0x8000 || GetAsyncKeyState(VK_RBUTTON) & 0x8000)
     {
         if (bLRButtonDown == false)

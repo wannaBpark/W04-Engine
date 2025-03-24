@@ -22,6 +22,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		return true;
 	}
+    //ImGuiIO& io = ImGui::GetIO();
+    //
 	int zDelta = 0;
 	switch (message)
 	{
@@ -51,6 +53,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         ViewportTypePanel::GetInstance().OnResize(hWnd);
 		break;
 	case WM_MOUSEWHEEL:
+        //if (io.WantCaptureMouse) break;
 		zDelta = GET_WHEEL_DELTA_WPARAM(wParam); // 휠 회전 값 (+120 / -120)
         if (GEngineLoop.GetLevelEditor())
         {

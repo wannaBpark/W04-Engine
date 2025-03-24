@@ -45,7 +45,8 @@ void UPlayer::Release()
 
 void UPlayer::Input()
 {
-
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse) return;
 	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000 )
 	{
 		if (!bLeftMouseDown) {

@@ -67,6 +67,8 @@ void FEditorViewportClient::SaveConfig()
 
 void FEditorViewportClient::Input()
 {
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse) return;
     if (GetAsyncKeyState(VK_RBUTTON) & 0x8000) // VK_RBUTTON은 마우스 오른쪽 버튼을 나타냄
     {
         if (!bRightMouseDown)
@@ -86,19 +88,25 @@ void FEditorViewportClient::Input()
             int32 deltaY = currentMousePos.y - lastMousePos.y;
 
             // Yaw(좌우 회전) 및 Pitch(상하 회전) 값 변경
-            CameraRotateYaw(deltaX * 0.1f);  // X 이동에 따라 좌우 회전
-            CameraRotatePitch(deltaY * 0.1f);  // Y 이동에 따라 상하 회전
-
+            if (IsPerspective()) {
+                CameraRotateYaw(deltaX * 0.1f);  // X 이동에 따라 좌우 회전
+                CameraRotatePitch(deltaY * 0.1f);  // Y 이동에 따라 상하 회전
+            }
+            else
+            {
+                PivotMoveRight(deltaX);
+                PivotMoveUp(deltaY);
+            }
             // 새로운 마우스 위치 저장
             lastMousePos = currentMousePos;
         }
         if (GetAsyncKeyState('A') & 0x8000)
         {
-            CameraMoveRigth(-1.f);
+            CameraMoveRight(-1.f);
         }
         if (GetAsyncKeyState('D') & 0x8000)
         {
-            CameraMoveRigth(1.f);
+            CameraMoveRight(1.f);
         }
         if (GetAsyncKeyState('W') & 0x8000)
         {
@@ -166,23 +174,40 @@ D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport()
 }
 void FEditorViewportClient::CameraMoveForward(float _Value)
 {
-    FVector curCameraLoc = ViewTransformPerspective.GetLocation();
-    curCameraLoc = curCameraLoc +  ViewTransformPerspective.GetForwardVector() * GetCameraSpeedScalar() * _Value;
-    ViewTransformPerspective.SetLocation(curCameraLoc);
+    if (IsPerspective()) {
+        FVector curCameraLoc = ViewTransformPerspective.GetLocation();
+        curCameraLoc = curCameraLoc + ViewTransformPerspective.GetForwardVector() * GetCameraSpeedScalar() * _Value;
+        ViewTransformPerspective.SetLocation(curCameraLoc);
+    }
+    else
+    {
+        Pivot.x += _Value * 0.1f;
+    }
 }
 
-void FEditorViewportClient::CameraMoveRigth(float _Value)
+void FEditorViewportClient::CameraMoveRight(float _Value)
 {
-    FVector curCameraLoc = ViewTransformPerspective.GetLocation();
-    curCameraLoc = curCameraLoc + ViewTransformPerspective.GetRightVector() * GetCameraSpeedScalar() * _Value;
-    ViewTransformPerspective.SetLocation(curCameraLoc);
+    if (IsPerspective()) {
+        FVector curCameraLoc = ViewTransformPerspective.GetLocation();
+        curCameraLoc = curCameraLoc + ViewTransformPerspective.GetRightVector() * GetCameraSpeedScalar() * _Value;
+        ViewTransformPerspective.SetLocation(curCameraLoc);
+    }
+    else
+    {
+        Pivot.y += _Value * 0.1f;
+    }
 }
 
 void FEditorViewportClient::CameraMoveUp(float _Value)
 {
-    FVector curCameraLoc = ViewTransformPerspective.GetLocation();
-    curCameraLoc.z = curCameraLoc.z +  GetCameraSpeedScalar() * _Value;
-    ViewTransformPerspective.SetLocation(curCameraLoc);
+    if (IsPerspective()) {
+        FVector curCameraLoc = ViewTransformPerspective.GetLocation();
+        curCameraLoc.z = curCameraLoc.z + GetCameraSpeedScalar() * _Value;
+        ViewTransformPerspective.SetLocation(curCameraLoc);
+    }
+    else {
+        Pivot.z += _Value * 0.1f;
+    }
 }
 
 void FEditorViewportClient::CameraRotateYaw(float _Value)
@@ -203,6 +228,16 @@ void FEditorViewportClient::CameraRotatePitch(float _Value)
     ViewTransformPerspective.SetRotation(curCameraRot);
 }
 
+void FEditorViewportClient::PivotMoveRight(float _Value)
+{
+    Pivot = Pivot + ViewTransformOrthographic.GetRightVector() * _Value * 0.01f;
+}
+
+void FEditorViewportClient::PivotMoveUp(float _Value)
+{
+    Pivot = Pivot + ViewTransformOrthographic.GetUpVector() * _Value * -0.01f;
+}
+
 void FEditorViewportClient::UpdateViewMatrix()
 {
     if (IsPerspective()) {
@@ -212,6 +247,7 @@ void FEditorViewportClient::UpdateViewMatrix()
     }
     else 
     {
+        UpdateOrthoCameraLoc();
         if (ViewportType == LVT_OrthoXY || ViewportType == LVT_OrthoNegativeXY) {
             View = JungleMath::CreateViewMatrix(ViewTransformOrthographic.GetLocation(),
                 Pivot, FVector(0.0f, -1.0f, 0.0f));
@@ -286,32 +322,37 @@ void FEditorViewportClient::SetViewportType(ELevelViewportType InViewportType)
     //UpdateLinkedOrthoViewports(true);
 
     //Invalidate();
-    UpdateOrthoCameraLoc();
 }
 
 void FEditorViewportClient::UpdateOrthoCameraLoc()
 {
     switch (ViewportType)
     {
-    case LVT_OrthoXY:
-        ViewTransformOrthographic.SetLocation(FVector::UpVector());
+    case LVT_OrthoXY: // Top
+        ViewTransformOrthographic.SetLocation(Pivot + FVector::UpVector());
+        ViewTransformOrthographic.SetRotation(FVector(0.0f, 90.0f, -90.0f));
         break;
-    case LVT_OrthoXZ:
-        ViewTransformOrthographic.SetLocation(FVector::ForwardVector());
+    case LVT_OrthoXZ: // Front
+        ViewTransformOrthographic.SetLocation(Pivot + FVector::ForwardVector());
+        ViewTransformOrthographic.SetRotation(FVector(0.0f, 0.0f, 180.0f));
         break;
-    case LVT_OrthoYZ:
-        ViewTransformOrthographic.SetLocation(FVector::RightVector());
+    case LVT_OrthoYZ: // Left
+        ViewTransformOrthographic.SetLocation(Pivot + FVector::RightVector());
+        ViewTransformOrthographic.SetRotation(FVector(0.0f, 0.0f, 270.0f));
         break;
     case LVT_Perspective:
         break;
-    case LVT_OrthoNegativeXY:
-        ViewTransformOrthographic.SetLocation(FVector::UpVector() * -1.0f);
+    case LVT_OrthoNegativeXY: // Bottom
+        ViewTransformOrthographic.SetLocation(Pivot + FVector::UpVector() * -1.0f);
+        ViewTransformOrthographic.SetRotation(FVector(0.0f, -90.0f, 90.0f));
         break;
-    case LVT_OrthoNegativeXZ:
-        ViewTransformOrthographic.SetLocation(FVector::ForwardVector() * -1.0f);
+    case LVT_OrthoNegativeXZ: // Back
+        ViewTransformOrthographic.SetLocation(Pivot + FVector::ForwardVector() * -1.0f);
+        ViewTransformOrthographic.SetRotation(FVector(0.0f, 0.0f, 0.0f));
         break;
-    case LVT_OrthoNegativeYZ:
-        ViewTransformOrthographic.SetLocation(FVector::RightVector() * -1.0f);
+    case LVT_OrthoNegativeYZ: // Right
+        ViewTransformOrthographic.SetLocation(Pivot + FVector::RightVector() * -1.0f);
+        ViewTransformOrthographic.SetRotation(FVector(0.0f, 0.0f, 90.0f));
         break;
     case LVT_MAX:
         break;
@@ -377,6 +418,13 @@ FVector FViewportCameraTransform::GetRightVector()
     FVector Right = FVector(0.f, 1.f, 0.0f);
 	Right = JungleMath::FVectorRotate(Right, ViewRotation);
 	return Right;
+}
+
+FVector FViewportCameraTransform::GetUpVector()
+{
+    FVector Up = FVector(0.f, 0.f, 1.0f);
+    Up = JungleMath::FVectorRotate(Up, ViewRotation);
+    return Up;
 }
 
 FViewportCameraTransform::FViewportCameraTransform()
