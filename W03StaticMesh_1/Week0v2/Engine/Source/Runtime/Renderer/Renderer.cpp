@@ -152,7 +152,8 @@ void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData)
     Graphics->DeviceContext->IASetIndexBuffer(renderData->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
     for (int subMeshIndex = 0; subMeshIndex < renderData->MaterialSubsets.Num(); subMeshIndex++) {
-        UpdateMaterial(renderData->Materials[subMeshIndex]);
+        int materialIndex = renderData->MaterialSubsets[subMeshIndex].MaterialIndex;
+        UpdateMaterial(renderData->Materials[materialIndex]);
         
         uint64 startIndex = renderData->MaterialSubsets[subMeshIndex].IndexStart;
         uint64 indexCount = renderData->MaterialSubsets[subMeshIndex].IndexCount;

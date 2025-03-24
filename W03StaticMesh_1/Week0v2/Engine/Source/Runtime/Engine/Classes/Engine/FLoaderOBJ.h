@@ -239,8 +239,11 @@ struct FLoaderOBJ
             {
                 LineStream >> Line;
                 OutFStaticMesh.Materials[MaterialIndex].DiffuseTextureName = Line;
-                OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath = OutObjInfo.PathName.append(OutFStaticMesh.Materials[MaterialIndex].DiffuseTextureName.ToWideString());
+
+                FWString TexturePath = OutObjInfo.PathName + OutFStaticMesh.Materials[MaterialIndex].DiffuseTextureName.ToWideString();
+                OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath = TexturePath;
                 OutFStaticMesh.Materials[MaterialIndex].bHasTexture = true;
+
                 CreateTextureFromFile(OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath);
             }
         }
