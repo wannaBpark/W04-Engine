@@ -44,12 +44,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 }
             }
 		}
-		Console::GetInstance().OnResize(hWnd);
-		ControlPanel::GetInstance().OnResize(hWnd);
-		PropertyPanel::GetInstance().OnResize(hWnd);
-		Outliner::GetInstance().OnResize(hWnd);
-		ViewModeDropdown::GetInstance().OnResize(hWnd);
-		ShowFlags::GetInstance().OnResize(hWnd);
+		// Console::GetInstance().OnResize(hWnd);
+		// ControlPanel::GetInstance().OnResize(hWnd);
+		// PropertyPanel::GetInstance().OnResize(hWnd);
+		// Outliner::GetInstance().OnResize(hWnd);
+		// ViewModeDropdown::GetInstance().OnResize(hWnd);
+		// ShowFlags::GetInstance().OnResize(hWnd);
 	    if (GEngineLoop.GetUnrealEditor())
 	    {
 	        GEngineLoop.GetUnrealEditor()->OnResize(hWnd);
@@ -182,15 +182,9 @@ void FEngineLoop::Tick()
 		// ControlPanel::GetInstance().Draw(GetWorld(),elapsedTime);
 		// PropertyPanel::GetInstance().Draw(GetWorld());
 		// Outliner::GetInstance().Draw(GetWorld());
-		// ShowFlags::GetInstance().Draw(GetWorld());
-		// ViewModeDropdown::GetInstance().Draw(GetWorld());
-		Console::GetInstance().Draw();
-		ControlPanel::GetInstance().Draw(GetWorld(),elapsedTime);
-		PropertyPanel::GetInstance().Draw(GetWorld());
-		Outliner::GetInstance().Draw(GetWorld());
-		ShowFlags::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
-		ViewModeDropdown::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
-        ViewportTypePanel::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+		// ShowFlags::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+		// ViewModeDropdown::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+  //       ViewportTypePanel::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
 		UIMgr->EndFrame();
 
 		GWorld->CleanUp();

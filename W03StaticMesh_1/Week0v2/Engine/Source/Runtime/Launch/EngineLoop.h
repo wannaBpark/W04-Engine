@@ -6,6 +6,7 @@
 #include "UnrealEd/PrimitiveBatch.h"
 #include "Engine/ResourceMgr.h"
 
+class UnrealEd;
 class UImGuiManager;
 class UWorld;
 class FEditorViewportClient;
@@ -41,6 +42,7 @@ private:
     UImGuiManager* UIMgr;
     UWorld* GWorld;
     SLevelEditor* LevelEditor;
+    UnrealEd* UnrealEditor;
     bool bIsExit = false;
     const int32 targetFPS = 60;
     int32 curViewportIndex = 0;
@@ -48,5 +50,6 @@ private:
 public:
     UWorld* GetWorld(){ return GWorld; }
     SLevelEditor* GetLevelEditor() { return LevelEditor; }
+    UnrealEd* GetUnrealEditor() { return UnrealEditor; }
 };
 

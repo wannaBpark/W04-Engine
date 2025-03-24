@@ -27,6 +27,16 @@ void PropertyEditorPanel::Render()
     /* Render Start */
     ImGui::Begin("Detail", nullptr, PanelFlags);
 
+    ImGui::SetItemDefaultFocus();
+    // TreeNode 배경색을 변경 (기본 상태)
+    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+    if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_Framed)) // 트리 노드 생성
+    {
+        ImGui::Text("Location");
+        ImGui::TreePop(); // 트리 닫기
+    }
+    ImGui::PopStyleColor();
+    
     ImGui::End();
     
 }
