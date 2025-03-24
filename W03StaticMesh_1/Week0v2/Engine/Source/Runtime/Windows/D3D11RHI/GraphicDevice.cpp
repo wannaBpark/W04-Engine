@@ -373,7 +373,7 @@ void FGraphicsDevice::ChangeRasterizer(EViewModeIndex evi)
         CurrentRasterizer = RasterizerStateSOLID;
         break;
     }
-    
+    DeviceContext->RSSetState(CurrentRasterizer); //레스터 라이저 상태 설정
 }
 
 void FGraphicsDevice::ChangeDepthStencilState(ID3D11DepthStencilState* newDetptStencil)
