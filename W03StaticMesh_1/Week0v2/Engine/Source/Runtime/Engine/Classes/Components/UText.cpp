@@ -1,12 +1,9 @@
 #include "UText.h"
-
-#include "World.h"
 #include "Engine/Source/Runtime/Engine/Camera/CameraComponent.h"
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
-UText::UText()
+UText::UText() : UBillboardComponent("Quad")
 {
-    SetType("Quad");
 }
 
 UText::~UText()
@@ -50,7 +47,7 @@ void UText::Render()
 }
 void UText::ClearText()
 {
-	vertexTextureArr.Empty();
+    vertexTextureArr.clear();
 }
 void UText::SetRowColumnCount(int _cellsPerRow, int _cellsPerColumn)
 {
@@ -86,19 +83,19 @@ int UText::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float
     CameraView.M[2][2] = -CameraView.M[2][2];
     FMatrix LookAtCamera = FMatrix::Transpose(CameraView);
 
-	for (auto it : vertexTextureArr)
-	{
-		FVector vtmp = FVector(it.x, it.y, it.z);
-		FMatrix::TransformVector(vtmp,LookAtCamera);
-		FVertexSimple tmp ;
-		tmp.x = vtmp.x ;tmp.y = vtmp.y; tmp.z = vtmp.z;
-		//UE_LOG(LogLevel::Warning, "Text x : %f y: %f z : %f", tmp.x, tmp.y, tmp.z);
-		verArr.Add(tmp);
-	}
-	FVertexSimple* vertices = verArr.GetData();
-	int vCount = verArr.Num();
-	UINT* indices = nullptr;
-	int iCount = 0;
+    for (auto it : vertexTextureArr)
+    {
+        FVector vtmp = FVector(it.x, it.y, it.z);
+        FMatrix::TransformVector(vtmp,LookAtCamera);
+        FVertexSimple tmp ;
+        tmp.x = vtmp.x ;tmp.y = vtmp.y; tmp.z = vtmp.z;
+        //UE_LOG(LogLevel::Warning, "Text x : %f y: %f z : %f", tmp.x, tmp.y, tmp.z);
+        verArr.push_back(tmp);
+    }
+    FVertexSimple* vertices = verArr.data();
+    int vCount = verArr.size();
+    UINT* indices = nullptr;
+    int iCount = 0;
 
     if (!vertices) return 0;
     BYTE* pbPositions = reinterpret_cast<BYTE*>(vertices);
@@ -132,15 +129,15 @@ int UText::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float
             nIntersections++;
         }
 
-	}
-	return nIntersections;
-	*/
-	
-	for (int i = 0; i < vertexTextureArr.Num(); i++)
-	{
-		quad.Add(FVector(vertexTextureArr[i].x,
-			vertexTextureArr[i].y, vertexTextureArr[i].z));
-	}
+    }
+    return nIntersections;
+    */
+
+    for (int i = 0; i < vertexTextureArr.size(); i++)
+    {
+        quad.push_back(FVector(vertexTextureArr[i].x,
+            vertexTextureArr[i].y, vertexTextureArr[i].z));
+    }
 
     return CheckPickingOnNDC(quad, pfNearHitDistance);
 }
@@ -153,8 +150,8 @@ void UText::SetText(FWString _text)
     {
         Console::GetInstance().AddLog(LogLevel::Warning, "Text is empty");
 
-		vertexTextureArr.Empty();
-		quad.Empty();
+        vertexTextureArr.clear();
+        quad.clear();
 
         // 기존 버텍스 버퍼가 있다면 해제
         if (vertexTextBuffer)
@@ -205,20 +202,20 @@ void UText::SetText(FWString _text)
         rightDown.u += (nTexelUOffset * startU);
         rightDown.v += (nTexelVOffset * startV);
 
-		vertexTextureArr.Add(leftUP);
-		vertexTextureArr.Add(rightUP);
-		vertexTextureArr.Add(leftDown);
-		vertexTextureArr.Add(rightUP);
-		vertexTextureArr.Add(rightDown);
-		vertexTextureArr.Add(leftDown);
-	}
-	UINT byteWidth = static_cast<UINT>(vertexTextureArr.Num() * sizeof(FVertexTexture));
+        vertexTextureArr.push_back(leftUP);
+        vertexTextureArr.push_back(rightUP);
+        vertexTextureArr.push_back(leftDown);
+        vertexTextureArr.push_back(rightUP);
+        vertexTextureArr.push_back(rightDown);
+        vertexTextureArr.push_back(leftDown);
+    }
+    UINT byteWidth = static_cast<UINT>(vertexTextureArr.size() * sizeof(FVertexTexture));
 
-	float lastX = -1.0f + quadSize * _text.size();
-	quad.Add(FVector(-1.0f,1.0f,0.0f));
-	quad.Add(FVector(-1.0f,-1.0f,0.0f));
-	quad.Add(FVector(lastX,1.0f,0.0f));
-	quad.Add(FVector(lastX,-1.0f,0.0f));
+    float lastX = -1.0f + quadSize * _text.size();
+    quad.push_back(FVector(-1.0f, 1.0f, 0.0f));
+    quad.push_back(FVector(-1.0f, -1.0f, 0.0f));
+    quad.push_back(FVector(lastX, 1.0f, 0.0f));
+    quad.push_back(FVector(lastX, -1.0f, 0.0f));
 
     CreateTextTextureVertexBuffer(vertexTextureArr, byteWidth);
 }
@@ -326,14 +323,14 @@ void UText::setStartUV(char alphabet, float& outStartU, float& outStartV)
 
 void UText::CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex, UINT byteWidth)
 {
-	numTextVertices = static_cast<UINT>(_vertex.Num());
-	// 2. Create a vertex buffer
-	D3D11_BUFFER_DESC vertexbufferdesc = {};
-	vertexbufferdesc.ByteWidth = byteWidth;
-	vertexbufferdesc.Usage = D3D11_USAGE_IMMUTABLE; // will never be updated 
-	vertexbufferdesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    numTextVertices = static_cast<UINT>(_vertex.size());
+    // 2. Create a vertex buffer
+    D3D11_BUFFER_DESC vertexbufferdesc = {};
+    vertexbufferdesc.ByteWidth = byteWidth;
+    vertexbufferdesc.Usage = D3D11_USAGE_IMMUTABLE; // will never be updated 
+    vertexbufferdesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
-	D3D11_SUBRESOURCE_DATA vertexbufferSRD = { _vertex.GetData()};
+    D3D11_SUBRESOURCE_DATA vertexbufferSRD = { _vertex.data() };
 
     ID3D11Buffer* vertexBuffer;
 
@@ -344,8 +341,8 @@ void UText::CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex,
     }
     vertexTextBuffer = vertexBuffer;
 
-	//FEngineLoop::resourceMgr.RegisterMesh(&FEngineLoop::renderer, "JungleText", _vertex, _vertex.Num() * sizeof(FVertexTexture),
-	//	nullptr, 0);
+    //FEngineLoop::resourceMgr.RegisterMesh(&FEngineLoop::renderer, "JungleText", _vertex, _vertex.size() * sizeof(FVertexTexture),
+    //	nullptr, 0);
 
 }
 
@@ -358,14 +355,14 @@ void UText::TextMVPRendering()
     FMatrix M = CreateBillboardMatrix();
     FMatrix VP = GetEngine().View * GetEngine().Projection;
 
-	// 최종 MVP 행렬
-	FMatrix MVP = M * VP;
-	if (this == GetWorld()->GetPickingGizmo()) {
-		FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);
-	}
-	else
-		FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
-    FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
+    // 최종 MVP 행렬
+    FMatrix MVP = M * VP;
+    if (this == GetWorld()->GetPickingGizmo())
+    {
+        FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);
+    }
+    else
+        FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
 
     if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))
     {
