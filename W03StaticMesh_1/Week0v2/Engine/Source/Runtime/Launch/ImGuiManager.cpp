@@ -31,6 +31,7 @@ void UImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceCont
         ICON_SAVE,      ICON_SAVE + 1,
         ICON_LOAD,      ICON_LOAD + 1,
         ICON_MENU,      ICON_MENU + 1,
+        ICON_SLIDER,    ICON_SLIDER + 1,
         0 };
 
     io.Fonts->AddFontFromMemoryTTF(FeatherRawData, FontSizeOfFeather, 22.0f, &FeatherFontConfig, IconRanges);
@@ -58,12 +59,15 @@ void UImGuiManager::PreferenceStyle()
     ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive] = ImVec4(0.00f, 0.00f, 0.85f, 0.85f);
     ImGui::GetStyle().Colors[ImGuiCol_TitleBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
     ImGui::GetStyle().WindowRounding = 5.0f;
-
+    ImGui::GetStyle().PopupRounding = 3.0f;
     ImGui::GetStyle().FrameRounding = 3.0f;
 
     // Sep
     ImGui::GetStyle().Colors[ImGuiCol_Separator] = ImVec4(0.3f, 0.3f, 0.3f, 1.0f);
 
+    // Popup
+    ImGui::GetStyle().Colors[ImGuiCol_PopupBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.9f);
+    
     // Frame
     ImGui::GetStyle().Colors[ImGuiCol_FrameBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.9f);
     ImGui::GetStyle().Colors[ImGuiCol_FrameBgActive] = ImVec4(0.203f, 0.203f, 0.203f, 0.6f);
