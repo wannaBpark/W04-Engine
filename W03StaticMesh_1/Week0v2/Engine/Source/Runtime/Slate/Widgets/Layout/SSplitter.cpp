@@ -77,9 +77,12 @@ void SSplitterH::LoadConfig(const TMap<FString, FString>& config)
 {
     // 각 키에 대해 기본값을 지정 (예: 기본 위치 및 크기)
     Rect.leftTopX = GetValueFromConfig(config, "SplitterH.X", GEngineLoop.graphicDevice.screenWidth *0.5f);
-    Rect.leftTopY = GetValueFromConfig(config, "SplitterH.Y", GEngineLoop.graphicDevice.screenHeight * 0.5f);
-    Rect.width = GetValueFromConfig(config, "SplitterH.Width", 20);
-    Rect.height = GetValueFromConfig(config, "SplitterH.Height", 10); // 수평 스플리터는 높이 고정
+    Rect.leftTopY = GetValueFromConfig(config, "SplitterH.Y", 0.0f);
+
+    Rect.width = GetValueFromConfig(config, "SplitterH.Width", 20.0f);
+    Rect.height = GetValueFromConfig(config, "SplitterH.Height", 10.0f); // 수평 스플리터는 높이 고정
+    
+    Rect.leftTopX *= GEngineLoop.graphicDevice.screenWidth /GetValueFromConfig(config, "SplitterV.Width", 1000.0f);
 }
 
 void SSplitterH::SaveConfig(TMap<FString, FString>& config) const
@@ -122,10 +125,13 @@ void SSplitterV::OnResize(float width, float height)
 
 void SSplitterV::LoadConfig(const TMap<FString, FString>& config)
 {
-    Rect.leftTopX = GetValueFromConfig(config, "SplitterV.X", 0);
-    Rect.leftTopY = GetValueFromConfig(config, "SplitterV.Y", 0);
+    Rect.leftTopX = GetValueFromConfig(config, "SplitterV.X", 0.0f);
+    Rect.leftTopY = GetValueFromConfig(config, "SplitterV.Y", GEngineLoop.graphicDevice.screenHeight * 0.5f);
     Rect.width = GetValueFromConfig(config, "SplitterV.Width", 10); // 수직 스플리터는 너비 고정
     Rect.height = GetValueFromConfig(config, "SplitterV.Height", 20);
+
+    Rect.leftTopY *= GEngineLoop.graphicDevice.screenHeight / GetValueFromConfig(config, "SplitterH.Height", 1000.0f);
+
 }
 
 void SSplitterV::SaveConfig(TMap<FString, FString>& config) const
