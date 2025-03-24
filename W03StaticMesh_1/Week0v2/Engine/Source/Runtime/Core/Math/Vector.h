@@ -2,6 +2,35 @@
 
 #include <DirectXMath.h>
 
+struct FVector2D
+{
+	float x,y;
+	FVector2D(float _x = 0, float _y = 0) : x(_x), y(_y) {}
+
+	FVector2D operator+(const FVector2D& rhs) const
+	{
+		return FVector2D(x + rhs.x, y + rhs.y);
+	}
+	FVector2D operator-(const FVector2D& rhs) const
+	{
+		return FVector2D(x - rhs.x, y - rhs.y);
+	}
+	FVector2D operator*(float rhs) const
+	{
+		return FVector2D(x * rhs, y * rhs);
+	}
+	FVector2D operator/(float rhs) const
+	{
+		return FVector2D(x / rhs, y / rhs);
+	}
+	FVector2D& operator+=(const FVector2D& rhs)
+	{
+		x += rhs.x;
+		y += rhs.y;
+		return *this;
+	}
+};
+
 // 3D 벡터
 struct FVector
 {

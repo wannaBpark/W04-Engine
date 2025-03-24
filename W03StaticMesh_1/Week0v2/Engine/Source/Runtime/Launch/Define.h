@@ -1,6 +1,8 @@
 #pragma once
 #include <cmath>
 #include <algorithm>
+#include "Core/Container/String.h"
+#include "Core/Container/Array.h"
 
 // 수학 관련
 #include "Math/Vector.h"
@@ -13,14 +15,102 @@
 
 #include "UserInterface/Console.h"
 
-
 struct FVertexSimple
 {
-	float x, y, z;    // Position
-	float r, g, b, a; // Color
-	float nx, ny, nz;
+    float x, y, z;    // Position
+    float r, g, b, a; // Color
+    float nx, ny, nz;
     float u=0, v=0;
+    uint32 MaterialIndex;
 };
+
+// Material Subset
+struct FMaterialSubset
+{
+    uint32 IndexStart; // Index Buffer Start pos
+    uint32 IndexCount; // Index Count
+    uint32 MaterialIndex; // Material Index
+    FString MaterialName; // Material Name
+};
+
+// OBJ File Raw Data
+struct FObjInfo
+{
+    FWString ObjectName; // OBJ File Name
+    FWString PathName; // OBJ File Paths
+    FString MatName; // OBJ MTL File Name
+    
+    // Group
+    uint32 NumOfGroup = 0; // token 'g' or 'o'
+    TArray<FString> GroupName;
+    
+    // Vertex, UV, Normal List
+    TArray<FVector> Vertices;
+    TArray<FVector> Normals;
+    TArray<FVector2D> UVs;
+    
+    // Faces
+    TArray<int32> Faces;
+
+    // Index
+    TArray<uint32> VertexIndices;
+    TArray<uint32> NormalIndices;
+    TArray<uint32> TextureIndices;
+    
+    // Material
+    TArray<FMaterialSubset> MaterialSubsets;
+};
+
+struct FObjMaterialInfo
+{
+    FString MTLName;  // newmtl : Material Name.
+
+    bool bHasTexture = false;  // Has Texture?
+    bool bTransparent = false; // Has alpha channel?
+
+    FVector Diffuse;  // Kd : Diffuse (Vector4)
+    FVector Specular;  // Ks : Specular (Vector) 
+    FVector Ambient;   // Ka : Ambient (Vector)
+    FVector Emissive;  // Ke : Emissive (Vector)
+
+    float SpecularScalar; // Ns : Specular Power (Float)
+    float DensityScalar;  // Ni : Optical Density (Float)
+    float TransparencyScalar; // d or Tr  : Transparency of surface (Float)
+
+    uint32 IlluminanceModel; // illum: illumination Model between 0 and 10. (UINT)
+
+    /* Texture */
+    FString DiffuseTextureName;  // map_Kd : Diffuse texture
+    FWString DiffuseTexturePath;
+    
+    FString AmbientTextureName;  // map_Ka : Ambient texture
+    FWString AmbientTexturePath;
+    
+    FString SpecularTextureName; // map_Ks : Specular texture
+    FWString SpecularTexturePath;
+    
+    FString BumpTextureName;     // map_Bump : Bump texture
+    FWString BumpTexturePath;
+    
+    FString AlphaTextureName;    // map_d : Alpha texture
+    FWString AlphaTexturePath;
+};
+
+// Cooked Data
+namespace OBJ
+{
+    struct FStaticMesh
+    {
+        FWString ObjectName;
+        FWString PathName;
+        
+        TArray<FVertexSimple> Vertices;
+        TArray<UINT> Indices;
+        
+        TArray<FObjMaterialInfo> Materials;
+        TArray<FMaterialSubset> MaterialSubsets;
+    };
+}
 
 struct FVertexTexture
 {
