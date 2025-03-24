@@ -6,6 +6,11 @@
 #undef GetObject // Windows.h 이름 겹침
 
 
+/**
+ * 특정 타입의 UObject 인스턴스를 순회하기 위한 반복자 클래스입니다.
+ * 
+ * @tparam T 순회할 UObject 타입 또는 그 파생 클래스
+ */
 template <typename T>
 class TObjectIterator
 {
@@ -71,6 +76,13 @@ protected:
     int32 Index;
 };
 
+
+/**
+ * 특정 타입의 UObject 인스턴스들을 순회할 수 있는 범위를 정의하는 구조체입니다.
+ * 이 구조체는 range-based for 루프에서 사용될 수 있습니다.
+ * 
+ * @tparam T 순회할 UObject 타입 또는 그 파생 클래스
+ */
 template <typename T>
 struct TObjectRange
 {
