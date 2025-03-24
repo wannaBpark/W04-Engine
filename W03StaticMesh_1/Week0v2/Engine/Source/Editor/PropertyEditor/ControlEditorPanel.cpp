@@ -1,4 +1,5 @@
 ﻿#include "ControlEditorPanel.h"
+#include "tinyfiledialogs/tinyfiledialogs.h"
 
 void ControlEditorPanel::Render()
 {
@@ -31,14 +32,16 @@ void ControlEditorPanel::Render()
     /* Render Start */
     ImGui::Begin("Control Panel", nullptr, PanelFlags);
     
-    ImGui::PushFont(IconFont);
-    CreateMenuButton(IconSize);
-    ImGui::PopFont();
+    CreateMenuButton(IconSize, IconFont);
     
     ImGui::SameLine();
     
     CreateFlagButton();
     
+    ImGui::SameLine();
+
+    CreateModifyButton(IconSize, IconFont);
+
     ImGui::SameLine();
 
     /* Get Window Content Region */
@@ -54,11 +57,120 @@ void ControlEditorPanel::Render()
     ImGui::End();
 }
 
-void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize) const
+void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
 {
+    ImGui::PushFont(IconFont);
     if (ImGui::Button("\ue9ad", ButtonSize)) // Menu
     {
+        bOpenMenu = !bOpenMenu;
+    }
+    ImGui::PopFont();
+    
+    if (bOpenMenu)
+    {
+        ImGui::SetNextWindowPos(ImVec2(10, 55), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(135, 170), ImGuiCond_Always);
         
+        ImGui::Begin("Menu", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+        
+        if (ImGui::MenuItem("New Scene"))
+        {
+            
+        }
+
+        if (ImGui::MenuItem("Load Scene"))
+        {
+            
+        }
+
+        ImGui::Separator();
+        
+        if (ImGui::MenuItem("Save Scene"))
+        {
+            
+        }
+
+        ImGui::Separator();
+        
+        if (ImGui::BeginMenu("Import"))
+        {
+            if (ImGui::MenuItem("Wavefront (.obj)"))
+            {
+                char const * lFilterPatterns[1]={"*.obj"};
+                const char* FileName =  tinyfd_openFileDialog("Open OBJ File", "", 1, lFilterPatterns,"Wavefront(.obj) file", 0);
+
+                if (FileName != nullptr)
+                {
+                    std::cout << FileName << std::endl;
+                }
+            }
+            
+            ImGui::EndMenu();
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::MenuItem("Quit"))
+        {
+            ImGui::OpenPopup("프로그램 종료");   
+        }
+
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+        if (ImGui::BeginPopupModal("프로그램 종료", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text("정말 프로그램을 종료하시겠습니까?");
+            ImGui::Separator();
+
+            float ContentWidth = ImGui::GetWindowContentRegionMax().x;
+
+            /* Move Cursor X Position */
+            ImGui::SetCursorPosX(ContentWidth - (160.f + 10.0f));
+            
+            if (ImGui::Button("OK", ImVec2(80, 0))) { PostQuitMessage(0); }
+
+            ImGui::SameLine();
+            
+            ImGui::SetItemDefaultFocus();
+            ImGui::PushID("CancelButtonWithQuitWindow");
+            ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 1.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.9f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 1.0f, 1.0f));
+            if (ImGui::Button("Cancel", ImVec2(80, 0))) { ImGui::CloseCurrentPopup(); }
+            ImGui::PopStyleColor(3);
+            ImGui::PopID();
+
+            ImGui::EndPopup();
+        }
+        
+        ImGui::End();
+    }
+}
+
+void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
+{
+    ImGui::PushFont(IconFont);
+    if (ImGui::Button("\ue9c4", ButtonSize)) // Slider
+    {
+        ImGui::OpenPopup("SliderControl");
+    }
+    ImGui::PopFont();
+
+    if (ImGui::BeginPopup("SliderControl"))
+    {
+        ImGui::SetNextItemWidth(120.0f);
+        if (ImGui::DragFloat("Grid Scale", &GridScale, 0.1f, 0.1f, 100.0f, "%.1f"))
+        {
+            
+        }
+
+        ImGui::SetNextItemWidth(120.0f);
+        if (ImGui::DragFloat("Fov", &FOV, 0.1f, 0.0f, 120.0f, "%.1f"))
+        {
+            
+        }
+        ImGui::EndPopup();
     }
 }
 

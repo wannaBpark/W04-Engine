@@ -10,11 +10,16 @@ public:
 
 
 private:
-    void CreateMenuButton(ImVec2 ButtonSize) const;
+    void CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont);
+    void CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont);
     void CreateFlagButton() const;
     void CreateSRTButton(ImVec2 ButtonSize) const;
     
 private:
     float Width = 300, Height = 100;
+    bool bOpenMenu = false;
+
+    float FOV = 0.0f;
+    float GridScale = 1.0f;
 };
 
