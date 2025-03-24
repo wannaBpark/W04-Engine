@@ -18,6 +18,8 @@ public:
     void SelectViewport(POINT point);
     void OnResize();
     void ResizeViewports();
+    void OnMultiViewport();
+    void OffMultiViewport();
 private:
     bool bInitialize;
     SSplitterH* HSplitter;
@@ -28,10 +30,13 @@ private:
 
     bool bLButtonDown = false;
     bool bRButtonDown = false;
+    
+    bool bMultiViewportMode = false;
 
     POINT lastMousePos;
     float EditorWidth;
     float EditorHeight;
+
 public:
     std::shared_ptr<FEditorViewportClient>* GetViewports() { return viewportClients; }
     std::shared_ptr<FEditorViewportClient> GetActiveViewportClient() const

@@ -164,3 +164,15 @@ void SLevelEditor::ResizeViewports()
         }
     }
 }
+
+void SLevelEditor::OnMultiViewport()
+{
+    bMultiViewportMode = true;
+    ResizeViewports();
+}
+
+void SLevelEditor::OffMultiViewport()
+{
+    bMultiViewportMode = false;
+
+}
