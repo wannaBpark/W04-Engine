@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Source/Runtime/CoreUObject/UObject/Object.h"
 #include "EngineStatics.h"
+#include "UObjectArray.h"
 
 class FObjectFactory
 {
@@ -16,6 +17,8 @@ public:
         Obj->ClassPrivate = T::StaticClass();
         Obj->NamePrivate = Name;
         Obj->UUID = id;
+
+        GUObjectArray.Add(Obj);
 
         UE_LOG(LogLevel::Display, "Created New Object : %s", *Name);
         return Obj;

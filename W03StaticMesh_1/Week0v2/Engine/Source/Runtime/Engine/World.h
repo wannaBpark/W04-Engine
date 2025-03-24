@@ -4,6 +4,7 @@
 #include "UnrealEd/SceneMgr.h"
 #include "UObject/ObjectFactory.h"
 #include "UObject/ObjectTypes.h"
+#include "UObject/UObjectArray.h"
 
 class FObjectFactory;
 class AActor;
@@ -51,7 +52,6 @@ public:
 
 private:
     const FString defaultMapName = "Default";
-    TArray<UObject*> GUObjectArray;
     TArray<UObject*> Trashbin;
 
     /** World에서 관리되는 모든 Actor의 목록 */
@@ -71,7 +71,6 @@ private:
 public:
     UObject* worldGizmo = nullptr;
 
-    const TArray<UObject*>& GetObjects() const { return GUObjectArray; }
     const TSet<AActor*>& GetActors() const { return ActorsArray; }
 
     UTransformGizmo* LocalGizmo = nullptr;

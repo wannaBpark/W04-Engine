@@ -205,7 +205,6 @@ void UWorld::LoadData(SceneData& _Data)
 	}
 
     camera = static_cast<UCameraComponent*>(_Data.Cameras[0]);
-
 }
 
 SceneData UWorld::SaveData()
