@@ -281,7 +281,7 @@ struct FLoaderOBJ
                 if (tIdx != UINT32_MAX && tIdx < RawData.UVs.Num())
                 {
                     vertex.u = RawData.UVs[tIdx].x;
-                    vertex.v = RawData.UVs[tIdx].y;
+                    vertex.v = -RawData.UVs[tIdx].y;
                 }
 
                 if (nIdx != UINT32_MAX && nIdx < RawData.Normals.Num())

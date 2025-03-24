@@ -4,7 +4,7 @@
 
 UStaticMesh::UStaticMesh()
 {
-    staticMeshRenderData = FManagerOBJ::LoadObjStaticMeshAsset("Assets/helloBlender.obj");
+    staticMeshRenderData = FManagerOBJ::LoadObjStaticMeshAsset("Assets/Madara_Uchiha.obj");
 
     if (staticMeshRenderData == nullptr) return;
     
@@ -14,7 +14,7 @@ UStaticMesh::UStaticMesh()
 
     uint32 indexNum = staticMeshRenderData->Indices.Num();
     if (indexNum <= 0) return;
-    staticMeshRenderData->IndexBuffer = GetEngine().renderer.CreateIndexBuffer(staticMeshRenderData->Indices, indexNum * sizeof(FVertexSimple));
+    staticMeshRenderData->IndexBuffer = GetEngine().renderer.CreateIndexBuffer(staticMeshRenderData->Indices, indexNum * sizeof(uint32));
 
     for (int materialIndex = 0; materialIndex < staticMeshRenderData->Materials.Num(); materialIndex++) {
         FStaticMaterial* newMaterialSlot = new FStaticMaterial();

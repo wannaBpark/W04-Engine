@@ -97,10 +97,13 @@ PS_OUTPUT mainPS(PS_INPUT input)
     
     float3 texColor = Textures.Sample(Sampler, input.texcoord);
     float3 color;
-    if(texColor.g == 0)
+    if (texColor.g == 0)
         color = saturate(Material.DiffuseColor);
     else
-        color = saturate(texColor * Material.DiffuseColor);
+        color = saturate(texColor);
+    
+    output.color = float4(color, 1.0f);
+    return output;
     
     if (isSelected)
     {
