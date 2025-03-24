@@ -1,4 +1,4 @@
-﻿#include "Engine/Source/Runtime/Core/Math/JungleMath.h"
+#include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 #include <DirectXMath.h>
 
 #include "MathUtility.h"
@@ -63,6 +63,22 @@ FMatrix JungleMath::CreateProjectionMatrix(float fov, float aspect, float nearPl
     Projection.M[2][3] = 1.0f;
     Projection.M[3][2] = -(nearPlane * farPlane) / depth;
     Projection.M[3][3] = 0.0f;  
+
+    return Projection;
+}
+
+FMatrix JungleMath::CreateOrthoProjectionMatrix(float width, float height, float nearPlane, float farPlane)
+{
+    float r = width * 0.5f;
+    float t = height * 0.5f;
+    float invDepth = 1.0f / (farPlane - nearPlane);
+
+    FMatrix Projection = {};
+    Projection.M[0][0] = 1.0f / r;
+    Projection.M[1][1] = 1.0f / t;
+    Projection.M[2][2] = invDepth;
+    Projection.M[3][2] = -nearPlane * invDepth;
+    Projection.M[3][3] = 1.0f;
 
     return Projection;
 }

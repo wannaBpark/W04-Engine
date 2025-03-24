@@ -112,6 +112,19 @@ void SLevelEditor::Input()
     {
         bTestButtonDown = false;
     }
+    if (GetAsyncKeyState('O') & 0x8000)
+    {
+        if (!bTestButton2Down)
+        {
+            bTestButton2Down = true;
+
+            ActiveViewportClient->AddViewportType();
+        }
+    }
+    else
+    {
+        bTestButton2Down = false;
+    }
 }
 
 void SLevelEditor::Release()

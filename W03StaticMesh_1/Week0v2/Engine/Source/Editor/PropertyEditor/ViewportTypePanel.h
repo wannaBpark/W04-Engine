@@ -3,14 +3,14 @@
 #include "Define.h"
 #include "EngineBaseTypes.h"
 #include "UnrealEd/EditorViewportClient.h"
-class ViewportSettingPanel : public IWindowToggleable
+class ViewportTypePanel : public IWindowToggleable
 {
 private:
-    ViewportSettingPanel();
+    ViewportTypePanel();
 public:
-    ~ViewportSettingPanel();
+    ~ViewportTypePanel();
 
-    static ViewportSettingPanel& GetInstance();
+    static ViewportTypePanel& GetInstance();
 
     void Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport);
     void OnResize(HWND hWnd);

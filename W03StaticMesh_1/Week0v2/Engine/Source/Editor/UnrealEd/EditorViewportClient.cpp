@@ -6,8 +6,10 @@
 #include "EngineLoop.h"
 #include "UnrealClient.h"
 
+FVector FEditorViewportClient::Pivot = FVector(0.0f, 0.0f, 0.0f);
+float FEditorViewportClient::orthoSize = 10.0f;
 FEditorViewportClient::FEditorViewportClient()
-    : Viewport(nullptr), ViewMode(VMI_Lit), CameraMode(VCM_Perspective), ShowFlag(31)
+    : Viewport(nullptr), ViewMode(VMI_Lit), ViewportType(LVT_Perspective), ShowFlag(31)
 {
 
 }
@@ -203,19 +205,129 @@ void FEditorViewportClient::CameraRotatePitch(float _Value)
 
 void FEditorViewportClient::UpdateViewMatrix()
 {
-    View = JungleMath::CreateViewMatrix(ViewTransformPerspective.GetLocation(),
-        ViewTransformPerspective.GetLocation() + ViewTransformPerspective.GetForwardVector(),
-        FVector{ 0.0f,0.0f, 1.0f });
+    if (IsPerspective()) {
+        View = JungleMath::CreateViewMatrix(ViewTransformPerspective.GetLocation(),
+            ViewTransformPerspective.GetLocation() + ViewTransformPerspective.GetForwardVector(),
+            FVector{ 0.0f,0.0f, 1.0f });
+    }
+    else 
+    {
+        if (ViewportType == LVT_OrthoXY || ViewportType == LVT_OrthoNegativeXY) {
+            View = JungleMath::CreateViewMatrix(ViewTransformOrthographic.GetLocation(),
+                Pivot, FVector(0.0f, -1.0f, 0.0f));
+        }
+        else
+        {
+            View = JungleMath::CreateViewMatrix(ViewTransformOrthographic.GetLocation(),
+                Pivot, FVector(0.0f, 0.0f, 1.0f));
+        }
+    }
 }
 
 void FEditorViewportClient::UpdateProjectionMatrix()
 {
-    Projection = JungleMath::CreateProjectionMatrix(
-        ViewFOV * (3.141592f / 180.0f),
-        GEngineLoop.GetAspectRatio(GEngineLoop.graphicDevice.SwapChain),
-        nearPlane,
-        farPlane
-    );
+    if (IsPerspective()) {
+        Projection = JungleMath::CreateProjectionMatrix(
+            ViewFOV * (3.141592f / 180.0f),
+            GEngineLoop.GetAspectRatio(GEngineLoop.graphicDevice.SwapChain),
+            nearPlane,
+            farPlane
+        );
+    }
+    else
+    {
+        // 스왑체인의 가로세로 비율을 구합니다.
+        float aspectRatio = GEngineLoop.GetAspectRatio(GEngineLoop.graphicDevice.SwapChain);
+
+        // 오쏘그래픽 너비는 줌 값과 가로세로 비율에 따라 결정됩니다.
+        float orthoWidth = orthoSize * aspectRatio;
+        float orthoHeight = orthoSize;
+
+        // 오쏘그래픽 투영 행렬 생성 (nearPlane, farPlane 은 기존 값 사용)
+        Projection = JungleMath::CreateOrthoProjectionMatrix(
+            orthoWidth,
+            orthoHeight,
+            nearPlane,
+            farPlane
+        );
+    }
+}
+
+bool FEditorViewportClient::IsOrtho() const
+{
+    return !IsPerspective();
+}
+
+bool FEditorViewportClient::IsPerspective() const
+{
+    return (GetViewportType() == LVT_Perspective);
+}
+
+ELevelViewportType FEditorViewportClient::GetViewportType() const
+{
+    ELevelViewportType EffectiveViewportType = ViewportType;
+    if (EffectiveViewportType == LVT_None)
+    {
+        EffectiveViewportType = LVT_Perspective;
+    }
+    //if (bUseControllingActorViewInfo)
+    //{
+    //    EffectiveViewportType = (ControllingActorViewInfo.ProjectionMode == ECameraProjectionMode::Perspective) ? LVT_Perspective : LVT_OrthoFreelook;
+    //}
+    return EffectiveViewportType;
+}
+
+void FEditorViewportClient::SetViewportType(ELevelViewportType InViewportType)
+{
+    ViewportType = InViewportType;
+    //ApplyViewMode(GetViewMode(), IsPerspective(), EngineShowFlags);
+
+    //// We might have changed to an orthographic viewport; if so, update any viewport links
+    //UpdateLinkedOrthoViewports(true);
+
+    //Invalidate();
+    UpdateOrthoCameraLoc();
+}
+
+void FEditorViewportClient::UpdateOrthoCameraLoc()
+{
+    switch (ViewportType)
+    {
+    case LVT_OrthoXY:
+        ViewTransformOrthographic.SetLocation(FVector::UpVector());
+        break;
+    case LVT_OrthoXZ:
+        ViewTransformOrthographic.SetLocation(FVector::ForwardVector());
+        break;
+    case LVT_OrthoYZ:
+        ViewTransformOrthographic.SetLocation(FVector::RightVector());
+        break;
+    case LVT_Perspective:
+        break;
+    case LVT_OrthoNegativeXY:
+        ViewTransformOrthographic.SetLocation(FVector::UpVector() * -1.0f);
+        break;
+    case LVT_OrthoNegativeXZ:
+        ViewTransformOrthographic.SetLocation(FVector::ForwardVector() * -1.0f);
+        break;
+    case LVT_OrthoNegativeYZ:
+        ViewTransformOrthographic.SetLocation(FVector::RightVector() * -1.0f);
+        break;
+    case LVT_MAX:
+        break;
+    case LVT_None:
+        break;
+    default:
+        break;
+    }
+}
+
+void FEditorViewportClient::SetOthoSize(float _Value)
+{
+    orthoSize += _Value;
+    if (orthoSize <= 0.1f)
+        orthoSize = 0.1f;
+    
 }
 
 

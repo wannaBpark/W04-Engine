@@ -116,7 +116,7 @@ public:
     //카메라
     /** Viewport camera transform data for perspective viewports */
     FViewportCameraTransform		ViewTransformPerspective;
-
+    FViewportCameraTransform        ViewTransformOrthographic;
     // 카메라 정보 
     float ViewFOV = 60.0f;
     /** Viewport's stored horizontal field of view (saved in ini files). */
@@ -124,8 +124,9 @@ public:
     float AspectRatio;
     float nearPlane = 0.1f;
     float farPlane = 1000.0f;
-
-    EViewportCameraMode CameraMode;
+    static FVector Pivot;
+    static float orthoSize;
+    ELevelViewportType ViewportType;
     uint64 ShowFlag;
     EViewModeIndex ViewMode;
 
@@ -143,25 +144,31 @@ public: //Camera Movement
     void UpdateViewMatrix();
     void UpdateProjectionMatrix();
 
-    EViewportCameraMode GetCameraSetting() { return CameraMode; }
-    void SetCameraSetting(EViewportCameraMode newMode) { CameraMode = newMode; }
-
+    bool IsOrtho() const;
+    bool IsPerspective() const;
+    ELevelViewportType GetViewportType() const;
+    void SetViewportType(ELevelViewportType InViewportType);
+    void UpdateOrthoCameraLoc();
     EViewModeIndex GetViewMode() { return ViewMode; }
     void SetViewMode(EViewModeIndex newMode) { ViewMode = newMode; }
-
     uint64 GetShowFlag() { return ShowFlag; }
     void SetShowFlag(uint64 newMode) { ShowFlag = newMode; }
-
     bool GetIsOnRBMouseClick() { return bRightMouseDown; }
 
     //Flag Test Code
+    static void SetOthoSize(float _Value);
     void AddViewMode() {
         ViewMode = static_cast<EViewModeIndex>((ViewMode + 1) % 3);
+    }
+    void AddViewportType()
+    {
+        ViewportType = static_cast<ELevelViewportType>((ViewportType + 1) % LVT_MAX);
+        UpdateOrthoCameraLoc();
     }
 private: // Input
     POINT lastMousePos;
     bool bRightMouseDown = false;
-
+   
 
 private :
     const FString IniFilePath = "editor.ini";

@@ -1,22 +1,22 @@
-#include "ViewportSettingPanel.h"
+#include "ViewportTypePanel.h"
 
-ViewportSettingPanel::ViewportSettingPanel()
+ViewportTypePanel::ViewportTypePanel()
 {
 }
 
-ViewportSettingPanel::~ViewportSettingPanel()
+ViewportTypePanel::~ViewportTypePanel()
 {
 }
 
-ViewportSettingPanel& ViewportSettingPanel::GetInstance()
+ViewportTypePanel& ViewportTypePanel::GetInstance()
 {
     // TODO: 여기에 return 문을 삽입합니다.
-    static ViewportSettingPanel instance;
+    static ViewportTypePanel instance;
     return instance;
 }
 
 
-void ViewportSettingPanel::Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport)
+void ViewportTypePanel::Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
     float controllWindowWidth = static_cast<float>(width) * 0.05f;
     float controllWindowHeight = static_cast<float>(height) * 0.f;
@@ -28,18 +28,17 @@ void ViewportSettingPanel::Draw(std::shared_ptr<FEditorViewportClient> ActiveVie
 
     if (ImGui::Begin("Viewport Setting"))
     {
-        const char* cameraModeNames[] = { "Perspective", "Top", "Bottom", "Left", "Right", "Front", "Back"};
+        const char* cameraModeNames[] = { "Top", "Front", "Left","Perspective", "Bottom", "Back", "Right"};
 
-        if (ImGui::BeginCombo("##Viewport Camera", cameraModeNames[(int)ActiveViewport->GetCameraSetting()]))
+        if (ImGui::BeginCombo("##Viewport Camera", cameraModeNames[(int)ActiveViewport->GetViewportType()]))
         {
             for (int i = 0; i < IM_ARRAYSIZE(cameraModeNames); i++)
             {
                 bool isSelected = ((int)ActiveViewport->GetViewMode() == i);
                 if (ImGui::Selectable(cameraModeNames[i], isSelected))
                 {
-                    ActiveViewport->SetCameraSetting((EViewportCameraMode)i);
-                    FEngineLoop::graphicDevice.ChangeRasterizer(ActiveViewport->GetViewMode());
-                    FEngineLoop::renderer.ChangeViewMode(ActiveViewport->GetViewMode());
+                    ActiveViewport->SetViewportType((ELevelViewportType)i);
+
                 }
 
                 if (isSelected)
@@ -51,7 +50,7 @@ void ViewportSettingPanel::Draw(std::shared_ptr<FEditorViewportClient> ActiveVie
     ImGui::End();
 }
 
-void ViewportSettingPanel::OnResize(HWND hWnd)
+void ViewportTypePanel::OnResize(HWND hWnd)
 {
     RECT clientRect;
     GetClientRect(hWnd, &clientRect);

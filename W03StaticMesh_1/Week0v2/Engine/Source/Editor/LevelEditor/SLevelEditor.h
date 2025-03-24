@@ -28,6 +28,7 @@ private:
 
     bool bLRButtonDown = false;
     bool bTestButtonDown = false;
+    bool bTestButton2Down = false;
 
     POINT lastMousePos;
     float EditorWidth;

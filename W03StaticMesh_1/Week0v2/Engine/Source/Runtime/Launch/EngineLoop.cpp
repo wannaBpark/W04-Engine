@@ -7,7 +7,7 @@
 #include "PropertyEditor/PropertyPanel.h"
 #include "PropertyEditor/ViewModeDropdown.h"
 #include "PropertyEditor/ShowFlags.h"
-#include "PropertyEditor/ViewportSettingPanel.h"
+#include "PropertyEditor/ViewportTypePanel.h"
 #include "Outliner.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealClient.h"
@@ -48,17 +48,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		Outliner::GetInstance().OnResize(hWnd);
 		ViewModeDropdown::GetInstance().OnResize(hWnd);
 		ShowFlags::GetInstance().OnResize(hWnd);
-        ViewportSettingPanel::GetInstance().OnResize(hWnd);
+        ViewportTypePanel::GetInstance().OnResize(hWnd);
 		break;
 	case WM_MOUSEWHEEL:
 		zDelta = GET_WHEEL_DELTA_WPARAM(wParam); // 휠 회전 값 (+120 / -120)
-		if (GEngineLoop.GetLevelEditor() && GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetIsOnRBMouseClick()) {
-			GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeedScalar(static_cast<float>(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar() + zDelta * 0.01));
-		}
-		else
-		{
-			GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CameraMoveForward(zDelta*0.1f);
-		}
+        if (GEngineLoop.GetLevelEditor())
+        {
+            if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->IsPerspective()) {
+                if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetIsOnRBMouseClick()) {
+                    GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeedScalar(static_cast<float>(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar() + zDelta * 0.01));
+                }
+                else
+                {
+                    GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CameraMoveForward(zDelta * 0.1f);
+                }
+            }
+            else
+            {
+                FEditorViewportClient::SetOthoSize(-zDelta * 0.01f);
+            }
+        }
 		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
@@ -165,7 +174,7 @@ void FEngineLoop::Tick()
 		Outliner::GetInstance().Draw(GetWorld());
 		ShowFlags::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
 		ViewModeDropdown::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
-        ViewportSettingPanel::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+        ViewportTypePanel::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
 		UIMgr->EndFrame();
 
 		GWorld->CleanUp();
