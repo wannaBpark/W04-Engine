@@ -102,16 +102,16 @@ public:
     template <typename InitKeyType = KeyType, typename InitValueType = ValueType>
     ValueType& Emplace(InitKeyType&& InKey, InitValueType&& InValue)
     {
-        auto it = ContainerPrivate.emplace(std::forward<InitKeyType>(InKey), std::forward<InitValueType>(InValue));
-    	return it->second;
+        auto result = ContainerPrivate.emplace(std::forward<InitKeyType>(InKey), std::forward<InitValueType>(InValue));
+    	return result.first->second;
     }
 
 	// Key만 넣고, Value는 기본값으로 삽입
 	template <typename InitKeyType = KeyType>
     ValueType& Emplace(InitKeyType&& InKey)
     {
-        auto it = ContainerPrivate.emplace(std::forward<InitKeyType>(InKey), ValueType{});
-    	return it->second;
+        auto result = ContainerPrivate.emplace(std::forward<InitKeyType>(InKey), ValueType{});
+    	return result.first->second;
     }
 
     void Remove(const KeyType& Key)
@@ -127,7 +127,7 @@ public:
     // 검색 및 조회
     bool Contains(const KeyType& Key) const
     {
-        return ContainerPrivate.find(Key) != ContainerPrivate.end();
+        return ContainerPrivate.contains(Key);
     }
 
     const ValueType* Find(const KeyType& Key) const
@@ -140,6 +140,15 @@ public:
     {
         auto it = ContainerPrivate.find(Key);
         return it != ContainerPrivate.end() ? &(it->second) : nullptr;
+    }
+
+    ValueType& FindOrAdd(const KeyType& Key)
+    {
+        if (ValueType* Value = Find(Key))
+        {
+            return *Value;
+        }
+        return Emplace(Key);
     }
 
     // 크기 관련
