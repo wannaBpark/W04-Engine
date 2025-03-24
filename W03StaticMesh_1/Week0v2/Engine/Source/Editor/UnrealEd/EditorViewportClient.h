@@ -161,13 +161,6 @@ public: //Camera Movement
 
     //Flag Test Code
     static void SetOthoSize(float _Value);
-    void AddViewMode() {
-        ViewMode = static_cast<EViewModeIndex>((ViewMode + 1) % 3);
-    }
-    void AddViewportType()
-    {
-        ViewportType = static_cast<ELevelViewportType>((ViewportType + 1) % LVT_MAX);
-    }
 private: // Input
     POINT lastMousePos;
     bool bRightMouseDown = false;

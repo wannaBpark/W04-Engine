@@ -24,8 +24,18 @@ void SWindow::OnResize(float width, float height)
 }
 
 
-bool SWindow::IsHover(FPoint coord) const
+bool SWindow::IsHover(FPoint coord) 
 {
-    return coord.x >= Rect.leftTopX && coord.x < Rect.leftTopX + Rect.width &&
+    return bIsHoverd = coord.x >= Rect.leftTopX && coord.x < Rect.leftTopX + Rect.width &&
         coord.y >= Rect.leftTopY && coord.y < Rect.leftTopY + Rect.height;
+}
+
+bool SWindow::OnPressed(FPoint coord)
+{
+    return false;
+}
+
+bool SWindow::OnReleased() 
+{
+    return false;
 }

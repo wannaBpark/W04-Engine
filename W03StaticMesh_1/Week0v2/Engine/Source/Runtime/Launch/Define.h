@@ -1,7 +1,6 @@
 #pragma once
 #include <cmath>
 #include <algorithm>
-
 // 수학 관련
 #include "Math/Vector.h"
 #include "Math/Vector4.h"
@@ -51,7 +50,10 @@ struct FRect
 struct FPoint
 {
     FPoint() : x(0), y(0) {}
-    FPoint(float x, float y) : x(x), y(y) {}
+    FPoint(float _x, float _y) : x(_x), y(_y) {}
+    FPoint(long _x, long _y) : x(_x), y(_y) {}
+    FPoint(int _x, int _y) : x(_x), y(_y) {}
+
     float x, y;
 };
 struct FBoundingBox

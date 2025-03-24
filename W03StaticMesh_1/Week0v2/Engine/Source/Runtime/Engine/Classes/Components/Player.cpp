@@ -420,7 +420,6 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UPrimitiveComponent* Giz
 			FVector crossResult = vecObjToCamera.Cross(FVector(1.0f, 0.0f, 0.0f));
 			if (crossResult.z > 0)
 				degree *= -1.0f;
-			//UE_LOG(LogLevel::Error, "%f", degree);
 
 			if ( 0 < degree && degree <  180.0f)
 				pObj->AddLocation(FVector(1.0f, 0.0f, 0.0f) * deltaXf * 0.01f);
@@ -438,7 +437,6 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UPrimitiveComponent* Giz
 			FVector crossResult = vecObjToCamera.Cross(FVector(0.0f, 1.0f, 0.0f));
 			if (crossResult.z > 0)
 				degree *= -1.0f;
-			//UE_LOG(LogLevel::Error, "%f", degree);
 			if (0 < degree && degree < 180)
 				pObj->AddLocation(FVector(0.0f, 1.0f, 0.0f) * deltaXf * 0.01f);
 			else
@@ -466,7 +464,6 @@ void UPlayer::ControlScale(USceneComponent* pObj, UPrimitiveComponent* Gizmo, in
 		FVector crossResult = vecObjToCamera.Cross(FVector(1.0f, 0.0f, 0.0f));
 		if (crossResult.z > 0)
 			degree *= -1.0f;
-		//UE_LOG(LogLevel::Error, "%f", degree);
 
 		if (0 < degree && degree < 180.0f)
 			pObj->AddScale(FVector(1.0f, 0.0f, 0.0f) * deltaXf * 0.01f);
@@ -484,7 +481,6 @@ void UPlayer::ControlScale(USceneComponent* pObj, UPrimitiveComponent* Gizmo, in
 		FVector crossResult = vecObjToCamera.Cross(FVector(0.0f, 1.0f, 0.0f));
 		if (crossResult.z > 0)
 			degree *= -1.0f;
-		//UE_LOG(LogLevel::Error, "%f", degree);
 		if (0 < degree && degree < 180)
 			pObj->AddScale(FVector(0.0f, 1.0f, 0.0f) * deltaXf * 0.01f);
 		else

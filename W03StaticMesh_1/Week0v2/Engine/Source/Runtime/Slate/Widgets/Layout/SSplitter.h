@@ -11,6 +11,8 @@ public:
     virtual void OnDragStart(const FPoint& mousePos) { /* 초기화 */ }
     virtual void OnDrag(const FPoint& delta) = 0; // 가로/세로에 따라 구현 다름.
     virtual void OnResize(float width, float height);
+    virtual bool OnPressed(FPoint coord);
+    virtual bool OnReleased();
 
     virtual void OnDragEnd() {
         // 변경된 스플리터 위치 Editor.ini 저장 로직 구현

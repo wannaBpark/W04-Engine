@@ -14,6 +14,13 @@ public:
 
     FRect Rect;
     void SetRect(FRect newRect) { Rect = newRect; }
-    bool IsHover(FPoint coord) const;
+    bool IsHover(FPoint coord);
+    virtual bool OnPressed(FPoint coord);
+    virtual bool OnReleased();
+    bool IsPressing() { return bIsPressed; }
+protected:
+    bool bIsHoverd = false;
+    bool bIsPressed = false;
+
 };
 

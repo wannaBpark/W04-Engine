@@ -18,6 +18,20 @@ void SSplitter::OnResize(float width, float height)
 {
 }
 
+bool SSplitter::OnPressed(FPoint coord)
+{
+    if (!IsHover(coord))
+        return false;
+    
+    return bIsPressed = true;
+}
+
+bool SSplitter::OnReleased()
+{
+    bIsPressed = false;
+    return false;
+}
+
 void SSplitterH::Initialize(FRect initRect)
 {
     __super::Initialize(initRect);
@@ -64,10 +78,8 @@ void SSplitterV::Initialize(FRect initRect)
 
 void SSplitterV::OnResize(float width, float height)
 {
-    UE_LOG(LogLevel::Warning, "width %f height %f", width, height);
     Rect.width = width;
     Rect.leftTopY *= height;
-    UE_LOG(LogLevel::Warning, "%f ", SideLT->Rect.width);
     if (SideLT)
     {
         SideLT->Rect.width = width;

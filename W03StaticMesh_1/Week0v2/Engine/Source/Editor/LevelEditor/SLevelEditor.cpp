@@ -50,8 +50,6 @@ void SLevelEditor::Tick(double deltaTime)
         SetCursor(LoadCursor(NULL, IDC_ARROW));
     }
     OnResize();
-    //VSplitter->OnResize(EditorWidth, EditorHeight);
-    //HSplitter->OnResize(EditorWidth, EditorHeight);
     //Test Code Cursor icon End
     Input();
 
@@ -62,18 +60,20 @@ void SLevelEditor::Input()
 {
     ImGuiIO& io = ImGui::GetIO();
     if (io.WantCaptureMouse) return;
-    if (GetAsyncKeyState(VK_LBUTTON) & 0x8000 || GetAsyncKeyState(VK_RBUTTON) & 0x8000)
+    if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
     {
-        if (bLRButtonDown == false)
+        if (bLButtonDown == false)
         {
-            bLRButtonDown = true;
+            bLButtonDown = true;
             POINT pt;
             GetCursorPos(&pt);
             GetCursorPos(&lastMousePos);
             ScreenToClient(GEngineLoop.hWnd, &pt);
-            //UE_LOG(LogLevel::Error, TEXT("LButton Down %d %d"), pt.x, pt.y);
 
             SelectViewport(pt);
+
+            VSplitter->OnPressed(FPoint(pt.x, pt.y));
+            HSplitter->OnPressed(FPoint(pt.x, pt.y));
         }
         else
         {
@@ -84,11 +84,11 @@ void SLevelEditor::Input()
             int32 deltaX = currentMousePos.x - lastMousePos.x;
             int32 deltaY = currentMousePos.y - lastMousePos.y;
 
-            if (VSplitter->IsHover(FPoint(lastMousePos.x, lastMousePos.y)))
+            if (VSplitter->IsPressing())
             {
                 VSplitter->OnDrag(FPoint(deltaX, deltaY));
             }
-            if (HSplitter->IsHover(FPoint(lastMousePos.x, lastMousePos.y)))
+            if (HSplitter->IsPressing())
             {
                 HSplitter->OnDrag(FPoint(deltaX, deltaY));
             }
@@ -98,34 +98,26 @@ void SLevelEditor::Input()
     }
     else
     {
-        bLRButtonDown = false;
+        bLButtonDown = false;
+        VSplitter->OnReleased();
+        HSplitter->OnReleased();
     }
-    // Flag Test 
-    if (GetAsyncKeyState('P') & 0x8000)
+    if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
     {
-        if (!bTestButtonDown)
+        if (!bRButtonDown)
         {
-            bTestButtonDown = true;
+            bRButtonDown = true;
+            POINT pt;
+            GetCursorPos(&pt);
+            GetCursorPos(&lastMousePos);
+            ScreenToClient(GEngineLoop.hWnd, &pt);
 
-            ActiveViewportClient->AddViewMode();
+            SelectViewport(pt);
         }
     }
     else
     {
-        bTestButtonDown = false;
-    }
-    if (GetAsyncKeyState('O') & 0x8000)
-    {
-        if (!bTestButton2Down)
-        {
-            bTestButton2Down = true;
-
-            ActiveViewportClient->AddViewportType();
-        }
-    }
-    else
-    {
-        bTestButton2Down = false;
+        bRButtonDown = false;
     }
 }
 
