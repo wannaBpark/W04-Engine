@@ -18,19 +18,19 @@ ViewportTypePanel& ViewportTypePanel::GetInstance()
 
 void ViewportTypePanel::Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
-    float controllWindowWidth = static_cast<float>(width) * 0.05f;
+    float controllWindowWidth = static_cast<float>(width) * 0.12f;
     float controllWindowHeight = static_cast<float>(height) * 0.f;
 
-    float controllWindowPosX = (static_cast<float>(width) - controllWindowWidth) * 0.45f;
+    float controllWindowPosX = (static_cast<float>(width) - controllWindowWidth) * 0.5f;
     float controllWindowPosY = (static_cast<float>(height) - controllWindowHeight) * 0.f;
     ImGui::SetNextWindowPos(ImVec2(controllWindowPosX, controllWindowPosY));
     ImGui::SetNextWindowSize(ImVec2(controllWindowWidth, controllWindowHeight), ImGuiCond_Always);
 
-    if (ImGui::Begin("Viewport Setting"))
+    if (ImGui::Begin("ViewportType"))
     {
         const char* cameraModeNames[] = { "Top", "Front", "Left","Perspective", "Bottom", "Back", "Right"};
 
-        if (ImGui::BeginCombo("##Viewport Camera", cameraModeNames[(int)ActiveViewport->GetViewportType()]))
+        if (ImGui::BeginCombo("##Viewport Type", cameraModeNames[(int)ActiveViewport->GetViewportType()]))
         {
             for (int i = 0; i < IM_ARRAYSIZE(cameraModeNames); i++)
             {
