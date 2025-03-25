@@ -1,6 +1,8 @@
 ﻿#include "OutlinerEditorPanel.h"
 #include "EngineLoop.h"
+#include "World.h"
 #include "Components/SceneComponent.h"
+#include "GameFramework/Actor.h"
 
 void OutlinerEditorPanel::Render()
 {
@@ -35,17 +37,29 @@ void OutlinerEditorPanel::Render()
     {
         static int selected = -1; // 선택된 항목 저장용 변수
         
-        // 오브젝트 리스트
-        for (int32 i = 0; i < GEngineLoop.GetWorld()->GetObjectArr().Num();i++)
+        // Actor 리스트
+        // for (int32 i = 0; i < GEngineLoop.GetWorld()->GetObjectArr().Num();i++)
+        // {
+        //     if(!GEngineLoop.GetWorld()->GetObjectArr()[i]->IsA(USceneComponent::StaticClass()))
+        //         continue;
+        //     // 선택 가능 항목 (Selectable)
+        //     if (ImGui::Selectable(*GEngineLoop.GetWorld()->GetObjectArr()[i]->GetName(), selected == i))
+        //     {
+        //         selected = i; // 선택된 아이템 업데이트
+        //         GEngineLoop.GetWorld()->SetPickingObj(GEngineLoop.GetWorld()->GetObjectArr()[i]);
+        //     }
+        // }
+        UWorld* World = GEngineLoop.GetWorld();
+        static int Selected = -1; // 선택된 항목 저장용 변수
+        int Index = 0;
+        for (AActor* Actor : World->GetActors())
         {
-            if(!GEngineLoop.GetWorld()->GetObjectArr()[i]->IsA(USceneComponent::StaticClass()))
-                continue;
-            // 선택 가능 항목 (Selectable)
-            if (ImGui::Selectable(*GEngineLoop.GetWorld()->GetObjectArr()[i]->GetName(), selected == i))
+            if (ImGui::Selectable(*Actor->GetActorLabel(), Selected == Index))
             {
-                selected = i; // 선택된 아이템 업데이트
-                GEngineLoop.GetWorld()->SetPickingObj(GEngineLoop.GetWorld()->GetObjectArr()[i]);
+                Selected = Index;
+                World->SetPickedActor(Actor);
             }
+            ++Index;
         }
         ImGui::TreePop(); // 트리 닫기
     }

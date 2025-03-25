@@ -1,7 +1,8 @@
 ﻿#include "PropertyEditorPanel.h"
 
+#include "World.h"
 #include "Components/LightComponent.h"
-#include "Components/Player.h"
+#include "Actors/Player.h"
 #include "Components/SceneComponent.h"
 #include "Components/UText.h"
 #include "Math/MathUtility.h"
@@ -36,17 +37,17 @@ void PropertyEditorPanel::Render()
     ImGui::Begin("Detail", nullptr, PanelFlags);
     
     UPlayer* player = GEngineLoop.GetWorld()->GetPlayer();
-    USceneComponent* PickObj = GEngineLoop.GetWorld()->GetPickingObj();
-    if (PickObj)
+    AActor* PickedActor = GEngineLoop.GetWorld()->GetPickedActor();
+    if (PickedActor)
     {
         ImGui::SetItemDefaultFocus();
         // TreeNode 배경색을 변경 (기본 상태)
         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
         if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_Framed)) // 트리 노드 생성
         {
-            Location = PickObj->GetWorldLocation();
-            Rotation = PickObj->GetWorldRotation();
-            Scale = PickObj->GetWorldScale();
+            Location = PickedActor->GetActorLocation();
+            Rotation = PickedActor->GetActorRotation();
+            Scale = PickedActor->GetActorScale();
             
             FImGuiWidget::DrawVec3Control("Location", Location, 0, 85);
             ImGui::Spacing();
@@ -57,9 +58,9 @@ void PropertyEditorPanel::Render()
             FImGuiWidget::DrawVec3Control("Scale", Scale, 0, 85);
             ImGui::Spacing();
 
-            PickObj->SetLocation(Location);
-            PickObj->SetRotation(Rotation);
-            PickObj->SetScale(Scale);
+            PickedActor->SetActorLocation(Location);
+            PickedActor->SetActorRotation(Rotation);
+            PickedActor->SetActorScale(Scale);
             
             std::string coordiButtonLabel;
             if (player->GetCoordiMode() == CoordiMode::CDM_WORLD)
@@ -76,7 +77,8 @@ void PropertyEditorPanel::Render()
         ImGui::PopStyleColor();
     }
 
-    if (ULightComponentBase* lightObj = Cast<ULightComponentBase>(PickObj))
+    // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
+    if (ULightComponentBase* lightObj = Cast<ULightComponentBase>(PickedActor))
     {
         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
         if (ImGui::TreeNodeEx("SpotLight", ImGuiTreeNodeFlags_Framed)) // 트리 노드 생성
@@ -149,7 +151,8 @@ void PropertyEditorPanel::Render()
         }
     }
 
-    if (UText* textOBj = Cast<UText>(PickObj))
+    // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
+    if (UText* textOBj = Cast<UText>(PickedActor))
     {
         if (ImGui::TreeNodeEx("Text", ImGuiTreeNodeFlags_Framed)) // 트리 노드 생성
         {
