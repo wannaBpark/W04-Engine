@@ -4,26 +4,7 @@
 
 UStaticMesh::UStaticMesh()
 {
-    staticMeshRenderData = FManagerOBJ::LoadObjStaticMeshAsset("Assets/Madara_Uchiha.obj");
 
-    if (staticMeshRenderData == nullptr) return;
-    
-    uint32 verticeNum = staticMeshRenderData->Vertices.Num();
-    if(verticeNum <= 0) return;
-    staticMeshRenderData->VertexBuffer = GetEngine().renderer.CreateVertexBuffer(staticMeshRenderData->Vertices, verticeNum * sizeof(FVertexSimple));
-
-    uint32 indexNum = staticMeshRenderData->Indices.Num();
-    if (indexNum <= 0) return;
-    staticMeshRenderData->IndexBuffer = GetEngine().renderer.CreateIndexBuffer(staticMeshRenderData->Indices, indexNum * sizeof(uint32));
-
-    for (int materialIndex = 0; materialIndex < staticMeshRenderData->Materials.Num(); materialIndex++) {
-        FStaticMaterial* newMaterialSlot = new FStaticMaterial();
-        UMaterial* newMaterial = FObjectFactory::ConstructObject<UMaterial>();
-        newMaterialSlot->Material = newMaterial;
-        newMaterialSlot->Material->SetmaterialInfo(staticMeshRenderData->Materials[materialIndex]);
-        newMaterialSlot->MaterialSlotName = staticMeshRenderData->Materials[materialIndex].MTLName;
-        materials.Add(newMaterialSlot);
-    }
 }
 
 UStaticMesh::~UStaticMesh()
@@ -55,5 +36,28 @@ void UStaticMesh::GetUsedMaterials(TArray<UMaterial*> Out) const
 {
     for (uint32 materialIndex = 0; materialIndex < materials.Len(); materialIndex++) {
         Out.Add(materials[materialIndex]->Material);
+    }
+}
+
+void UStaticMesh::SetData(OBJ::FStaticMeshRenderData* renderData)
+{
+    staticMeshRenderData = renderData;
+
+    uint32 verticeNum = staticMeshRenderData->Vertices.Num();
+    if (verticeNum <= 0) return;
+    staticMeshRenderData->VertexBuffer = GetEngine().renderer.CreateVertexBuffer(staticMeshRenderData->Vertices, verticeNum * sizeof(FVertexSimple));
+
+    uint32 indexNum = staticMeshRenderData->Indices.Num();
+    if (indexNum > 0)
+        staticMeshRenderData->IndexBuffer = GetEngine().renderer.CreateIndexBuffer(staticMeshRenderData->Indices, indexNum * sizeof(uint32));
+
+    for (int materialIndex = 0; materialIndex < staticMeshRenderData->Materials.Num(); materialIndex++) {
+        FStaticMaterial* newMaterialSlot = new FStaticMaterial();
+        UMaterial* newMaterial = FManagerOBJ::CreateMaterial(staticMeshRenderData->Materials[materialIndex]);
+
+        newMaterialSlot->Material = newMaterial;
+        newMaterialSlot->MaterialSlotName = staticMeshRenderData->Materials[materialIndex].MTLName;
+
+        materials.Add(newMaterialSlot);
     }
 }

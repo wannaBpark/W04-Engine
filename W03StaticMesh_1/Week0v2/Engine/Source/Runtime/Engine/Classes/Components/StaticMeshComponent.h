@@ -7,7 +7,7 @@ class UStaticMeshComponent : public UMeshComponent
     DECLARE_CLASS(UStaticMeshComponent, USceneComponent)
 
 public:
-    UStaticMeshComponent() {}
+    UStaticMeshComponent();
     ~UStaticMeshComponent() {}
 
     virtual void Initialize() override {}
@@ -22,6 +22,14 @@ public:
     virtual void GetUsedMaterials(TArray<UMaterial*> Out) const override;
 
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
+
+    UStaticMesh* GetStaticMesh() { return staticMesh; }
+    void SetStaticMesh(UStaticMesh* value)
+    { 
+        staticMesh = value;
+        OverrideMaterials.SetNum(staticMesh->GetMaterials().Num());
+    }
+
 protected:
     UStaticMesh* staticMesh = nullptr;
 };
