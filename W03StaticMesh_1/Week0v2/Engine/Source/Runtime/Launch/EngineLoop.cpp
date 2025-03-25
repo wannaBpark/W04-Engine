@@ -140,6 +140,8 @@ void FEngineLoop::Render()
             renderer.PrepareShader();
             renderer.UpdateLightBuffer();
             RenderWorld();
+            // renderer.PrepareRender(GetWorld()->GetObjectArr());
+            // renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
         }
         GetLevelEditor()->SetViewportClient(viewportClient);
     }
@@ -151,6 +153,8 @@ void FEngineLoop::Render()
         renderer.PrepareShader();
         renderer.UpdateLightBuffer();
         RenderWorld();
+        // renderer.PrepareRender(GetWorld()->GetObjectArr());
+        // renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
     }
 }
 
@@ -218,9 +222,9 @@ void FEngineLoop::Tick()
 float a = 5;
 void FEngineLoop::RenderWorld()
 {
+	UPrimitiveBatch::GetInstance().RenderBatch(GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix(), GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix());
 	GWorld->Render();
 	GWorld->RenderBaseObject();
-	UPrimitiveBatch::GetInstance().RenderBatch(GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix(), GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix());
 }
 
 

@@ -143,10 +143,11 @@ public: // line shader
 
     //Render Pass Demo
     void PrepareRender(TArray<UObject*>& Objects);
+    void ClearRenderArr();
     void Render(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
     void RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
-    void RenderGizmos(std::shared_ptr<FEditorViewportClient> ActiveViewport);
-    void RenderBillboards(std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void RenderGizmos(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void RenderBillboards(UWorld* World,std::shared_ptr<FEditorViewportClient> ActiveViewport);
 private:
     TArray<UStaticMeshComponent*> StaticMeshObjs;
     TArray<UGizmoBaseComponent*> GizmoObjs;

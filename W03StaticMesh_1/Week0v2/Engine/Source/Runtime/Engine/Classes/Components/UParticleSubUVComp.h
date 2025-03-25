@@ -27,8 +27,7 @@ private:
     int CellsPerRow;
     int CellsPerColumn;
 
-    float finalIndexU = 0.0f;
-    float finalIndexV = 0.0f;
+
 
     void UpdateVertexBuffer(const TArray<FVertexTexture>& vertices);
     void CreateSubUVVertexBuffer();

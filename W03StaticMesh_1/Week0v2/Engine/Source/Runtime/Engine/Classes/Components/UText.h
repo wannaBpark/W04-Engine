@@ -21,8 +21,8 @@ public:
 
 protected:
     ID3D11Buffer* vertexTextBuffer;
-    FWString text;
     TArray<FVertexTexture> vertexTextureArr;
+    FWString text;
     UINT numTextVertices;
 
     TArray<FVector> quad;

@@ -1,6 +1,7 @@
 #include "Renderer.h"
 
 #include "BaseGizmos/GizmoBaseComponent.h"
+#include "Components/Player.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/UBillboardComponent.h"
 #include "D3D11RHI/GraphicDevice.h"
@@ -844,7 +845,8 @@ void FRenderer::PrepareRender(TArray<UObject*>& Objects)
     {
         if (UStaticMeshComponent* pStaticMeshComp = Cast<UStaticMeshComponent>(iter))
         {
-            StaticMeshObjs.Add(pStaticMeshComp);
+            if (!Cast<UGizmoBaseComponent>(iter))
+                StaticMeshObjs.Add(pStaticMeshComp);
         }
         if (UGizmoBaseComponent* pGizmoComp = Cast<UGizmoBaseComponent>(iter))
         {
@@ -857,19 +859,30 @@ void FRenderer::PrepareRender(TArray<UObject*>& Objects)
     }
 }
 
+void FRenderer::ClearRenderArr()
+{
+    StaticMeshObjs.Empty();
+    GizmoObjs.Empty();
+    BillboardObjs.Empty();
+}
+
 void FRenderer::Render(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
+    UPrimitiveBatch::GetInstance().RenderBatch(ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix());
+
     if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))
         RenderStaticMeshes(World, ActiveViewport);
-    RenderGizmos(ActiveViewport);
+    RenderGizmos(World, ActiveViewport);
     if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))
-        RenderBillboards(ActiveViewport);
+        RenderBillboards(World, ActiveViewport);
+    
+    ClearRenderArr();
 }
 
 void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
-    for (auto StaticMeshComp : StaticMeshObjs)
-    {
+     for (auto StaticMeshComp : StaticMeshObjs)
+     {
         FMatrix Model = JungleMath::CreateModelMatrix(
             StaticMeshComp->GetWorldLocation(),
             StaticMeshComp->GetWorldRotation(),
@@ -880,10 +893,10 @@ void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewpor
         FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
         FVector4 UUIDColor = StaticMeshComp->EncodeUUID() / 255.0f;
         if (StaticMeshComp == World->GetPickingObj()) {
-            FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
+            UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
         }
         else
-            FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+            UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
 
         if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
             UPrimitiveBatch::GetInstance().RenderAABB(
@@ -891,23 +904,82 @@ void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewpor
                 StaticMeshComp->GetWorldLocation(),
                 Model);
     
-        if (!StaticMeshComp->GetStaticMesh()) return;
+        if (!StaticMeshComp->GetStaticMesh()) continue;
 
         OBJ::FStaticMeshRenderData* renderData = StaticMeshComp->GetStaticMesh()->GetRenderData();
-        if (renderData == nullptr) return;
+        if (renderData == nullptr) continue;
 
-        FEngineLoop::renderer.RenderPrimitive(renderData);
+        RenderPrimitive(renderData);
     }
 }
 
-void FRenderer::RenderGizmos(std::shared_ptr<FEditorViewportClient> ActiveViewport)
+void FRenderer::RenderGizmos(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
     #pragma region GizmoDepth
-        ID3D11DepthStencilState* DepthStateDisable = FEngineLoop::graphicDevice.DepthStateDisable;
-        FEngineLoop::graphicDevice.DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
+        ID3D11DepthStencilState* DepthStateDisable = Graphics->DepthStateDisable;
+        Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
+    #pragma endregion GizmoDepth
+
+    //  fill solid,  Wirframe 에서도 제대로 렌더링되기 위함
+    Graphics->DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID); 
+
+    for (auto GizmoComp : GizmoObjs)
+    {
+        if (!World->GetPickingObj() || World->GetPlayer()->GetControlMode() != CM_TRANSLATION)
+            return;
+        FMatrix Model = JungleMath::CreateModelMatrix(GizmoComp->GetWorldLocation(),
+            GizmoComp->GetWorldRotation(),
+            GizmoComp->GetWorldScale());
+        FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
+        FVector4 UUIDColor = GizmoComp->EncodeUUID() / 255.0f;
+        
+        FMatrix MVP = Model * ActiveViewport->GetViewMatrix() * ActiveViewport->GetProjectionMatrix();
+        
+        if (GizmoComp == World->GetPickingGizmo()) 
+            UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
+        else
+            UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+        
+        if (!GizmoComp->GetStaticMesh()) return;
+
+        OBJ::FStaticMeshRenderData* renderData = GizmoComp->GetStaticMesh()->GetRenderData();
+        if (renderData == nullptr) return;
+
+        RenderPrimitive(renderData);
+    }
+    
+    Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
+
+    #pragma region GizmoDepth
+        ID3D11DepthStencilState* originalDepthState = Graphics->DepthStencilState;
+        Graphics->DeviceContext->OMSetDepthStencilState(originalDepthState, 0);
     #pragma endregion GizmoDepth
 }
 
-void FRenderer::RenderBillboards(std::shared_ptr<FEditorViewportClient> ActiveViewport)
+void FRenderer::RenderBillboards(UWorld* World,std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
+    PrepareTextureShader();
+    PrepareSubUVConstant();
+    for (auto BillboardComp : BillboardObjs)
+    {
+        UpdateSubUVConstant(BillboardComp->finalIndexU,BillboardComp->finalIndexV);
+
+        FMatrix Model = BillboardComp->CreateBillboardMatrix();
+
+        // 최종 MVP 행렬
+        FMatrix MVP = Model * ActiveViewport->GetViewMatrix() * ActiveViewport->GetProjectionMatrix();
+        FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
+        FVector4 UUIDColor = BillboardComp->EncodeUUID() / 255.0f;
+        if (BillboardComp == World->GetPickingGizmo()) 
+            UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
+        else
+            UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+
+        RenderTexturePrimitive(BillboardComp->vertexTextureBuffer,BillboardComp->numVertices,
+    BillboardComp->indexTextureBuffer,BillboardComp->numIndices,BillboardComp->Texture->TextureSRV,BillboardComp->Texture->SamplerState);
+           // RenderTexturePrimitive(
+           //     BillboardComp->vertexSubUVBuffer, numTextVertices,
+           //      indexTextureBuffer, numIndices, Texture->TextureSRV, Texture->SamplerState);
+    };
+    PrepareShader();
 }
