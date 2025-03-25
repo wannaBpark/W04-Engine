@@ -25,11 +25,6 @@ private:
     int CellsPerRow;
     int CellsPerColumn;
 
-
-
-    // TODO: UActorComponent에 Activate, Deactivate 만들기
-    bool bIsActivate = true;
-
     void UpdateVertexBuffer(const TArray<FVertexTexture>& vertices);
     void CreateSubUVVertexBuffer();
 };
