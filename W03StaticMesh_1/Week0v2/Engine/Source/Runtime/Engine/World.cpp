@@ -3,9 +3,10 @@
 #include "Actors/Player.h"
 #include "BaseGizmos/TransformGizmo.h"
 #include "Camera/CameraComponent.h"
+#include "LevelEditor/SLevelEditor.h"
 #include "PropertyEditor/ShowFlags.h"
 
-#include "LevelEditor/SLevelEditor.h"
+
 UWorld::UWorld()
 {
 }

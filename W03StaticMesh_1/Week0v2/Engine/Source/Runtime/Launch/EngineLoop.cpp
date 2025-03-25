@@ -141,23 +141,27 @@ void FEngineLoop::Render()
         for (int i = 0; i < 4; ++i)
         {
             LevelEditor->SetViewportClient(i);
-            graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetViewports()[i]->GetD3DViewport());
-            graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
-            renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
-            renderer.PrepareShader();
-            renderer.UpdateLightBuffer();
-            RenderWorld();
+            // graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetViewports()[i]->GetD3DViewport());
+            // graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
+            // renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
+            // renderer.PrepareShader();
+            // renderer.UpdateLightBuffer();
+            // RenderWorld();
+            renderer.PrepareRender(GUObjectArray.GetObjectItemArrayUnsafe());
+            renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
         }
         GetLevelEditor()->SetViewportClient(viewportClient);
     }
     else
     {
-        graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetActiveViewportClient()->GetD3DViewport());
-        graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
-        renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
-        renderer.PrepareShader();
-        renderer.UpdateLightBuffer();
-        RenderWorld();
+        // graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetActiveViewportClient()->GetD3DViewport());
+        // graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
+        // renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
+        // renderer.PrepareShader();
+        // renderer.UpdateLightBuffer();
+        // RenderWorld();
+        renderer.PrepareRender(GUObjectArray.GetObjectItemArrayUnsafe());
+        renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
     }
 }
 
@@ -227,11 +231,11 @@ void FEngineLoop::Tick()
 
 void FEngineLoop::RenderWorld()
 {
-    GWorld->Render();
-    GWorld->RenderBaseObject();
+    
     UPrimitiveBatch::GetInstance().RenderBatch(
         GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix(), GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix()
-    );
+    );GWorld->Render();
+	GWorld->RenderBaseObject();
 }
 
 

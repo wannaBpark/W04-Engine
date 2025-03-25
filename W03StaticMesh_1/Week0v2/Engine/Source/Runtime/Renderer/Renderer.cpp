@@ -1,10 +1,23 @@
 #include "Renderer.h"
-
 #include <d3dcompiler.h>
 
+#include "World.h"
+#include "Actors/Player.h"
+#include "BaseGizmos/GizmoBaseComponent.h"
+#include "Components/LightComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/UBillboardComponent.h"
+#include "Components/UParticleSubUVComp.h"
+#include "Components/UText.h"
+#include "Components/Material/Material.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Launch/EngineLoop.h"
-#include "Components/Material/Material.h"
+#include "Math/JungleMath.h"
+#include "UnrealEd/EditorViewportClient.h"
+#include "UnrealEd/PrimitiveBatch.h"
+#include "UObject/Casts.h"
+#include "UObject/Object.h"
+#include "PropertyEditor/ShowFlags.h"
 
 void FRenderer::Initialize(FGraphicsDevice* graphics) {
     Graphics = graphics;
@@ -845,5 +858,174 @@ void FRenderer::RenderBatch(const FGridParameters& gridParam, ID3D11Buffer* pVer
     UINT instanceCount = gridParam.numGridLines + 3 + (boundingBoxCount * 12) + (coneCount * (2 * coneSegmentCount)) + (12 * obbCount);
     Graphics->DeviceContext->DrawInstanced(vertexCountPerInstance, instanceCount, 0, 0);
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+void FRenderer::PrepareRender(const TArray<UObject*>& Objects)
+{
+    
+    for (const auto iter : Objects)
+    {
+        if (UStaticMeshComponent* pStaticMeshComp = Cast<UStaticMeshComponent>(iter))
+        {
+            if (!Cast<UGizmoBaseComponent>(iter))
+                StaticMeshObjs.Add(pStaticMeshComp);
+        }
+        if (UGizmoBaseComponent* pGizmoComp = Cast<UGizmoBaseComponent>(iter))
+        {
+            GizmoObjs.Add(pGizmoComp);
+        }
+        if (UBillboardComponent* pBillboardComp = Cast<UBillboardComponent>(iter))
+        {
+            BillboardObjs.Add(pBillboardComp);
+        }
+        if (ULightComponentBase* pLightComp = Cast<ULightComponentBase>(iter))
+        {
+            LightObjs.Add(pLightComp);
+        }
+    }
+}
+void FRenderer::ClearRenderArr()
+{
+    StaticMeshObjs.Empty();
+    GizmoObjs.Empty();
+    BillboardObjs.Empty();
+    LightObjs.Empty();
+}
+void FRenderer::Render(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
+{
+    Graphics->DeviceContext->RSSetViewports(1, &ActiveViewport->GetD3DViewport());
+    Graphics->ChangeRasterizer(ActiveViewport->GetViewMode());
+    ChangeViewMode(ActiveViewport->GetViewMode());
+    UpdateLightBuffer();
+    UPrimitiveBatch::GetInstance().RenderBatch(ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix());
 
+    if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))
+        RenderStaticMeshes(World, ActiveViewport);
+    RenderGizmos(World, ActiveViewport);
+    if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))
+        RenderBillboards(World, ActiveViewport);
+    RenderLight(World, ActiveViewport);
+    ClearRenderArr();
+}
+void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
+{
+     PrepareShader();
+     for (UStaticMeshComponent* StaticMeshComp : StaticMeshObjs)
+     {
+        FMatrix Model = JungleMath::CreateModelMatrix(
+            StaticMeshComp->GetWorldLocation(),
+            StaticMeshComp->GetWorldRotation(),
+            StaticMeshComp->GetWorldScale());
+        // 최종 MVP 행렬
+        FMatrix MVP = Model * ActiveViewport->GetViewMatrix() * ActiveViewport->GetProjectionMatrix();
+        // 노말 회전시 필요 행렬
+        FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
+        FVector4 UUIDColor = StaticMeshComp->EncodeUUID() / 255.0f;
+        if (World->GetPickedActor() == StaticMeshComp->GetOwner()) {
+            UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
+        }
+        else
+            UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+
+        if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
+            UPrimitiveBatch::GetInstance().RenderAABB(
+                StaticMeshComp->GetBoundingBox(),
+                StaticMeshComp->GetWorldLocation(),
+                Model);
+    
+        if (!StaticMeshComp->GetStaticMesh()) continue;
+
+        OBJ::FStaticMeshRenderData* renderData = StaticMeshComp->GetStaticMesh()->GetRenderData();
+        if (renderData == nullptr) continue;
+
+        RenderPrimitive(renderData,StaticMeshComp->GetOverrideMaterials());
+    }
+}
+void FRenderer::RenderGizmos(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
+{
+    #pragma region GizmoDepth
+        ID3D11DepthStencilState* DepthStateDisable = Graphics->DepthStateDisable;
+        Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
+    #pragma endregion GizmoDepth
+
+    //  fill solid,  Wirframe 에서도 제대로 렌더링되기 위함
+    Graphics->DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID); 
+
+    for (auto GizmoComp : GizmoObjs)
+    {
+        if (!World->GetPickedActor() || World->GetPlayer()->GetControlMode() != CM_TRANSLATION)
+            return;
+        FMatrix Model = JungleMath::CreateModelMatrix(GizmoComp->GetWorldLocation(),
+            GizmoComp->GetWorldRotation(),
+            GizmoComp->GetWorldScale());
+        FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
+        FVector4 UUIDColor = GizmoComp->EncodeUUID() / 255.0f;
+        
+        FMatrix MVP = Model * ActiveViewport->GetViewMatrix() * ActiveViewport->GetProjectionMatrix();
+        
+        if (GizmoComp == World->GetPickingGizmo()) 
+            UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
+        else
+            UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+        
+        if (!GizmoComp->GetStaticMesh()) return;
+
+        OBJ::FStaticMeshRenderData* renderData = GizmoComp->GetStaticMesh()->GetRenderData();
+        if (renderData == nullptr) return;
+
+        RenderPrimitive(renderData, GizmoComp->GetOverrideMaterials());
+    }
+    
+    Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
+
+    #pragma region GizmoDepth
+        ID3D11DepthStencilState* originalDepthState = Graphics->DepthStencilState;
+        Graphics->DeviceContext->OMSetDepthStencilState(originalDepthState, 0);
+    #pragma endregion GizmoDepth
+}
+void FRenderer::RenderBillboards(UWorld* World,std::shared_ptr<FEditorViewportClient> ActiveViewport)
+{
+    PrepareTextureShader();
+    PrepareSubUVConstant();
+    for (auto BillboardComp : BillboardObjs)
+    {
+        UpdateSubUVConstant(BillboardComp->finalIndexU,BillboardComp->finalIndexV);
+
+        FMatrix Model = BillboardComp->CreateBillboardMatrix();
+
+        // 최종 MVP 행렬
+        FMatrix MVP = Model * ActiveViewport->GetViewMatrix() * ActiveViewport->GetProjectionMatrix();
+        FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
+        FVector4 UUIDColor = BillboardComp->EncodeUUID() / 255.0f;
+        if (BillboardComp == World->GetPickingGizmo()) 
+            UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
+        else
+            UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+
+        if (UParticleSubUVComp* SubUVParticle = Cast<UParticleSubUVComp>(BillboardComp))
+        {
+            RenderTexturePrimitive(
+                SubUVParticle->vertexSubUVBuffer, SubUVParticle->numTextVertices,
+                 SubUVParticle->indexTextureBuffer, SubUVParticle->numIndices, SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState);
+        }
+        else if (UText* Text = Cast<UText>(BillboardComp))
+        {
+            FEngineLoop::renderer.RenderTextPrimitive(Text->vertexTextBuffer, Text->numTextVertices,
+    Text->Texture->TextureSRV, Text->Texture->SamplerState);
+        }
+        else {
+            RenderTexturePrimitive(BillboardComp->vertexTextureBuffer,BillboardComp->numVertices,
+    BillboardComp->indexTextureBuffer,BillboardComp->numIndices,BillboardComp->Texture->TextureSRV,BillboardComp->Texture->SamplerState);
+        }
+    }
+    PrepareShader();
+}
+void FRenderer::RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
+{
+    for (auto Light : LightObjs)
+    {
+        Light->GetTexture2D()->Render();
+        FMatrix Model = JungleMath::CreateModelMatrix(Light->GetWorldLocation(), Light->GetWorldRotation(), {1,1,1});
+        UPrimitiveBatch::GetInstance().AddCone(Light->GetWorldLocation(), Light->GetRadius(), 15, 140, Light->GetColor(), Model);
+        UPrimitiveBatch::GetInstance().RenderOBB(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);
+    }
 }

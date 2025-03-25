@@ -25,4 +25,9 @@ private:
     float radius;
     FBoundingBox AABB;
     UBillboardComponent* texture2D;
+public:
+    FBoundingBox GetBoundingBox() {return AABB;}
+    float GetRadius() {return radius;}
+    FVector4 GetColor() {return color;}
+    UBillboardComponent* GetTexture2D(){return texture2D;}
 };

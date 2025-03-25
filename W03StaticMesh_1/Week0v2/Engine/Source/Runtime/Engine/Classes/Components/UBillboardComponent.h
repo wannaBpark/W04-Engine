@@ -20,15 +20,18 @@ public:
 
     void SetTexture(FWString _fileName);
     void SetUUIDParent(USceneComponent* _parent);
-
-protected:
-    std::shared_ptr<FTexture> Texture;
     FMatrix CreateBillboardMatrix();
 
     ID3D11Buffer* vertexTextureBuffer;
     ID3D11Buffer* indexTextureBuffer;
     UINT numVertices;
     UINT numIndices;
+    float finalIndexU = 0.0f;
+    float finalIndexV = 0.0f;
+    std::shared_ptr<FTexture> Texture;
+protected:
+
+
 
     USceneComponent* m_parent = nullptr;
 

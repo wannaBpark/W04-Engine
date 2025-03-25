@@ -28,4 +28,7 @@ public:
 
 protected:
     UStaticMesh* staticMesh = nullptr;
+
+    public:
+    UStaticMesh* GetStaticMesh() const { return staticMesh; }
 };

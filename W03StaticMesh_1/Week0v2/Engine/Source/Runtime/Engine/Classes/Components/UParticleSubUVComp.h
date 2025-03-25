@@ -15,9 +15,9 @@ public:
 
     void SetRowColumnCount(int _cellsPerRow, int _cellsPerColumn);
 
-private:
     ID3D11Buffer* vertexSubUVBuffer;
     UINT numTextVertices;
+private:
 
     int indexU = 0;
     int indexV = 0;
@@ -26,8 +26,7 @@ private:
     int CellsPerRow;
     int CellsPerColumn;
 
-    float finalIndexU = 0.0f;
-    float finalIndexV = 0.0f;
+
 
     // TODO: UActorComponent에 Activate, Deactivate 만들기
     bool bIsActivate = true;

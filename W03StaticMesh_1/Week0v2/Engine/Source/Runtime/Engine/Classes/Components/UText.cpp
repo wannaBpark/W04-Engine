@@ -7,7 +7,7 @@
 
 UText::UText()
 {
-    SetType("Quad");
+    SetType(StaticClass()->GetName());
 }
 
 UText::~UText()
@@ -21,116 +21,48 @@ UText::~UText()
 
 void UText::InitializeComponent()
 {
-	Super::InitializeComponent();
+    Super::InitializeComponent();
 }
 
 void UText::TickComponent(float DeltaTime)
 {
 	Super::TickComponent(DeltaTime);
 
-	//FVector newCamera = GetWorld()->GetCamera()->GetForwardVector();
-	//newCamera.z = 0;
-	//newCamera = newCamera.Normalize();
-	//float tmp = FVector(1.0f, 0.0f, 0.0f).Dot(newCamera);
-	//float rad = acosf(tmp);
-	//float degree = JungleMath::RadToDeg(rad);
-	//FVector vtmp = FVector(1.0f, 0.0f, 0.0f).Cross(GetWorld()->GetCamera()->GetForwardVector());
-	//if (vtmp.z < 0)
-	//	degree *= -1;
-	//RelativeRotation.z = degree + 90;
+    //FVector newCamera = GetWorld()->GetCamera()->GetForwardVector();
+    //newCamera.z = 0;
+    //newCamera = newCamera.Normalize();
+    //float tmp = FVector(1.0f, 0.0f, 0.0f).Dot(newCamera);
+    //float rad = acosf(tmp);
+    //float degree = JungleMath::RadToDeg(rad);
+    //FVector vtmp = FVector(1.0f, 0.0f, 0.0f).Cross(GetWorld()->GetCamera()->GetForwardVector());
+    //if (vtmp.z < 0)
+    //	degree *= -1;
+    //RelativeRotation.z = degree + 90;
+}
+
+void UText::Release()
+{
 }
 
 void UText::Render()
 {
-	TextMVPRendering();
+    TextMVPRendering();
 }
 void UText::ClearText()
 {
-	vertexTextureArr.Empty();
+    vertexTextureArr.Empty();
 }
 void UText::SetRowColumnCount(int _cellsPerRow, int _cellsPerColumn) 
 {
-	RowCount = _cellsPerRow;
-	ColumnCount = _cellsPerColumn;
+    RowCount = _cellsPerRow;
+    ColumnCount = _cellsPerColumn;
 }
 
 int UText::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
-	if (!(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))) {
+	if (!(ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))) {
 		return 0;
 	}
-	/*
-	int nIntersections = 0;
-	
-	TArray<FVertexSimple> verArr;
-	FMatrix CameraView = GetEngine().View;
-
-	CameraView.M[0][3] = 0.0f;
-	CameraView.M[1][3] = 0.0f;
-	CameraView.M[2][3] = 0.0f;
-
-
-	CameraView.M[3][0] = 0.0f;
-	CameraView.M[3][1] = 0.0f;
-	CameraView.M[3][2] = 0.0f;
-	CameraView.M[3][3] = 1.0f;
-
-
-	CameraView.M[0][2] = -CameraView.M[0][2];
-	CameraView.M[1][2] = -CameraView.M[1][2];
-	CameraView.M[2][2] = -CameraView.M[2][2];
-	FMatrix LookAtCamera = FMatrix::Transpose(CameraView);
-
-	for (auto it : vertexTextureArr)
-	{
-		FVector vtmp = FVector(it.x, it.y, it.z);
-		FMatrix::TransformVector(vtmp,LookAtCamera);
-		FVertexSimple tmp ;
-		tmp.x = vtmp.x ;tmp.y = vtmp.y; tmp.z = vtmp.z;
-		//UE_LOG(LogLevel::Warning, "Text x : %f y: %f z : %f", tmp.x, tmp.y, tmp.z);
-		verArr.Add(tmp);
-	}
-	FVertexSimple* vertices = verArr.GetData();
-	int vCount = verArr.Num();
-	UINT* indices = nullptr;
-	int iCount = 0;
-
-	if (!vertices) return 0;
-	BYTE* pbPositions = reinterpret_cast<BYTE*>(vertices);
-
-	int nPrimitives = (!indices) ? (vCount / 3) : (iCount / 3);
-	float fNearHitDistance = FLT_MAX;
-	for (int i = 0; i < nPrimitives; i++) {
-		int idx0, idx1, idx2;
-		if (!indices) {
-			idx0 = i * 3;
-			idx1 = i * 3 + 1;
-			idx2 = i * 3 + 2;
-		}
-		else {
-			idx0 = indices[i * 3];
-			idx2 = indices[i * 3 + 1];
-			idx1 = indices[i * 3 + 2];
-		}
-
-		// 각 삼각형의 버텍스 위치를 FVector로 불러옵니다.
-		uint32 stride = sizeof(FVertexSimple);
-		FVector v0 = *reinterpret_cast<FVector*>(pbPositions + idx0 * stride);
-		FVector v1 = *reinterpret_cast<FVector*>(pbPositions + idx1 * stride);
-		FVector v2 = *reinterpret_cast<FVector*>(pbPositions + idx2 * stride);
-
-		float fHitDistance;
-		if (IntersectRayTriangle(rayOrigin, rayDirection, v0, v1, v2, fHitDistance)) {
-			if (fHitDistance < fNearHitDistance) {
-				pfNearHitDistance = fNearHitDistance = fHitDistance;
-			}
-			nIntersections++;
-		}
-
-	}
-	return nIntersections;
-	*/
-	
 	for (int i = 0; i < vertexTextureArr.Num(); i++)
 	{
 		quad.Add(FVector(vertexTextureArr[i].x,
@@ -209,7 +141,7 @@ void UText::SetText(FWString _text)
 	}
 	UINT byteWidth = static_cast<UINT>(vertexTextureArr.Num() * sizeof(FVertexTexture));
 
-	float lastX = -1.0f + quadSize * _text.size();
+	float lastX = -1.0f + quadSize* _text.size();
 	quad.Add(FVector(-1.0f,1.0f,0.0f));
 	quad.Add(FVector(-1.0f,-1.0f,0.0f));
 	quad.Add(FVector(lastX,1.0f,0.0f));
@@ -219,98 +151,94 @@ void UText::SetText(FWString _text)
 }
 void UText::setStartUV(wchar_t hangul, float& outStartU, float& outStartV)
 {
-	//대문자만 받는중
-	int StartU = 0;
-	int StartV = 0;
-	int offset = -1;
+    //대문자만 받는중
+    int StartU = 0;
+    int StartV = 0;
+    int offset = -1;
 
-	if (hangul == L' ') {
-		outStartU = 0;  // Space는 특별히 UV 좌표를 (0,0)으로 설정
-		outStartV = 0;
-		offset = 0;
-		return;
-	}
-	else if (hangul >= L'A' && hangul <= L'Z') {
+    if (hangul == L' ') {
+        outStartU = 0;  // Space는 특별히 UV 좌표를 (0,0)으로 설정
+        outStartV = 0;
+        offset = 0;
+        return;
+    }
+    else if (hangul >= L'A' && hangul <= L'Z') {
 
-		StartU = 11;
-		StartV = 0;
-		offset = hangul - L'A'; // 대문자 위치
-	}
-	else if (hangul >= L'a' && hangul <= L'z') {
-		StartU = 37;
-		StartV = 0;
-		offset = (hangul - L'a'); // 소문자는 대문자 다음 위치
-	}
-	else if (hangul >= L'0' && hangul <= L'9') {
-		StartU = 1;
-		StartV = 0;
-		offset = (hangul - L'0'); // 숫자는 소문자 다음 위치
-	}
-	else if (hangul >= L'가' && hangul <= L'힣')
-	{
-		StartU = 63;
-		StartV = 0;
-		offset = hangul - L'가'; // 대문자 위치
-	}
+        StartU = 11;
+        StartV = 0;
+        offset = hangul - L'A'; // 대문자 위치
+    }
+    else if (hangul >= L'a' && hangul <= L'z') {
+        StartU = 37;
+        StartV = 0;
+        offset = (hangul - L'a'); // 소문자는 대문자 다음 위치
+    }
+    else if (hangul >= L'0' && hangul <= L'9') {
+        StartU = 1;
+        StartV = 0;
+        offset = (hangul - L'0'); // 숫자는 소문자 다음 위치
+    }
+    else if (hangul >= L'가' && hangul <= L'힣')
+    {
+        StartU = 63;
+        StartV = 0;
+        offset = hangul - L'가'; // 대문자 위치
+    }
 
-	if (offset == -1)
-	{
-		Console::GetInstance().AddLog(LogLevel::Warning, "Text Error");
-	}
+    if (offset == -1)
+    {
+        Console::GetInstance().AddLog(LogLevel::Warning, "Text Error");
+    }
 
-	int offsetV = (offset + StartU) / ColumnCount;
-	int offsetU = (offset + StartU) % ColumnCount;
+    int offsetV = (offset + StartU) / ColumnCount;
+    int offsetU = (offset + StartU) % ColumnCount;
 
-	outStartU = static_cast<float>(offsetU);
-	outStartV = static_cast<float>(StartV + offsetV);
+    outStartU = static_cast<float>(offsetU);
+    outStartV = static_cast<float>(StartV + offsetV);
 }
-
-
 void UText::setStartUV(char alphabet, float& outStartU, float& outStartV)
 {
-	//대문자만 받는중
-	int StartU=0;
-	int StartV=0;
-	int offset = -1;
+    //대문자만 받는중
+    int StartU=0;
+    int StartV=0;
+    int offset = -1;
 
 
-	if (alphabet == ' ') {
-		outStartU = 0;  // Space는 특별히 UV 좌표를 (0,0)으로 설정
-		outStartV = 0;
-		offset = 0;
-		return;
-	}
-	else if (alphabet >= 'A' && alphabet <= 'Z') {
+    if (alphabet == ' ') {
+        outStartU = 0;  // Space는 특별히 UV 좌표를 (0,0)으로 설정
+        outStartV = 0;
+        offset = 0;
+        return;
+    }
+    else if (alphabet >= 'A' && alphabet <= 'Z') {
 
-		StartU = 1;
-		StartV = 4;
-		offset = alphabet - 'A'; // 대문자 위치
-	}
-	else if (alphabet >= 'a' && alphabet <= 'z') {
-		StartU = 1;
-		StartV = 6;
-		offset = (alphabet - 'a'); // 소문자는 대문자 다음 위치
-	}
-	else if (alphabet >= '0' && alphabet <= '9') {
-		StartU = 0;
-		StartV = 3;
-		offset = (alphabet - '0'); // 숫자는 소문자 다음 위치
-	}
+        StartU = 1;
+        StartV = 4;
+        offset = alphabet - 'A'; // 대문자 위치
+    }
+    else if (alphabet >= 'a' && alphabet <= 'z') {
+        StartU = 1;
+        StartV = 6;
+        offset = (alphabet - 'a'); // 소문자는 대문자 다음 위치
+    }
+    else if (alphabet >= '0' && alphabet <= '9') {
+        StartU = 0;
+        StartV = 3;
+        offset = (alphabet - '0'); // 숫자는 소문자 다음 위치
+    }
 
-	if (offset == -1)
-	{
-		Console::GetInstance().AddLog(LogLevel::Warning, "Text Error");
-	}
+    if (offset == -1)
+    {
+        Console::GetInstance().AddLog(LogLevel::Warning, "Text Error");
+    }
 
-	int offsetV = (offset + StartU) / ColumnCount;
-	int offsetU = (offset + StartU) % ColumnCount;
+    int offsetV = (offset + StartU) / ColumnCount;
+    int offsetU = (offset + StartU) % ColumnCount;
 
-	outStartU = static_cast<float>(offsetU);
-	outStartV = static_cast<float>(StartV + offsetV);
+    outStartU = static_cast<float>(offsetU);
+    outStartV = static_cast<float>(StartV + offsetV);
 
 }
-
-
 void UText::CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex,UINT byteWidth)
 {
 	numTextVertices = static_cast<UINT>(_vertex.Num());
@@ -336,30 +264,28 @@ void UText::CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex,
 
 }
 
+
 void UText::TextMVPRendering()
 {
-	FEngineLoop::renderer.PrepareTextureShader();
-	//FEngineLoop::renderer.UpdateSubUVConstant(0, 0);
-	//FEngineLoop::renderer.PrepareSubUVConstant();
+    FEngineLoop::renderer.PrepareTextureShader();
+    //FEngineLoop::renderer.UpdateSubUVConstant(0, 0);
+    //FEngineLoop::renderer.PrepareSubUVConstant();
+    FMatrix Model = CreateBillboardMatrix();
 
-	FMatrix Model = CreateBillboardMatrix();
-
-
-	// 최종 MVP 행렬
     FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
     FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
     FVector4 UUIDColor = EncodeUUID() / 255.0f;
-	if (this == GetWorld()->GetPickingGizmo()) {
-		FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
-	}
-	else
-		FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+    if (this == GetWorld()->GetPickingGizmo()) {
+        FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
+    }
+    else
+        FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
 
-	if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
-		FEngineLoop::renderer.RenderTextPrimitive(vertexTextBuffer, numTextVertices,
-			Texture->TextureSRV, Texture->SamplerState);
-	}
-	//Super::Render();
+    if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
+        FEngineLoop::renderer.RenderTextPrimitive(vertexTextBuffer, numTextVertices,
+            Texture->TextureSRV, Texture->SamplerState);
+    }
+    //Super::Render();
 
-	FEngineLoop::renderer.PrepareShader();
+    FEngineLoop::renderer.PrepareShader();
 }
