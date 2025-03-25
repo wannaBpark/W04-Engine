@@ -82,8 +82,8 @@ void FEditorViewportClient::Input()
                 PivotMoveRight(deltaX);
                 PivotMoveUp(deltaY);
             }
-            // 새로운 마우스 위치 저장
-            lastMousePos = currentMousePos;
+
+            SetCursorPos(lastMousePos.x, lastMousePos.y);
         }
         if (GetAsyncKeyState('A') & 0x8000)
         {
@@ -112,6 +112,7 @@ void FEditorViewportClient::Input()
     }
     else
     {
+        ShowCursor(true);
         bRightMouseDown = false; // 마우스 오른쪽 버튼을 떼면 상태 초기화
     }
 }
