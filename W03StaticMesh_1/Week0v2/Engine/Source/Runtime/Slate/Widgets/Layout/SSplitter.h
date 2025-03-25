@@ -1,5 +1,9 @@
 #pragma once
 #include "SlateCore/Widgets/SWindow.h"
+#include "Container/Map.h"
+#include "fstream"
+#include "ostream"
+#include "sstream"
 class SSplitter : public SWindow
 {
 public:
@@ -15,23 +19,38 @@ public:
     virtual bool OnReleased();
 
     virtual void OnDragEnd() {
-        // 변경된 스플리터 위치 Editor.ini 저장 로직 구현
-        SaveSplitterInfo();
+
     }
 
-    void SaveSplitterInfo() {
-        // Editor.ini에 현재 스플리터 상태(위치, 크기 등) 저장
-    }
+    virtual void LoadConfig(const TMap<FString, FString>& config);
+    virtual void SaveConfig(TMap<FString, FString>& config) const;
 
     // 스플리터가 포함된 영역에 따라 자식 창의 Rect를 재계산하는 함수
     virtual void UpdateChildRects() = 0;
+
+    template <typename T>
+    T GetValueFromConfig(const TMap<FString, FString>& config, const FString& key, T defaultValue) {
+        if (const FString* Value = config.Find(key))
+        {
+            std::istringstream iss(**Value);
+            T value;
+            if (iss >> value)
+            {
+                return value;
+            }
+        }
+        return defaultValue;
+    }
 };
 
 class SSplitterH : public SSplitter
 {
 public:
-    virtual void Initialize(FRect initRect);
-    virtual void OnResize(float width, float height);
+    virtual void Initialize(FRect initRect) override;
+    virtual void OnResize(float width, float height) override;
+
+    virtual void LoadConfig(const TMap<FString, FString>& config) override;
+    virtual void SaveConfig(TMap<FString, FString>& config) const override;
     void OnDrag(const FPoint& delta) override {
         // 수평 스플리터의 경우, 좌우로 이동
         Rect.leftTopX += delta.x;
@@ -55,8 +74,11 @@ public:
 class SSplitterV : public SSplitter
 {
 public:
-    virtual void Initialize(FRect initRect);
-    virtual void OnResize(float width, float height);
+    virtual void Initialize(FRect initRect) override;
+    virtual void OnResize(float width, float height)    override;
+
+    virtual void LoadConfig(const TMap<FString, FString>& config)   override;
+    virtual void SaveConfig(TMap<FString, FString>& config) const   override;
     void OnDrag(const FPoint& delta) override {
 
         Rect.leftTopY += delta.y;

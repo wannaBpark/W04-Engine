@@ -1,6 +1,6 @@
 #pragma once
 #include "Define.h"
-
+#include "Container/Map.h"
 class SSplitterH;
 class SSplitterV;
 class UWorld;
@@ -20,6 +20,7 @@ public:
     void ResizeViewports();
     void OnMultiViewport();
     void OffMultiViewport();
+    bool IsMultiViewport();
 private:
     bool bInitialize;
     SSplitterH* HSplitter;
@@ -31,7 +32,7 @@ private:
     bool bLButtonDown = false;
     bool bRButtonDown = false;
     
-    bool bMultiViewportMode = false;
+    bool bMultiViewportMode;
 
     POINT lastMousePos;
     float EditorWidth;
@@ -50,6 +51,30 @@ public:
     void SetViewportClient(int index)
     {
         ActiveViewportClient = viewportClients[index];
+    }
+
+    //Save And Load
+private:
+    const FString IniFilePath = "editor.ini";
+public:
+    void LoadConfig();
+    void SaveConfig();
+private:
+    TMap<FString, FString> ReadIniFile(const FString& filePath);
+    void WriteIniFile(const FString& filePath, const TMap<FString, FString>& config);
+
+    template <typename T>
+    T GetValueFromConfig(const TMap<FString, FString>& config, const FString& key, T defaultValue) {
+        if (const FString* Value = config.Find(key))
+        {
+            std::istringstream iss(**Value);
+            T value;
+            if (iss >> value)
+            {
+                return value;
+            }
+        }
+        return defaultValue;
     }
 };
 

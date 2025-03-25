@@ -20,13 +20,14 @@ public:
 
     int32 PreInit();
     int32 Init(HINSTANCE hInstance);
+    void Render();
     void Tick();
     void Exit();
     float GetAspectRatio(IDXGISwapChain* swapChain);
-
+    void Input();
 private:
     void WindowInit(HINSTANCE hInstance);
-    void Render();
+    void RenderWorld();
 public:
     static FGraphicsDevice graphicDevice;
     static FRenderer renderer;
@@ -43,8 +44,8 @@ private:
     SLevelEditor* LevelEditor;
     bool bIsExit = false;
     const int32 targetFPS = 60;
-    int32 curViewportIndex = 0;
 
+    bool bTestInput = false;
 public:
     UWorld* GetWorld(){ return GWorld; }
     SLevelEditor* GetLevelEditor() { return LevelEditor; }

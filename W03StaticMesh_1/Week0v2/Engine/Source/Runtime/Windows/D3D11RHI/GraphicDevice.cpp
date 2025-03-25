@@ -423,7 +423,7 @@ uint32 FGraphicsDevice::GetPixelUUID(POINT pt)
     srcBox.bottom = srcBox.top + 1; // 1픽셀 높이
     srcBox.front = 0;
     srcBox.back = 1;
-    FVector4 UUIDColor{ 1, 1, 1, 1 };
+    FVector4 UUIDColor{ 1, 1, 1, 1 }; 
 
     if (stagingTexture == nullptr)
         return DecodeUUIDColor(UUIDColor);
@@ -449,7 +449,7 @@ uint32 FGraphicsDevice::GetPixelUUID(POINT pt)
     {
         UUIDColor.x = static_cast<float>(pixelData[0]); // R
         UUIDColor.y = static_cast<float>(pixelData[1]); // G
-        UUIDColor.z = static_cast<float>(pixelData[2]); // B
+        UUIDColor.z = static_cast<float>(pixelData[2]) ; // B
         UUIDColor.a = static_cast<float>(pixelData[3]); // A
     }
 
