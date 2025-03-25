@@ -117,21 +117,63 @@ struct FLoaderOBJ
                     faceNormalIndices.Add(normalIndex);
                 }
 
-                // 삼각형화 (삼각형 팬 방식)
-                for (int j = 1; j + 1 < faceVertexIndices.Num(); j++)
+                if (faceVertexIndices.Num() == 4) // 쿼드
                 {
+                    // 첫 번째 삼각형: 0-1-2
                     OutObjInfo.VertexIndices.Add(faceVertexIndices[0]);
-                    OutObjInfo.VertexIndices.Add(faceVertexIndices[j]);
-                    OutObjInfo.VertexIndices.Add(faceVertexIndices[j + 1]);
+                    OutObjInfo.VertexIndices.Add(faceVertexIndices[1]);
+                    OutObjInfo.VertexIndices.Add(faceVertexIndices[2]);
 
                     OutObjInfo.TextureIndices.Add(faceTextureIndices[0]);
-                    OutObjInfo.TextureIndices.Add(faceTextureIndices[j]);
-                    OutObjInfo.TextureIndices.Add(faceTextureIndices[j + 1]);
+                    OutObjInfo.TextureIndices.Add(faceTextureIndices[1]);
+                    OutObjInfo.TextureIndices.Add(faceTextureIndices[2]);
 
                     OutObjInfo.NormalIndices.Add(faceNormalIndices[0]);
-                    OutObjInfo.NormalIndices.Add(faceNormalIndices[j]);
-                    OutObjInfo.NormalIndices.Add(faceNormalIndices[j + 1]);
+                    OutObjInfo.NormalIndices.Add(faceNormalIndices[1]);
+                    OutObjInfo.NormalIndices.Add(faceNormalIndices[2]);
+
+                    // 두 번째 삼각형: 0-2-3
+                    OutObjInfo.VertexIndices.Add(faceVertexIndices[0]);
+                    OutObjInfo.VertexIndices.Add(faceVertexIndices[2]);
+                    OutObjInfo.VertexIndices.Add(faceVertexIndices[3]);
+
+                    OutObjInfo.TextureIndices.Add(faceTextureIndices[0]);
+                    OutObjInfo.TextureIndices.Add(faceTextureIndices[2]);
+                    OutObjInfo.TextureIndices.Add(faceTextureIndices[3]);
+
+                    OutObjInfo.NormalIndices.Add(faceNormalIndices[0]);
+                    OutObjInfo.NormalIndices.Add(faceNormalIndices[2]);
+                    OutObjInfo.NormalIndices.Add(faceNormalIndices[3]);
                 }
+                else if (faceVertexIndices.Num() == 3) // 삼각형
+                {
+                    OutObjInfo.VertexIndices.Add(faceVertexIndices[0]);
+                    OutObjInfo.VertexIndices.Add(faceVertexIndices[1]);
+                    OutObjInfo.VertexIndices.Add(faceVertexIndices[2]);
+
+                    OutObjInfo.TextureIndices.Add(faceTextureIndices[0]);
+                    OutObjInfo.TextureIndices.Add(faceTextureIndices[1]);
+                    OutObjInfo.TextureIndices.Add(faceTextureIndices[2]);
+
+                    OutObjInfo.NormalIndices.Add(faceNormalIndices[0]);
+                    OutObjInfo.NormalIndices.Add(faceNormalIndices[1]);
+                    OutObjInfo.NormalIndices.Add(faceNormalIndices[2]);
+                }
+                // // 삼각형화 (삼각형 팬 방식)
+                // for (int j = 1; j + 1 < faceVertexIndices.Num(); j++)
+                // {
+                //     OutObjInfo.VertexIndices.Add(faceVertexIndices[0]);
+                //     OutObjInfo.VertexIndices.Add(faceVertexIndices[j]);
+                //     OutObjInfo.VertexIndices.Add(faceVertexIndices[j + 1]);
+                //
+                //     OutObjInfo.TextureIndices.Add(faceTextureIndices[0]);
+                //     OutObjInfo.TextureIndices.Add(faceTextureIndices[j]);
+                //     OutObjInfo.TextureIndices.Add(faceTextureIndices[j + 1]);
+                //
+                //     OutObjInfo.NormalIndices.Add(faceNormalIndices[0]);
+                //     OutObjInfo.NormalIndices.Add(faceNormalIndices[j]);
+                //     OutObjInfo.NormalIndices.Add(faceNormalIndices[j + 1]);
+                // }
             }
         }
 

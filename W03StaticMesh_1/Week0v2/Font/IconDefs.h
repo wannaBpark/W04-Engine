@@ -14,5 +14,6 @@
 
 #define ICON_MENU		0xE9AD
 #define ICON_SLIDER		0xE9C4
+#define ICON_PLUS       0xE9C8
 
 #endif // !__ICON_FONT__

@@ -14,12 +14,15 @@ private:
     void CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont);
     void CreateFlagButton() const;
     void CreateSRTButton(ImVec2 ButtonSize) const;
+
+    uint64 ConvertSelectionToFlags(const bool selected[]) const;
     
 private:
     float Width = 300, Height = 100;
     bool bOpenMenu = false;
 
-    float FOV = 0.0f;
+    float* FOV = nullptr;
+    float CameraSpeed = 0.0f;
     float GridScale = 1.0f;
 };
 
