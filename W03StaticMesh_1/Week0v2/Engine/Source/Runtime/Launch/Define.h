@@ -46,6 +46,7 @@ struct FObjInfo
 {
     FWString ObjectName; // OBJ File Name
     FWString PathName; // OBJ File Paths
+    FString DisplayName; // Display Name
     FString MatName; // OBJ MTL File Name
     
     // Group
@@ -111,6 +112,7 @@ namespace OBJ
     {
         FWString ObjectName;
         FWString PathName;
+        FString DisplayName;
         
         TArray<FVertexSimple> Vertices;
         TArray<UINT> Indices;
