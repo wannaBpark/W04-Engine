@@ -100,7 +100,11 @@ PS_OUTPUT mainPS(PS_INPUT input)
     if (texColor.g == 0) // TODO: boolean으로 변경
         color = saturate(Material.DiffuseColor);
     else
-        color = saturate(texColor);
+    {
+        float grayScale = (texColor.x + texColor.y + texColor.z) / 3;
+        color = float3(grayScale, grayScale, grayScale);
+        color += Material.DiffuseColor;
+    }
     
     if (isSelected)
     {
