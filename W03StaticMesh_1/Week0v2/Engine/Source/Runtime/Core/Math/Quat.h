@@ -1,14 +1,13 @@
-#pragma once
 
-// ÄõÅÍ´Ï¾ğ
+// ì¿¼í„°ë‹ˆì–¸
 struct FQuat
 {
 	float w, x, y, z;
 
-	// ±âº» »ı¼ºÀÚ
+	// ê¸°ë³¸ ìƒì„±ì
 	FQuat() : w(1.0f), x(0.0f), y(0.0f), z(0.0f) {}
 
-	// FQuat »ı¼ºÀÚ Ãß°¡: È¸Àü Ãà°ú °¢µµ¸¦ ¹Ş¾Æ¼­ FQuat »ı¼º
+	// FQuat ìƒì„±ì ì¶”ê°€: íšŒì „ ì¶•ê³¼ ê°ë„ë¥¼ ë°›ì•„ì„œ FQuat ìƒì„±
 	FQuat(const FVector& Axis, float Angle)
 	{
 		float HalfAngle = Angle * 0.5f;
@@ -21,10 +20,10 @@ struct FQuat
 		w = CosHalfAngle;
 	}
 
-	// w, x, y, z °ªÀ¸·Î ÃÊ±âÈ­
+	// w, x, y, z ê°’ìœ¼ë¡œ ì´ˆê¸°í™”
 	FQuat(float InW, float InX, float InY, float InZ) : w(InW), x(InX), y(InY), z(InZ) {}
 
-	// ÄõÅÍ´Ï¾ğÀÇ °ö¼À ¿¬»ê (È¸Àü °áÇÕ)
+	// ì¿¼í„°ë‹ˆì–¸ì˜ ê³±ì…ˆ ì—°ì‚° (íšŒì „ ê²°í•©)
 	FQuat operator*(const FQuat& Other) const
 	{
 		return FQuat(
@@ -35,32 +34,32 @@ struct FQuat
 		);
 	}
 
-	// (ÄõÅÍ´Ï¾ğ) º¤ÅÍ È¸Àü
+	// (ì¿¼í„°ë‹ˆì–¸) ë²¡í„° íšŒì „
 	FVector RotateVector(const FVector& Vec) const
 	{
-		// º¤ÅÍ¸¦ ÄõÅÍ´Ï¾ğÀ¸·Î º¯È¯
+		// ë²¡í„°ë¥¼ ì¿¼í„°ë‹ˆì–¸ìœ¼ë¡œ ë³€í™˜
 		FQuat vecQuat(0.0f, Vec.x, Vec.y, Vec.z);
-		// È¸Àü Àû¿ë (q * vec * q^-1)
-		FQuat conjugate = FQuat(w, -x, -y, -z);  // ÄõÅÍ´Ï¾ğÀÇ ÄÓ·¹
+		// íšŒì „ ì ìš© (q * vec * q^-1)
+		FQuat conjugate = FQuat(w, -x, -y, -z);  // ì¿¼í„°ë‹ˆì–¸ì˜ ì¼¤ë ˆ
 		FQuat result = *this * vecQuat * conjugate;
 
-		return FVector(result.x, result.y, result.z); // È¸ÀüµÈ º¤ÅÍ ¹İÈ¯
+		return FVector(result.x, result.y, result.z); // íšŒì „ëœ ë²¡í„° ë°˜í™˜
 	}
 
-	// ´ÜÀ§ ÄõÅÍ´Ï¾ğ ¿©ºÎ È®ÀÎ
+	// ë‹¨ìœ„ ì¿¼í„°ë‹ˆì–¸ ì—¬ë¶€ í™•ì¸
 	bool IsNormalized() const
 	{
 		return fabs(w * w + x * x + y * y + z * z - 1.0f) < 1e-6f;
 	}
 
-	// ÄõÅÍ´Ï¾ğ Á¤±ÔÈ­ (´ÜÀ§ ÄõÅÍ´Ï¾ğÀ¸·Î ¸¸µë)
+	// ì¿¼í„°ë‹ˆì–¸ ì •ê·œí™” (ë‹¨ìœ„ ì¿¼í„°ë‹ˆì–¸ìœ¼ë¡œ ë§Œë“¬)
 	FQuat Normalize() const
 	{
 		float magnitude = sqrtf(w * w + x * x + y * y + z * z);
 		return FQuat(w / magnitude, x / magnitude, y / magnitude, z / magnitude);
 	}
 
-	// È¸Àü °¢µµ¿Í ÃàÀ¸·ÎºÎÅÍ ÄõÅÍ´Ï¾ğ »ı¼º (axis-angle ¹æ½Ä)
+	// íšŒì „ ê°ë„ì™€ ì¶•ìœ¼ë¡œë¶€í„° ì¿¼í„°ë‹ˆì–¸ ìƒì„± (axis-angle ë°©ì‹)
 	static FQuat FromAxisAngle(const FVector& Axis, float Angle)
 	{
 		float halfAngle = Angle * 0.5f;
@@ -70,20 +69,20 @@ struct FQuat
 
 	static FQuat CreateRotation(float roll, float pitch, float yaw)
 	{
-		// °¢µµ¸¦ ¶óµğ¾ÈÀ¸·Î º¯È¯
+		// ê°ë„ë¥¼ ë¼ë””ì•ˆìœ¼ë¡œ ë³€í™˜
 		float radRoll = roll * (3.14159265359f / 180.0f);
 		float radPitch = pitch * (3.14159265359f / 180.0f);
 		float radYaw = yaw * (3.14159265359f / 180.0f);
 
-		// °¢ Ãà¿¡ ´ëÇÑ È¸Àü ÄõÅÍ´Ï¾ğ °è»ê
-		FQuat qRoll = FQuat(FVector(1.0f, 0.0f, 0.0f), radRoll);  // XÃà È¸Àü
-		FQuat qPitch = FQuat(FVector(0.0f, 1.0f, 0.0f), radPitch);  // YÃà È¸Àü
-		FQuat qYaw = FQuat(FVector(0.0f, 0.0f, 1.0f), radYaw);  // ZÃà È¸Àü
+		// ê° ì¶•ì— ëŒ€í•œ íšŒì „ ì¿¼í„°ë‹ˆì–¸ ê³„ì‚°
+		FQuat qRoll = FQuat(FVector(1.0f, 0.0f, 0.0f), radRoll);  // Xì¶• íšŒì „
+		FQuat qPitch = FQuat(FVector(0.0f, 1.0f, 0.0f), radPitch);  // Yì¶• íšŒì „
+		FQuat qYaw = FQuat(FVector(0.0f, 0.0f, 1.0f), radYaw);  // Zì¶• íšŒì „
 
-		// È¸Àü ¼ø¼­´ë·Î ÄõÅÍ´Ï¾ğ °áÇÕ (Y -> X -> Z)
+		// íšŒì „ ìˆœì„œëŒ€ë¡œ ì¿¼í„°ë‹ˆì–¸ ê²°í•© (Y -> X -> Z)
 		return qRoll * qPitch * qYaw;
 	}
-	// ÄõÅÍ´Ï¾ğÀ» È¸Àü Çà·Ä·Î º¯È¯
+	// ì¿¼í„°ë‹ˆì–¸ì„ íšŒì „ í–‰ë ¬ë¡œ ë³€í™˜
 	FMatrix ToMatrix() const
 	{
 		FMatrix RotationMatrix;

@@ -12,6 +12,7 @@ public:
     }
 
 public:
+    void Release();
     void ClearGrid() {};
     float GetSpacing() { return GridParam.gridSpacing; }
     void GenerateGrid(float spacing, int gridCount);

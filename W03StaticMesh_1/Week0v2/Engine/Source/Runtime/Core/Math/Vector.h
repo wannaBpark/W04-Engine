@@ -84,5 +84,16 @@ struct FVector
 	{
 		return DirectX::XMFLOAT3(x, y, z);
 	}
-
+    static FVector UpVector()
+    {
+        return FVector(0.0f, 0.0f, 1.0f);
+    }
+    static FVector ForwardVector()
+    {
+        return FVector(1.0f, 0.0f, 0.0f);
+    }
+    static FVector RightVector()
+    {
+        return FVector(0.0f, 1.0f, 0.0f);
+    }
 };

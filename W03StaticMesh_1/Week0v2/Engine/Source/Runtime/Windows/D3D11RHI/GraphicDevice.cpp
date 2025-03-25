@@ -13,22 +13,21 @@ void FGraphicsDevice::CreateDeviceAndSwapChain(HWND hWindow) {
     D3D_FEATURE_LEVEL featurelevels[] = { D3D_FEATURE_LEVEL_11_0 };
 
     // 스왑 체인 설정 구조체 초기화
-    DXGI_SWAP_CHAIN_DESC swapchaindesc = {};
-    swapchaindesc.BufferDesc.Width = 0; // 창 크기에 맞게 자동으로 설정
-    swapchaindesc.BufferDesc.Height = 0; // 창 크기에 맞게 자동으로 설정
-    swapchaindesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; // 색상 포맷
-    swapchaindesc.SampleDesc.Count = 1; // 멀티 샘플링 비활성화
-    swapchaindesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // 렌더 타겟으로 사용
-    swapchaindesc.BufferCount = 2; // 더블 버퍼링
-    swapchaindesc.OutputWindow = hWindow; // 렌더링할 창 핸들
-    swapchaindesc.Windowed = TRUE; // 창 모드
-    swapchaindesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // 스왑 방식
+    SwapchainDesc.BufferDesc.Width = 0; // 창 크기에 맞게 자동으로 설정
+    SwapchainDesc.BufferDesc.Height = 0; // 창 크기에 맞게 자동으로 설정
+    SwapchainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; // 색상 포맷
+    SwapchainDesc.SampleDesc.Count = 1; // 멀티 샘플링 비활성화
+    SwapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // 렌더 타겟으로 사용
+    SwapchainDesc.BufferCount = 2; // 더블 버퍼링
+    SwapchainDesc.OutputWindow = hWindow; // 렌더링할 창 핸들
+    SwapchainDesc.Windowed = TRUE; // 창 모드
+    SwapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // 스왑 방식
 
     // 디바이스와 스왑 체인 생성
     HRESULT hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr,
         D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG,
         featurelevels, ARRAYSIZE(featurelevels), D3D11_SDK_VERSION,
-        &swapchaindesc, &SwapChain, &Device, nullptr, &DeviceContext);
+        &SwapchainDesc, &SwapChain, &Device, nullptr, &DeviceContext);
 
     if (FAILED(hr)) {
         MessageBox(hWindow, L"CreateDeviceAndSwapChain failed!", L"Error", MB_ICONERROR | MB_OK);
@@ -36,10 +35,9 @@ void FGraphicsDevice::CreateDeviceAndSwapChain(HWND hWindow) {
     }
 
     // 스왑 체인 정보 가져오기 (이후에 사용을 위해)
-    SwapChain->GetDesc(&swapchaindesc);
-
-    // 뷰포트 정보 설정
-    ViewportInfo = { 0.0f, 0.0f, (float)swapchaindesc.BufferDesc.Width, (float)swapchaindesc.BufferDesc.Height, 0.0f, 1.0f };
+    SwapChain->GetDesc(&SwapchainDesc);
+    screenWidth = SwapchainDesc.BufferDesc.Width;
+    screenHeight = SwapchainDesc.BufferDesc.Height;
 }
 
 
@@ -187,8 +185,8 @@ void FGraphicsDevice::CreateFrameBuffer()
     Device->CreateRenderTargetView(FrameBuffer, &framebufferRTVdesc, &FrameBufferRTV);
     
     D3D11_TEXTURE2D_DESC textureDesc = {};
-    textureDesc.Width = ViewportInfo.Width;
-    textureDesc.Height = ViewportInfo.Height;
+    textureDesc.Width = screenWidth;
+    textureDesc.Height = screenHeight;
     textureDesc.MipLevels = 1;
     textureDesc.ArraySize = 1;
     textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -294,7 +292,7 @@ void FGraphicsDevice::Prepare()
 
     DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // 정정 연결 방식 설정
 
-    DeviceContext->RSSetViewports(1, &ViewportInfo); // GPU가 화면을 렌더링할 영역 설정
+    //DeviceContext->RSSetViewports(1, &ViewportInfo); // GPU가 화면을 렌더링할 영역 설정
     DeviceContext->RSSetState(CurrentRasterizer); //레스터 라이저 상태 설정
 
     DeviceContext->OMSetDepthStencilState(DepthStencilState, 0);
@@ -302,6 +300,23 @@ void FGraphicsDevice::Prepare()
     DeviceContext->OMSetRenderTargets(2, RTVs, DepthStencilView); // 렌더 타겟 설정(백버퍼를 가르킴)
     DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff); // 블렌뎅 상태 설정, 기본블렌딩 상태임
 }
+
+void FGraphicsDevice::Prepare(D3D11_VIEWPORT* viewport)
+{
+    DeviceContext->ClearRenderTargetView(FrameBufferRTV, ClearColor); // 렌더 타겟 뷰에 저장된 이전 프레임 데이터를 삭제
+    DeviceContext->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0); // 깊이 버퍼 초기화 추가
+
+    DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // 정정 연결 방식 설정
+
+    DeviceContext->RSSetViewports(1, viewport); // GPU가 화면을 렌더링할 영역 설정
+    DeviceContext->RSSetState(CurrentRasterizer); //레스터 라이저 상태 설정
+
+    DeviceContext->OMSetDepthStencilState(DepthStencilState, 0);
+
+    DeviceContext->OMSetRenderTargets(1, &FrameBufferRTV, DepthStencilView); // 렌더 타겟 설정(백버퍼를 가르킴)
+    DeviceContext->OMSetBlendState(nullptr, nullptr, 0xffffffff); // 블렌뎅 상태 설정, 기본블렌딩 상태임
+}
+
 
 void FGraphicsDevice::OnResize(HWND hWindow) {
     DeviceContext->OMSetRenderTargets(0, RTVs, 0);
@@ -319,13 +334,9 @@ void FGraphicsDevice::OnResize(HWND hWindow) {
 
     ReleaseFrameBuffer();
 
-    // 윈도우 크기 가져오기
-    RECT clientRect;
-    GetClientRect(hWindow, &clientRect);
-    UINT width = clientRect.right - clientRect.left;
-    UINT height = clientRect.bottom - clientRect.top;
 
-    if (width == 0 || height == 0) {
+
+    if (screenWidth == 0 || screenHeight == 0) {
         MessageBox(hWindow, L"Invalid width or height for ResizeBuffers!", L"Error", MB_ICONERROR | MB_OK);
         return;
     }
@@ -338,14 +349,17 @@ void FGraphicsDevice::OnResize(HWND hWindow) {
         return;
     }
     
+    SwapChain->GetDesc(&SwapchainDesc);
+    screenWidth = SwapchainDesc.BufferDesc.Width;
+    screenHeight = SwapchainDesc.BufferDesc.Height;
+
     CreateFrameBuffer();
     CreateDepthStencilBuffer(hWindow);
 
 
-    DXGI_SWAP_CHAIN_DESC swapchaindesc = {};
-    SwapChain->GetDesc(&swapchaindesc);
-    ViewportInfo = { 0.0f, 0.0f, (float)swapchaindesc.BufferDesc.Width, (float)swapchaindesc.BufferDesc.Height, 0.0f, 1.0f };
+
 }
+
 
 void FGraphicsDevice::ChangeRasterizer(EViewModeIndex evi)
 {
@@ -359,7 +373,7 @@ void FGraphicsDevice::ChangeRasterizer(EViewModeIndex evi)
         CurrentRasterizer = RasterizerStateSOLID;
         break;
     }
-    
+    DeviceContext->RSSetState(CurrentRasterizer); //레스터 라이저 상태 설정
 }
 
 void FGraphicsDevice::ChangeDepthStencilState(ID3D11DepthStencilState* newDetptStencil)
@@ -374,16 +388,16 @@ uint32 FGraphicsDevice::GetPixelUUID(POINT pt)
     if (pt.x < 0) {
         pt.x = 0;
     }
-    else if (pt.x > ViewportInfo.Width) {
-        pt.x = ViewportInfo.Width;
+    else if (pt.x > screenWidth) {
+        pt.x = screenWidth;
     }
 
     // pt.y 값 제한하기
     if (pt.y < 0) {
         pt.y = 0;
     }
-    else if (pt.y > ViewportInfo.Height) {
-        pt.y = ViewportInfo.Height;
+    else if (pt.y > screenHeight) {
+        pt.y = screenHeight;
     }
 
     // 1. Staging 텍스처 생성 (1x1 픽셀)

@@ -2,6 +2,9 @@
 
 #include "World.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
+#include "UnrealEd/EditorViewportClient.h"
+#include "LevelEditor/SLevelEditor.h"
+
 #include "Mesh/StaticMesh.h"
 USkySphereComponent::USkySphereComponent()
 {
@@ -30,7 +33,7 @@ void USkySphereComponent::Render()
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());
 
     // 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().View * GetEngine().Projection;
+    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
     FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
     FVector4 UUIDColor = EncodeUUID() / 255.0f;
     if (this == GetWorld()->GetPickingObj())
@@ -43,7 +46,7 @@ void USkySphereComponent::Render()
     bool isUniform = (fabs(scale.x - scale.y) < 1e-6f) && (fabs(scale.y - scale.z) < 1e-6f);
     r = { r.x * scale.x,r.y * scale.y,r.z * scale.z };
 
-    if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_AABB)) {
+    if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB)) {
         UPrimitiveBatch::GetInstance().RenderAABB(AABB, GetWorldLocation(), Model);
         UPrimitiveBatch::GetInstance().RenderOBB(AABB, GetWorldLocation(), Model);
     }

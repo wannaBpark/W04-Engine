@@ -5,7 +5,6 @@ extern FEngineLoop GEngineLoop;
 
 UPrimitiveBatch::UPrimitiveBatch()
 {
-
     GenerateGrid(5, 5000);
 }
 
@@ -15,6 +14,13 @@ UPrimitiveBatch::~UPrimitiveBatch()
         pVertexBuffer->Release();
         pVertexBuffer = nullptr;
     }
+    ReleaseOBBResources();
+    ReleaseBoundingBoxResources();
+    ReleaseConeResources();
+}
+
+void UPrimitiveBatch::Release()
+{
     ReleaseOBBResources();
     ReleaseBoundingBoxResources();
     ReleaseConeResources();

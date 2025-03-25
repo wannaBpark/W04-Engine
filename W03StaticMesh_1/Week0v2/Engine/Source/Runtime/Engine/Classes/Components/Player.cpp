@@ -1,4 +1,4 @@
-﻿#include "Components/Player.h"
+#include "Components/Player.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Engine/Source/Runtime/Engine/World.h"
 #include "Define.h"
@@ -14,6 +14,10 @@
 #include "BaseGizmos/GizmoRectangleComponent.h"
 #include "UBillboardComponent.h"
 #include "LightComponent.h"
+#include "UnrealEd/EditorViewportClient.h"
+#include "UnrealClient.h"
+#include "LevelEditor/SLevelEditor.h"
+
 
 using namespace DirectX;
 
@@ -41,7 +45,8 @@ void UPlayer::Release()
 
 void UPlayer::Input()
 {
-
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse) return;
 	if (GetAsyncKeyState(VK_LBUTTON) & 0x8000 )
 	{
 		if (!bLeftMouseDown) {
@@ -64,7 +69,7 @@ void UPlayer::Input()
 
 			FVector pickPosition;
 		
-			ScreenToViewSpace (mousePos.x, mousePos.y, GEngineLoop.View, GEngineLoop.Projection, pickPosition);
+			ScreenToViewSpace (mousePos.x, mousePos.y, GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix(), GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix(), pickPosition);
 			bool res = PickGizmo(pickPosition);
 			if(!res) PickObj(pickPosition);
 		}
@@ -211,7 +216,7 @@ bool UPlayer::PickGizmo(FVector& pickPosition)
 }
 void UPlayer::PickObj(FVector& pickPosition)
 {
-	if (!(ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) return;
+	if (!(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))) return;
 
 	UObject* Possible = nullptr;
 	int maxIntersect = 0;
@@ -265,19 +270,24 @@ void UPlayer::DeletePickedObj()
 
 void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& pickPosition)
 {
-	D3D11_VIEWPORT viewport;
+	D3D11_VIEWPORT viewport = GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetD3DViewport();
 	UINT numViewports = 1;
-	FEngineLoop::graphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
-	float screenWidth = viewport.Width;
-	float screenHeight = viewport.Height;
+	//FEngineLoop::graphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
 
-	pickPosition.x = ((2.0f * screenX / viewport.Width) - 1) / projectionMatrix[0][0];
-	pickPosition.y = -((2.0f * screenY / viewport.Height) - 1) / projectionMatrix[1][1];
+	//pickPosition.x = ((2.0f * screenX / viewport.Width) - 1) / projectionMatrix[0][0];
+	//pickPosition.y = -((2.0f * screenY / viewport.Height) - 1) / projectionMatrix[1][1];
+
+    float viewportX = screenX - viewport.TopLeftX;
+    float viewportY = screenY - viewport.TopLeftY;
+    //float viewportY = (viewport.TopLeftY + viewport.Height) - screenY;
+
+    pickPosition.x = ((2.0f * viewportX / viewport.Width) - 1) / projectionMatrix[0][0];
+    pickPosition.y = -((2.0f * viewportY / viewport.Height) - 1) / projectionMatrix[1][1];
 	pickPosition.z = 1.0f; // Near Plane
+
 }
 int UPlayer::RayIntersectsObject(const FVector& pickPosition, UPrimitiveComponent* obj, float& hitDistance, int& intersectCount)
 {
-	// ������Ʈ�� ���� ��ȯ ��� ���� (��ġ, ȸ��, ũ�� ����)
 	FMatrix scaleMatrix = FMatrix::CreateScale(
 		obj->GetWorldScale().x,
 		obj->GetWorldScale().y,
@@ -297,7 +307,7 @@ int UPlayer::RayIntersectsObject(const FVector& pickPosition, UPrimitiveComponen
 	// ���� ��ȯ ���
 	FMatrix worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
 
-	FMatrix ViewMatrix = GEngineLoop.View;
+	FMatrix ViewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
 	FMatrix inverseMatrix = FMatrix::Inverse(worldMatrix * ViewMatrix);
 
 	FVector cameraOrigin = { 0,0,0 };
@@ -335,7 +345,6 @@ void UPlayer::PickedObjControl()
 			ControlRotation(pObj, Gizmo, deltaX, deltaY);
 			break;
 		}
-		// ���ο� ���콺 ��ġ ����
 		m_LastMousePos = currentMousePos;
 	}
 }
@@ -347,7 +356,6 @@ void UPlayer::ControlRotation(USceneComponent* pObj, UPrimitiveComponent* Gizmo,
 		FVector cameraRight = GetWorld()->GetCamera()->GetRightVector();
 		FVector cameraUp = GetWorld()->GetCamera()->GetUpVector();
 
-		// ���� ���� ȸ���� ��������
 		FQuat currentRotation = pObj->GetQuat();
 
 		FQuat rotationDelta;
@@ -412,7 +420,6 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UPrimitiveComponent* Giz
 			FVector crossResult = vecObjToCamera.Cross(FVector(1.0f, 0.0f, 0.0f));
 			if (crossResult.z > 0)
 				degree *= -1.0f;
-			//UE_LOG(LogLevel::Error, "%f", degree);
 
 			if ( 0 < degree && degree <  180.0f)
 				pObj->AddLocation(FVector(1.0f, 0.0f, 0.0f) * deltaXf * 0.01f);
@@ -430,7 +437,6 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UPrimitiveComponent* Giz
 			FVector crossResult = vecObjToCamera.Cross(FVector(0.0f, 1.0f, 0.0f));
 			if (crossResult.z > 0)
 				degree *= -1.0f;
-			//UE_LOG(LogLevel::Error, "%f", degree);
 			if (0 < degree && degree < 180)
 				pObj->AddLocation(FVector(0.0f, 1.0f, 0.0f) * deltaXf * 0.01f);
 			else
@@ -458,7 +464,6 @@ void UPlayer::ControlScale(USceneComponent* pObj, UPrimitiveComponent* Gizmo, in
 		FVector crossResult = vecObjToCamera.Cross(FVector(1.0f, 0.0f, 0.0f));
 		if (crossResult.z > 0)
 			degree *= -1.0f;
-		//UE_LOG(LogLevel::Error, "%f", degree);
 
 		if (0 < degree && degree < 180.0f)
 			pObj->AddScale(FVector(1.0f, 0.0f, 0.0f) * deltaXf * 0.01f);
@@ -476,7 +481,6 @@ void UPlayer::ControlScale(USceneComponent* pObj, UPrimitiveComponent* Gizmo, in
 		FVector crossResult = vecObjToCamera.Cross(FVector(0.0f, 1.0f, 0.0f));
 		if (crossResult.z > 0)
 			degree *= -1.0f;
-		//UE_LOG(LogLevel::Error, "%f", degree);
 		if (0 < degree && degree < 180)
 			pObj->AddScale(FVector(0.0f, 1.0f, 0.0f) * deltaXf * 0.01f);
 		else

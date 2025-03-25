@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -168,6 +168,8 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Source\Editor\LevelEditor\SLevelEditor.cpp" />
+    <ClCompile Include="Engine\Source\Editor\PropertyEditor\ViewportTypePanel.cpp" />
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Casts.cpp" />
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\NameTypes.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Container\String.cpp" />
@@ -182,6 +184,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\StaticMeshComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\FLoaderOBJ.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\UnrealClient.cpp" />
     <ClCompile Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoArrowComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Camera\CameraComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\UserInterface\Console.cpp" />
@@ -192,6 +195,8 @@
     <ClCompile Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoCircleComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Launch\EngineLoop.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Launch\ImGuiManager.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\SlateCore\Widgets\SWindow.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Slate\Widgets\Layout\SSplitter.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\include\ImGUI\imgui.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\include\ImGUI\imgui_demo.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\include\ImGUI\imgui_draw.cpp" />
@@ -226,6 +231,8 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\QuadTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Source\Editor\LevelEditor\SLevelEditor.h" />
+    <ClInclude Include="Engine\Source\Editor\PropertyEditor\ViewportTypePanel.h" />
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\Casts.h" />
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\NameTypes.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Container\Array.h" />
@@ -248,6 +255,8 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\StaticMeshComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\FLoaderOBJ.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\UnrealClient.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\ViewportClient.h" />
     <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoArrowComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Camera\CameraComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\UserInterface\Console.h" />
@@ -258,6 +267,9 @@
     <ClInclude Include="Engine\Source\Editor\UnrealEd\EditorWindow.h" />
     <ClInclude Include="Engine\Source\Runtime\Launch\EngineLoop.h" />
     <ClInclude Include="Engine\Source\Runtime\Launch\ImGuiManager.h" />
+    <ClInclude Include="Engine\Source\Runtime\Serialization\Serializer.h" />
+    <ClInclude Include="Engine\Source\Runtime\SlateCore\Widgets\SWindow.h" />
+    <ClInclude Include="Engine\Source\Runtime\Slate\Widgets\Layout\SSplitter.h" />
     <ClInclude Include="Engine\Source\ThirdParty\DirectXTK\Include\DDSTextureLoader.h" />
     <ClInclude Include="Font\IconDefs.h" />
     <ClInclude Include="Font\RawFonts.h" />

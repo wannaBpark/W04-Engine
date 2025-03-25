@@ -5,6 +5,8 @@
 #include "UnrealEd/PrimitiveBatch.h"
 #include "UObject/ObjectFactory.h"
 
+#include "UnrealEd/EditorViewportClient.h"
+#include "LevelEditor/SLevelEditor.h"
 UCubeComp::UCubeComp()
 {
     staticMesh = FObjectFactory::ConstructObject<UStaticMesh>();
@@ -34,7 +36,7 @@ void UCubeComp::Render()
 {
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());
     // 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().View * GetEngine().Projection;
+    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
     FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
     FVector4 UUIDColor = EncodeUUID() / 255.0f;
     if (this == GetWorld()->GetPickingObj()) {
@@ -43,8 +45,8 @@ void UCubeComp::Render()
     else
         FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
 
-    if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_AABB))
+    if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
         UPrimitiveBatch::GetInstance().RenderAABB(AABB, GetWorldLocation(), Model);
-    if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_Primitives))
+    if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))
         Super::Render();
 }
