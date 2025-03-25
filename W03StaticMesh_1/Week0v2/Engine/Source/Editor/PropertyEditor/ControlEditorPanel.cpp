@@ -265,10 +265,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 {
                     SpawnedActor = World->SpawnActor<AActor>();
                     SpawnedActor->SetActorLabel(TEXT("OBJ_CUBE"));
-                    UCubeComp* CubeComp = SpawnedActor->AddComponent<UCubeComp>();
-                    USphereComp* SphereComp = SpawnedActor->AddComponent<USphereComp>();
-                    SphereComp->SetLocation({10, 0, 0});
-                    SphereComp->SetupAttachment(CubeComp);
+                    SpawnedActor->AddComponent<UCubeComp>();
                     break;
                 }
                 case OBJ_SpotLight:
