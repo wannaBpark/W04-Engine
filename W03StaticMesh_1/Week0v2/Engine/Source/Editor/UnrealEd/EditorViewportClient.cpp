@@ -217,12 +217,12 @@ void FEditorViewportClient::CameraRotatePitch(float _Value)
 
 void FEditorViewportClient::PivotMoveRight(float _Value)
 {
-    Pivot = Pivot + ViewTransformOrthographic.GetRightVector() * _Value * 0.01f;
+    Pivot = Pivot + ViewTransformOrthographic.GetRightVector() * _Value * -0.05f;
 }
 
 void FEditorViewportClient::PivotMoveUp(float _Value)
 {
-    Pivot = Pivot + ViewTransformOrthographic.GetUpVector() * _Value * -0.01f;
+    Pivot = Pivot + ViewTransformOrthographic.GetUpVector() * _Value * 0.05f;
 }
 
 void FEditorViewportClient::UpdateViewMatrix()

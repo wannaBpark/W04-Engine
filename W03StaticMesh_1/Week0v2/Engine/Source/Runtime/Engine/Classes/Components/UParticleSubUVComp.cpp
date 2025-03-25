@@ -7,7 +7,7 @@
 
 UParticleSubUVComp::UParticleSubUVComp()
 {
-    SetType("Quad");
+    SetType(StaticClass()->GetName());
 }
 
 UParticleSubUVComp::~UParticleSubUVComp()
@@ -70,8 +70,8 @@ void UParticleSubUVComp::Release()
 void UParticleSubUVComp::Render()
 {
 	FEngineLoop::renderer.PrepareTextureShader();
-	FEngineLoop::renderer.UpdateSubUVConstant(finalIndexU, finalIndexV);
 	FEngineLoop::renderer.PrepareSubUVConstant();
+	FEngineLoop::renderer.UpdateSubUVConstant(finalIndexU, finalIndexV);
 
 	FMatrix Model = CreateBillboardMatrix();
 
@@ -84,6 +84,7 @@ void UParticleSubUVComp::Render()
 	}
 	else
 		FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+    
 	if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
 
 		FEngineLoop::renderer.RenderTexturePrimitive(vertexSubUVBuffer, numTextVertices,
