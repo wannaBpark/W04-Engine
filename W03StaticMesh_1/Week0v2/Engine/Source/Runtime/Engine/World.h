@@ -1,5 +1,7 @@
 #pragma once
 #include "Define.h"
+#include "Delegates/Delegate.h"
+#include "Delegates/DelegateCombination.h"
 #include "UnrealEd/SceneMgr.h"
 #include "UObject/ObjectTypes.h"
 class UObject;
@@ -8,6 +10,9 @@ class UCameraComponent;
 class UPlayer;
 class USceneComponent;
 class UTransformGizmo;
+
+DECLARE_DELEGATE_OneParam(FOnSelectedObject, UObject*);
+
 class UWorld
 {
 public:
@@ -54,4 +59,6 @@ public:
     UObject* GetWorldGizmo() { return worldGizmo; }
     USceneComponent* GetPickingGizmo() { return pickingGizmo; }
     void	SetPickingGizmo(UObject* _Obj);
+
+    FOnSelectedObject OnSelectedObject;
 };
