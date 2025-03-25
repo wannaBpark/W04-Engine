@@ -35,7 +35,7 @@ void UGizmoArrowComponent::Render()
     ID3D11DepthStencilState* DepthStateDisable = FEngineLoop::graphicDevice.DepthStateDisable;
     FEngineLoop::graphicDevice.DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
 #pragma endregion GizmoDepth
-
+    
     if (!GetWorld()->GetPickingObj() || GetWorld()->GetPlayer()->GetControlMode() != CM_TRANSLATION)
         return;
     if (!staticMesh) return;
@@ -55,7 +55,7 @@ void UGizmoArrowComponent::Render()
         FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
     
     FEngineLoop::graphicDevice.DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID); // fill solid로 렌더링.
-    FEngineLoop::renderer.RenderPrimitive(renderData, OverrideMaterials);
+    FEngineLoop::renderer.RenderPrimitive(renderData, staticMesh->GetMaterials(), OverrideMaterials, selectedSubMeshIndex);
     FEngineLoop::graphicDevice.DeviceContext->RSSetState(FEngineLoop::graphicDevice.GetCurrentRasterizer()); // 이전 레스터라이저 재설정.
 
 #pragma region GizmoDepth

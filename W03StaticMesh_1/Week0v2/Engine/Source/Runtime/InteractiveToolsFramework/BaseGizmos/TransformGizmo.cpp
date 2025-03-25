@@ -53,6 +53,7 @@ UTransformGizmo::UTransformGizmo()
     locationX->SetGizmoType(UGizmoBaseComponent::ArrowX);
 	AttachChildren.Add(locationX);
 	ArrowArr.Add(locationX);
+    GetWorld()->GetObjectArr().Add(locationX);
 
     UGizmoArrowComponent* locationY = FObjectFactory::ConstructObject<UGizmoArrowComponent>();
     locationY->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"gizmo_loc_y.obj"));
@@ -60,6 +61,7 @@ UTransformGizmo::UTransformGizmo()
     locationY->SetGizmoType(UGizmoBaseComponent::ArrowY);
     AttachChildren.Add(locationY);
     ArrowArr.Add(locationY);
+    GetWorld()->GetObjectArr().Add(locationY);
 
     UGizmoArrowComponent* locationZ = FObjectFactory::ConstructObject<UGizmoArrowComponent>();
     locationZ->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"gizmo_loc_z.obj"));
@@ -67,6 +69,7 @@ UTransformGizmo::UTransformGizmo()
     locationZ->SetGizmoType(UGizmoBaseComponent::ArrowZ);
     AttachChildren.Add(locationZ);
     ArrowArr.Add(locationZ);
+    GetWorld()->GetObjectArr().Add(locationZ);
 
     UGizmoRectangleComponent* ScaleX = FObjectFactory::ConstructObject<UGizmoRectangleComponent>();
     ScaleX->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"gizmo_scale_x.obj"));
@@ -74,6 +77,7 @@ UTransformGizmo::UTransformGizmo()
     ScaleX->SetGizmoType(UGizmoBaseComponent::ScaleX);
     AttachChildren.Add(ScaleX);
     RectangleArr.Add(ScaleX);
+    GetWorld()->GetObjectArr().Add(ScaleX);
 
     UGizmoRectangleComponent* ScaleY = FObjectFactory::ConstructObject<UGizmoRectangleComponent>();
     ScaleY->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"gizmo_scale_y.obj"));
@@ -81,6 +85,7 @@ UTransformGizmo::UTransformGizmo()
     ScaleY->SetGizmoType(UGizmoBaseComponent::ScaleY);
     AttachChildren.Add(ScaleY);
     RectangleArr.Add(ScaleY);
+    GetWorld()->GetObjectArr().Add(ScaleY);
 
     UGizmoRectangleComponent* ScaleZ = FObjectFactory::ConstructObject<UGizmoRectangleComponent>();
     ScaleZ->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"gizmo_scale_z.obj"));
@@ -88,6 +93,7 @@ UTransformGizmo::UTransformGizmo()
     ScaleZ->SetGizmoType(UGizmoBaseComponent::ScaleZ);
     AttachChildren.Add(ScaleZ);
     RectangleArr.Add(ScaleZ);
+    GetWorld()->GetObjectArr().Add(ScaleZ);
 
     UGizmoCircleComponent* CircleX = FObjectFactory::ConstructObject<UGizmoCircleComponent>();
     CircleX->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"gizmo_rot_x.obj"));
@@ -95,6 +101,7 @@ UTransformGizmo::UTransformGizmo()
     CircleX->SetGizmoType(UGizmoBaseComponent::CircleX);
     AttachChildren.Add(CircleX);
     CircleArr.Add(CircleX);
+    GetWorld()->GetObjectArr().Add(CircleX);
 
     UGizmoCircleComponent* CircleY = FObjectFactory::ConstructObject<UGizmoCircleComponent>();
     CircleY->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"gizmo_rot_y.obj"));
@@ -102,6 +109,7 @@ UTransformGizmo::UTransformGizmo()
     CircleY->SetGizmoType(UGizmoBaseComponent::CircleY);
     AttachChildren.Add(CircleY);
     CircleArr.Add(CircleY);
+    GetWorld()->GetObjectArr().Add(CircleY);
 
     UGizmoCircleComponent* CircleZ = FObjectFactory::ConstructObject<UGizmoCircleComponent>();
     CircleZ->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"gizmo_rot_z.obj"));
@@ -109,6 +117,7 @@ UTransformGizmo::UTransformGizmo()
     CircleZ->SetGizmoType(UGizmoBaseComponent::CircleZ);
     AttachChildren.Add(CircleZ);
     CircleArr.Add(CircleZ);
+    GetWorld()->GetObjectArr().Add(CircleZ);
 }
 
 UTransformGizmo::~UTransformGizmo()
