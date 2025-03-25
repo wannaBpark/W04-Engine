@@ -1,8 +1,13 @@
 ﻿#include "ControlEditorPanel.h"
 
 #include "ShowFlags.h"
-#include "Camera/CameraComponent.h"
-#include "Components/Player.h"
+#include "World.h"
+#include "Actors/Player.h"
+#include "Components/CubeComp.h"
+#include "Components/LightComponent.h"
+#include "Components/SphereComp.h"
+#include "Components/UParticleSubUVComp.h"
+#include "Components/UText.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 #include "UnrealEd/EditorViewportClient.h"
@@ -81,7 +86,7 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
         
         if (ImGui::MenuItem("New Scene"))
         {
-            GEngineLoop.GetWorld()->NewScene();
+            // TODO: New Scene
         }
 
         if (ImGui::MenuItem("Load Scene"))
@@ -96,10 +101,7 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
                 return;
             }
 
-            FString SceneName(FileName);
-            FString LoadJsonData = FSceneMgr::LoadSceneFromFile(SceneName);
-            SceneData LoadData = FSceneMgr::ParseSceneData(LoadJsonData);
-            GEngineLoop.GetWorld()->LoadData(LoadData);
+            // TODO: Load Scene
         }
 
         ImGui::Separator();
@@ -114,11 +116,9 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
                 ImGui::End();
                 return;
             }
-            
-            FString SceneName(FileName);
-            SceneData SaveData = GEngineLoop.GetWorld()->SaveData();
-            FSceneMgr::SaveSceneToFile(SceneName, SaveData);
-            
+
+            // TODO: Save Scene
+
             tinyfd_messageBox("알림", "저장되었습니다.", "ok", "info", 1);
         }
 
@@ -249,7 +249,66 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
         {
             if (ImGui::Selectable(primitive.label))
             {
-                GEngineLoop.GetWorld()->SpawnObject(static_cast<OBJECTS>(primitive.obj));
+                // GEngineLoop.GetWorld()->SpawnObject(static_cast<OBJECTS>(primitive.obj));
+                UWorld* World = GEngineLoop.GetWorld();
+                AActor* SpawnedActor = nullptr;
+                switch (static_cast<OBJECTS>(primitive.obj))
+                {
+                case OBJ_SPHERE:
+                {
+                    SpawnedActor = World->SpawnActor<AActor>();
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_SPHERE"));
+                    SpawnedActor->AddComponent<USphereComp>();
+                    break;
+                }
+                case OBJ_CUBE:
+                {
+                    SpawnedActor = World->SpawnActor<AActor>();
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_CUBE"));
+                    UCubeComp* CubeComp = SpawnedActor->AddComponent<UCubeComp>();
+                    USphereComp* SphereComp = SpawnedActor->AddComponent<USphereComp>();
+                    SphereComp->SetLocation({10, 0, 0});
+                    SphereComp->SetupAttachment(CubeComp);
+                    break;
+                }
+                case OBJ_SpotLight:
+                {
+                    SpawnedActor = World->SpawnActor<AActor>();
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_SpotLight"));
+                    SpawnedActor->AddComponent<ULightComponentBase>();
+                    break;
+                }
+                case OBJ_PARTICLE:
+                {
+                    SpawnedActor = World->SpawnActor<AActor>();
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_PARTICLE"));
+                    UParticleSubUVComp* ParticleComponent = SpawnedActor->AddComponent<UParticleSubUVComp>();
+                    ParticleComponent->SetTexture(L"Assets/Texture/T_Explosion_SubUV.png");
+                    ParticleComponent->SetRowColumnCount(6, 6);
+                    ParticleComponent->SetScale(FVector(10.0f, 10.0f, 1.0f));
+                    break;
+                }
+                case OBJ_Text:
+                {
+                    SpawnedActor = World->SpawnActor<AActor>();
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_Text"));
+                    UText* TextComponent = SpawnedActor->AddComponent<UText>();
+                    TextComponent->SetTexture(L"Assets/Texture/font.png");
+                    TextComponent->SetRowColumnCount(106, 106);
+                    TextComponent->SetText(L"안녕하세요 Jungle 1");
+                    break;
+                }
+                case OBJ_TRIANGLE:
+                case OBJ_CAMERA:
+                case OBJ_PLAYER:
+                case OBJ_END:
+                    break;
+                }
+        
+                if (SpawnedActor)
+                {
+                    World->SetPickedActor(SpawnedActor);
+                }
             }
         }
         ImGui::EndPopup();
