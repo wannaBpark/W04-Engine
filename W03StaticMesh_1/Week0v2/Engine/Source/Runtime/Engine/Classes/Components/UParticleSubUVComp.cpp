@@ -27,12 +27,13 @@ void UParticleSubUVComp::InitializeComponent()
 void UParticleSubUVComp::TickComponent(float DeltaTime)
 {
     Super::TickComponent(DeltaTime);
+    if (!bIsActivate) return;
 
 	uint32 CellWidth = Texture->width / CellsPerColumn;
 	uint32 CellHeight = Texture->height / CellsPerColumn;
 
 
-	second += static_cast<float>(DeltaTime);
+	second += DeltaTime;
 	if (second >= 75)
 	{
 		indexU++;
@@ -48,8 +49,9 @@ void UParticleSubUVComp::TickComponent(float DeltaTime)
 		indexU = 0;
 		indexV = 0;
 
-	    // TODO: 파티클 제거 수정
-	    DestroyComponent();
+	    // TODO: 파티클 제거는 따로 안하고, Actor에 LifeTime을 설정하든가, 파티클의 Activate 설정을 추가하던가 하기로
+	    bIsActivate = false;
+	    // DestroyComponent();
 		// GetWorld()->ThrowAwayObj(this);
 		// GetWorld()->SetPickingObj(nullptr);
 	}
@@ -64,6 +66,8 @@ void UParticleSubUVComp::TickComponent(float DeltaTime)
 
 void UParticleSubUVComp::Render()
 {
+    if (!bIsActivate) return;
+
 	FEngineLoop::renderer.PrepareTextureShader();
 	FEngineLoop::renderer.UpdateSubUVConstant(finalIndexU, finalIndexV);
 	FEngineLoop::renderer.PrepareSubUVConstant();

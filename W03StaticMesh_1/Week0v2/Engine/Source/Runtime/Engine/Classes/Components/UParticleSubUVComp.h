@@ -29,6 +29,9 @@ private:
     float finalIndexU = 0.0f;
     float finalIndexV = 0.0f;
 
+    // TODO: UActorComponent에 Activate, Deactivate 만들기
+    bool bIsActivate = true;
+
     void UpdateVertexBuffer(const TArray<FVertexTexture>& vertices);
     void CreateSubUVVertexBuffer();
 };
