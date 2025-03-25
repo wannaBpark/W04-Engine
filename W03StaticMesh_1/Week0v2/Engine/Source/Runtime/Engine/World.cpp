@@ -46,46 +46,6 @@ void UWorld::CreateBaseObject()
         UObject* pLocalGizmo = FObjectFactory::ConstructObject<UTransformGizmo>();
         LocalGizmo = static_cast<UTransformGizmo*>(pLocalGizmo);
     }
-	////테스트용 텍스트
-	
-	/*UObject* pObj = FObjectFactory::ConstructObject<USkySphereComponent>();
-	USkySphereComponent* skySphere = static_cast<USkySphereComponent*>(pObj);
-	skySphere->SetTexture(L"Assets/Texture/ocean_sky.jpg");
-	skySphere->SetScale(FVector( -300.0f, -300.0f, -300.0f));
-	skySphere->SetRotation(FVector(-167.0f, 25.0f, -135.0f));
-
-	GUObjectArray.Add(skySphere);*/
-
-
-	//테스트용 텍스트
-	
-	
-/*
-
-	//테스트용 빌보드. 필요없으면 삭제
-	UObject* billboard = FObjectFactory::ConstructObject<UBillboardComponent>();
-	billboard = static_cast<UBillboardComponent*>(billboard);
-	UBillboardComponent* castBillboard = static_cast<UBillboardComponent*>(billboard);
-	castBillboard->SetTexture(L"Assets/Texture/emart.png");
-	GUObjectArray.Add(billboard);
-
-
-	/*
-	//테스트용 텍스트
-	UObject* uuid = FObjectFactory::ConstructObject<UTextUUID>();
-	UTextUUID* castUUID = static_cast<UTextUUID*>(uuid);
-	castUUID->SetTexture(L"Assets/Texture/font.png");
-	castUUID->SetRowColumnCount(106, 106);
-	castUUID->SetUUID(sphere->UUID);
-	castUUID->SetScale(FVector(0.25f, 0.25f, 0.25f));
-	//SetText전에 RowColumn 반드시 설정
-	GUObjectArray.Add(uuid);
-
-	castUUID->SetUUIDParent(sphere);
-	//castBillboard->SetupAttachment(sphere);
-	//sphere->AddChild(castBillboard);
-	//cube->AddChild(sphere);
-*/
 }
 
 void UWorld::ReleaseBaseObject()
@@ -106,7 +66,6 @@ void UWorld::RenderBaseObject()
 
 void UWorld::Tick(float DeltaTime)
 {
-	Input();
 	camera->TickComponent(DeltaTime);
 	localPlayer->Tick(DeltaTime);
 	LocalGizmo->Tick(DeltaTime);
@@ -189,72 +148,7 @@ bool UWorld::DestroyActor(AActor* Actor)
     return true;
 }
 
-void UWorld::Input()
-{
-
-}
-
-void UWorld::LoadData(SceneData& _Data)
-{
-	Release();
-	CreateBaseObject();
-	for (auto iter : _Data.Primitives)
-	{
-		GUObjectArray.Add(iter.Value);
-	}
-
-    camera = static_cast<UCameraComponent*>(_Data.Cameras[0]);
-}
-
-SceneData UWorld::SaveData()
-{
-	SceneData Save;
-	int32 Count = 0;
-	for (UObject* iter : GUObjectArray)
-	{
-	    if (const USceneComponent* Primitive = Cast<USceneComponent>(iter))
-	    {
-            if (!Primitive->IsA<UBillboardComponent>())
-            {
-                Save.Primitives[Count] = iter;
-                Count++;
-            }
-		}
-	}
-    // TODO :
-    // 이후 카메라가 여러 대로 바뀌면 루프로 바꾸기
-    Save.Cameras[0] = GetCamera();
-	Save.Version = 1;
-	Save.NextUUID = Count;
-	
-	return Save;
-}
-
-void UWorld::NewScene()
-{
-	Release();
-	CreateBaseObject();
-}
-
-void UWorld::ThrowAwayObj(UObject* _Obj)
-{
-	Trashbin.Add(_Obj);
-}
-
-void UWorld::CleanUp()
-{
-	if (Trashbin.IsEmpty())
-		return;
-
-    for (const auto& Obj : Trashbin)
-    {
-        GUObjectArray.Remove(Obj);
-        delete Obj;
-    }
-    Trashbin.Empty();
-}
-
-void UWorld::SetPickingGizmo(UObject* _Obj)
+void UWorld::SetPickingGizmo(UObject* Object)
 {
 	pickingGizmo = static_cast<USceneComponent*>(_Obj);
 }

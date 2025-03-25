@@ -152,7 +152,8 @@ void FEngineLoop::Tick()
 		ViewModeDropdown::GetInstance().Draw(GetWorld());
 		UIMgr->EndFrame();
 
-		GWorld->CleanUp();
+	    // Pending 처리된 오브젝트 제거
+        GUObjectArray.ProcessPendingDestroyObjects();
 
 		graphicDevice.SwapBuffer();
 		do

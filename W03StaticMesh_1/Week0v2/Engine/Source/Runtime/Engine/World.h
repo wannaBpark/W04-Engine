@@ -1,7 +1,6 @@
 #pragma once
 #include "Define.h"
 #include "Container/Set.h"
-#include "UnrealEd/SceneMgr.h"
 #include "UObject/ObjectFactory.h"
 #include "UObject/ObjectTypes.h"
 #include "UObject/UObjectArray.h"
@@ -29,16 +28,7 @@ public:
     void RenderBaseObject();
     void Tick(float DeltaTime);
     void Release();
-    void Input();
 
-    [[deprecated]]
-    void LoadData(SceneData& _Data);
-    [[deprecated]]
-    SceneData SaveData();
-    [[deprecated]]
-    void NewScene();
-    void ThrowAwayObj(UObject* _Obj);
-    void CleanUp();
     void Render();
 
     /**
@@ -55,7 +45,6 @@ public:
 
 private:
     const FString defaultMapName = "Default";
-    TArray<UObject*> Trashbin;
 
     /** World에서 관리되는 모든 Actor의 목록 */
     TSet<AActor*> ActorsArray;
@@ -71,6 +60,7 @@ private:
     USceneComponent* pickingGizmo = nullptr;
     UCameraComponent* camera = nullptr;
     UPlayer* localPlayer = nullptr;
+
 public:
     UObject* worldGizmo = nullptr;
 
@@ -81,12 +71,13 @@ public:
     UPlayer* GetPlayer() const { return localPlayer; }
 
 
+    // EditorManager 같은데로 보내기
     AActor* GetPickedActor() const { return PickedActor; }
     void SetPickedActor(AActor* InActor) { PickedActor = InActor; }
 
     UObject* GetWorldGizmo() const { return worldGizmo; }
     USceneComponent* GetPickingGizmo() const { return pickingGizmo; }
-    void	SetPickingGizmo(UObject* _Obj);
+    void SetPickingGizmo(UObject* Object);
 };
 
 

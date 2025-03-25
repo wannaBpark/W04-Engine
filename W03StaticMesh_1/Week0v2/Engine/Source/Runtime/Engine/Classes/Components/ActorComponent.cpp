@@ -39,4 +39,7 @@ void UActorComponent::DestroyComponent()
     }
 
     OnComponentDestroyed();
+
+    // 나중에 ProcessPendingDestroyObjects에서 실제로 제거
+    GUObjectArray.MarkRemoveObject(this);
 }
