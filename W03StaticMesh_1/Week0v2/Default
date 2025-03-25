@@ -35,42 +35,6 @@
                 -300.0
             ],
             "Type": "USkySphereComponent"
-        },
-        "1": {
-            "Location": [
-                6.700000286102295,
-                0.0,
-                0.0
-            ],
-            "Rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "Scale": [
-                1.0,
-                1.0,
-                1.0
-            ],
-            "Type": "UCubeComp"
-        },
-        "2": {
-            "Location": [
-                0.0,
-                5.170000076293945,
-                0.0
-            ],
-            "Rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "Scale": [
-                1.0,
-                1.0,
-                1.0
-            ],
-            "Type": "UCubeComp"
         }
     },
     "Version": 1
