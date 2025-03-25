@@ -216,7 +216,8 @@ void UWorld::NewScene()
 
 void UWorld::SetPickingObj(UObject* _Obj)
 {
-	 pickingObj = static_cast<USceneComponent*>(_Obj); 
+	pickingObj = static_cast<USceneComponent*>(_Obj);
+    OnSelectedObject.ExecuteIfBound(pickingObj);
 }
 
 void UWorld::DeleteObj(UObject* _Obj)
