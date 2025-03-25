@@ -8,12 +8,11 @@
 #include "UnrealClient.h"
 #include "slate/Widgets/Layout/SSplitter.h"
 #include "LevelEditor/SLevelEditor.h"
-#include "UnrealEd/PrimitiveBatch.h"
 
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
     {
@@ -93,9 +92,11 @@ uint32 FEngineLoop::TotalAllocationBytes = 0;
 uint32 FEngineLoop::TotalAllocationCount = 0;
 
 FEngineLoop::FEngineLoop()
-    : UIMgr(nullptr)
+    : hWnd(nullptr)
+    , UIMgr(nullptr)
     , GWorld(nullptr)
     , LevelEditor(nullptr)
+    , UnrealEditor(nullptr)
 {
 }
 
@@ -143,7 +144,7 @@ void FEngineLoop::Render()
             // renderer.PrepareShader();
             // renderer.UpdateLightBuffer();
             // RenderWorld();
-            renderer.PrepareRender(GUObjectArray.GetObjectItemArrayUnsafe());
+            renderer.PrepareRender();
             renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
         }
         GetLevelEditor()->SetViewportClient(viewportClient);
@@ -156,7 +157,7 @@ void FEngineLoop::Render()
         // renderer.PrepareShader();
         // renderer.UpdateLightBuffer();
         // RenderWorld();
-        renderer.PrepareRender(GUObjectArray.GetObjectItemArrayUnsafe());
+        renderer.PrepareRender();
         renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
     }
 }

@@ -488,7 +488,7 @@ void FRenderer::UpdateLitUnlitConstant(int isLit) const
     }
 }
 
-void FRenderer::UpdateSubMeshConstant(bool isSelected)
+void FRenderer::UpdateSubMeshConstant(bool isSelected) const
 {
     if (SubMeshConstantBuffer) {
         D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU �� �޸� �ּ� ����
@@ -785,7 +785,7 @@ ID3D11Buffer* FRenderer::CreateStaticVerticesBuffer() const
 
 ID3D11Buffer* FRenderer::CreateBoundingBoxBuffer(UINT numBoundingBoxes) const
 {
-    D3D11_BUFFER_DESC bufferDesc = {};
+    D3D11_BUFFER_DESC bufferDesc;
     bufferDesc.Usage = D3D11_USAGE_DYNAMIC; // ���� ������Ʈ�� ��� DYNAMIC, �׷��� ������ DEFAULT
     bufferDesc.ByteWidth = sizeof(FBoundingBox) * numBoundingBoxes;
     bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
@@ -800,7 +800,7 @@ ID3D11Buffer* FRenderer::CreateBoundingBoxBuffer(UINT numBoundingBoxes) const
 
 ID3D11Buffer* FRenderer::CreateOBBBuffer(UINT numBoundingBoxes) const
 {
-    D3D11_BUFFER_DESC bufferDesc = {};
+    D3D11_BUFFER_DESC bufferDesc;
     bufferDesc.Usage = D3D11_USAGE_DYNAMIC; // ���� ������Ʈ�� ��� DYNAMIC, �׷��� ������ DEFAULT
     bufferDesc.ByteWidth = sizeof(FOBB) * numBoundingBoxes;
     bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
@@ -830,7 +830,7 @@ ID3D11Buffer* FRenderer::CreateConeBuffer(UINT numCones) const
 
 ID3D11ShaderResourceView* FRenderer::CreateBoundingBoxSRV(ID3D11Buffer* pBoundingBoxBuffer, UINT numBoundingBoxes)
 {
-    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
     srvDesc.Format = DXGI_FORMAT_UNKNOWN; // ����ü ������ ��� UNKNOWN
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
     srvDesc.Buffer.ElementOffset = 0;
@@ -843,7 +843,7 @@ ID3D11ShaderResourceView* FRenderer::CreateBoundingBoxSRV(ID3D11Buffer* pBoundin
 
 ID3D11ShaderResourceView* FRenderer::CreateOBBSRV(ID3D11Buffer* pBoundingBoxBuffer, UINT numBoundingBoxes)
 {
-    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
     srvDesc.Format = DXGI_FORMAT_UNKNOWN; // ����ü ������ ��� UNKNOWN
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
     srvDesc.Buffer.ElementOffset = 0;
@@ -854,7 +854,7 @@ ID3D11ShaderResourceView* FRenderer::CreateOBBSRV(ID3D11Buffer* pBoundingBoxBuff
 
 ID3D11ShaderResourceView* FRenderer::CreateConeSRV(ID3D11Buffer* pConeBuffer, UINT numCones)
 {
-    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
     srvDesc.Format = DXGI_FORMAT_UNKNOWN; // ����ü ������ ��� UNKNOWN
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
     srvDesc.Buffer.ElementOffset = 0;
@@ -923,7 +923,7 @@ void FRenderer::UpdateLinePrimitveCountBuffer(int numBoundingBoxes, int numCones
 {
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     HRESULT hr = Graphics->DeviceContext->Map(LinePrimitiveBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-    auto pData = reinterpret_cast<FPrimitiveCounts*>(mappedResource.pData);
+    auto pData = static_cast<FPrimitiveCounts*>(mappedResource.pData);
     pData->BoundingBoxCount = numBoundingBoxes;
     pData->ConeCount = numCones;
     Graphics->DeviceContext->Unmap(LinePrimitiveBuffer, 0);
@@ -944,7 +944,7 @@ void FRenderer::RenderBatch(
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void FRenderer::PrepareRender(const TArray<UObject*>& Objects)
+void FRenderer::PrepareRender()
 {
     for (const auto iter : TObjectRange<USceneComponent>())
     {

@@ -79,8 +79,8 @@ public:
     void UpdateLightBuffer() const;
     void UpdateConstant(const FMatrix& MVP, const FMatrix& NormalMatrix, FVector4 UUIDColor, bool IsSelected) const;
     void UpdateMaterial(const FObjMaterialInfo& MaterialInfo) const;
-    void UpdateLitUnlitConstant(int isLit);
-    void UpdateSubMeshConstant(bool isSelected);
+    void UpdateLitUnlitConstant(int isLit) const;
+    void UpdateSubMeshConstant(bool isSelected) const;
 
 public://텍스쳐용 기능 추가
     ID3D11VertexShader* VertexTextureShader = nullptr;
@@ -118,7 +118,7 @@ public: // line shader
     void PrepareLineShader() const;
     void CreateLineShader();
     void ReleaseLineShader() const;
-    void RenderBatch(const FGridParameters& gridParam, ID3D11Buffer* pVectexBuffer, int boundingBoxCount, int coneCount, int coneSegmentCount, int obbCount) const;
+    void RenderBatch(const FGridParameters& gridParam, ID3D11Buffer* pVertexBuffer, int boundingBoxCount, int coneCount, int coneSegmentCount, int obbCount) const;
     void UpdateGridConstantBuffer(const FGridParameters& gridParams) const;
     void UpdateLinePrimitveCountBuffer(int numBoundingBoxes, int numCones) const;
     ID3D11Buffer* CreateStaticVerticesBuffer() const;
@@ -134,7 +134,7 @@ public: // line shader
     void UpdateConesBuffer(ID3D11Buffer* pConeBuffer, const TArray<FCone>& Cones, int numCones) const;
 
     //Render Pass Demo
-    void PrepareRender(const TArray<UObject*>& Objects);
+    void PrepareRender();
     void ClearRenderArr();
     void Render(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
     void RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
