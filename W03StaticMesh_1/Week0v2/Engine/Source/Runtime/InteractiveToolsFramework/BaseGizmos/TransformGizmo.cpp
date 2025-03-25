@@ -97,13 +97,3 @@ void UTransformGizmo::Tick(float DeltaTime)
 		RectangleArr[i]->TickComponent(DeltaTime);
 	}
 }
-
-void UTransformGizmo::Render()
-{
-	for (int i = 0;i < 3;i++)
-	{
-		ArrowArr[i]->Render();
-		CircleArr[i]->Render();
-		RectangleArr[i]->Render();
-	}
-}

@@ -37,8 +37,6 @@ public:
     UObject();
     virtual ~UObject() = default;
 
-    virtual void RenderUUID();
-
     UWorld* GetWorld()
     {
         return GEngineLoop.GetWorld();

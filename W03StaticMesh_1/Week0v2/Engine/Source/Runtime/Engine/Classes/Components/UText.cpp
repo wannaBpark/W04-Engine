@@ -40,10 +40,6 @@ void UText::TickComponent(float DeltaTime)
     //RelativeRotation.z = degree + 90;
 }
 
-void UText::Render()
-{
-    TextMVPRendering();
-}
 void UText::ClearText()
 {
     vertexTextureArr.Empty();

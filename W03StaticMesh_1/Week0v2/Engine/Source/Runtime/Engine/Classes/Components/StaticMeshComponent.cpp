@@ -9,35 +9,6 @@
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/PrimitiveBatch.h"
 
-void UStaticMeshComponent::Render()
-{
-    if (!staticMesh) return;
-
-    OBJ::FStaticMeshRenderData* renderData = staticMesh->GetRenderData();
-    if (renderData == nullptr) return;
-
-    FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());
-    // 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
-    FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
-    FVector4 UUIDColor = EncodeUUID() / 255.0f;
-    if (GetWorld()->GetPickedActor() == GetOwner())
-    {
-        FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
-    }
-    else
-    {
-        FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
-    }
-
-    if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
-    {
-        UPrimitiveBatch::GetInstance().RenderAABB(AABB, GetWorldLocation(), Model);
-    }
-
-    FEngineLoop::renderer.RenderPrimitive(renderData, OverrideMaterials);
-}
-
 
 uint32 UStaticMeshComponent::GetNumMaterials() const
 {

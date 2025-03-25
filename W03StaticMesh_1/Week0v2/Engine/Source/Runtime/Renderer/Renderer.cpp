@@ -1085,7 +1085,6 @@ void FRenderer::RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient
 {
     for (auto Light : LightObjs)
     {
-        Light->GetTexture2D()->Render();
         FMatrix Model = JungleMath::CreateModelMatrix(Light->GetWorldLocation(), Light->GetWorldRotation(), {1, 1, 1});
         UPrimitiveBatch::GetInstance().AddCone(Light->GetWorldLocation(), Light->GetRadius(), 15, 140, Light->GetColor(), Model);
         UPrimitiveBatch::GetInstance().RenderOBB(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);

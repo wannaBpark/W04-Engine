@@ -19,10 +19,6 @@ UObject::UObject()
 {
 }
 
-void UObject::RenderUUID()
-{
-}
-
 bool UObject::IsA(const UClass* SomeBase) const
 {
     const UClass* ThisClass = GetClass();

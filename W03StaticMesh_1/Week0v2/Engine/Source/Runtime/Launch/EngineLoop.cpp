@@ -99,10 +99,6 @@ FEngineLoop::FEngineLoop()
 {
 }
 
-FEngineLoop::~FEngineLoop()
-{
-}
-
 int32 FEngineLoop::PreInit()
 {
     return 0;
@@ -229,17 +225,7 @@ void FEngineLoop::Tick()
     }
 }
 
-void FEngineLoop::RenderWorld()
-{
-    
-    UPrimitiveBatch::GetInstance().RenderBatch(
-        GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix(), GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix()
-    );GWorld->Render();
-	GWorld->RenderBaseObject();
-}
-
-
-float FEngineLoop::GetAspectRatio(IDXGISwapChain* swapChain)
+float FEngineLoop::GetAspectRatio(IDXGISwapChain* swapChain) const
 {
     DXGI_SWAP_CHAIN_DESC desc;
     swapChain->GetDesc(&desc);

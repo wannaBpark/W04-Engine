@@ -31,10 +31,6 @@ void USceneComponent::TickComponent(float DeltaTime)
 }
 
 
-void USceneComponent::Render()
-{
-}
-
 FVector USceneComponent::GetForwardVector()
 {
 	FVector Forward = FVector(1.f, 0.f, 0.0f);
@@ -130,9 +126,4 @@ void USceneComponent::SetupAttachment(USceneComponent* InParent)
         AttachParent = InParent;
         InParent->AttachChildren.AddUnique(this);
     }
-}
-
-void USceneComponent::RenderUUID()
-{
-	if (uuidText) uuidText->Render();
 }

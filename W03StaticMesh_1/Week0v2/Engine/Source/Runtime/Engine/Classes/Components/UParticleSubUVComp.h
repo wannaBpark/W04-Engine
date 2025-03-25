@@ -11,7 +11,6 @@ public:
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
-    virtual void Render() override;
 
     void SetRowColumnCount(int _cellsPerRow, int _cellsPerColumn);
 

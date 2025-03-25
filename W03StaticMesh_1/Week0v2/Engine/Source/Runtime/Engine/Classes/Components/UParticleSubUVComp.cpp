@@ -66,38 +66,6 @@ void UParticleSubUVComp::TickComponent(float DeltaTime)
 	finalIndexV = float(indexV) * normalHeightOffset;
 }
 
-void UParticleSubUVComp::Render()
-{
-    if (!bIsActivate) return;
-
-	FEngineLoop::renderer.PrepareTextureShader();
-	FEngineLoop::renderer.PrepareSubUVConstant();
-	FEngineLoop::renderer.UpdateSubUVConstant(finalIndexU, finalIndexV);
-
-	FMatrix Model = CreateBillboardMatrix();
-
-	// 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
-    FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
-    FVector4 UUIDColor = EncodeUUID() / 255.0f;
-	if (this == GetWorld()->GetPickingGizmo()) {
-		FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
-	}
-	else
-		FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
-    
-	if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
-
-		FEngineLoop::renderer.RenderTexturePrimitive(vertexSubUVBuffer, numTextVertices,
-			indexTextureBuffer, numIndices, Texture->TextureSRV, Texture->SamplerState);
-	}	
-	//Super::Render();
-
-	FEngineLoop::renderer.UpdateSubUVConstant(0, 0);
-	FEngineLoop::renderer.PrepareSubUVConstant();
-	FEngineLoop::renderer.PrepareShader();
-}
-
 void UParticleSubUVComp::SetRowColumnCount(int _cellsPerRow, int _cellsPerColumn)
 {
 	CellsPerRow = _cellsPerRow;

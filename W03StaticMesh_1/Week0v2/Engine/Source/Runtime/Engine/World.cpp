@@ -53,11 +53,6 @@ void UWorld::ReleaseBaseObject()
 	localPlayer = nullptr;
 }
 
-void UWorld::RenderBaseObject()
-{
-	LocalGizmo->Render();
-}
-
 void UWorld::Tick(float DeltaTime)
 {
 	camera->TickComponent(DeltaTime);
@@ -94,19 +89,6 @@ void UWorld::Release()
 
 	pickingGizmo = nullptr;
 	ReleaseBaseObject();
-}
-
-void UWorld::Render()
-{
-    for (const auto& Actor : ActorsArray)
-    {
-        Actor->Render();
-        if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & EEngineShowFlags::SF_UUIDText)
-        {
-            Actor->RenderUUID();
-        }
-    }
-
 }
 
 bool UWorld::DestroyActor(AActor* ThisActor)

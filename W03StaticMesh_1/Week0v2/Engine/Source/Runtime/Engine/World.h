@@ -23,11 +23,8 @@ public:
     void Initialize();
     void CreateBaseObject();
     void ReleaseBaseObject();
-    void RenderBaseObject();
     void Tick(float DeltaTime);
     void Release();
-
-    void Render();
 
     /**
      * World에 Actor를 Spawn합니다.

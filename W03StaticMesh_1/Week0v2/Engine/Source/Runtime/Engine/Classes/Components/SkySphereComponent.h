@@ -13,7 +13,6 @@ public:
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
-    virtual void Render() override;
 
 protected:
     std::shared_ptr<FTexture> Texture;

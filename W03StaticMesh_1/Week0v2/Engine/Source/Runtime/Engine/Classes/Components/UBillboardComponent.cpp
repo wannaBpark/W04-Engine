@@ -43,33 +43,6 @@ void UBillboardComponent::TickComponent(float DeltaTime)
     Super::TickComponent(DeltaTime);
 }
 
-void UBillboardComponent::Render()
-{
-	FEngineLoop::renderer.PrepareTextureShader();
-	//FEngineLoop::renderer.UpdateSubUVConstant(0, 0);
-	//FEngineLoop::renderer.PrepareSubUVConstant();
-
-	FMatrix Model = CreateBillboardMatrix();
-
-	// 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
-    FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
-    FVector4 UUIDColor = EncodeUUID() / 255.0f;
-	if (this == GetWorld()->GetPickingGizmo()) {
-		FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor,true);
-	}
-	else
-		FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
-
-	if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
-
-	FEngineLoop::renderer.RenderTexturePrimitive(vertexTextureBuffer,numVertices,
-		indexTextureBuffer,numIndices,Texture->TextureSRV,Texture->SamplerState);
-	}
-
-	FEngineLoop::renderer.PrepareShader();
-}
-
 
 int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {

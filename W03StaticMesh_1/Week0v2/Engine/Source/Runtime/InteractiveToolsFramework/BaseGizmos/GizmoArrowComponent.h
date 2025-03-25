@@ -12,7 +12,6 @@ public:
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
-    virtual void Render() override;
 
 private:
     ARROW_DIR Dir;

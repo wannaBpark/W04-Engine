@@ -9,7 +9,6 @@ public:
     UTextUUID();
     virtual ~UTextUUID() override;
 
-    virtual void Render() override;
     virtual int CheckRayIntersection(
         FVector& rayOrigin,
         FVector& rayDirection, float& pfNearHitDistance

@@ -18,11 +18,6 @@ void UPrimitiveComponent::TickComponent(float DeltaTime)
 	Super::TickComponent(DeltaTime);
 }
 
-void UPrimitiveComponent::Render()
-{
-
-}
-
 int UPrimitiveComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
     //if (!AABB.Intersect(rayOrigin, rayDirection, pfNearHitDistance)) return 0;

@@ -13,7 +13,6 @@ public:
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
-    virtual void Render();
     virtual FVector GetForwardVector();
     virtual FVector GetRightVector();
     virtual FVector GetUpVector();
@@ -50,5 +49,4 @@ private:
     class UTextUUID* uuidText = nullptr;
 
 public:
-    virtual void RenderUUID() override;
 };

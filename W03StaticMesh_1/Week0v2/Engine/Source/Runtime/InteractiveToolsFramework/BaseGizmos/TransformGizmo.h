@@ -13,7 +13,6 @@ class UTransformGizmo : public AActor
     UTransformGizmo();
 
     virtual void Tick(float DeltaTime) override;
-    virtual void Render() override;
 
     TArray<UGizmoArrowComponent*>& GetArrowArr() { return ArrowArr; }
     TArray<UGizmoCircleComponent*>& GetDiscArr() { return CircleArr; }
