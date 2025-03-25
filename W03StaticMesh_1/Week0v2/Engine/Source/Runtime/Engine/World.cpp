@@ -16,6 +16,8 @@
 #include "Components/SkySphereComponent.h"
 #include "UObject/Casts.h"
 #include "LevelEditor/SLevelEditor.h"
+#include "Engine/FLoaderOBJ.h"
+
 UWorld::UWorld()
 {
 }
@@ -49,35 +51,16 @@ void UWorld::CreateBaseObject()
         UObject* pLocalGizmo = FObjectFactory::ConstructObject<UTransformGizmo>();
         LocalGizmo = static_cast<UTransformGizmo*>(pLocalGizmo);
     }
-	////테스트용 텍스트
-	
-	/*UObject* pObj = FObjectFactory::ConstructObject<USkySphereComponent>();
-	USkySphereComponent* skySphere = static_cast<USkySphereComponent*>(pObj);
-	skySphere->SetTexture(L"Assets/Texture/ocean_sky.jpg");
-	skySphere->SetScale(FVector( -300.0f, -300.0f, -300.0f));
-	skySphere->SetRotation(FVector(-167.0f, 25.0f, -135.0f));
 
-	GUObjectArray.Add(skySphere);*/
-    
-
-	//테스트용 빌보드. 필요없으면 삭제
-	// UObject* billboard = FObjectFactory::ConstructObject<UBillboardComponent>();
-	// UBillboardComponent* castBillboard = static_cast<UBillboardComponent*>(billboard);
-	// castBillboard->SetTexture(L"Assets/Texture/emart.png");
-	// GUObjectArray.Add(billboard);
- //
- //    UObject* tmp = FObjectFactory::ConstructObject<UParticleSubUVComp>();
- //    UParticleSubUVComp* SubUV = static_cast<UParticleSubUVComp*>(tmp);
- //    SubUV->SetTexture(L"Assets/Texture/T_Explosion_SubUV.png");
- //    SubUV->SetRowColumnCount(6, 6);
- //    GUObjectArray.Add(SubUV);
-    
-	//
-	// castUUID->SetUUIDParent(sphere);
-	//castBillboard->SetParent(sphere);
-	//sphere->AddChild(castBillboard);
-	//cube->AddChild(sphere);
-
+    FManagerOBJ::CreateStaticMesh("Assets/Dodge/Dodge.obj");
+    UStaticMeshComponent* mySummerCar = FObjectFactory::ConstructObject<UStaticMeshComponent>();
+    UStaticMesh* tesmp = FManagerOBJ::GetStaticMesh(L"Dodge.obj");
+    mySummerCar->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Dodge.obj"));
+    //mySummerCar->GetMaterial(0)->SetDiffuse(FVector(0.3f,0.4f,0.5f));
+    mySummerCar->GetMaterial(1)->SetDiffuse(FVector(1.0f,0.2f,0.2f));
+    //mySummerCar->GetMaterial(2)->SetDiffuse(FVector(0.0f,0.4f,0.4f));
+    //mySummerCar->GetMaterial(3)->SetDiffuse(FVector(0.8f,0.8f,0.0f));
+    GUObjectArray.Add(mySummerCar);
 }
 
 void UWorld::ReleaseBaseObject()

@@ -4,6 +4,7 @@
 #include "Math/JungleMath.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"
+#include "Define.h"
 
 UStaticMeshComponent::UStaticMeshComponent()
 {
@@ -30,7 +31,7 @@ void UStaticMeshComponent::Render()
     if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
         UPrimitiveBatch::GetInstance().RenderAABB(AABB, GetWorldLocation(), Model);
 
-    FEngineLoop::renderer.RenderPrimitive(renderData, OverrideMaterials);
+    FEngineLoop::renderer.RenderPrimitive(renderData, staticMesh->GetMaterials(), OverrideMaterials, selectedSubMeshIndex);
 }
 
 uint32 UStaticMeshComponent::GetNumMaterials() const
@@ -47,8 +48,9 @@ UMaterial* UStaticMeshComponent::GetMaterial(uint32 ElementIndex) const
     if (OverrideMaterials[ElementIndex] != nullptr)
         return OverrideMaterials[ElementIndex];
 
-    if (staticMesh->GetMaterials().IsValidIndex(ElementIndex))
+    if (staticMesh->GetMaterials().IsValidIndex(ElementIndex)) {
         return staticMesh->GetMaterials()[ElementIndex]->Material;
+    }
 }
 
 uint32 UStaticMeshComponent::GetMaterialIndex(FName MaterialSlotName) const
