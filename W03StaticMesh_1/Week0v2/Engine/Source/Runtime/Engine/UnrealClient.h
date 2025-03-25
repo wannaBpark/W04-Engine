@@ -18,6 +18,7 @@ public:
     void Initialize();
     void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
     void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
+    void ResizeViewport(FRect newRect);
 
 private:
     D3D11_VIEWPORT viewport;            // 뷰포트 정보

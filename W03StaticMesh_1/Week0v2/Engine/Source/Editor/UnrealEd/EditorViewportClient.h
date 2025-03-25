@@ -93,8 +93,7 @@ public:
     void Initialize(int32 viewportIndex);
     void Tick(float DeltaTime);
     void Release();
-    void LoadConfig();
-    void SaveConfig();
+
     void Input();
     void ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc);
     void ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right);
@@ -166,8 +165,9 @@ private: // Input
     bool bRightMouseDown = false;
    
 
-private :
-    const FString IniFilePath = "editor.ini";
+public:
+    void LoadConfig(const TMap<FString, FString>& config);
+    void SaveConfig(TMap<FString, FString>& config);
 private:
     TMap<FString, FString> ReadIniFile(const FString& filePath);
     void WriteIniFile(const FString& filePath, const TMap<FString, FString>& config);
