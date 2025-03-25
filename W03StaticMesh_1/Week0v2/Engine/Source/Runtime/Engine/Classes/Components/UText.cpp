@@ -40,10 +40,6 @@ void UText::TickComponent(float DeltaTime)
     //RelativeRotation.z = degree + 90;
 }
 
-void UText::Release()
-{
-}
-
 void UText::Render()
 {
     TextMVPRendering();
