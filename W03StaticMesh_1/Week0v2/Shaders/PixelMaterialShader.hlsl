@@ -43,6 +43,12 @@ cbuffer FlagConstants : register(b3)
     float3 flagPad0;
 }
 
+cbuffer SubMeshConstants : register(b4)
+{
+    bool IsSelectedSubMesh;
+    float3 SubMeshPad0;
+}
+
 struct PS_INPUT
 {
     float4 position : SV_POSITION; // 변환된 화면 좌표
@@ -150,6 +156,10 @@ PS_OUTPUT mainPS(PS_INPUT input)
         output.color = PaperTexture(color);
         // 투명도 적용
         output.color.a = Material.TransparencyScalar;
+        
+        if (IsSelectedSubMesh)
+            output.color += float4(1.0f, 1.0f, 1.0f, 1.0f);
+            
         return output;
     }
 }

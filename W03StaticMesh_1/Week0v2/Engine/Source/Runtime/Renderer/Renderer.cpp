@@ -11,7 +11,7 @@ void FRenderer::Initialize(FGraphicsDevice* graphics) {
     CreateConstantBuffer();
     CreateLightingBuffer();
     CreateLitUnlitBuffer();
-    UpdateLitUnlitConstantBuffer(1);
+    UpdateLitUnlitConstant(1);
 }
 
 void FRenderer::Release() {
@@ -78,6 +78,7 @@ void FRenderer::PrepareShader()
         Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &MaterialConstantBuffer);
         Graphics->DeviceContext->PSSetConstantBuffers(2, 1, &LightingBuffer);
         Graphics->DeviceContext->PSSetConstantBuffers(3, 1, &FlagBuffer);
+        Graphics->DeviceContext->PSSetConstantBuffers(4, 1, &SubMeshConstantBuffer);
     }
 }
 void FRenderer::ResetVertexShader()
@@ -123,11 +124,11 @@ void FRenderer::ChangeViewMode(EViewModeIndex evi)
     switch (evi)
     {
     case EViewModeIndex::VMI_Lit:
-        UpdateLitUnlitConstantBuffer(1);
+        UpdateLitUnlitConstant(1);
         break;
     case EViewModeIndex::VMI_Wireframe:
     case EViewModeIndex::VMI_Unlit:
-        UpdateLitUnlitConstantBuffer(0);
+        UpdateLitUnlitConstant(0);
         break;
     }
 }
@@ -146,7 +147,7 @@ void FRenderer::RenderPrimitive(ID3D11Buffer* pVectexBuffer, UINT numVertices, I
     Graphics->DeviceContext->DrawIndexed(numIndices, 0, 0);
 }
 
-void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<FStaticMaterial*> materials, TArray<UMaterial*> overrideMaterial)
+void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<FStaticMaterial*> materials, TArray<UMaterial*> overrideMaterial, int selectedSubMeshIndex)
 {
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &renderData->VertexBuffer, &Stride, &offset);
@@ -158,17 +159,13 @@ void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<F
         Graphics->DeviceContext->DrawIndexed(renderData->Indices.Num(), 0, 0);
     }
 
-    if (materials.Num() > 2) {
-        int temp = 0;
-    }
-
     for (int subMeshIndex = 0; subMeshIndex < renderData->MaterialSubsets.Num(); subMeshIndex++) {
         int materialIndex = renderData->MaterialSubsets[subMeshIndex].MaterialIndex;
 
-        if (overrideMaterial[materialIndex] != nullptr)
-            UpdateMaterial(overrideMaterial[materialIndex]->GetMaterialInfo());
-        else
-            UpdateMaterial(materials[materialIndex]->Material->GetMaterialInfo());
+        subMeshIndex == selectedSubMeshIndex ? UpdateSubMeshConstant(true) : UpdateSubMeshConstant(false);
+
+        overrideMaterial[materialIndex] != nullptr ? 
+            UpdateMaterial(overrideMaterial[materialIndex]->GetMaterialInfo()) : UpdateMaterial(materials[materialIndex]->Material->GetMaterialInfo());
 
         if (renderData->IndexBuffer) { // index draw
             uint64 startIndex = renderData->MaterialSubsets[subMeshIndex].IndexStart;
@@ -305,6 +302,9 @@ void FRenderer::CreateConstantBuffer()
 
     constantbufferdesc.ByteWidth = sizeof(FMaterialConstants) + 0xf & 0xfffffff0;
     Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &MaterialConstantBuffer);
+    
+    constantbufferdesc.ByteWidth = sizeof(FSubMeshConstants) + 0xf & 0xfffffff0;
+    Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &SubMeshConstantBuffer);
 }
 
 void FRenderer::CreateLightingBuffer()
@@ -334,6 +334,7 @@ void FRenderer::ReleaseConstantBuffer()
     if (LightingBuffer) LightingBuffer->Release(); LightingBuffer = nullptr;
     if (FlagBuffer) FlagBuffer->Release(); FlagBuffer = nullptr;
     if (MaterialConstantBuffer) MaterialConstantBuffer->Release(); MaterialConstantBuffer = nullptr;
+    if (SubMeshConstantBuffer) SubMeshConstantBuffer->Release(); SubMeshConstantBuffer = nullptr;
 }
 void FRenderer::UpdateLightBuffer()
 {
@@ -354,7 +355,7 @@ void FRenderer::UpdateLightBuffer()
 
 }
 
-void FRenderer::UpdateConstant(FMatrix _MVP, FMatrix _NormalMatrix, FVector4 _UUIDColor, float _IsSelected)
+void FRenderer::UpdateConstant(FMatrix _MVP, FMatrix _NormalMatrix, FVector4 _UUIDColor, bool _IsSelected)
 {
     if (ConstantBuffer)
     {
@@ -366,7 +367,7 @@ void FRenderer::UpdateConstant(FMatrix _MVP, FMatrix _NormalMatrix, FVector4 _UU
             constants->MVP = _MVP;
             constants->ModelMatrixInverseTranspose = _NormalMatrix;
             constants->UUIDColor = _UUIDColor;
-            constants->Flag = _IsSelected;
+            constants->IsSelected = _IsSelected;
         }
         Graphics->DeviceContext->Unmap(ConstantBuffer, 0); // GPU�� �ٽ� ��밡���ϰ� �����
     }
@@ -406,7 +407,7 @@ void FRenderer::UpdateMaterial(FObjMaterialInfo materialInfo)
     }
 }
 
-void FRenderer::UpdateLitUnlitConstantBuffer(int isLit)
+void FRenderer::UpdateLitUnlitConstant(int isLit)
 {
     if (FlagBuffer) {
         D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU �� �޸� �ּ� ����
@@ -416,6 +417,19 @@ void FRenderer::UpdateLitUnlitConstantBuffer(int isLit)
             constants->isLit = isLit;
         }
         Graphics->DeviceContext->Unmap(FlagBuffer, 0);
+    }
+}
+
+void FRenderer::UpdateSubMeshConstant(bool isSelected)
+{
+    if (SubMeshConstantBuffer) {
+        D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU �� �޸� �ּ� ����
+        Graphics->DeviceContext->Map(SubMeshConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR);
+        FSubMeshConstants* constants = (FSubMeshConstants*)constantbufferMSR.pData; //GPU �޸� ���� ����
+        {
+            constants->isSelectedSubMesh = isSelected;
+        }
+        Graphics->DeviceContext->Unmap(SubMeshConstantBuffer, 0);
     }
 }
 
