@@ -3,9 +3,9 @@
 #include "World.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 #include "LevelEditor/SLevelEditor.h"
-#include "Mesh/StaticMesh.h"
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
+#include "UnrealEd/PrimitiveBatch.h"
 
 
 USkySphereComponent::USkySphereComponent()

@@ -1,5 +1,4 @@
 #pragma once
-#include "Define.h"
 #include "D3D11RHI/GraphicDevice.h"
 struct FTexture
 {

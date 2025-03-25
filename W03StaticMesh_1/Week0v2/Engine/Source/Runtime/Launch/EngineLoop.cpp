@@ -2,13 +2,13 @@
 #include "ImGuiManager.h"
 #include "World.h"
 #include "Camera/CameraComponent.h"
-#include "PropertyEditor/ShowFlags.h"
 #include "PropertyEditor/ViewportTypePanel.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/UnrealEd.h"
 #include "UnrealClient.h"
 #include "slate/Widgets/Layout/SSplitter.h"
 #include "LevelEditor/SLevelEditor.h"
+#include "UnrealEd/PrimitiveBatch.h"
 
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

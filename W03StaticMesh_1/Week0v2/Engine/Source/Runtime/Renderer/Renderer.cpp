@@ -1,4 +1,7 @@
 #include "Renderer.h"
+
+#include <d3dcompiler.h>
+
 #include "D3D11RHI/GraphicDevice.h"
 #include "Launch/EngineLoop.h"
 #include "Components/Material/Material.h"

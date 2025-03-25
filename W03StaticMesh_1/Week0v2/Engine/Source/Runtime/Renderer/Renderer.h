@@ -5,7 +5,6 @@
 
 #define _TCHAR_DEFINED
 #include <d3d11.h>
-#include <d3dcompiler.h>
 #include "EngineBaseTypes.h"
 #include "Define.h"
 class FGraphicsDevice;

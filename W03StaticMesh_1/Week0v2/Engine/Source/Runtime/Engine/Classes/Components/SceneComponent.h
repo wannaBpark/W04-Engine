@@ -1,5 +1,6 @@
 #pragma once
 #include "ActorComponent.h"
+#include "Math/Quat.h"
 #include "UObject/ObjectMacros.h"
 
 class USceneComponent : public UActorComponent

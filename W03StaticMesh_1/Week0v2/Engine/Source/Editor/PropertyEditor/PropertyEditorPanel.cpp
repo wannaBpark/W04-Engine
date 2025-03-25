@@ -3,7 +3,6 @@
 #include "World.h"
 #include "Components/LightComponent.h"
 #include "Actors/Player.h"
-#include "Components/SceneComponent.h"
 #include "Components/UText.h"
 #include "Math/MathUtility.h"
 #include "UnrealEd/ImGuiWidget.h"

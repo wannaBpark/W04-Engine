@@ -7,6 +7,7 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "PropertyEditor/ShowFlags.h"
+#include "UnrealEd/PrimitiveBatch.h"
 
 void UStaticMeshComponent::Render()
 {

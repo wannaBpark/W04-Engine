@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "Components/ActorComponent.h"
-#include "ImGUI/imgui.h"
 #include "UnrealEd/EditorPanel.h"
 
 class PropertyEditorPanel : public UEditorPanel
