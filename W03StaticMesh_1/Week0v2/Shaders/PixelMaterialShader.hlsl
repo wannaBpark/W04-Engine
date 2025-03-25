@@ -101,9 +101,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
         color = saturate(Material.DiffuseColor);
     else
     {
-        float grayScale = (texColor.x + texColor.y + texColor.z) / 3;
-        color = float3(grayScale, grayScale, grayScale);
-        color += Material.DiffuseColor;
+        color = texColor + Material.DiffuseColor;
     }
     
     if (isSelected)
