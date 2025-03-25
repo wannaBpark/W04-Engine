@@ -52,43 +52,43 @@ public:
 public:
     void Initialize(FGraphicsDevice* graphics);
    
-    void PrepareShader();
+    void PrepareShader() const;
     
     //Render
-    void RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices);
-    void RenderPrimitive(ID3D11Buffer* pVectexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices);
-    void RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<UMaterial*> overrideMaterial);
+    void RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices) const;
+    void RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices) const;
+    void RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<UMaterial*> overrideMaterial) const;
    
-    void RenderTexturedModelPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices, ID3D11ShaderResourceView* _TextureSRV, ID3D11SamplerState* _SamplerState);
+    void RenderTexturedModelPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices, ID3D11ShaderResourceView* InTextureSRV, ID3D11SamplerState* InSamplerState) const;
     //Release
     void Release();
     void ReleaseShader();
-    void ReleaseBuffer(ID3D11Buffer*& Buffer);
+    void ReleaseBuffer(ID3D11Buffer*& Buffer) const;
     void ReleaseConstantBuffer();
 
-    void ResetVertexShader();
-    void ResetPixelShader();
+    void ResetVertexShader() const;
+    void ResetPixelShader() const;
     void CreateShader();
 
     void SetVertexShader(const FWString& filename, const FString& funcname, const FString& version);
     void SetPixelShader(const FWString& filename, const FString& funcname, const FString& version);
     
-    void ChangeViewMode(EViewModeIndex evi);
+    void ChangeViewMode(EViewModeIndex evi) const;
     
     // CreateBuffer
     void CreateConstantBuffer();
     void CreateLightingBuffer();
     void CreateLitUnlitBuffer();
-    ID3D11Buffer* CreateVertexBuffer(FVertexSimple* vertices, UINT byteWidth);
-    ID3D11Buffer* CreateVertexBuffer(const TArray<FVertexSimple>& vertices, UINT byteWidth);
-    ID3D11Buffer* CreateIndexBuffer(uint32* indices, UINT byteWidth);
-    ID3D11Buffer* CreateIndexBuffer(const TArray<uint32>& indices, UINT byteWidth);
+    ID3D11Buffer* CreateVertexBuffer(FVertexSimple* vertices, UINT byteWidth) const;
+    ID3D11Buffer* CreateVertexBuffer(const TArray<FVertexSimple>& vertices, UINT byteWidth) const;
+    ID3D11Buffer* CreateIndexBuffer(uint32* indices, UINT byteWidth) const;
+    ID3D11Buffer* CreateIndexBuffer(const TArray<uint32>& indices, UINT byteWidth) const;
 
     // update
-    void UpdateLightBuffer();
-    void UpdateConstant(FMatrix _MVP, FMatrix _NormalMatrix, FVector4 _UUIDColor, float _Flag);
-    void UpdateMaterial(FObjMaterialInfo materialInfo);
-    void UpdateLitUnlitConstantBuffer(int isLit);
+    void UpdateLightBuffer() const;
+    void UpdateConstant(const FMatrix& MVP, const FMatrix& NormalMatrix, FVector4 UUIDColor, float IsSelected) const;
+    void UpdateMaterial(const FObjMaterialInfo& MaterialInfo) const;
+    void UpdateLitUnlitConstantBuffer(int isLit) const;
 
 public://텍스쳐용 기능 추가
     ID3D11VertexShader* VertexTextureShader = nullptr;
@@ -106,40 +106,40 @@ public://텍스쳐용 기능 추가
 public:
     void CreateTextureShader();
     void ReleaseTextureShader();
-    void PrepareTextureShader();
-    ID3D11Buffer* CreateVertexTextureBuffer(FVertexTexture* vertices, UINT byteWidth);
-    ID3D11Buffer* CreateIndexTextureBuffer(uint32* indices, UINT byteWidth);
+    void PrepareTextureShader() const;
+    ID3D11Buffer* CreateVertexTextureBuffer(FVertexTexture* vertices, UINT byteWidth) const;
+    ID3D11Buffer* CreateIndexTextureBuffer(uint32* indices, UINT byteWidth) const;
     void RenderTexturePrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices,
         ID3D11Buffer* pIndexBuffer, UINT numIndices,
         ID3D11ShaderResourceView* _TextureSRV,
-        ID3D11SamplerState* _SamplerState);
+        ID3D11SamplerState* _SamplerState) const;
     void RenderTextPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices,
         ID3D11ShaderResourceView* _TextureSRV,
-        ID3D11SamplerState* _SamplerState);
-    ID3D11Buffer* CreateVertexBuffer(FVertexTexture* vertices, UINT byteWidth);
+        ID3D11SamplerState* _SamplerState) const;
+    ID3D11Buffer* CreateVertexBuffer(FVertexTexture* vertices, UINT byteWidth) const;
 
-    void UpdateSubUVConstant(float _indexU, float _indexV);
-    void PrepareSubUVConstant();
+    void UpdateSubUVConstant(float _indexU, float _indexV) const;
+    void PrepareSubUVConstant() const;
 
 
 public: // line shader
-    void PrepareLineShader();
+    void PrepareLineShader() const;
     void CreateLineShader();
-    void ReleaseLineShader();
-    void RenderBatch(const FGridParameters& gridParam, ID3D11Buffer* pVectexBuffer, int boundingBoxCount, int coneCount, int coneSegmentCount, int obbCount);
-    void UpdateGridConstantBuffer(const FGridParameters& gridParams);
-    void UpdateLinePrimitveCountBuffer(int numBoundingBoxes, int numCones);
-    ID3D11Buffer* CreateStaticVerticesBuffer();
-    ID3D11Buffer* CreateBoundingBoxBuffer(UINT numBoundingBoxes);
-    ID3D11Buffer* CreateOBBBuffer(UINT numBoundingBoxes);
-    ID3D11Buffer* CreateConeBuffer(UINT numCones);
+    void ReleaseLineShader() const;
+    void RenderBatch(const FGridParameters& gridParam, ID3D11Buffer* pVectexBuffer, int boundingBoxCount, int coneCount, int coneSegmentCount, int obbCount) const;
+    void UpdateGridConstantBuffer(const FGridParameters& gridParams) const;
+    void UpdateLinePrimitveCountBuffer(int numBoundingBoxes, int numCones) const;
+    ID3D11Buffer* CreateStaticVerticesBuffer() const;
+    ID3D11Buffer* CreateBoundingBoxBuffer(UINT numBoundingBoxes) const;
+    ID3D11Buffer* CreateOBBBuffer(UINT numBoundingBoxes) const;
+    ID3D11Buffer* CreateConeBuffer(UINT numCones) const;
     ID3D11ShaderResourceView* CreateBoundingBoxSRV(ID3D11Buffer* pBoundingBoxBuffer, UINT numBoundingBoxes);
     ID3D11ShaderResourceView* CreateOBBSRV(ID3D11Buffer* pBoundingBoxBuffer, UINT numBoundingBoxes);
     ID3D11ShaderResourceView* CreateConeSRV(ID3D11Buffer* pConeBuffer, UINT numCones);
 
-    void UpdateBoundingBoxBuffer(ID3D11Buffer* pBoundingBoxBuffer, const TArray<FBoundingBox>& BoundingBoxes, int numBoundingBoxes);
-    void UpdateOBBBuffer(ID3D11Buffer* pBoundingBoxBuffer, const TArray<FOBB>& BoundingBoxes, int numBoundingBoxes);
-    void UpdateConesBuffer(ID3D11Buffer* pConeBuffer, const TArray<FCone>& Cones, int numCones);
+    void UpdateBoundingBoxBuffer(ID3D11Buffer* pBoundingBoxBuffer, const TArray<FBoundingBox>& BoundingBoxes, int numBoundingBoxes) const;
+    void UpdateOBBBuffer(ID3D11Buffer* pBoundingBoxBuffer, const TArray<FOBB>& BoundingBoxes, int numBoundingBoxes) const;
+    void UpdateConesBuffer(ID3D11Buffer* pConeBuffer, const TArray<FCone>& Cones, int numCones) const;
 
     //Render Pass Demo
     void PrepareRender(const TArray<UObject*>& Objects);
