@@ -147,10 +147,10 @@ void UTransformGizmo::Release()
 
 void UTransformGizmo::Render()
 {
-	for (int i = 0;i < 3;i++)
-	{
-		ArrowArr[i]->Render();
-		CircleArr[i]->Render();
-		RectangleArr[i]->Render();
-	}
+	// for (int i = 0;i < 3;i++)
+	// {
+	// 	ArrowArr[i]->Render();
+	// 	CircleArr[i]->Render();
+	// 	RectangleArr[i]->Render();
+	// }
 }

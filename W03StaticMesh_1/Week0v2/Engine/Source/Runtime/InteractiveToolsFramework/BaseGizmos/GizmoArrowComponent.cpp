@@ -55,7 +55,7 @@ void UGizmoArrowComponent::Render()
         FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
     
     FEngineLoop::graphicDevice.DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID); // fill solid로 렌더링.
-    FEngineLoop::renderer.RenderPrimitive(renderData, OverrideMaterials);
+    // FEngineLoop::renderer.RenderPrimitive(renderData, OverrideMaterials);
     FEngineLoop::graphicDevice.DeviceContext->RSSetState(FEngineLoop::graphicDevice.GetCurrentRasterizer()); // 이전 레스터라이저 재설정.
 
 #pragma region GizmoDepth
