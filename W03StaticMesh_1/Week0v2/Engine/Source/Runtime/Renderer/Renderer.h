@@ -49,7 +49,7 @@ public:
     //Render
     void RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices);
     void RenderPrimitive(ID3D11Buffer* pVectexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices);
-    void RenderPrimitive(OBJ::FStaticMeshRenderData* renderData);
+    void RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<UMaterial*> overrideMaterial);
    
     void RenderTexturedModelPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices, ID3D11ShaderResourceView* _TextureSRV, ID3D11SamplerState* _SamplerState);
     //Release

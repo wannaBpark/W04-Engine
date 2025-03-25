@@ -15,8 +15,9 @@ public:
     uint32 GetMaterialIndex(FName MaterialSlotName) const;
     void GetUsedMaterials(TArray<UMaterial*> Out) const;
     OBJ::FStaticMeshRenderData* GetRenderData() const { return staticMeshRenderData; }
-private:
-    OBJ::FStaticMeshRenderData* staticMeshRenderData;
-    TArray<FStaticMaterial*> materials;
 
+    void SetData(OBJ::FStaticMeshRenderData* renderData);
+private:
+    OBJ::FStaticMeshRenderData* staticMeshRenderData = nullptr;
+    TArray<FStaticMaterial*> materials;
 };

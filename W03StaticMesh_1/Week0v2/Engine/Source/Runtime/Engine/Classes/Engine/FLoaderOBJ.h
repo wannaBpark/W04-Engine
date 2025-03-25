@@ -8,6 +8,8 @@
 #include "HAL/PlatformType.h"
 #include "Serialization/Serializer.h"
 
+class UStaticMesh;
+struct FManagerOBJ;
 struct FLoaderOBJ
 {
     // Obj Parsing (*.obj to FObjInfo)
@@ -449,6 +451,10 @@ public:
             }
 
             CombineMaterialIndex(*NewStaticMesh);
+
+            for (int materialIndex = 0; materialIndex < NewStaticMesh->Materials.Num(); materialIndex++) {
+                CreateMaterial(NewStaticMesh->Materials[materialIndex]);
+            }
         }
         
         // Convert FStaticMeshRenderData
@@ -665,6 +671,13 @@ public:
         return true;
     }
 
+    static UMaterial* CreateMaterial(FObjMaterialInfo materialInfo);
+    static UMaterial* GetMaterial(FString name);
+    static UStaticMesh* CreateStaticMesh(FString filePath);
+    static UStaticMesh* GetStaticMesh(FWString name);
+
 private:
     inline static TMap<FString, OBJ::FStaticMeshRenderData*> ObjStaticMeshMap;
+    inline static TMap<FWString, UStaticMesh*> staticMeshMap;
+    inline static TMap<FString, UMaterial*> materialMap;
 };
