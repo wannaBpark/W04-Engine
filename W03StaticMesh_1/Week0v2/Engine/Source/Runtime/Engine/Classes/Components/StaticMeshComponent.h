@@ -15,6 +15,8 @@ public:
     virtual void Release() override {}
     virtual void Render() override;
 
+    PROPERTY(int, selectedSubMeshIndex);
+
     virtual uint32 GetNumMaterials() const override ;
     virtual UMaterial* GetMaterial(uint32 ElementIndex) const override;
     virtual uint32 GetMaterialIndex(FName MaterialSlotName) const override;
@@ -22,15 +24,15 @@ public:
     virtual void GetUsedMaterials(TArray<UMaterial*> Out) const override;
 
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
-
+    
     UStaticMesh* GetStaticMesh() { return staticMesh; }
     void SetStaticMesh(UStaticMesh* value)
     { 
         staticMesh = value;
         OverrideMaterials.SetNum(value->GetMaterials().Num());
     }
-    int selectedSubMeshIndex = -1;
 
 protected:
     UStaticMesh* staticMesh = nullptr;
+    int selectedSubMeshIndex = -1;
 };

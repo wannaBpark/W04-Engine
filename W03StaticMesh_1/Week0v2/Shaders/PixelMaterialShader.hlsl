@@ -113,6 +113,8 @@ PS_OUTPUT mainPS(PS_INPUT input)
     if (isSelected)
     {
         color += float3(0.2f, 0.2f, 0.0f); // 노란색 틴트로 하이라이트
+        if (IsSelectedSubMesh)
+            color = float3(1, 1, 1);
     }
     
     // 발광 색상 추가
@@ -156,9 +158,6 @@ PS_OUTPUT mainPS(PS_INPUT input)
         output.color = PaperTexture(color);
         // 투명도 적용
         output.color.a = Material.TransparencyScalar;
-        
-        if (IsSelectedSubMesh)
-            output.color += float4(1.0f, 1.0f, 1.0f, 1.0f);
             
         return output;
     }

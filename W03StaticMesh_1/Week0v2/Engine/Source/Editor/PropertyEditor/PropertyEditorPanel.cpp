@@ -1,4 +1,4 @@
-﻿#include "PropertyEditorPanel.h"
+#include "PropertyEditorPanel.h"
 
 #include "Components/LightComponent.h"
 #include "Components/Player.h"
@@ -269,6 +269,28 @@ void PropertyEditorPanel::RenderForStaticMesh(UStaticMeshComponent* StaticMeshCo
         
         ImGui::TreePop();
     }
+
+    if (ImGui::TreeNodeEx("SubMeshes", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
+    {
+        auto subsets = StaticMeshComp->GetStaticMesh()->GetRenderData()->MaterialSubsets;
+        for (uint32 i = 0; i < subsets.Num(); ++i)
+        {
+            std::string temp = "subset " + std::to_string(i);
+            if (ImGui::Selectable(temp.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
+            {
+                if (ImGui::IsMouseDoubleClicked(0))
+                {
+                    std::cout << GetData(StaticMeshComp->GetMaterialSlotNames()[i].ToString()) << std::endl;
+                    StaticMeshComp->SetselectedSubMeshIndex(i);
+                    int temp = StaticMeshComp->GetselectedSubMeshIndex();
+                    SelectedStaticMeshComp = StaticMeshComp;
+                }
+            }
+        }
+
+        ImGui::TreePop();
+    }
+
     ImGui::PopStyleColor();
 
     if (SelectedMaterialIndex != -1)
@@ -354,6 +376,11 @@ void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
     }
      
     ImGui::End();
+}
+
+void PropertyEditorPanel::RenderSubMeshView(UStaticMeshComponent* StaticMeshComp)
+{
+    
 }
 
 void PropertyEditorPanel::OnResize(HWND hWnd)

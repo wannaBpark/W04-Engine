@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Components/ActorComponent.h"
 #include "ImGUI/imgui.h"
 #include "UnrealEd/EditorPanel.h"
@@ -19,6 +19,7 @@ private:
     /* Materials Settings */
     void RenderForStaticMesh(UStaticMeshComponent* StaticMeshComp);
     void RenderMaterialView(UMaterial* Material);
+    void RenderSubMeshView(UStaticMeshComponent* StaticMeshComp);
 private:
     float Width = 0, Height = 0;
     FVector Location = FVector(0, 0, 0);
