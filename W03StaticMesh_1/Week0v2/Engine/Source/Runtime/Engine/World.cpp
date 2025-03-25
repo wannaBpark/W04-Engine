@@ -44,13 +44,30 @@ void UWorld::CreateBaseObject()
 
 void UWorld::ReleaseBaseObject()
 {
-	delete LocalGizmo;
-	delete worldGizmo;
-	delete camera;
-	delete localPlayer;
-	LocalGizmo = nullptr;
-	camera = nullptr;
-	localPlayer = nullptr;
+    if (LocalGizmo)
+    {
+        delete LocalGizmo;
+        LocalGizmo = nullptr;
+    }
+
+    if (worldGizmo)
+    {
+        delete worldGizmo;
+        worldGizmo = nullptr;
+    }
+
+    if (camera)
+    {
+        delete camera;
+        camera = nullptr;
+    }
+
+    if (localPlayer)
+    {
+        delete localPlayer;
+        localPlayer = nullptr;
+    }
+
 }
 
 void UWorld::Tick(float DeltaTime)
