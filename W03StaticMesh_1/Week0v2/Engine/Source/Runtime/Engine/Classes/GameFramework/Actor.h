@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Components/SceneComponent.h"
 #include "Container/Set.h"
+#include "Engine/EngineTypes.h"
 #include "UObject/Casts.h"
 #include "UObject/Object.h"
 #include "UObject/ObjectFactory.h"
@@ -25,12 +26,26 @@ public:
     /** Actor가 제거될 때 호출됩니다. */
     virtual void Destroyed();
 
+    /**
+     * 액터가 게임 플레이를 종료할 때 호출되는 함수입니다.
+     *
+     * @param EndPlayReason EndPlay가 호출된 이유를 나타내는 열거형 값
+     * @note Destroyed와는 다른점은, EndPlay는 레벨 전환, 게임 종료, 또는 Destroy() 호출 시 항상 실행됩니다.
+     */
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
+
     // TODO: 추후 제거해야 함
     virtual void Render();
 
 public:
     /** 이 Actor를 제거합니다. */
     virtual bool Destroy();
+
+    /** 현재 Actor가 제거중인지 여부를 반환합니다. */
+    bool IsActorBeingDestroyed() const
+    {
+        return bActorIsBeingDestroyed;
+    }
 
     /**
      * Actor에 컴포넌트를 새로 추가합니다.
@@ -53,7 +68,7 @@ public:
 
 public:
     USceneComponent* GetRootComponent() const { return RootComponent; }
-    void SetRootComponent(USceneComponent* NewRootComponent);
+    bool SetRootComponent(USceneComponent* NewRootComponent);
 
     AActor* GetOwner() const { return Owner; }
     void SetOwner(AActor* NewOwner) { Owner = NewOwner; }
@@ -74,7 +89,12 @@ private:
     /** 이 Actor를 소유하고 있는 다른 Actor의 정보 */
     AActor* Owner = nullptr;
 
+    /** 본인이 소유하고 있는 컴포넌트들의 정보 */
     TSet<UActorComponent*> OwnedComponents;
+
+
+    /** 현재 Actor가 삭제 처리중인지 여부 */
+    uint8 bActorIsBeingDestroyed : 1;
 
 #if 1 // TODO: WITH_EDITOR 추가
 public:

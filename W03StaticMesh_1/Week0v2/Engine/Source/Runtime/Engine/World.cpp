@@ -82,32 +82,17 @@ void UWorld::Tick(float DeltaTime)
 	{
 	    Actor->Tick(DeltaTime);
 	}
-
-    // 제거 대기열에 있는 Actor들 제거
-    for (AActor* Actor : PendingDestroyActors)
-    {
-        const TSet CopiedComponents = Actor->GetComponents();
-        for (UActorComponent* Comp : CopiedComponents)
-        {
-            Comp->DestroyComponent();
-            GUObjectArray.Remove(Comp);
-            delete Comp;
-        }
-        GUObjectArray.Remove(Actor);
-        delete Actor;
-    }
-    PendingDestroyActors.Empty();
 }
 
 void UWorld::Release()
 {
-
-	for (auto iter : GUObjectArray)
+	for (AActor* Actor : ActorsArray)
 	{
-		delete iter;
+		Actor->EndPlay(EEndPlayReason::WorldTransition);
+	    GUObjectArray.MarkRemoveObject(Actor);
 	}
-	GUObjectArray.Empty();
     ActorsArray.Empty();
+
 	pickingGizmo = nullptr;
 	ReleaseBaseObject();
 }
@@ -132,7 +117,7 @@ bool UWorld::DestroyActor(AActor* Actor)
         return false;
     }
 
-    if (PendingDestroyActors.Contains(Actor))
+    if (Actor->IsActorBeingDestroyed())
     {
         return true;
     }
@@ -144,11 +129,11 @@ bool UWorld::DestroyActor(AActor* Actor)
     ActorsArray.Remove(Actor);
 
     // 제거 대기열에 추가
-    PendingDestroyActors.Add(Actor);
+    GUObjectArray.MarkRemoveObject(Actor);
     return true;
 }
 
 void UWorld::SetPickingGizmo(UObject* Object)
 {
-	pickingGizmo = static_cast<USceneComponent*>(_Obj);
+	pickingGizmo = Cast<USceneComponent>(Object);
 }

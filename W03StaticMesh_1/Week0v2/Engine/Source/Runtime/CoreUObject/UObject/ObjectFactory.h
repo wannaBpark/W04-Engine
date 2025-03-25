@@ -18,7 +18,7 @@ public:
         Obj->NamePrivate = Name;
         Obj->UUID = id;
 
-        GUObjectArray.Add(Obj);
+        GUObjectArray.AddObject(Obj);
 
         UE_LOG(LogLevel::Display, "Created New Object : %s", *Name);
         return Obj;

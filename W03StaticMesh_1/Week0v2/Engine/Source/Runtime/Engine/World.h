@@ -52,9 +52,6 @@ private:
     /** Actor가 Spawn되었고, 아직 BeginPlay가 호출되지 않은 Actor들 */
     TArray<AActor*> PendingBeginPlayActors;
 
-    /** Actor 제거 대기열 */
-    TArray<AActor*> PendingDestroyActors;
-
     AActor* PickedActor = nullptr;
 
     USceneComponent* pickingGizmo = nullptr;

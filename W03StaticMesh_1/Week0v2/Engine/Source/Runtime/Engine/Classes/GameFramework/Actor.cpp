@@ -25,11 +25,20 @@ void AActor::Tick(float DeltaTime)
 
 void AActor::Destroyed()
 {
-    // World->Tick에서 컴포넌트 제거
-    // for (UActorComponent* Comp : OwnedComponents)
-    // {
-    //     Comp->DestroyComponent();
-    // }
+    // Actor가 제거되었을 때 호출하는 EndPlay
+    EndPlay(EEndPlayReason::Destroyed);
+}
+
+void AActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    // 본인이 소유하고 있는 모든 컴포넌트의 EndPlay 호출
+    for (UActorComponent* Component : GetComponents())
+    {
+        if (Component->HasBegunPlay())
+        {
+            Component->EndPlay(EndPlayReason);
+        }
+    }
 }
 
 // TODO: 추후 제거해야 함
@@ -46,12 +55,16 @@ void AActor::Render()
 
 bool AActor::Destroy()
 {
-    if (UWorld* World = GetWorld())
+    if (!IsActorBeingDestroyed())
     {
-        World->DestroyActor(this);
+        if (UWorld* World = GetWorld())
+        {
+            World->DestroyActor(this);
+            bActorIsBeingDestroyed = true;
+        }
     }
 
-    return true;
+    return IsActorBeingDestroyed();
 }
 
 void AActor::RemoveOwnedComponent(UActorComponent* Component)
@@ -59,9 +72,9 @@ void AActor::RemoveOwnedComponent(UActorComponent* Component)
     OwnedComponents.Remove(Component);
 }
 
-void AActor::SetRootComponent(USceneComponent* NewRootComponent)
+bool AActor::SetRootComponent(USceneComponent* NewRootComponent)
 {
-    if (NewRootComponent != nullptr && NewRootComponent->GetOwner() == this)
+    if (NewRootComponent == nullptr || NewRootComponent->GetOwner() == this)
     {
         if (RootComponent != NewRootComponent)
         {
@@ -70,7 +83,9 @@ void AActor::SetRootComponent(USceneComponent* NewRootComponent)
 
             OldRootComponent->SetupAttachment(RootComponent);
         }
+        return true;
     }
+    return false;
 }
 
 bool AActor::SetActorLocation(const FVector& NewLocation)

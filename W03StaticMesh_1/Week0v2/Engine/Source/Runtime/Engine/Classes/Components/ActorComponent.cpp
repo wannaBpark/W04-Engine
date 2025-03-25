@@ -9,6 +9,7 @@ void UActorComponent::InitializeComponent()
 
 void UActorComponent::BeginPlay()
 {
+    bHasBegunPlay = true;
 }
 
 void UActorComponent::TickComponent(float DeltaTime)
@@ -16,6 +17,10 @@ void UActorComponent::TickComponent(float DeltaTime)
 }
 
 void UActorComponent::OnComponentDestroyed()
+{
+}
+
+void UActorComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 }
 
