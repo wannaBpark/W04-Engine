@@ -56,6 +56,7 @@ void FEditorViewportClient::Input()
     if (io.WantCaptureMouse) return;
     if (GetAsyncKeyState(VK_RBUTTON) & 0x8000) // VK_RBUTTON은 마우스 오른쪽 버튼을 나타냄
     {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_None);
         if (!bRightMouseDown)
         {
             // 마우스 오른쪽 버튼을 처음 눌렀을 때, 마우스 위치 초기화
@@ -112,7 +113,7 @@ void FEditorViewportClient::Input()
     }
     else
     {
-        ShowCursor(true);
+        ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
         bRightMouseDown = false; // 마우스 오른쪽 버튼을 떼면 상태 초기화
     }
 }
