@@ -1,13 +1,16 @@
 #include "UBillboardComponent.h"
-#include "Engine/Source/Runtime/Core/Math/JungleMath.h"
+#include "Math/JungleMath.h"
 #include "Actors/Player.h"
-#include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
+#include "Editor/PropertyEditor/ShowFlags.h"
 #include "QuadTexture.h"
 #include "Define.h"
 #include <DirectXMath.h>
 
 #include "World.h"
 #include "Math/MathUtility.h"
+#include "UnrealEd/EditorViewportClient.h"
+#include "LevelEditor/SLevelEditor.h"
+
 
 UBillboardComponent::UBillboardComponent()
 {
@@ -47,19 +50,19 @@ void UBillboardComponent::Render()
 	//FEngineLoop::renderer.UpdateSubUVConstant(0, 0);
 	//FEngineLoop::renderer.PrepareSubUVConstant();
 
-	FMatrix M = CreateBillboardMatrix();
-	FMatrix VP = GetEngine().View * GetEngine().Projection;
+	FMatrix Model = CreateBillboardMatrix();
 
 	// 최종 MVP 행렬
-	FMatrix MVP = M * VP;
+    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
+    FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
+    FVector4 UUIDColor = EncodeUUID() / 255.0f;
 	if (this == GetWorld()->GetPickingGizmo()) {
-		FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);
+		FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor,true);
 	}
 	else
-		FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
-    FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
+		FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
 
-	if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
+	if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
 
 	FEngineLoop::renderer.RenderTexturePrimitive(vertexTextureBuffer,numVertices,
 		indexTextureBuffer,numIndices,Texture->TextureSRV,Texture->SamplerState);
@@ -129,7 +132,7 @@ void UBillboardComponent::SetUUIDParent(USceneComponent* _parent)
 
 FMatrix UBillboardComponent::CreateBillboardMatrix()
 {
-	FMatrix CameraView = GetEngine().View;
+	FMatrix CameraView = GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
 
 	CameraView.M[0][3] = 0.0f;
 	CameraView.M[1][3] = 0.0f;
@@ -189,13 +192,13 @@ bool UBillboardComponent::CheckPickingOnNDC(const TArray<FVector>& checkQuad, fl
 	FVector pickPosition;
 	int screenX = mousePos.x;
 	int screenY = mousePos.y;
-	FMatrix projectionMatrix = GetEngine().Projection;
+    FMatrix projectionMatrix = GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
 	pickPosition.x = ((2.0f * screenX / viewport.Width) - 1);
 	pickPosition.y = -((2.0f * screenY / viewport.Height) - 1);
 	pickPosition.z = 1.0f; // Near Plane
 
 	FMatrix M = CreateBillboardMatrix();
-	FMatrix V = GEngineLoop.View;
+    FMatrix V = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();;
 	FMatrix P = projectionMatrix;
 	FMatrix MVP = M * V * P;
 

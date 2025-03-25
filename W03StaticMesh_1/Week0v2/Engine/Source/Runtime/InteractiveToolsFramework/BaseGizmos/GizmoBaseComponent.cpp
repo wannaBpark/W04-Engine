@@ -4,13 +4,14 @@ int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 {
     int nIntersections = 0;
     if (staticMesh == nullptr) return 0;
-    FVertexSimple* vertices = staticMesh->vertices.get();
-    int vCount = staticMesh->numVertices;
-    UINT* indices = staticMesh->indices.get();
-    int iCount = staticMesh->numIndices;
+    OBJ::FStaticMeshRenderData* renderData = staticMesh->GetRenderData();
+    FVertexSimple* vertices = renderData->Vertices.GetData();
+    int vCount = renderData->Vertices.Len();
+    UINT* indices = renderData->Indices.GetData();
+    int iCount = renderData->Indices.Len();
 
     if (!vertices) return 0;
-    BYTE* pbPositions = reinterpret_cast<BYTE*>(staticMesh->vertices.get());
+    BYTE* pbPositions = reinterpret_cast<BYTE*>(renderData->Vertices.GetData());
 
     int nPrimitives = (!indices) ? (vCount / 3) : (iCount / 3);
     float fNearHitDistance = FLT_MAX;

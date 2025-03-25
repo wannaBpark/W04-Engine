@@ -2,12 +2,13 @@
 #include "EngineBaseTypes.h"
 #include "IWindowToggleable.h"
 class UWorld;
+class FEditorViewportClient;
 class ViewModeDropdown : public IWindowToggleable
 {
 public:
     static ViewModeDropdown& GetInstance();
 
-    void Draw(UWorld* world);
+    void Draw(std::shared_ptr<FEditorViewportClient> ActiveViewport);
     void OnResize(HWND hWnd);
     void Toggle() override {
         if (bWasOpen) {

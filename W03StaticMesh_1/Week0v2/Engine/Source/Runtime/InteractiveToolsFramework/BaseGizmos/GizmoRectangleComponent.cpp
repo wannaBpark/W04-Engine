@@ -1,8 +1,12 @@
 #include "GizmoRectangleComponent.h"
 
 #include "World.h"
-#include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 #include "Actors/Player.h"
+#include "LevelEditor/SLevelEditor.h"
+#include "Math/JungleMath.h"
+#include "UnrealEd/EditorViewportClient.h"
+
+
 UGizmoRectangleComponent::UGizmoRectangleComponent()
 {
 }
@@ -33,13 +37,18 @@ void UGizmoRectangleComponent::Render()
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetQuat(), GetWorldScale());
 
     // 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().View * GetEngine().Projection;
-    if (this == GetWorld()->GetPickingGizmo()) {
-        FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);
+    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->
+        GetActiveViewportClient()->GetProjectionMatrix();
+    FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
+    FVector4 UUIDColor = EncodeUUID() / 255.0f;
+    if (this == GetWorld()->GetPickingGizmo())
+    {
+        FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
     }
     else
-        FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
-    FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
+    {
+        FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+    }
 
     FEngineLoop::graphicDevice.DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID); // fill solid로 렌더링.
     Super::Render();

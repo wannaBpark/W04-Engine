@@ -3,8 +3,13 @@
 #include "World.h"
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/PrimitiveBatch.h"
+#include "UObject/ObjectFactory.h"
+
+#include "UnrealEd/EditorViewportClient.h"
+#include "LevelEditor/SLevelEditor.h"
 UCubeComp::UCubeComp()
 {
+    staticMesh = FObjectFactory::ConstructObject<UStaticMesh>();
     SetType(StaticClass()->GetName());
     AABB.max = { 1,1,1 };
     AABB.min = { -1,-1,-1 };
@@ -29,17 +34,25 @@ void UCubeComp::Render()
 {
     FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());
     // 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().View * GetEngine().Projection;
-    FEngineLoop::renderer.UpdateNormalConstantBuffer(Model);
-    if (GetWorld()->GetPickedActor() == GetOwner()) {
-        FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);
+    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->
+        GetActiveViewportClient()->GetProjectionMatrix();
+    FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
+    FVector4 UUIDColor = EncodeUUID() / 255.0f;
+    if (GetWorld()->GetPickedActor() == GetOwner())
+    {
+        FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
     }
     else
-        FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
-    FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
+    {
+        FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+    }
 
-    if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_AABB))
+    if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
+    {
         UPrimitiveBatch::GetInstance().RenderAABB(AABB, GetWorldLocation(), Model);
-    if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_Primitives))
+    }
+    if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))
+    {
         Super::Render();
+    }
 }

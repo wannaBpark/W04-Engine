@@ -1,34 +1,29 @@
+Texture2D Texture : register(t0);
+SamplerState Sampler : register(s0);
+
 // MatrixBuffer: 변환 행렬 관리
 cbuffer MatrixBuffer : register(b0)
 {
     row_major float4x4 MVP;
-    float flag;
+    row_major float4x4 MInverseTranspose;
+    float4 UUID;
+    bool isSelected;
+    float3 MatrixPad0;
 };
 
 // LightingBuffer: 조명 관련 파라미터 관리
 cbuffer LightingBuffer : register(b1)
 {
     float3 LightDirection; // 조명 방향 (단위 벡터; 빛이 들어오는 방향의 반대 사용)
-    float pad1; // 16바이트 정렬용 패딩
-    float3 LightColor; // 조명 색상 (예: (1, 1, 1))
-    float pad2; // 16바이트 정렬용 패딩
     float AmbientFactor; // ambient 계수 (예: 0.1)
-    float pad3; // 16바이트 정렬 맞춤 추가 패딩
-    float pad4; // 16바이트 정렬 맞춤 추가 패딩
-    float pad5; // 16바이트 정렬 맞춤 추가 패딩
-};
-cbuffer FNormalConstants : register(b2)
-{
-    row_major float4x4 MInverseTranspose;
-};
-cbuffer FLitUnlitConstants : register(b3)
-{
-    int isLit;
+    float3 LightColor; // 조명 색상 (예: (1, 1, 1))
+    float LightPad0; // 16바이트 정렬용 패딩
 };
 
-cbuffer UUIDConstant : register(b4)
+cbuffer FFlagConstants : register(b2)
 {
-    float4 UUID;
+    bool IsLit;
+    float3 FlagPad0;
 }
 
 struct VS_INPUT
@@ -38,8 +33,6 @@ struct VS_INPUT
     float3 normal : NORMAL; // 버텍스 노멀
     float2 texcoord : TEXCOORD;
 };
-Texture2D Texture : register(t0);
-SamplerState Sampler : register(s0);
 
 struct PS_INPUT
 {
@@ -63,7 +56,7 @@ PS_INPUT mainVS(VS_INPUT input)
     // 위치 변환
     output.position = mul(input.position, MVP);
     output.color = input.color;
-    if (flag)
+    if (isSelected)
         output.color *= 0.5;
     // 입력 normal 값의 길이 확인
     float normalThreshold = 0.001;
@@ -133,7 +126,7 @@ PS_OUTPUT mainPS(PS_INPUT input) : SV_Target
 
     //float3 color = saturate(input.color.rgb);
 
-    if (isLit == 1) // 조명이 적용되는 경우
+    if (IsLit == 1) // 조명이 적용되는 경우
     {
         if (input.normalFlag > 0.5)
         {

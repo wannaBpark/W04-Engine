@@ -47,9 +47,9 @@ typedef char ANSICHAR;
 typedef wchar_t WIDECHAR;
 
 #if USE_WIDECHAR
-    typedef WIDECHAR TCHAR;
+typedef WIDECHAR TCHAR;
 #else
-    typedef ANSICHAR TCHAR;
+typedef ANSICHAR TCHAR;
 #endif
 
 // 임시로 사용

@@ -5,7 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "PropertyEditor/ShowFlags.h"
 
-
+#include "LevelEditor/SLevelEditor.h"
 UWorld::UWorld()
 {
 }
@@ -100,7 +100,7 @@ void UWorld::Render()
     for (const auto& Actor : ActorsArray)
     {
         Actor->Render();
-        if (ShowFlags::GetInstance().currentFlags & EEngineShowFlags::SF_UUIDText)
+        if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & EEngineShowFlags::SF_UUIDText)
         {
             Actor->RenderUUID();
         }

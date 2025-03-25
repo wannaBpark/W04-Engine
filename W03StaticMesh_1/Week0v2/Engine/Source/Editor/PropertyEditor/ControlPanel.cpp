@@ -9,7 +9,8 @@
 #include "Components/UParticleSubUVComp.h"
 #include "Components/UText.h"
 #include "UnrealEd/EditorViewportClient.h"
-#include "UnrealEd/EditorWindow.h"
+#include "UnrealEd/EditorPanel.h"
+#include "LevelEditor/SLevelEditor.h"
 // #include "ImGUI\imgui.h"
 //#include "Font\IconDefs.h"
 //#include "Font/RawFonts.h"
@@ -124,10 +125,6 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
 	if (!player) return;
 	static ControlMode selectedMode = CM_TRANSLATION;
 
-	//PropertyPanel* propPanel = world->GetPropertyPanel(); // PropertyPanel 가져오기
-	//bool isTranslationActive = (PrimaryGizmo && PrimaryGizmo->GetCurrentGizmo() == EGizmoType::Translation);
-	//if (isTranslationActive)
-	//	ImGui::PushStyleColor(ImGuiCol_Button, ActiveColor); // 활성 상태 색상
 	if (ImGui::Button("\ue9bc", ControlButtonSize))
 	{
 		selectedMode = CM_TRANSLATION;
@@ -179,28 +176,32 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
     }
     ImGui::Separator();
 	
-	float sp = GEngineLoop.GetViewportClient()->GetGridSize();
+	float sp = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetGridSize();
 	ImGui::SliderFloat("Grid Spacing", &sp, 1.0f, 20.0f);
 	UPrimitiveBatch::GetInstance().GenerateGrid(sp, 5000);
-	GEngineLoop.GetViewportClient()->SetGridSize(sp);
+	GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetGridSize(sp);
 	
-	sp = GEngineLoop.GetViewportClient()->GetCameraSpeedScalar();
+	sp = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetCameraSpeedScalar();
 	ImGui::SliderFloat("Camera Speed", &sp, 0.198f, 192.0f);
-	GEngineLoop.GetViewportClient()->SetCameraSpeedScalar(sp);
+	GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->SetCameraSpeedScalar(sp);
 
 	ImGui::Separator();
 
 	ImGui::Text("Orthogonal");
 	ImGui::SliderFloat("FOV", &world->GetCamera()->GetFOV(), 30.0f, 120.0f);
 
-	float cameraLocation[3] = { world->GetCamera()->GetWorldLocation().x, world->GetCamera()->GetWorldLocation().y, world->GetCamera()->GetWorldLocation().z };
+	float cameraLocation[3] = { GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation().x
+        , GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation().y,
+        GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation().z };
 	ImGui::InputFloat3("Camera Location", cameraLocation);
 
-	float cameraRotation[3] = { world->GetCamera()->GetWorldRotation().x, world->GetCamera()->GetWorldRotation().y, world->GetCamera()->GetWorldRotation().z };
+	float cameraRotation[3] = { GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetRotation().x
+        , GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetRotation().y,
+        GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetRotation().z };
 	ImGui::InputFloat3("Camera Rotation", cameraRotation);
 
-	world->GetCamera()->SetLocation(FVector(cameraLocation[0], cameraLocation[1], cameraLocation[2]));
-	world->GetCamera()->SetRotation(FVector(cameraRotation[0], cameraRotation[1], cameraRotation[2]));
+    GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.SetLocation(FVector(cameraLocation[0], cameraLocation[1], cameraLocation[2]));
+    GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.SetRotation(FVector(cameraRotation[0], cameraRotation[1], cameraRotation[2]));
 
 	ImGui::End();
 }

@@ -87,4 +87,7 @@ struct FVector
 
     static const FVector ZeroVector;
     static const FVector OneVector;
+    static const FVector UpVector;
+    static const FVector ForwardVector;
+    static const FVector RightVector;
 };

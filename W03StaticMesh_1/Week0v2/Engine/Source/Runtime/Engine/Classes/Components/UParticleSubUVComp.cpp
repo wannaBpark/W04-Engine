@@ -1,7 +1,9 @@
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "UParticleSubUVComp.h"
-
+#include "UnrealEd/EditorViewportClient.h"
 #include "World.h"
+#include "LevelEditor/SLevelEditor.h"
+
 
 UParticleSubUVComp::UParticleSubUVComp()
 {
@@ -72,17 +74,17 @@ void UParticleSubUVComp::Render()
 	FEngineLoop::renderer.UpdateSubUVConstant(finalIndexU, finalIndexV);
 	FEngineLoop::renderer.PrepareSubUVConstant();
 
-	FMatrix M = CreateBillboardMatrix();
-	FMatrix VP = GetEngine().View * GetEngine().Projection;
+	FMatrix Model = CreateBillboardMatrix();
 
 	// 최종 MVP 행렬
-	FMatrix MVP = M * VP;
+    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
+    FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
+    FVector4 UUIDColor = EncodeUUID() / 255.0f;
 	if (this == GetWorld()->GetPickingGizmo()) {
-		FEngineLoop::renderer.UpdateConstant(MVP, 1.0f);
+		FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
 	}
 	else
-		FEngineLoop::renderer.UpdateConstant(MVP, 0.0f);
-    FEngineLoop::renderer.UpdateUUIDConstantBuffer(EncodeUUID());
+		FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
 	if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
 
 		FEngineLoop::renderer.RenderTexturePrimitive(vertexSubUVBuffer, numTextVertices,

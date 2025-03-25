@@ -5,12 +5,14 @@
 #include "Renderer/Renderer.h"
 #include "UnrealEd/PrimitiveBatch.h"
 #include "Engine/ResourceMgr.h"
-//#include "Engine/Source/Editor/UnrealEd/EditorViewportClient.h"
+
+class UnrealEd;
 class UImGuiManager;
 class UWorld;
 class FEditorViewportClient;
-
-
+class SSplitterV;
+class SSplitterH;
+class SLevelEditor;
 class FEngineLoop
 {
 public:
@@ -19,13 +21,14 @@ public:
 
     int32 PreInit();
     int32 Init(HINSTANCE hInstance);
+    void Render();
     void Tick();
     void Exit();
-	
+    float GetAspectRatio(IDXGISwapChain* swapChain);
+    void Input();
 private:
     void WindowInit(HINSTANCE hInstance);
-    void Render();
-    float GetAspectRatio(IDXGISwapChain* swapChain);
+    void RenderWorld();
 public:
     static FGraphicsDevice graphicDevice;
     static FRenderer renderer;
@@ -33,22 +36,21 @@ public:
     static uint32 TotalAllocationBytes;
     static uint32 TotalAllocationCount;
 
-	
+
     HWND hWnd;
-    FMatrix View;
-    FMatrix Projection;
+
 private:
     UImGuiManager* UIMgr;
     UWorld* GWorld;
+    SLevelEditor* LevelEditor;
+    UnrealEd* UnrealEditor;
     bool bIsExit = false;
     const int32 targetFPS = 60;
 
-    std::shared_ptr<FEditorViewportClient> viewportClient;
+    bool bTestInput = false;
 public:
     UWorld* GetWorld(){ return GWorld; }
-    std::shared_ptr<FEditorViewportClient> GetViewportClient() const
-    {
-        return viewportClient;
-    }
+    SLevelEditor* GetLevelEditor() { return LevelEditor; }
+    UnrealEd* GetUnrealEditor() { return UnrealEditor; }
 };
 

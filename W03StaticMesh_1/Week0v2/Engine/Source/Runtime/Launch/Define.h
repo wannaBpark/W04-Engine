@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "Core/Container/String.h"
 #include "Core/Container/Array.h"
+#include "UObject/NameTypes.h"
 
 // 수학 관련
 #include "Math/Vector.h"
@@ -31,6 +32,13 @@ struct FMaterialSubset
     uint32 IndexCount; // Index Count
     uint32 MaterialIndex; // Material Index
     FString MaterialName; // Material Name
+};
+
+struct FStaticMaterial
+{
+    class UMaterial* Material;
+    FName MaterialSlotName;
+    //FMeshUVChannelInfo UVChannelData;
 };
 
 // OBJ File Raw Data
@@ -99,16 +107,22 @@ struct FObjMaterialInfo
 // Cooked Data
 namespace OBJ
 {
-    struct FStaticMesh
+    struct FStaticMeshRenderData
     {
         FWString ObjectName;
         FWString PathName;
         
         TArray<FVertexSimple> Vertices;
         TArray<UINT> Indices;
+
+        ID3D11Buffer* VertexBuffer;
+        ID3D11Buffer* IndexBuffer;
         
         TArray<FObjMaterialInfo> Materials;
         TArray<FMaterialSubset> MaterialSubsets;
+
+        FVector BoundingBoxMin;
+        FVector BoundingBoxMax;
     };
 }
 
@@ -131,6 +145,21 @@ struct FSimpleVertex
 };
 struct FOBB {
     FVector corners[8];
+};
+struct FRect
+{
+    FRect() : leftTopX(0), leftTopY(0), width(0), height(0) {}
+    FRect(float x, float y, float w, float h) : leftTopX(x), leftTopY(y), width(w), height(h) {}
+    float leftTopX, leftTopY, width, height;
+};
+struct FPoint
+{
+    FPoint() : x(0), y(0) {}
+    FPoint(float _x, float _y) : x(_x), y(_y) {}
+    FPoint(long _x, long _y) : x(_x), y(_y) {}
+    FPoint(int _x, int _y) : x(_x), y(_y) {}
+
+    float x, y;
 };
 struct FBoundingBox
 {
@@ -247,5 +276,14 @@ struct FLighting
 	float pad5; // 16바이트 정렬 맞춤 추가 패딩
 };
 
-
+struct FMaterialConstants {
+    FVector DiffuseColor;
+    float TransparencyScalar;
+    FVector AmbientColor;
+    float DensityScalar;
+    FVector SpecularColor;
+    float SpecularScalar;
+    FVector EmmisiveColor;
+    float MaterialPad0;
+};
 

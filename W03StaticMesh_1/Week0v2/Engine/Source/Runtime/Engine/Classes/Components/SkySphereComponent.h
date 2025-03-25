@@ -1,11 +1,11 @@
 #pragma once
-#include "PrimitiveComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Engine/Texture.h"
 
 
-class USkySphereComponent : public UPrimitiveComponent
+class USkySphereComponent : public UStaticMeshComponent
 {
-    DECLARE_CLASS(USkySphereComponent, UPrimitiveComponent)
+    DECLARE_CLASS(USkySphereComponent, UStaticMeshComponent)
 
 public:
     USkySphereComponent();

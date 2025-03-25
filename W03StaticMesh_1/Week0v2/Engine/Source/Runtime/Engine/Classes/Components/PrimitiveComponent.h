@@ -23,15 +23,12 @@ public:
 private:
     FString m_Type;
 
-protected:
-    std::shared_ptr<FStaticMesh> staticMesh;
-
 public:
     FString GetType() { return m_Type; }
 
     void SetType(const FString& _Type)
     {
         m_Type = _Type;
-        staticMesh = FEngineLoop::resourceMgr.GetMesh(m_Type);
+        //staticMesh = FEngineLoop::resourceMgr.GetMesh(m_Type);
     }
 };

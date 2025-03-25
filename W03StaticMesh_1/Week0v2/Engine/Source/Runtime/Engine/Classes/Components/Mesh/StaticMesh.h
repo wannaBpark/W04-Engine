@@ -2,24 +2,21 @@
 #include "UObject/Object.h"
 #include "UObject/ObjectMacros.h"
 #include "Components/Material/Material.h"
-
-// FStaticMaterial 구조체
-struct FStaticMaterial
-{
-    UMaterial* Material;
-    FName MaterialSlotName;
-    //FMeshUVChannelInfo UVChannelData;
-};
+#include "Define.h"
 
 class UStaticMesh : public UObject
 {
     DECLARE_CLASS(UStaticMesh, UObject)
 
 public:
+    UStaticMesh();
+    ~UStaticMesh();
     TArray<FStaticMaterial*> GetMaterials() const { return materials; }
     uint32 GetMaterialIndex(FName MaterialSlotName) const;
     void GetUsedMaterials(TArray<UMaterial*> Out) const;
+    OBJ::FStaticMeshRenderData* GetRenderData() const { return staticMeshRenderData; }
 private:
-    FStaticMesh staticMeshInfo; // 언리얼의 FStaticMeshRenderData
+    OBJ::FStaticMeshRenderData* staticMeshRenderData;
     TArray<FStaticMaterial*> materials;
+
 };
