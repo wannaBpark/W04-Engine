@@ -1,10 +1,12 @@
 ﻿#include "UObjectArray.h"
 #include "Object.h"
+#include "UObjectHash.h"
 
 
 void FUObjectArray::AddObject(UObject* Object)
 {
     ObjObjects.Add(Object);
+    AddToClassMap(Object);
 }
 
 void FUObjectArray::MarkRemoveObject(UObject* Object)
@@ -15,8 +17,9 @@ void FUObjectArray::MarkRemoveObject(UObject* Object)
 
 void FUObjectArray::ProcessPendingDestroyObjects()
 {
-    for (const UObject* Object : PendingDestroyObjects)
+    for (UObject* Object : PendingDestroyObjects)
     {
+        RemoveFromClassMap(Object);
         delete Object;
     }
     PendingDestroyObjects.Empty();

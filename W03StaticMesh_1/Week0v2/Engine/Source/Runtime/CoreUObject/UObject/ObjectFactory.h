@@ -18,7 +18,6 @@ public:
         Obj->ClassPrivate = T::StaticClass();
         Obj->NamePrivate = Name;
         Obj->UUID = id;
-        AddToClassMap(Obj);  // TODO: 등록 위치를 UClass에서 하도록 변경하기
 
         GUObjectArray.AddObject(Obj);
 
