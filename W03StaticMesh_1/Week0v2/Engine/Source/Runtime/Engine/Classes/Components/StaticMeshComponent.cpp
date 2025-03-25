@@ -3,10 +3,6 @@
 #include "World.h"
 #include "Launch/EngineLoop.h"
 #include "UObject/ObjectFactory.h"
-#include "Math/JungleMath.h"
-#include "UnrealEd/EditorViewportClient.h"
-#include "LevelEditor/SLevelEditor.h"
-#include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/PrimitiveBatch.h"
 
 
@@ -19,13 +15,19 @@ uint32 UStaticMeshComponent::GetNumMaterials() const
 
 UMaterial* UStaticMeshComponent::GetMaterial(uint32 ElementIndex) const
 {
-    if (staticMesh == nullptr) return nullptr;
-
-    if (OverrideMaterials[ElementIndex] != nullptr)
-        return OverrideMaterials[ElementIndex];
-
-    if (staticMesh->GetMaterials().IsValidIndex(ElementIndex))
-        return staticMesh->GetMaterials()[ElementIndex]->Material;
+    if (staticMesh != nullptr)
+    {
+        if (OverrideMaterials[ElementIndex] != nullptr)
+        {
+            return OverrideMaterials[ElementIndex];
+        }
+    
+        if (staticMesh->GetMaterials().IsValidIndex(ElementIndex))
+        {
+            return staticMesh->GetMaterials()[ElementIndex]->Material;
+        }
+    }
+    return nullptr;
 }
 
 uint32 UStaticMeshComponent::GetMaterialIndex(FName MaterialSlotName) const

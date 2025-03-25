@@ -21,12 +21,10 @@ public:
     void SetStaticMesh(UStaticMesh* value)
     { 
         staticMesh = value;
-        OverrideMaterials.SetNum(staticMesh->GetMaterials().Num());
+        OverrideMaterials.SetNum(value->GetMaterials().Num());
     }
+    int selectedSubMeshIndex = -1;
 
 protected:
     UStaticMesh* staticMesh = nullptr;
-
-    public:
-    UStaticMesh* GetStaticMesh() const { return staticMesh; }
 };

@@ -12,6 +12,8 @@
 class ULightComponentBase;
 class UWorld;
 class FGraphicsDevice;
+class UMaterial;
+struct FStaticMaterial;
 class UObject;
 class FEditorViewportClient;
 class UBillboardComponent;
@@ -31,23 +33,12 @@ public:
     ID3D11Buffer* LightingBuffer = nullptr;
     ID3D11Buffer* FlagBuffer = nullptr;
     ID3D11Buffer* MaterialConstantBuffer = nullptr;
+    ID3D11Buffer* SubMeshConstantBuffer = nullptr;
 
     FLighting lightingData;
 
     uint32 Stride;
     uint32 Stride2;
-
-    struct FConstants {
-        FMatrix MVP;      // 모델
-        FMatrix ModelMatrixInverseTranspose; // normal 변환을 위한 행렬
-        FVector4 UUIDColor;
-        float Flag;
-        FVector pad;
-    };
-    struct FLitUnlitConstants {
-        int isLit; // 1 = Lit, 0 = Unlit 
-        FVector pad;
-    };
 
 public:
     void Initialize(FGraphicsDevice* graphics);
@@ -57,7 +48,7 @@ public:
     //Render
     void RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices) const;
     void RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices) const;
-    void RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<UMaterial*> overrideMaterial) const;
+    void RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<FStaticMaterial*> materials, TArray<UMaterial*> overrideMaterial, int selectedSubMeshIndex) const;
    
     void RenderTexturedModelPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices, ID3D11ShaderResourceView* InTextureSRV, ID3D11SamplerState* InSamplerState) const;
     //Release
@@ -86,9 +77,10 @@ public:
 
     // update
     void UpdateLightBuffer() const;
-    void UpdateConstant(const FMatrix& MVP, const FMatrix& NormalMatrix, FVector4 UUIDColor, float IsSelected) const;
+    void UpdateConstant(const FMatrix& MVP, const FMatrix& NormalMatrix, FVector4 UUIDColor, bool IsSelected) const;
     void UpdateMaterial(const FObjMaterialInfo& MaterialInfo) const;
-    void UpdateLitUnlitConstantBuffer(int isLit) const;
+    void UpdateLitUnlitConstant(int isLit);
+    void UpdateSubMeshConstant(bool isSelected);
 
 public://텍스쳐용 기능 추가
     ID3D11VertexShader* VertexTextureShader = nullptr;

@@ -5,74 +5,66 @@
 #include "Actors/Player.h"
 #include "GizmoRectangleComponent.h"
 #include "World.h"
+#include "Engine/FLoaderOBJ.h"
 
 UTransformGizmo::UTransformGizmo()
 {
+    FManagerOBJ::CreateStaticMesh("Assets/LocationGizmo.obj");
+    FManagerOBJ::CreateStaticMesh("Assets/RotationGizmo.obj");
+    FManagerOBJ::CreateStaticMesh("Assets/ScaleGizmo.obj");
+
+    FObjMaterialInfo YAxisMaterialInfo = {
+        .MTLName = "YAxisMaterial",            // MTLName
+        .bHasTexture = false,                  // bHasTexture
+        .bTransparent = false,                 // bTransparent
+        .Diffuse = FVector(0.0f, 1.0f, 0.0f),  // Diffuse
+        .Specular = FVector(1.0f, 1.0f, 1.0f), // Specular
+        .Ambient = FVector(0.2f, 0.2f, 0.2f),  // Ambient
+        .Emissive = FVector(0.0f, 0.0f, 0.0f), // Emissive
+        .SpecularScalar = 32.0f,               // SpecularScalar
+        .DensityScalar = 1.0f,                 // DensityScalar
+        .TransparencyScalar = 1.0f,            // TransparencyScalar
+    };
+    FObjMaterialInfo ZAxisMaterialInfo = {
+        "ZAxisMaterial",                // MTLName
+        false,                         // bHasTexture
+        false,                         // bTransparent
+        FVector(0.0f, 0.0f, 1.0f),     // Diffuse
+        FVector(1.0f, 1.0f, 1.0f),     // Specular
+        FVector(0.2f, 0.2f, 0.2f),     // Ambient
+        FVector(0.0f, 0.0f, 0.0f),     // Emissive
+        32.0f,                         // SpecularScalar
+        1.0f,                          // DensityScalar
+        1.0f,                          // TransparencyScalar
+        };
+    FManagerOBJ::CreateMaterial(YAxisMaterialInfo);
+    FManagerOBJ::CreateMaterial(ZAxisMaterialInfo);
+
     SetRootComponent(
         AddComponent<USceneComponent>()
     );
 
-	UGizmoArrowComponent* ArrowX = AddComponent<UGizmoArrowComponent>();
-	ArrowX->SetupAttachment(RootComponent);
-	ArrowX->SetType("ArrowX");
-	ArrowArr.Add(ArrowX);
+    UStaticMeshComponent* LocationX = AddComponent<UStaticMeshComponent>();
+    LocationX->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"LocationGizmo.obj"));
+    LocationX->SetRotation(FVector(0, 0, 90));
+    LocationX->SetupAttachment(RootComponent);
+    ArrowArr.Add(LocationX);
 
-	UGizmoArrowComponent* ArrowY = AddComponent<UGizmoArrowComponent>();
-	ArrowY->SetupAttachment(RootComponent);
-	ArrowY->SetType("ArrowY");
-	ArrowY->SetDir(ARROW_DIR::AD_Y);
-	ArrowArr.Add(ArrowY);
+    UStaticMeshComponent* LocationY = AddComponent<UStaticMeshComponent>();
+    UMaterial* YMaterial = FManagerOBJ::GetMaterial("YAxisMaterial");
+    LocationY->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"LocationGizmo.obj"));
+    LocationY->SetRotation(FVector(0, 0, 180));
+    LocationY->SetMaterial(0, YMaterial);
+    LocationY->SetupAttachment(RootComponent);
+    ArrowArr.Add(LocationY);
 
-
-	UGizmoArrowComponent* ArrowZ = AddComponent<UGizmoArrowComponent>();
-	ArrowZ->SetupAttachment(RootComponent);
-	ArrowZ->SetType("ArrowZ");
-	ArrowZ->SetDir(ARROW_DIR::AD_Z);
-	ArrowArr.Add(ArrowZ);
-
-	UGizmoCircleComponent* disc = AddComponent<UGizmoCircleComponent>();
-	disc->SetupAttachment(RootComponent);
-	disc->SetInnerRadius(0.9f);
-	disc->SetType("CircleX");
-	disc->SetRotation(FVector(0.0f,0.0f,0.0f));
-	CircleArr.Add(disc);
-
-	disc = AddComponent<UGizmoCircleComponent>();
-	disc->SetupAttachment(RootComponent);
-	disc->SetInnerRadius(0.9f);
-	disc->SetType("CircleY");
-	CircleArr.Add(disc);
-
-
-	disc = AddComponent<UGizmoCircleComponent>();
-	disc->SetupAttachment(RootComponent);
-	disc->SetInnerRadius(0.9f);
-	disc->SetType("CircleZ");
-	disc->SetRotation(FVector(0.0f,0.0f,0.0f));
-	CircleArr.Add(disc);
-
-	for (auto i : CircleArr)
-	{
-		i->SetScale({ 2.5f,2.5f,2.5f });
-	}
-
-	UGizmoRectangleComponent* ScaleX = AddComponent<UGizmoRectangleComponent>();
-	ScaleX->SetType("ScaleX");
-	ScaleX->SetupAttachment(RootComponent);
-	RectangleArr.Add(ScaleX);
-
-	UGizmoRectangleComponent* ScaleY = AddComponent<UGizmoRectangleComponent>();
-	ScaleY->SetType("ScaleY");
-	ScaleY->SetupAttachment(RootComponent);
-	RectangleArr.Add(ScaleY);
-
-	UGizmoRectangleComponent* ScaleZ = AddComponent<UGizmoRectangleComponent>();
-	ScaleZ->SetType("ScaleZ");
-	ScaleZ->SetupAttachment(RootComponent);
-	RectangleArr.Add(ScaleZ);
-
-
-
+    UStaticMeshComponent* LocationZ = AddComponent<UStaticMeshComponent>();
+    UMaterial* ZMaterial = FManagerOBJ::GetMaterial("ZAxisMaterial");
+    LocationZ->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"LocationGizmo.obj"));
+    LocationZ->SetRotation(FVector(-90, 0, 0));
+    LocationZ->SetMaterial(0, ZMaterial);
+    LocationZ->SetupAttachment(RootComponent);
+    ArrowArr.Add(LocationZ);
 }
 
 void UTransformGizmo::Tick(float DeltaTime)
@@ -93,7 +85,7 @@ void UTransformGizmo::Tick(float DeltaTime)
 	for (int i = 0;i < 3;i++)
 	{
 		ArrowArr[i]->TickComponent(DeltaTime);
-		CircleArr[i]->TickComponent(DeltaTime);
-		RectangleArr[i]->TickComponent(DeltaTime);
+		//CircleArr[i]->TickComponent(DeltaTime);
+		//RectangleArr[i]->TickComponent(DeltaTime);
 	}
 }

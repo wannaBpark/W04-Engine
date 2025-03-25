@@ -2,24 +2,22 @@
 #include "GameFramework/Actor.h"
 
 
-class UGizmoArrowComponent;
-class UGizmoCircleComponent;
-class UGizmoRectangleComponent;
-
+class UStaticMeshComponent;
 class UTransformGizmo : public AActor
 {
     DECLARE_CLASS(UTransformGizmo, AActor)
 
+public:
     UTransformGizmo();
 
     virtual void Tick(float DeltaTime) override;
 
-    TArray<UGizmoArrowComponent*>& GetArrowArr() { return ArrowArr; }
-    TArray<UGizmoCircleComponent*>& GetDiscArr() { return CircleArr; }
-    TArray<UGizmoRectangleComponent*>& GetScaleArr() { return RectangleArr; }
+    TArray<UStaticMeshComponent*>& GetArrowArr() { return ArrowArr; }
+    TArray<UStaticMeshComponent*>& GetDiscArr() { return CircleArr; }
+    TArray<UStaticMeshComponent*>& GetScaleArr() { return RectangleArr; }
 
 private:
-    TArray<UGizmoArrowComponent*> ArrowArr;
-    TArray<UGizmoCircleComponent*> CircleArr;
-    TArray<UGizmoRectangleComponent*> RectangleArr;
+    TArray<UStaticMeshComponent*> ArrowArr;
+    TArray<UStaticMeshComponent*> CircleArr;
+    TArray<UStaticMeshComponent*> RectangleArr;
 };
