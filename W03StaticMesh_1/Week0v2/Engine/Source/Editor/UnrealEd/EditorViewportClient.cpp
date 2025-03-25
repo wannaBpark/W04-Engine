@@ -5,6 +5,8 @@
 #include "Math/JungleMath.h"
 #include "EngineLoop.h"
 #include "UnrealClient.h"
+#include "World.h"
+#include "GameFramework/Actor.h"
 
 FVector FEditorViewportClient::Pivot = FVector(0.0f, 0.0f, 0.0f);
 float FEditorViewportClient::orthoSize = 10.0f;
@@ -115,6 +117,19 @@ void FEditorViewportClient::Input()
     {
         ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
         bRightMouseDown = false; // 마우스 오른쪽 버튼을 떼면 상태 초기화
+    }
+
+    // Focus Selected Actor
+    if (GetAsyncKeyState('F') & 0x8000)
+    {
+        if (AActor* PickedActor = GEngineLoop.GetWorld()->GetPickedActor())
+        {
+            FViewportCameraTransform& ViewTransform = ViewTransformPerspective;
+            ViewTransform.SetLocation(
+                // TODO: 10.0f 대신, 정점의 min, max의 거리를 구해서 하면 좋을 듯
+                PickedActor->GetActorLocation() - (ViewTransform.GetForwardVector() * 10.0f)
+            );
+        }
     }
 }
 void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchaindesc)
