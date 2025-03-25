@@ -3,6 +3,7 @@
 #include "Components/LightComponent.h"
 #include "Components/Player.h"
 #include "Components/SceneComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Components/UText.h"
 #include "Math/MathUtility.h"
 #include "UnrealEd/ImGuiWidget.h"
@@ -241,6 +242,24 @@ void PropertyEditorPanel::HSVToRGB(float h, float s, float v, float& r, float& g
     else { r = c;  g = 0.0f; b = x; }
 
     r += m;  g += m;  b += m;
+}
+
+void PropertyEditorPanel::RenderForStaticMesh(UStaticMeshComponent* StaticMeshComp)
+{
+    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+    if (ImGui::TreeNodeEx("Materials", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
+    {
+        for (uint32 i = 0; i < StaticMeshComp->GetNumMaterials(); ++i)
+        {
+            if (ImGui::Selectable(GetData(StaticMeshComp->GetMaterialSlotNames()[i].ToString()), false, ImGuiSelectableFlags_AllowDoubleClick))
+            {
+                
+            }
+        }
+        
+        ImGui::TreePop();
+    }
+    ImGui::PopStyleColor();
 }
 
 void PropertyEditorPanel::OnResize(HWND hWnd)

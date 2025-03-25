@@ -3,6 +3,8 @@
 #include "ImGUI/imgui.h"
 #include "UnrealEd/EditorPanel.h"
 
+class UStaticMeshComponent;
+
 class PropertyEditorPanel : public UEditorPanel
 {
 public:
@@ -13,6 +15,7 @@ public:
 private:
     void RGBToHSV(float r, float g, float b, float& h, float& s, float& v);
     void HSVToRGB(float h, float s, float v, float& r, float& g, float& b);
+    void RenderForStaticMesh(UStaticMeshComponent* StaticMeshComp);
 private:
     float Width = 0, Height = 0;
     FVector Location = FVector(0, 0, 0);
