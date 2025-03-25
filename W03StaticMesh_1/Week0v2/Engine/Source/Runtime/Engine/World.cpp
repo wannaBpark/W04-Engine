@@ -1,12 +1,9 @@
 #include "Engine/Source/Runtime/Engine/World.h"
-#include "Engine/Source/Runtime/Engine/Camera/CameraComponent.h"
-#include "Engine/Source/Runtime/Core/Math/JungleMath.h"
-#include "UObject/ObjectFactory.h"
+
 #include "Actors/Player.h"
 #include "BaseGizmos/TransformGizmo.h"
-#include "Components/UBillboardComponent.h"
-#include "Components/LightComponent.h"
-#include "UObject/Casts.h"
+#include "Camera/CameraComponent.h"
+#include "PropertyEditor/ShowFlags.h"
 
 
 UWorld::UWorld()

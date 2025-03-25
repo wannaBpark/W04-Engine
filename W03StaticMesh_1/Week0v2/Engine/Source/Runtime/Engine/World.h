@@ -2,8 +2,6 @@
 #include "Define.h"
 #include "Container/Set.h"
 #include "UObject/ObjectFactory.h"
-#include "UObject/ObjectTypes.h"
-#include "UObject/UObjectArray.h"
 
 class FObjectFactory;
 class AActor;
