@@ -31,8 +31,11 @@ public:
     void Release();
     void Input();
 
+    [[deprecated]]
     void LoadData(SceneData& _Data);
+    [[deprecated]]
     SceneData SaveData();
+    [[deprecated]]
     void NewScene();
     void ThrowAwayObj(UObject* _Obj);
     void CleanUp();

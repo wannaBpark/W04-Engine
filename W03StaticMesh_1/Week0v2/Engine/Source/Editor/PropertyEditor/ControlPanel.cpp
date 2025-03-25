@@ -165,22 +165,19 @@ void ControlPanel::Draw(UWorld* world, double elapsedTime )
 	static char sceneName[64] = "Default";
 	ImGui::InputText("Scene Name", sceneName, IM_ARRAYSIZE(sceneName));
 
-	if (ImGui::Button("New scene")) {
-		world->NewScene();
-	}
-	if (ImGui::Button("Save scene")) {
-
-		FString SceneName(sceneName);
-		SceneData SaveData = world->SaveData();
-		FSceneMgr::SaveSceneToFile(SceneName, SaveData);
-	}
-	if (ImGui::Button("Load scene")) {
-		FString SceneName(sceneName);
-		FString LoadJsonData = FSceneMgr::LoadSceneFromFile(SceneName);
-		SceneData LoadData = FSceneMgr::ParseSceneData(LoadJsonData);
-		world->LoadData(LoadData);
-	}
-	ImGui::Separator();
+    if (ImGui::Button("New scene"))
+    {
+        // TODO: New Scene
+    }
+    if (ImGui::Button("Save scene"))
+    {
+        // TODO: Save Scene
+    }
+    if (ImGui::Button("Load scene"))
+    {
+        // TODO: Load Scene
+    }
+    ImGui::Separator();
 	
 	float sp = GEngineLoop.GetViewportClient()->GetGridSize();
 	ImGui::SliderFloat("Grid Spacing", &sp, 1.0f, 20.0f);

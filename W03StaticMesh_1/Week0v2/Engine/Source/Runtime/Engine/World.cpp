@@ -25,8 +25,7 @@ UWorld::~UWorld()
 
 void UWorld::Initialize()
 {
-    SceneData loadData = FSceneMgr::ParseSceneData(FSceneMgr::LoadSceneFromFile(defaultMapName));
-    LoadData(loadData);
+    // TODO: Load Scene
     CreateBaseObject();
 }
 
