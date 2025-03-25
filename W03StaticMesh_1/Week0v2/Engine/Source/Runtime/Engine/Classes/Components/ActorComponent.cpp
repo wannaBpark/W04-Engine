@@ -43,8 +43,13 @@ void UActorComponent::DestroyComponent()
         }
     }
 
+    if (bHasBegunPlay)
+    {
+        EndPlay(EEndPlayReason::Destroyed);
+    }
+
     OnComponentDestroyed();
 
-    // 나중에 ProcessPendingDestroyObjects에서 실제로 제거
+    // 나중에 ProcessPendingDestroyObjects에서 실제로 제거됨
     GUObjectArray.MarkRemoveObject(this);
 }

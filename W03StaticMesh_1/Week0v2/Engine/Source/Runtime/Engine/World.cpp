@@ -21,6 +21,7 @@ UWorld::UWorld()
 UWorld::~UWorld()
 {
 	Release();
+    GUObjectArray.ProcessPendingDestroyObjects();
 }
 
 void UWorld::Initialize()
@@ -89,6 +90,11 @@ void UWorld::Release()
 	for (AActor* Actor : ActorsArray)
 	{
 		Actor->EndPlay(EEndPlayReason::WorldTransition);
+        TSet<UActorComponent*> Components = Actor->GetComponents();
+	    for (UActorComponent* Component : Components)
+	    {
+	        GUObjectArray.MarkRemoveObject(Component);
+	    }
 	    GUObjectArray.MarkRemoveObject(Actor);
 	}
     ActorsArray.Empty();
@@ -110,26 +116,37 @@ void UWorld::Render()
 
 }
 
-bool UWorld::DestroyActor(AActor* Actor)
+bool UWorld::DestroyActor(AActor* ThisActor)
 {
-    if (Actor->GetWorld() == nullptr)
+    if (ThisActor->GetWorld() == nullptr)
     {
         return false;
     }
 
-    if (Actor->IsActorBeingDestroyed())
+    if (ThisActor->IsActorBeingDestroyed())
     {
         return true;
     }
 
     // 액터의 Destroyed 호출
-    Actor->Destroyed();
+    ThisActor->Destroyed();
+
+    if (ThisActor->GetOwner())
+    {
+        ThisActor->SetOwner(nullptr);
+    }
+
+    TSet<UActorComponent*> Components = ThisActor->GetComponents();
+    for (UActorComponent* Component : Components)
+    {
+        Component->DestroyComponent();
+    }
 
     // World에서 제거
-    ActorsArray.Remove(Actor);
+    ActorsArray.Remove(ThisActor);
 
     // 제거 대기열에 추가
-    GUObjectArray.MarkRemoveObject(Actor);
+    GUObjectArray.MarkRemoveObject(ThisActor);
     return true;
 }
 
