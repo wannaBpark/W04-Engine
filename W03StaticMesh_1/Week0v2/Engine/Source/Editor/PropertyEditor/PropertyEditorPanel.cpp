@@ -1,8 +1,9 @@
-﻿#include "PropertyEditorPanel.h"
+#include "PropertyEditorPanel.h"
 
 #include "World.h"
-#include "Components/LightComponent.h"
 #include "Actors/Player.h"
+#include "Components/LightComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Components/UText.h"
 #include "Math/MathUtility.h"
 #include "UnrealEd/ImGuiWidget.h"
@@ -187,10 +188,15 @@ void PropertyEditorPanel::Render()
         }
         ImGui::PopStyleColor();
     }
+
+    if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(PickedActor->GetRootComponent()))
+    {
+        RenderForStaticMesh(StaticMeshComponent);
+    }
     ImGui::End();
 }
 
-void PropertyEditorPanel::RGBToHSV(float r, float g, float b, float& h, float& s, float& v)
+void PropertyEditorPanel::RGBToHSV(float r, float g, float b, float& h, float& s, float& v) const
 {
     float mx = FMath::Max(r, FMath::Max(g, b));
     float mn = FMath::Min(r, FMath::Min(g, b));
@@ -227,7 +233,7 @@ void PropertyEditorPanel::RGBToHSV(float r, float g, float b, float& h, float& s
     }
 }
 
-void PropertyEditorPanel::HSVToRGB(float h, float s, float v, float& r, float& g, float& b)
+void PropertyEditorPanel::HSVToRGB(float h, float s, float v, float& r, float& g, float& b) const
 {
     // h: 0~360, s:0~1, v:0~1
     float c = v * s;
@@ -243,6 +249,140 @@ void PropertyEditorPanel::HSVToRGB(float h, float s, float v, float& r, float& g
     else { r = c;  g = 0.0f; b = x; }
 
     r += m;  g += m;  b += m;
+}
+
+void PropertyEditorPanel::RenderForStaticMesh(UStaticMeshComponent* StaticMeshComp)
+{
+    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+    if (ImGui::TreeNodeEx("Materials", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
+    {
+        for (uint32 i = 0; i < StaticMeshComp->GetNumMaterials(); ++i)
+        {
+            if (ImGui::Selectable(GetData(StaticMeshComp->GetMaterialSlotNames()[i].ToString()), false, ImGuiSelectableFlags_AllowDoubleClick))
+            {
+                if (ImGui::IsMouseDoubleClicked(0))
+                {
+                    std::cout << GetData(StaticMeshComp->GetMaterialSlotNames()[i].ToString()) << std::endl;
+                    SelectedMaterialIndex = i;
+                    SelectedStaticMeshComp = StaticMeshComp;
+                }
+            }
+        }
+        
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNodeEx("SubMeshes", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
+    {
+        auto subsets = StaticMeshComp->GetStaticMesh()->GetRenderData()->MaterialSubsets;
+        for (uint32 i = 0; i < subsets.Num(); ++i)
+        {
+            std::string temp = "subset " + std::to_string(i);
+            if (ImGui::Selectable(temp.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
+            {
+                if (ImGui::IsMouseDoubleClicked(0))
+                {
+                    std::cout << GetData(StaticMeshComp->GetMaterialSlotNames()[i].ToString()) << std::endl;
+                    StaticMeshComp->SetselectedSubMeshIndex(i);
+                    int temp = StaticMeshComp->GetselectedSubMeshIndex();
+                    SelectedStaticMeshComp = StaticMeshComp;
+                }
+            }
+        }
+
+        ImGui::TreePop();
+    }
+
+    ImGui::PopStyleColor();
+
+    if (SelectedMaterialIndex != -1)
+    {
+        RenderMaterialView(SelectedStaticMeshComp->GetMaterial(SelectedMaterialIndex));
+    }
+}
+
+void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
+{
+    ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_Once);
+    ImGui::Begin("Material Viewer", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNav);
+
+    static ImGuiSelectableFlags BaseFlag = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_None | ImGuiColorEditFlags_NoAlpha;
+    
+    FVector MatDiffuseColor = Material->GetMaterialInfo().Diffuse;
+    FVector MatSpecularColor = Material->GetMaterialInfo().Specular;
+    FVector MatAmbientColor = Material->GetMaterialInfo().Ambient;
+    FVector MatEmissiveColor = Material->GetMaterialInfo().Emissive;
+
+    float dr = MatDiffuseColor.x;
+    float dg = MatDiffuseColor.y;
+    float db = MatDiffuseColor.z;
+    float da = 1.0f;
+    float DiffuseColorPick[4] = { dr, dg, db, da };
+
+    ImGui::Text("  Diffuse Color");
+    ImGui::SameLine();
+    if (ImGui::ColorEdit4("Diffuse##Color", (float*)&DiffuseColorPick, BaseFlag))
+    {
+        FVector NewColor = { DiffuseColorPick[0], DiffuseColorPick[1], DiffuseColorPick[2] };
+        Material->SetDiffuse(NewColor);
+    }
+
+    float sr = MatSpecularColor.x;
+    float sg = MatSpecularColor.y;
+    float sb = MatSpecularColor.z;
+    float sa = 1.0f;
+    float SpecularColorPick[4] = { sr, sg, sb, sa };
+
+    ImGui::Text("Specular Color");
+    ImGui::SameLine();
+    if (ImGui::ColorEdit4("Specular##Color", (float*)&SpecularColorPick, BaseFlag))
+    {
+        FVector NewColor = { SpecularColorPick[0], SpecularColorPick[1], SpecularColorPick[2] };
+        Material->SetSpecular(NewColor);
+    }
+
+
+    float ar = MatAmbientColor.x;
+    float ag = MatAmbientColor.y;
+    float ab = MatAmbientColor.z;
+    float aa = 1.0f;
+    float AmbientColorPick[4] = { ar, ag, ab, aa };
+
+    ImGui::Text("Ambient Color");
+    ImGui::SameLine();
+    if (ImGui::ColorEdit4("Ambient##Color", (float*)&AmbientColorPick, BaseFlag))
+    {
+        FVector NewColor = { AmbientColorPick[0], AmbientColorPick[1], AmbientColorPick[2] };
+        Material->SetAmbient(NewColor);
+    }
+
+
+    float er = MatEmissiveColor.x;
+    float eg = MatEmissiveColor.y;
+    float eb = MatEmissiveColor.z;
+    float ea = 1.0f;
+    float EmissiveColorPick[4] = { er, eg, eb, ea };
+
+    ImGui::Text("Emissive Color");
+    ImGui::SameLine();
+    if (ImGui::ColorEdit4("Emissive##Color", (float*)&EmissiveColorPick, BaseFlag))
+    {
+        FVector NewColor = { EmissiveColorPick[0], EmissiveColorPick[1], EmissiveColorPick[2] };
+        Material->SetEmissive(NewColor);
+    }
+
+    if (ImGui::Button("Close"))
+    {
+        SelectedMaterialIndex = -1;
+        SelectedStaticMeshComp = nullptr;
+    }
+     
+    ImGui::End();
+}
+
+void PropertyEditorPanel::RenderSubMeshView(UStaticMeshComponent* StaticMeshComp)
+{
+    
 }
 
 void PropertyEditorPanel::OnResize(HWND hWnd)

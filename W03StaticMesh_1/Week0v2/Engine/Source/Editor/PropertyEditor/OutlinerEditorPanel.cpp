@@ -3,8 +3,29 @@
 #include "World.h"
 #include "GameFramework/Actor.h"
 
+OutlinerEditorPanel::OutlinerEditorPanel()
+{
+    GEngineLoop.GetWorld()->OnSelectedObject.BindLambda(
+        [this](UObject* Obj)
+        {
+            this->SelectedObject = Obj;
+        }
+    );
+}
+
+
 void OutlinerEditorPanel::Render()
 {
+    // Please change code... bnb
+    static bool Once = false;
+    if (!Once)
+    {
+        GEngineLoop.GetWorld()->OnSelectedObject.BindLambda([this](UObject* Obj)
+        {
+           this->SelectedObject = Obj;
+        });
+        Once = true;
+    }
     /* Pre Setup */
     ImGuiIO& io = ImGui::GetIO();
     
