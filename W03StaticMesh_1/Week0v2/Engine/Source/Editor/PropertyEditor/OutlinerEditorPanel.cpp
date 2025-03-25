@@ -2,8 +2,28 @@
 #include "EngineLoop.h"
 #include "Components/SceneComponent.h"
 
+OutlinerEditorPanel::OutlinerEditorPanel()
+{
+    
+}
+
+OutlinerEditorPanel::~OutlinerEditorPanel()
+{
+    SelectedObject = nullptr;
+}
+
 void OutlinerEditorPanel::Render()
 {
+    // Please change code... bnb
+    static bool Once = false;
+    if (!Once)
+    {
+        GEngineLoop.GetWorld()->OnSelectedObject.BindLambda([this](UObject* Obj)
+        {
+           this->SelectedObject = Obj;
+        });
+        Once = true;
+    }
     /* Pre Setup */
     ImGuiIO& io = ImGui::GetIO();
     
@@ -40,6 +60,7 @@ void OutlinerEditorPanel::Render()
         {
             if(!GEngineLoop.GetWorld()->GetObjectArr()[i]->IsA(USceneComponent::StaticClass()))
                 continue;
+            if (SelectedObject == GEngineLoop.GetWorld()->GetObjectArr()[i]) selected = i;
             // 선택 가능 항목 (Selectable)
             if (ImGui::Selectable(*GEngineLoop.GetWorld()->GetObjectArr()[i]->GetName(), selected == i))
             {
