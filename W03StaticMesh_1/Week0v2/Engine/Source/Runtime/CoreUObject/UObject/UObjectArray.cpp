@@ -5,7 +5,7 @@
 
 void FUObjectArray::AddObject(UObject* Object)
 {
-    ObjObjects.Add(Object);
+    ObjObjects.AddUnique(Object);
     AddToClassMap(Object);
 }
 
