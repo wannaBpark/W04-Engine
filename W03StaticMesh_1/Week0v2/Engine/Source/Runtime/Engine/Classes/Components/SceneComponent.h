@@ -20,8 +20,6 @@ public:
     void AddRotation(FVector _added);
     void AddScale(FVector _added);
 
-    void AddChild(USceneComponent* _newChild);
-
 protected:
     FVector RelativeLocation;
     FVector RelativeRotation;
