@@ -8,7 +8,15 @@
 #include <d3dcompiler.h>
 #include "EngineBaseTypes.h"
 #include "Define.h"
+#include "Container/Set.h"
+
+class UWorld;
 class FGraphicsDevice;
+class UObject;
+class FEditorViewportClient;
+class UBillboardComponent;
+class UStaticMeshComponent;
+class UGizmoBaseComponent;
 class FRenderer 
 {
 
@@ -133,8 +141,17 @@ public: // line shader
     void UpdateOBBBuffer(ID3D11Buffer* pBoundingBoxBuffer, const TArray<FOBB>& BoundingBoxes, int numBoundingBoxes);
     void UpdateConesBuffer(ID3D11Buffer* pConeBuffer, const TArray<FCone>& Cones, int numCones);
 
-
- public:
+    //Render Pass Demo
+    void PrepareRender(TArray<UObject*>& Objects);
+    void Render(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void RenderGizmos(std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void RenderBillboards(std::shared_ptr<FEditorViewportClient> ActiveViewport);
+private:
+    TArray<UStaticMeshComponent*> StaticMeshObjs;
+    TArray<UGizmoBaseComponent*> GizmoObjs;
+    TArray<UBillboardComponent*> BillboardObjs;
+public:
     ID3D11VertexShader* VertexLineShader = nullptr;
     ID3D11PixelShader* PixelLineShader = nullptr;
     ID3D11Buffer* GridConstantBuffer = nullptr;

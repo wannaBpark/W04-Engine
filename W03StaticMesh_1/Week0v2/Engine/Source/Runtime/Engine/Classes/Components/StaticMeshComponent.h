@@ -24,4 +24,7 @@ public:
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
 protected:
     UStaticMesh* staticMesh = nullptr;
+
+    public:
+    UStaticMesh* GetStaticMesh() const { return staticMesh; }
 };

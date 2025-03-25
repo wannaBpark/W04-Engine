@@ -193,15 +193,15 @@ void FEngineLoop::Tick()
 		//Render();
 
 		UIMgr->BeginFrame();
-	    UnrealEditor->Render();
+	    // UnrealEditor->Render();
 	    
-		// Console::GetInstance().Draw();
-		// ControlPanel::GetInstance().Draw(GetWorld(),elapsedTime);
-		// PropertyPanel::GetInstance().Draw(GetWorld());
-		// Outliner::GetInstance().Draw(GetWorld());
-		// ShowFlags::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
-		// ViewModeDropdown::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
-  //       ViewportTypePanel::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+		Console::GetInstance().Draw();
+		ControlPanel::GetInstance().Draw(GetWorld(),elapsedTime);
+		PropertyPanel::GetInstance().Draw(GetWorld());
+		Outliner::GetInstance().Draw(GetWorld());
+		ShowFlags::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+		ViewModeDropdown::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+        ViewportTypePanel::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
 		UIMgr->EndFrame();
 
 		GWorld->CleanUp();
