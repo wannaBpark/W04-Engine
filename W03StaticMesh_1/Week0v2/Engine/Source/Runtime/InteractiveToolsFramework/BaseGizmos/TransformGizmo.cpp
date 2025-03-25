@@ -93,10 +93,4 @@ void UTransformGizmo::Tick(float DeltaTime)
         else if (GetWorld()->GetPlayer()->GetCoordiMode() == CoordiMode::CDM_WORLD)
             SetActorRotation(FVector(0.0f, 0.0f, 0.0f));
     }
-	for (int i = 0;i < 3;i++)
-	{
-		ArrowArr[i]->TickComponent(DeltaTime);
-		//CircleArr[i]->TickComponent(DeltaTime);
-		//RectangleArr[i]->TickComponent(DeltaTime);
-	}
 }
