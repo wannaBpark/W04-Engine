@@ -27,7 +27,7 @@ public:
     void SetStaticMesh(UStaticMesh* value)
     { 
         staticMesh = value;
-        OverrideMaterials.SetNum(staticMesh->GetMaterials().Num());
+        OverrideMaterials.SetNum(value->GetMaterials().Num());
     }
 
 protected:
