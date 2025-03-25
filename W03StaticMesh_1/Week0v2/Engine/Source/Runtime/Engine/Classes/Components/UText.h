@@ -19,11 +19,11 @@ public:
     void SetRowColumnCount(int _cellsPerRow, int _cellsPerColumn);
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
 
-protected:
     ID3D11Buffer* vertexTextBuffer;
-    FWString text;
     TArray<FVertexTexture> vertexTextureArr;
     UINT numTextVertices;
+protected:
+    FWString text;
 
     TArray<FVector> quad;
 

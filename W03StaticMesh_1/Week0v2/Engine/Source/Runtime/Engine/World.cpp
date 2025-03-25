@@ -58,37 +58,26 @@ void UWorld::CreateBaseObject()
 	skySphere->SetRotation(FVector(-167.0f, 25.0f, -135.0f));
 
 	GUObjectArray.Add(skySphere);*/
-
-
-	//테스트용 텍스트
-	
-	
-/*
+    
 
 	//테스트용 빌보드. 필요없으면 삭제
-	UObject* billboard = FObjectFactory::ConstructObject<UBillboardComponent>();
-	billboard = static_cast<UBillboardComponent*>(billboard);
-	UBillboardComponent* castBillboard = static_cast<UBillboardComponent*>(billboard);
-	castBillboard->SetTexture(L"Assets/Texture/emart.png");
-	GUObjectArray.Add(billboard);
-
-
-	/*
-	//테스트용 텍스트
-	UObject* uuid = FObjectFactory::ConstructObject<UTextUUID>();
-	UTextUUID* castUUID = static_cast<UTextUUID*>(uuid);
-	castUUID->SetTexture(L"Assets/Texture/font.png");
-	castUUID->SetRowColumnCount(106, 106);
-	castUUID->SetUUID(sphere->UUID);
-	castUUID->SetScale(FVector(0.25f, 0.25f, 0.25f));
-	//SetText전에 RowColumn 반드시 설정
-	GUObjectArray.Add(uuid);
-
-	castUUID->SetUUIDParent(sphere);
+	// UObject* billboard = FObjectFactory::ConstructObject<UBillboardComponent>();
+	// UBillboardComponent* castBillboard = static_cast<UBillboardComponent*>(billboard);
+	// castBillboard->SetTexture(L"Assets/Texture/emart.png");
+	// GUObjectArray.Add(billboard);
+ //
+ //    UObject* tmp = FObjectFactory::ConstructObject<UParticleSubUVComp>();
+ //    UParticleSubUVComp* SubUV = static_cast<UParticleSubUVComp*>(tmp);
+ //    SubUV->SetTexture(L"Assets/Texture/T_Explosion_SubUV.png");
+ //    SubUV->SetRowColumnCount(6, 6);
+ //    GUObjectArray.Add(SubUV);
+    
+	//
+	// castUUID->SetUUIDParent(sphere);
 	//castBillboard->SetParent(sphere);
 	//sphere->AddChild(castBillboard);
 	//cube->AddChild(sphere);
-*/
+
 }
 
 void UWorld::ReleaseBaseObject()

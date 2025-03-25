@@ -26,5 +26,7 @@ public:
 #pragma endregion
 protected:
     TArray<UMaterial*> OverrideMaterials;
+public:
+    TArray<UMaterial*>& GetOverrideMaterials() { return OverrideMaterials; }
 };
 
