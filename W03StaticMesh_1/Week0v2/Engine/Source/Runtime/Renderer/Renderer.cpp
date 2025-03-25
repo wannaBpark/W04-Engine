@@ -18,6 +18,7 @@
 #include "UObject/Casts.h"
 #include "UObject/Object.h"
 #include "PropertyEditor/ShowFlags.h"
+#include "UObject/UObjectIterator.h"
 
 void FRenderer::Initialize(FGraphicsDevice* graphics)
 {
@@ -907,7 +908,7 @@ void FRenderer::RenderBatch(
 
 void FRenderer::PrepareRender(const TArray<UObject*>& Objects)
 {
-    for (const auto iter : Objects)
+    for (const auto iter : TObjectRange<USceneComponent>())
     {
         if (UStaticMeshComponent* pStaticMeshComp = Cast<UStaticMeshComponent>(iter))
         {
