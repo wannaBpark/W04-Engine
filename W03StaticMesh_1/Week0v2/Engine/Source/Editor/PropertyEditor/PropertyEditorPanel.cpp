@@ -42,7 +42,7 @@ void PropertyEditorPanel::Render()
         ImGui::SetItemDefaultFocus();
         // TreeNode 배경색을 변경 (기본 상태)
         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
-        if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_Framed)) // 트리 노드 생성
+        if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
         {
             Location = PickObj->GetWorldLocation();
             Rotation = PickObj->GetWorldRotation();
@@ -79,7 +79,7 @@ void PropertyEditorPanel::Render()
     if (ULightComponentBase* lightObj = Cast<ULightComponentBase>(PickObj))
     {
         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
-        if (ImGui::TreeNodeEx("SpotLight", ImGuiTreeNodeFlags_Framed)) // 트리 노드 생성
+        if (ImGui::TreeNodeEx("SpotLight Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
         {
             FVector4 currColor = lightObj->GetColor();
 
@@ -91,7 +91,7 @@ void PropertyEditorPanel::Render()
             float lightColor[4] = { r, g, b, a };
 
             // SpotLight Color
-            if (ImGui::ColorPicker4("SpotLight Color", lightColor,
+            if (ImGui::ColorPicker4("##SpotLight Color", lightColor,
                 ImGuiColorEditFlags_DisplayRGB |
                 ImGuiColorEditFlags_NoSidePreview |
                 ImGuiColorEditFlags_NoInputs |
@@ -117,7 +117,8 @@ void PropertyEditorPanel::Render()
             if (ImGui::DragFloat("G##G", &g, 0.001f, 0.f, 1.f)) changedRGB = true;
             ImGui::SameLine();
             if (ImGui::DragFloat("B##B", &b, 0.001f, 0.f, 1.f)) changedRGB = true;
-
+            ImGui::Spacing();
+            
             // HSV
             if (ImGui::DragFloat("H##H", &h, 0.1f, 0.f, 360)) changedHSV = true;
             ImGui::SameLine();
@@ -125,7 +126,8 @@ void PropertyEditorPanel::Render()
             ImGui::SameLine();
             if (ImGui::DragFloat("V##V", &v, 0.001f, 0.f, 1)) changedHSV = true;
             ImGui::PopItemWidth();
-
+            ImGui::Spacing();
+            
             if (changedRGB && !changedHSV)
             {
                 // RGB -> HSV
@@ -147,41 +149,41 @@ void PropertyEditorPanel::Render()
             }
             ImGui::TreePop();
         }
+        ImGui::PopStyleColor();
     }
 
     if (UText* textOBj = Cast<UText>(PickObj))
     {
-        if (ImGui::TreeNodeEx("Text", ImGuiTreeNodeFlags_Framed)) // 트리 노드 생성
+        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+        if (ImGui::TreeNodeEx("Text Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
         {
             if (textOBj) {
-                bool reclaimFocus = false;
                 textOBj->SetTexture(L"Assets/Texture/font.png");
                 textOBj->SetRowColumnCount(106, 106);
                 FWString wText = textOBj->GetText();
                 int len = WideCharToMultiByte(CP_UTF8, 0, wText.c_str(), -1, nullptr, 0, nullptr, nullptr);
                 std::string u8Text(len, '\0');
-                WideCharToMultiByte(CP_UTF8, 0, wText.c_str(), -1, &u8Text[0], len, nullptr, nullptr);
+                WideCharToMultiByte(CP_UTF8, 0, wText.c_str(), -1, u8Text.data(), len, nullptr, nullptr);
 
                 static char buf[256];
                 strcpy_s(buf, u8Text.c_str());
-                   
-                if (ImGui::InputText("Hello", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue))
+
+                ImGui::Text("Text: ", buf);
+                ImGui::SameLine();
+                ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
+                if (ImGui::InputText("##Text", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     textOBj->ClearText();
                     int wlen = MultiByteToWideChar(CP_UTF8, 0, buf, -1, nullptr, 0);
                     FWString newWText(wlen, L'\0');
-                    MultiByteToWideChar(CP_UTF8, 0, buf, -1, &newWText[0], wlen);
-                    textOBj->SetText(newWText.c_str());
-                       
-                    reclaimFocus = true;
+                    MultiByteToWideChar(CP_UTF8, 0, buf, -1, newWText.data(), wlen);
+                    textOBj->SetText(newWText);
                 }
-                
-                if (reclaimFocus) {
-                    ImGui::SetKeyboardFocusHere(1);
-                }
+                ImGui::PopItemFlag();
             }
             ImGui::TreePop();
         }
+        ImGui::PopStyleColor();
     }
     ImGui::End();
 }

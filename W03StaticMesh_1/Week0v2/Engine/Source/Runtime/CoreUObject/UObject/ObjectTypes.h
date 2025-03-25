@@ -23,8 +23,8 @@ enum ARROW_DIR
 enum ControlMode
 {
 	CM_TRANSLATION,
-	CM_SCALE,
 	CM_ROTATION,
+	CM_SCALE,
 	CM_END
 };
 enum CoordiMode
