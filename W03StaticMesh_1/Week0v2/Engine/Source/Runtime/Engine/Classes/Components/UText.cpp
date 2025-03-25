@@ -370,5 +370,3 @@ void UText::TextMVPRendering()
 
 	FEngineLoop::renderer.PrepareShader();
 }
-
-

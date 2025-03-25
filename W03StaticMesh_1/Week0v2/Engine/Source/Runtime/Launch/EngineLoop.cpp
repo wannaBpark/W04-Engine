@@ -10,6 +10,7 @@
 #include "PropertyEditor/ViewportTypePanel.h"
 #include "Outliner.h"
 #include "UnrealEd/EditorViewportClient.h"
+#include "UnrealEd/UnrealEd.h"
 #include "UnrealClient.h"
 #include "slate/Widgets/Layout/SSplitter.h"
 #include "LevelEditor/SLevelEditor.h"
@@ -43,12 +44,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 }
             }
 		}
-		Console::GetInstance().OnResize(hWnd);
-		ControlPanel::GetInstance().OnResize(hWnd);
-		PropertyPanel::GetInstance().OnResize(hWnd);
-		Outliner::GetInstance().OnResize(hWnd);
-		ViewModeDropdown::GetInstance().OnResize(hWnd);
-		ShowFlags::GetInstance().OnResize(hWnd);
+		// Console::GetInstance().OnResize(hWnd);
+		// ControlPanel::GetInstance().OnResize(hWnd);
+		// PropertyPanel::GetInstance().OnResize(hWnd);
+		// Outliner::GetInstance().OnResize(hWnd);
+		// ViewModeDropdown::GetInstance().OnResize(hWnd);
+		// ShowFlags::GetInstance().OnResize(hWnd);
+	    if (GEngineLoop.GetUnrealEditor())
+	    {
+	        GEngineLoop.GetUnrealEditor()->OnResize(hWnd);
+	    }
         ViewportTypePanel::GetInstance().OnResize(hWnd);
 		break;
 	case WM_MOUSEWHEEL:
@@ -98,6 +103,11 @@ int32 FEngineLoop::PreInit()
 
 int32 FEngineLoop::Init(HINSTANCE hInstance)
 {
+
+    /* must be initialized before window. */
+    UnrealEditor = new UnrealEd();
+    UnrealEditor->Initialize();
+    
 	WindowInit(hInstance);
 	graphicDevice.Initialize(hWnd);
 	renderer.Initialize(&graphicDevice);
@@ -183,14 +193,15 @@ void FEngineLoop::Tick()
 		//Render();
 
 		UIMgr->BeginFrame();
-
-		Console::GetInstance().Draw();
-		ControlPanel::GetInstance().Draw(GetWorld(),elapsedTime);
-		PropertyPanel::GetInstance().Draw(GetWorld());
-		Outliner::GetInstance().Draw(GetWorld());
-		ShowFlags::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
-		ViewModeDropdown::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
-        ViewportTypePanel::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+	    UnrealEditor->Render();
+	    
+		// Console::GetInstance().Draw();
+		// ControlPanel::GetInstance().Draw(GetWorld(),elapsedTime);
+		// PropertyPanel::GetInstance().Draw(GetWorld());
+		// Outliner::GetInstance().Draw(GetWorld());
+		// ShowFlags::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+		// ViewModeDropdown::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+  //       ViewportTypePanel::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
 		UIMgr->EndFrame();
 
 		GWorld->CleanUp();

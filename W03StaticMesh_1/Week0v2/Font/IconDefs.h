@@ -12,4 +12,7 @@
 #define ICON_SAVE		0xE9D6
 #define ICON_LOAD		0xE950
 
+#define ICON_MENU		0xE9AD
+#define ICON_SLIDER		0xE9C4
+
 #endif // !__ICON_FONT__
