@@ -120,6 +120,9 @@ namespace OBJ
         
         TArray<FObjMaterialInfo> Materials;
         TArray<FMaterialSubset> MaterialSubsets;
+
+        FVector BoundingBoxMin;
+        FVector BoundingBoxMax;
     };
 }
 

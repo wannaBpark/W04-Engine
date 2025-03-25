@@ -317,6 +317,9 @@ struct FLoaderOBJ
             OutStaticMesh.Indices.Add(index);
             
         }
+
+        // Calculate StaticMesh BoundingBox
+        ComputeBoundingBox(OutStaticMesh.Vertices, OutStaticMesh.BoundingBoxMin, OutStaticMesh.BoundingBoxMax);
         
         return true;
     }
@@ -337,6 +340,26 @@ struct FLoaderOBJ
         }
 
         return true;
+    }
+
+    static void ComputeBoundingBox(const TArray<FVertexSimple>& InVertices, FVector& OutMinVector, FVector& OutMaxVector)
+    {
+        FVector MinVector = { FLT_MAX, FLT_MAX, FLT_MAX };
+        FVector MaxVector = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+        
+        for (int32 i = 0; i < InVertices.Num(); i++)
+        {
+            MinVector.x = std::min(MinVector.x, InVertices[i].x);
+            MinVector.y = std::min(MinVector.y, InVertices[i].y);
+            MinVector.z = std::min(MinVector.z, InVertices[i].z);
+
+            MaxVector.x = std::max(MaxVector.x, InVertices[i].x);
+            MaxVector.y = std::max(MaxVector.y, InVertices[i].y);
+            MaxVector.z = std::max(MaxVector.z, InVertices[i].z);
+        }
+
+        OutMinVector = MinVector;
+        OutMaxVector = MaxVector;
     }
 };
 
@@ -480,6 +503,10 @@ public:
             File.write(reinterpret_cast<const char*>(&Subset.MaterialIndex), sizeof(Subset.MaterialIndex));
         }
 
+        // Bounding Box
+        File.write(reinterpret_cast<const char*>(&StaticMesh.BoundingBoxMin), sizeof(FVector));
+        File.write(reinterpret_cast<const char*>(&StaticMesh.BoundingBoxMax), sizeof(FVector));
+        
         File.close();
         return true;
     }
@@ -575,9 +602,13 @@ public:
             File.read(reinterpret_cast<char*>(&Subset.MaterialIndex), sizeof(Subset.MaterialIndex));
         }
 
+        // Bounding Box
+        File.read(reinterpret_cast<char*>(&OutStaticMesh.BoundingBoxMin), sizeof(FVector));
+        File.read(reinterpret_cast<char*>(&OutStaticMesh.BoundingBoxMax), sizeof(FVector));
+        
         File.close();
 
-        // Texture Load 
+        // Texture Load
         if (Textures.Num() > 0)
         {
             for (const FWString& Texture : Textures)
