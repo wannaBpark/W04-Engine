@@ -4,18 +4,7 @@
 #include "BaseGizmos/TransformGizmo.h"
 #include "Camera/CameraComponent.h"
 #include "LevelEditor/SLevelEditor.h"
-#include "PropertyEditor/ShowFlags.h"
 
-
-UWorld::UWorld()
-{
-}
-
-UWorld::~UWorld()
-{
-	Release();
-    GUObjectArray.ProcessPendingDestroyObjects();
-}
 
 void UWorld::Initialize()
 {
@@ -25,20 +14,21 @@ void UWorld::Initialize()
 
 void UWorld::CreateBaseObject()
 {
-    if (localPlayer == nullptr) {
-        UObject* player = FObjectFactory::ConstructObject<UPlayer>();
-        localPlayer = static_cast<UPlayer*>(player);
+    if (localPlayer == nullptr)
+    {
+        localPlayer = FObjectFactory::ConstructObject<UPlayer>();;
     }
-    if (camera == nullptr) {
-        UObject* Camera = FObjectFactory::ConstructObject<UCameraComponent>();
-        camera = static_cast<UCameraComponent*>(Camera);
+
+    if (camera == nullptr)
+    {
+        camera = FObjectFactory::ConstructObject<UCameraComponent>();
         camera->SetLocation(FVector(8.0f, 8.0f, 8.f));
         camera->SetRotation(FVector(0.0f, 45.0f, -135.0f));
     }
 
-    if (LocalGizmo == nullptr) {
-        UObject* pLocalGizmo = FObjectFactory::ConstructObject<UTransformGizmo>();
-        LocalGizmo = static_cast<UTransformGizmo*>(pLocalGizmo);
+    if (LocalGizmo == nullptr)
+    {
+        LocalGizmo = FObjectFactory::ConstructObject<UTransformGizmo>();
     }
 }
 
@@ -89,6 +79,8 @@ void UWorld::Release()
 
 	pickingGizmo = nullptr;
 	ReleaseBaseObject();
+
+    GUObjectArray.ProcessPendingDestroyObjects();
 }
 
 bool UWorld::DestroyActor(AActor* ThisActor)

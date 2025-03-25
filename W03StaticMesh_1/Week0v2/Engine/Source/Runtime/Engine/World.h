@@ -2,6 +2,7 @@
 #include "Define.h"
 #include "Container/Set.h"
 #include "UObject/ObjectFactory.h"
+#include "UObject/ObjectMacros.h"
 
 class FObjectFactory;
 class AActor;
@@ -13,12 +14,12 @@ class USceneComponent;
 class UTransformGizmo;
 
 
-class UWorld
+class UWorld : public UObject
 {
-public:
-    UWorld();
-    ~UWorld();
+    DECLARE_CLASS(UWorld, UObject)
 
+public:
+    UWorld() = default;
 
     void Initialize();
     void CreateBaseObject();
