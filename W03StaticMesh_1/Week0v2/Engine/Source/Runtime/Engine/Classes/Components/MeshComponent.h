@@ -8,11 +8,6 @@ class UMeshComponent : public UPrimitiveComponent
 public:
     UMeshComponent() = default;
 
-    virtual void InitializeComponent() override;
-    virtual void TickComponent(float DeltaTime) override;
-    virtual void DestroyComponent() override;
-    virtual void Render() override;
-
 #pragma region Material
     virtual uint32 GetNumMaterials() const { return 0; }
     virtual UMaterial* GetMaterial(uint32 ElementIndex) const;
