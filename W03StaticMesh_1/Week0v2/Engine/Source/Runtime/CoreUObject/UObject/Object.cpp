@@ -20,11 +20,6 @@ UObject::UObject()
 {
 }
 
-UObject::~UObject()
-{
-    RemoveFromClassMap(this);
-}
-
 void UObject::RenderUUID()
 {
 }

@@ -133,8 +133,10 @@ void UWorld::Tick(float DeltaTime)
         {
             Comp->DestroyComponent();
             GUObjectArray.Remove(Comp);
+            RemoveFromClassMap(Comp);
             delete Comp;
         }
+        RemoveFromClassMap(Actor);
         GUObjectArray.Remove(Actor);
         delete Actor;
     }
