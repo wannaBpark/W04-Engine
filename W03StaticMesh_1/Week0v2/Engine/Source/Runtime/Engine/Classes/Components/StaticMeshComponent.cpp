@@ -1,14 +1,11 @@
 #include "Components/StaticMeshComponent.h"
+
+#include "World.h"
 #include "Launch/EngineLoop.h"
 #include "UObject/ObjectFactory.h"
 #include "Math/JungleMath.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"
-
-UStaticMeshComponent::UStaticMeshComponent()
-{
-    
-}
 
 void UStaticMeshComponent::Render()
 {
@@ -22,13 +19,19 @@ void UStaticMeshComponent::Render()
     FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
     FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
     FVector4 UUIDColor = EncodeUUID() / 255.0f;
-    if (this == GetWorld()->GetPickingObj())
+    if (GetWorld()->GetPickedActor() == GetOwner())
+    {
         FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
+    }
     else
+    {
         FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+    }
 
     if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
+    {
         UPrimitiveBatch::GetInstance().RenderAABB(AABB, GetWorldLocation(), Model);
+    }
 
     FEngineLoop::renderer.RenderPrimitive(renderData, OverrideMaterials);
 }
