@@ -83,6 +83,9 @@ template <typename T>
 T* UWorld::SpawnActor()
 {
     T* Actor = FObjectFactory::ConstructObject<T>();
+    // TODO: 일단 AddComponent에서 Component마다 초기화
+    // 추후에 RegisterComponent() 만들어지면 주석 해제
+    // Actor->InitializeComponents();
     ActorsArray.Add(Actor);
     PendingBeginPlayActors.Add(Actor);
     return Actor;

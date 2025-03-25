@@ -66,6 +66,9 @@ public:
         requires std::derived_from<T, UActorComponent>
     T* GetComponentByClass();
 
+    void InitializeComponents();
+    void UninitializeComponents();
+
 public:
     USceneComponent* GetRootComponent() const { return RootComponent; }
     bool SetRootComponent(USceneComponent* NewRootComponent);
@@ -134,7 +137,9 @@ T* AActor::AddComponent()
         }
     }
 
+    // TODO: RegisterComponent() 생기면 제거
     Component->InitializeComponent();
+
     return Component;
 }
 

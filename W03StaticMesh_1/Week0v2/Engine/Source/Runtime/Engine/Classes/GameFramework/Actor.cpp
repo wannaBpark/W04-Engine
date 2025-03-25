@@ -39,6 +39,7 @@ void AActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
             Component->EndPlay(EndPlayReason);
         }
     }
+    UninitializeComponents();
 }
 
 // TODO: 추후 제거해야 함
@@ -70,6 +71,35 @@ bool AActor::Destroy()
 void AActor::RemoveOwnedComponent(UActorComponent* Component)
 {
     OwnedComponents.Remove(Component);
+}
+
+void AActor::InitializeComponents()
+{
+    TSet<UActorComponent*> Components = GetComponents();
+    for (UActorComponent* ActorComp : Components)
+    {
+        if (ActorComp->bAutoActive && !ActorComp->IsActive())
+        {
+            ActorComp->Activate();
+        }
+
+        if (!ActorComp->HasBeenInitialized())
+        {
+            ActorComp->InitializeComponent();
+        }
+    }
+}
+
+void AActor::UninitializeComponents()
+{
+    TSet<UActorComponent*> Components = GetComponents();
+    for (UActorComponent* ActorComp : Components)
+    {
+        if (ActorComp->HasBeenInitialized())
+        {
+            ActorComp->UninitializeComponent();
+        }
+    }
 }
 
 bool AActor::SetRootComponent(USceneComponent* NewRootComponent)

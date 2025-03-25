@@ -5,6 +5,16 @@
 
 void UActorComponent::InitializeComponent()
 {
+    assert(!bHasBeenInitialized);
+
+    bHasBeenInitialized = true;
+}
+
+void UActorComponent::UninitializeComponent()
+{
+    assert(bHasBeenInitialized);
+
+    bHasBeenInitialized = false;
 }
 
 void UActorComponent::BeginPlay()
@@ -48,8 +58,25 @@ void UActorComponent::DestroyComponent()
         EndPlay(EEndPlayReason::Destroyed);
     }
 
+    if (bHasBeenInitialized)
+    {
+        UninitializeComponent();
+    }
+
     OnComponentDestroyed();
 
     // 나중에 ProcessPendingDestroyObjects에서 실제로 제거됨
     GUObjectArray.MarkRemoveObject(this);
+}
+
+void UActorComponent::Activate()
+{
+    // TODO: Tick 다시 재생
+    bIsActive = true;
+}
+
+void UActorComponent::Deactivate()
+{
+    // TODO: Tick 멈추기
+    bIsActive = false;
 }
