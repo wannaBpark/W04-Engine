@@ -1,9 +1,12 @@
 #include "Renderer.h"
 
 #include "BaseGizmos/GizmoBaseComponent.h"
+#include "Components/LightComponent.h"
 #include "Components/Player.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/UBillboardComponent.h"
+#include "Components/UParticleSubUVComp.h"
+#include "Components/UText.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Launch/EngineLoop.h"
 #include "Components/Material/Material.h"
@@ -853,6 +856,7 @@ void FRenderer::RenderBatch(const FGridParameters& gridParam, ID3D11Buffer* pVer
 }
 void FRenderer::PrepareRender(TArray<UObject*>& Objects)
 {
+    
     for (auto iter : Objects)
     {
         if (UStaticMeshComponent* pStaticMeshComp = Cast<UStaticMeshComponent>(iter))
@@ -868,18 +872,25 @@ void FRenderer::PrepareRender(TArray<UObject*>& Objects)
         {
             BillboardObjs.Add(pBillboardComp);
         }
+        if (ULightComponentBase* pLightComp = Cast<ULightComponentBase>(iter))
+        {
+            LightObjs.Add(pLightComp);
+        }
     }
 }
-
 void FRenderer::ClearRenderArr()
 {
     StaticMeshObjs.Empty();
     GizmoObjs.Empty();
     BillboardObjs.Empty();
+    LightObjs.Empty();
 }
-
 void FRenderer::Render(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
+    Graphics->DeviceContext->RSSetViewports(1, &ActiveViewport->GetD3DViewport());
+    Graphics->ChangeRasterizer(ActiveViewport->GetViewMode());
+    ChangeViewMode(ActiveViewport->GetViewMode());
+    UpdateLightBuffer();
     UPrimitiveBatch::GetInstance().RenderBatch(ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix());
 
     if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))
@@ -887,12 +898,12 @@ void FRenderer::Render(UWorld* World, std::shared_ptr<FEditorViewportClient> Act
     RenderGizmos(World, ActiveViewport);
     if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))
         RenderBillboards(World, ActiveViewport);
-    
+    RenderLight(World, ActiveViewport);
     ClearRenderArr();
 }
-
 void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
+     PrepareShader();
      for (auto StaticMeshComp : StaticMeshObjs)
      {
         FMatrix Model = JungleMath::CreateModelMatrix(
@@ -921,10 +932,9 @@ void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewpor
         OBJ::FStaticMeshRenderData* renderData = StaticMeshComp->GetStaticMesh()->GetRenderData();
         if (renderData == nullptr) continue;
 
-        RenderPrimitive(renderData);
+        RenderPrimitive(renderData,StaticMeshComp->GetOverrideMaterials());
     }
 }
-
 void FRenderer::RenderGizmos(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
     #pragma region GizmoDepth
@@ -957,7 +967,7 @@ void FRenderer::RenderGizmos(UWorld* World, std::shared_ptr<FEditorViewportClien
         OBJ::FStaticMeshRenderData* renderData = GizmoComp->GetStaticMesh()->GetRenderData();
         if (renderData == nullptr) return;
 
-        RenderPrimitive(renderData);
+        RenderPrimitive(renderData, GizmoComp->GetOverrideMaterials());
     }
     
     Graphics->DeviceContext->RSSetState(Graphics->GetCurrentRasterizer());
@@ -967,7 +977,6 @@ void FRenderer::RenderGizmos(UWorld* World, std::shared_ptr<FEditorViewportClien
         Graphics->DeviceContext->OMSetDepthStencilState(originalDepthState, 0);
     #pragma endregion GizmoDepth
 }
-
 void FRenderer::RenderBillboards(UWorld* World,std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
     PrepareTextureShader();
@@ -987,11 +996,31 @@ void FRenderer::RenderBillboards(UWorld* World,std::shared_ptr<FEditorViewportCl
         else
             UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
 
-        RenderTexturePrimitive(BillboardComp->vertexTextureBuffer,BillboardComp->numVertices,
+        if (UParticleSubUVComp* SubUVParticle = Cast<UParticleSubUVComp>(BillboardComp))
+        {
+            RenderTexturePrimitive(
+                SubUVParticle->vertexSubUVBuffer, SubUVParticle->numTextVertices,
+                 SubUVParticle->indexTextureBuffer, SubUVParticle->numIndices, SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState);
+        }
+        else if (UText* Text = Cast<UText>(BillboardComp))
+        {
+            FEngineLoop::renderer.RenderTextPrimitive(Text->vertexTextBuffer, Text->numTextVertices,
+    Text->Texture->TextureSRV, Text->Texture->SamplerState);
+        }
+        else {
+            RenderTexturePrimitive(BillboardComp->vertexTextureBuffer,BillboardComp->numVertices,
     BillboardComp->indexTextureBuffer,BillboardComp->numIndices,BillboardComp->Texture->TextureSRV,BillboardComp->Texture->SamplerState);
-           // RenderTexturePrimitive(
-           //     BillboardComp->vertexSubUVBuffer, numTextVertices,
-           //      indexTextureBuffer, numIndices, Texture->TextureSRV, Texture->SamplerState);
-    };
+        }
+    }
     PrepareShader();
+}
+void FRenderer::RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
+{
+    for (auto Light : LightObjs)
+    {
+        Light->GetTexture2D()->Render();
+        FMatrix Model = JungleMath::CreateModelMatrix(Light->GetWorldLocation(), Light->GetWorldRotation(), {1,1,1});
+        UPrimitiveBatch::GetInstance().AddCone(Light->GetWorldLocation(), Light->GetRadius(), 15, 140, Light->GetColor(), Model);
+        UPrimitiveBatch::GetInstance().RenderOBB(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);
+    }
 }

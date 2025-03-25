@@ -71,22 +71,7 @@ void UWorld::CreateBaseObject()
  //    SubUV->SetTexture(L"Assets/Texture/T_Explosion_SubUV.png");
  //    SubUV->SetRowColumnCount(6, 6);
  //    GUObjectArray.Add(SubUV);
-	
-	// 테스트용 텍스트
-    // UObject* text = FObjectFactory::ConstructObject<UText>();
-    // UText* castText = static_cast<UText*>(text);
-    // castText->SetTexture(L"Assets/Texture/font.png");
-    // castText->SetRowColumnCount(106, 106);
-    // castText->SetText(L"0");
-    // //SetText전에 RowColumn 반드시 설정
-    // GUObjectArray.Add(text);
-    UObject* text = FObjectFactory::ConstructObject<UText>();
-    UText* castText = static_cast<UText*>(text);
-    castText->SetTexture(L"Assets/Texture/font.png");
-    castText->SetRowColumnCount(106, 106);
-    castText->SetText(L"안녕하세요");
-    //SetText전에 RowColumn 반드시 설정
-    GUObjectArray.Add(text);
+    
 	//
 	// castUUID->SetUUIDParent(sphere);
 	//castBillboard->SetParent(sphere);

@@ -16,9 +16,9 @@ public:
 
     void SetRowColumnCount(int _cellsPerRow, int _cellsPerColumn);
 
-private:
     ID3D11Buffer* vertexSubUVBuffer;
     UINT numTextVertices;
+private:
 
     int indexU = 0;
     int indexV = 0;

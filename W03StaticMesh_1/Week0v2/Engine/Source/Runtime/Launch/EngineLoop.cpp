@@ -134,27 +134,27 @@ void FEngineLoop::Render()
         for (int i = 0;i < 4;++i)
         {
             LevelEditor->SetViewportClient(i);
-            graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetViewports()[i]->GetD3DViewport());
-            graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
-            renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
-            renderer.PrepareShader();
-            renderer.UpdateLightBuffer();
-            RenderWorld();
-            // renderer.PrepareRender(GetWorld()->GetObjectArr());
-            // renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
+            // graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetViewports()[i]->GetD3DViewport());
+            // graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
+            // renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
+            // renderer.PrepareShader();
+            // renderer.UpdateLightBuffer();
+            // RenderWorld();
+            renderer.PrepareRender(GetWorld()->GetObjectArr());
+            renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
         }
         GetLevelEditor()->SetViewportClient(viewportClient);
     }
     else
     {
-        graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetActiveViewportClient()->GetD3DViewport());
-        graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
-        renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
-        renderer.PrepareShader();
-        renderer.UpdateLightBuffer();
-        RenderWorld();
-        // renderer.PrepareRender(GetWorld()->GetObjectArr());
-        // renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
+        // graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetActiveViewportClient()->GetD3DViewport());
+        // graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
+        // renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
+        // renderer.PrepareShader();
+        // renderer.UpdateLightBuffer();
+        // RenderWorld();
+        renderer.PrepareRender(GetWorld()->GetObjectArr());
+        renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
     }
 }
 
@@ -197,15 +197,15 @@ void FEngineLoop::Tick()
 		//Render();
 
 		UIMgr->BeginFrame();
-	    // UnrealEditor->Render();
+	    UnrealEditor->Render();
 	    
-		Console::GetInstance().Draw();
-		ControlPanel::GetInstance().Draw(GetWorld(),elapsedTime);
-		PropertyPanel::GetInstance().Draw(GetWorld());
-		Outliner::GetInstance().Draw(GetWorld());
-		ShowFlags::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
-		ViewModeDropdown::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
-        ViewportTypePanel::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+		// Console::GetInstance().Draw();
+		// ControlPanel::GetInstance().Draw(GetWorld(),elapsedTime);
+		// PropertyPanel::GetInstance().Draw(GetWorld());
+		// Outliner::GetInstance().Draw(GetWorld());
+		// ShowFlags::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+		// ViewModeDropdown::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+  //       ViewportTypePanel::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
 		UIMgr->EndFrame();
 
 		GWorld->CleanUp();
