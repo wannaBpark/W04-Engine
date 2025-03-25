@@ -1,9 +1,9 @@
 #include "CubeComp.h"
 #include "Math/JungleMath.h"
 #include "World.h"
-#include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/PrimitiveBatch.h"
 #include "UObject/ObjectFactory.h"
+#include "PropertyEditor/ShowFlags.h"
 
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"

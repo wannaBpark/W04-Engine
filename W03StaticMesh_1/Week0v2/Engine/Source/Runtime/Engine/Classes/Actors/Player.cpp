@@ -9,6 +9,8 @@
 #include "Components/LightComponent.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "Math/MathUtility.h"
+#include "PropertyEditor/ShowFlags.h"
+#include "UnrealEd/EditorViewportClient.h"
 
 
 using namespace DirectX;

@@ -1,6 +1,5 @@
 #pragma once
 #include "Engine/Source/Runtime/Engine/Classes/Components/SceneComponent.h"
-#include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 
 class UPrimitiveComponent : public USceneComponent
 {

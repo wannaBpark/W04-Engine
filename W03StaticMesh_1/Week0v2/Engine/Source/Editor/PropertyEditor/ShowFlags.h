@@ -2,7 +2,6 @@
 #include "Define.h"
 #include "IWindowToggleable.h"
 #include "UnrealEd/EditorViewportClient.h"
-#include <cstdint>
 
 namespace EEngineShowFlags
 {

@@ -1,6 +1,5 @@
 ﻿#include "ControlEditorPanel.h"
 
-#include "ShowFlags.h"
 #include "World.h"
 #include "Actors/Player.h"
 #include "Components/CubeComp.h"
@@ -11,6 +10,7 @@
 #include "LevelEditor/SLevelEditor.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 #include "UnrealEd/EditorViewportClient.h"
+#include "PropertyEditor/ShowFlags.h"
 
 void ControlEditorPanel::Render()
 {

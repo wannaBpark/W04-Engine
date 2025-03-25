@@ -6,6 +6,7 @@
 #include "Math/JungleMath.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"
+#include "PropertyEditor/ShowFlags.h"
 
 void UStaticMeshComponent::Render()
 {

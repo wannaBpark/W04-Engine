@@ -1,7 +1,5 @@
 #include "UBillboardComponent.h"
-#include "Math/JungleMath.h"
 #include "Actors/Player.h"
-#include "Editor/PropertyEditor/ShowFlags.h"
 #include "QuadTexture.h"
 #include "Define.h"
 #include <DirectXMath.h>
@@ -10,6 +8,7 @@
 #include "Math/MathUtility.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"
+#include "PropertyEditor/ShowFlags.h"
 
 
 UBillboardComponent::UBillboardComponent()

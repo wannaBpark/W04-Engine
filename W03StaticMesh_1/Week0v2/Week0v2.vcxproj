@@ -195,7 +195,6 @@
     <ClCompile Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoArrowComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Camera\CameraComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\UserInterface\Console.cpp" />
-    <ClCompile Include="Engine\Source\Editor\PropertyEditor\ControlPanel.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\CubeComp.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Core\Math\Define.cpp" />
     <ClCompile Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoBaseComponent.cpp" />
@@ -218,10 +217,8 @@
     <ClCompile Include="Engine\Source\Runtime\Windows\D3D11RHI\GraphicDevice.cpp" />
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\Object.cpp" />
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\ObjectFactory.cpp" />
-    <ClCompile Include="Engine\Source\Editor\Outliner.cpp" />
     <ClCompile Include="Engine\Source\Editor\UnrealEd\PrimitiveBatch.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\PrimitiveComponent.cpp" />
-    <ClCompile Include="Engine\Source\Editor\PropertyEditor\PropertyPanel.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Renderer\Renderer.cpp" />
     <ClCompile Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoRectangleComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\SceneComponent.cpp" />
@@ -231,7 +228,6 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UParticleSubUVComp.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UText.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UTextUUID.cpp" />
-    <ClCompile Include="Engine\Source\Editor\PropertyEditor\ViewModeDropdown.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\World.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\QuadTexture.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.cpp" />
@@ -273,11 +269,12 @@
     <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoArrowComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Camera\CameraComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\UserInterface\Console.h" />
-    <ClInclude Include="Engine\Source\Editor\PropertyEditor\ControlPanel.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\CubeComp.h" />
     <ClInclude Include="Engine\Source\Runtime\Launch\Define.h" />
     <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoCircleComponent.h" />
     <ClInclude Include="Engine\Source\Editor\UnrealEd\EditorPanel.h" />
+    <ClInclude Include="Engine\Source\Runtime\Launch\EngineBaseTypes.h" />
+    <ClInclude Include="Engine\Source\Runtime\Launch\EngineLoop.h" />
     <ClInclude Include="Engine\Source\Runtime\Launch\ImGuiManager.h" />
     <ClInclude Include="Engine\Source\Runtime\SlateCore\Widgets\SWindow.h" />
     <ClInclude Include="Engine\Source\Runtime\Slate\Widgets\Layout\SSplitter.h" />
@@ -302,10 +299,8 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\Texture.h" />
     <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\TransformGizmo.h" />
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\ObjectFactory.h" />
-    <ClInclude Include="Engine\Source\Editor\Outliner.h" />
     <ClInclude Include="Engine\Source\Editor\UnrealEd\PrimitiveBatch.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\PrimitiveComponent.h" />
-    <ClInclude Include="Engine\Source\Editor\PropertyEditor\PropertyPanel.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Quad.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\QuadTexture.h" />
     <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoRectangleComponent.h" />
@@ -341,7 +336,6 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UParticleSubUVComp.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UText.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UTextUUID.h" />
-    <ClInclude Include="Engine\Source\Editor\PropertyEditor\ViewModeDropdown.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\World.h" />
   </ItemGroup>
   <ItemGroup>
