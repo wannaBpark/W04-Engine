@@ -261,7 +261,7 @@ void UPlayer::AddCoordiMode()
     cdMode = static_cast<CoordiMode>((cdMode + 1) % CDM_END);
 }
 
-void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& pickPosition)
+void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& pickPosition) const
 {
     D3D11_VIEWPORT viewport;
     UINT numViewports = 1;
@@ -274,7 +274,7 @@ void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMat
     pickPosition.z = 1.0f; // Near Plane
 }
 
-int UPlayer::RayIntersectsObject(const FVector& pickPosition, UPrimitiveComponent* obj, float& hitDistance, int& intersectCount)
+int UPlayer::RayIntersectsObject(const FVector& pickPosition, UPrimitiveComponent* obj, float& hitDistance, int& intersectCount) const
 {
     // ������Ʈ�� ���� ��ȯ ��� ���� (��ġ, ȸ��, ũ�� ����)
     FMatrix scaleMatrix = FMatrix::CreateScale(
@@ -354,21 +354,21 @@ void UPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo,
 
     FQuat rotationDelta;
 
-    if (Gizmo->GetType() == "CircleX")
+    if (Gizmo->GetGizmoType() == UGizmoBaseComponent::CircleX)
     {
         float rotationAmount = (cameraUp.z >= 0 ? -1.0f : 1.0f) * deltaY * 0.01f;
         rotationAmount = rotationAmount + (cameraRight.x >= 0 ? 1.0f : -1.0f) * deltaX * 0.01f;
 
         rotationDelta = FQuat(FVector(1.0f, 0.0f, 0.0f), rotationAmount); // ���� X �� ���� ȸ��
     }
-    else if (Gizmo->GetType() == "CircleY")
+    else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::CircleY)
     {
         float rotationAmount = (cameraRight.x >= 0 ? 1.0f : -1.0f) * deltaX * 0.01f;
         rotationAmount = rotationAmount + (cameraUp.z >= 0 ? 1.0f : -1.0f) * deltaY * 0.01f;
 
         rotationDelta = FQuat(FVector(0.0f, 1.0f, 0.0f), rotationAmount); // ���� Y �� ���� ȸ��
     }
-    else if (Gizmo->GetType() == "CircleZ")
+    else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::CircleZ)
     {
         float rotationAmount = (cameraForward.x <= 0 ? -1.0f : 1.0f) * deltaX * 0.01f;
         rotationDelta = FQuat(FVector(0.0f, 0.0f, 1.0f), rotationAmount); // ���� Z �� ���� ȸ��
@@ -394,17 +394,17 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Giz
 
     if (cdMode == CDM_LOCAL)
     {
-        if (Gizmo->GetType() == "ArrowX")
+        if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowX)
         {
             float moveAmount = worldMoveDir.Dot(pObj->GetForwardVector());
             pObj->AddLocation(pObj->GetForwardVector() * moveAmount);
         }
-        else if (Gizmo->GetType() == "ArrowY")
+        else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY)
         {
             float moveAmount = worldMoveDir.Dot(pObj->GetRightVector());
             pObj->AddLocation(pObj->GetRightVector() * moveAmount);
         }
-        else if (Gizmo->GetType() == "ArrowZ")
+        else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
         {
             float moveAmount = worldMoveDir.Dot(pObj->GetUpVector());
             pObj->AddLocation(pObj->GetUpVector() * moveAmount);
@@ -412,7 +412,7 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Giz
     }
     else if (cdMode == CDM_WORLD)
     {
-        if (Gizmo->GetType() == "ArrowX")
+        if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowX)
         {
             vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
             float dotResult = vecObjToCamera.Dot(FVector(1.0f, 0.0f, 0.0f));
@@ -431,7 +431,7 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Giz
                 pObj->AddLocation(FVector(1.0f, 0.0f, 0.0f) * deltaXf * -0.01f);
             }
         }
-        else if (Gizmo->GetType() == "ArrowY")
+        else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY)
         {
             vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
             float dotResult = vecObjToCamera.Dot(FVector(0.0f, 1.0f, 0.0f));
@@ -447,7 +447,7 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Giz
             else
                 pObj->AddLocation(FVector(0.0f, 1.0f, 0.0f) * deltaXf * -0.01f);
         }
-        else if (Gizmo->GetType() == "ArrowZ")
+        else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
         {
             pObj->AddLocation(FVector(0.0f, 0.0f, 1.0f) * deltaYf * -0.01f);
         }
@@ -459,7 +459,7 @@ void UPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, in
     FVector vecObjToCamera = GetWorld()->GetCamera()->GetWorldLocation() - pObj->GetWorldLocation();
     float deltaXf = static_cast<float>(deltaX);
     float deltaYf = static_cast<float>(deltaY);
-    if (Gizmo->GetType() == "ScaleX")
+    if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ScaleX)
     {
         vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
         float dotResult = vecObjToCamera.Dot(FVector(1.0f, 0.0f, 0.0f));
@@ -478,7 +478,7 @@ void UPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, in
             pObj->AddScale(FVector(1.0f, 0.0f, 0.0f) * deltaXf * -0.01f);
         }
     }
-    else if (Gizmo->GetType() == "ScaleY")
+    else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ScaleY)
     {
         vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
         float dotResult = vecObjToCamera.Dot(FVector(0.0f, 1.0f, 0.0f));
@@ -494,7 +494,7 @@ void UPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, in
         else
             pObj->AddScale(FVector(0.0f, 1.0f, 0.0f) * deltaXf * -0.01f);
     }
-    else if (Gizmo->GetType() == "ScaleZ")
+    else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ScaleZ)
     {
         pObj->AddScale(FVector(0.0f, 0.0f, 1.0f) * deltaYf * -0.01f);
     }
