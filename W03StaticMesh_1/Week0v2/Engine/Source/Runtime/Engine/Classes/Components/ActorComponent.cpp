@@ -32,6 +32,9 @@ void UActorComponent::OnComponentDestroyed()
 
 void UActorComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    assert(bHasBegunPlay);
+
+    bHasBegunPlay = false;
 }
 
 void UActorComponent::DestroyComponent()
