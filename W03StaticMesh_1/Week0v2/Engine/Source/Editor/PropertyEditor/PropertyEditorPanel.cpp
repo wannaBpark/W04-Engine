@@ -78,6 +78,7 @@ void PropertyEditorPanel::Render()
     }
 
     // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
+    if (PickedActor)
     if (ULightComponentBase* lightObj = Cast<ULightComponentBase>(PickedActor))
     {
         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
@@ -155,6 +156,7 @@ void PropertyEditorPanel::Render()
     }
 
     // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
+    if (PickedActor)
     if (UText* textOBj = Cast<UText>(PickedActor))
     {
         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
@@ -189,7 +191,9 @@ void PropertyEditorPanel::Render()
         ImGui::PopStyleColor();
     }
 
-    if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(PickedActor->GetRootComponent()))
+    // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
+    if (PickedActor)
+    if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(PickedActor))
     {
         RenderForStaticMesh(StaticMeshComponent);
     }
