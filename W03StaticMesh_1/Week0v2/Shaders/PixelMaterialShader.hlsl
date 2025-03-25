@@ -102,9 +102,6 @@ PS_OUTPUT mainPS(PS_INPUT input)
     else
         color = saturate(texColor);
     
-    output.color = float4(color, 1.0f);
-    return output;
-    
     if (isSelected)
     {
         color += float3(0.2f, 0.2f, 0.0f); // 노란색 틴트로 하이라이트

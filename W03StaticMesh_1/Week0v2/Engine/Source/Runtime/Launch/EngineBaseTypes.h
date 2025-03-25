@@ -10,21 +10,19 @@ enum EViewModeIndex
 
 enum ELevelViewportType
 {
+    LVT_Perspective = 0,
     /** Top */
-    LVT_OrthoXY = 0,
-    /** Front */
-    LVT_OrthoXZ = 1,
-    /** Left */
-    LVT_OrthoYZ = 2,
-    LVT_Perspective = 3,
-    //LVT_OrthoFreelook = 4,
+    LVT_OrthoXY = 1,
     /** Bottom */
     LVT_OrthoNegativeXY,
-    /** Back */
-    LVT_OrthoNegativeXZ,
+    /** Left */
+    LVT_OrthoYZ,
     /** Right */
     LVT_OrthoNegativeYZ,
+    /** Front */
+    LVT_OrthoXZ,
+    /** Back */
+    LVT_OrthoNegativeXZ,
     LVT_MAX,
-
     LVT_None = 255,
 };

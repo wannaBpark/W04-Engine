@@ -6,6 +6,7 @@
 #include "Components/UBillboardComponent.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Launch/EngineLoop.h"
+#include "Components/Material/Material.h"
 #include "Math/JungleMath.h"
 #include "UObject/Casts.h"
 #include "UObject/Object.h"
@@ -153,19 +154,31 @@ void FRenderer::RenderPrimitive(ID3D11Buffer* pVectexBuffer, UINT numVertices, I
     Graphics->DeviceContext->DrawIndexed(numIndices, 0, 0);
 }
 
-void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData)
+void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<UMaterial*> overrideMaterial)
 {
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &renderData->VertexBuffer, &Stride, &offset);
-    Graphics->DeviceContext->IASetIndexBuffer(renderData->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+    if (renderData->IndexBuffer)
+        Graphics->DeviceContext->IASetIndexBuffer(renderData->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+    if (renderData->MaterialSubsets.Num() == 0) { // no material
+        Graphics->DeviceContext->DrawIndexed(renderData->Indices.Num(), 0, 0);
+    }
 
     for (int subMeshIndex = 0; subMeshIndex < renderData->MaterialSubsets.Num(); subMeshIndex++) {
         int materialIndex = renderData->MaterialSubsets[subMeshIndex].MaterialIndex;
-        UpdateMaterial(renderData->Materials[materialIndex]);
-        
-        uint64 startIndex = renderData->MaterialSubsets[subMeshIndex].IndexStart;
-        uint64 indexCount = renderData->MaterialSubsets[subMeshIndex].IndexCount;
-        Graphics->DeviceContext->DrawIndexed(indexCount, startIndex, 0);
+
+        if (overrideMaterial[materialIndex] != nullptr)
+            UpdateMaterial(overrideMaterial[materialIndex]->GetmaterialInfo());
+        else
+            UpdateMaterial(renderData->Materials[materialIndex]);
+
+        if (renderData->IndexBuffer) { // index draw
+            uint64 startIndex = renderData->MaterialSubsets[subMeshIndex].IndexStart;
+            uint64 indexCount = renderData->MaterialSubsets[subMeshIndex].IndexCount;
+            Graphics->DeviceContext->DrawIndexed(indexCount, startIndex, 0);
+        }
     }
 }
 
@@ -801,7 +814,6 @@ void FRenderer::UpdateConesBuffer(ID3D11Buffer* pConeBuffer, const TArray<FCone>
     }
     Graphics->DeviceContext->Unmap(pConeBuffer, 0);
 }
-
 
 void FRenderer::UpdateGridConstantBuffer(const FGridParameters& gridParams)
 {
