@@ -35,7 +35,7 @@ private:
 
 public:
     UObject();
-    virtual ~UObject();
+    virtual ~UObject() = default;
 
     virtual void RenderUUID();
 

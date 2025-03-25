@@ -2,6 +2,7 @@
 
 #include "ObjectMacros.h"
 #include "UClass.h"
+#include "UObjectHash.h"
 #include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 
 
@@ -16,10 +17,6 @@ UObject::UObject()
     // TODO: Object를 생성할 때 직접 설정하기
     , InternalIndex(std::numeric_limits<uint32>::max())
     , NamePrivate("None")
-{
-}
-
-UObject::~UObject()
 {
 }
 
