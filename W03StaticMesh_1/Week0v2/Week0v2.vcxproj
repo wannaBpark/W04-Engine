@@ -189,12 +189,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Actors\Player.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\ActorComponent.cpp" />
     <ClCompile Include="Engine\Source\Editor\UnrealEd\EditorViewportClient.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Material\Material.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Slate\Widgets\Layout\SSplitter.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\MeshComponent.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\StaticMesh.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\StaticMeshComponent.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\FLoaderOBJ.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\UnrealClient.cpp" />
     <ClCompile Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoArrowComponent.cpp" />
@@ -282,7 +277,6 @@
     <ClInclude Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoCircleComponent.h" />
     <ClInclude Include="Engine\Source\Editor\UnrealEd\EditorPanel.h" />
     <ClInclude Include="Engine\Source\Runtime\Launch\ImGuiManager.h" />
-    <ClInclude Include="Engine\Source\Runtime\Serialization\Serializer.h" />
     <ClInclude Include="Engine\Source\Runtime\SlateCore\Widgets\SWindow.h" />
     <ClInclude Include="Engine\Source\Runtime\Slate\Widgets\Layout\SSplitter.h" />
     <ClInclude Include="Engine\Source\ThirdParty\DirectXTK\Include\DDSTextureLoader.h" />
@@ -337,8 +331,6 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\MeshComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\StaticMesh.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\StaticMeshComponent.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\StaticMesh.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Player.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UBillboardComponent.h" />
     <ClCompile Include="Engine\Source\Runtime\CoreUObject\UObject\UClass.cpp" />
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\ObjectMacros.h" />
