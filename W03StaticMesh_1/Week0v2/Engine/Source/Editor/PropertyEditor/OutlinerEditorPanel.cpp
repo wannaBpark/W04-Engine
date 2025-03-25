@@ -3,16 +3,6 @@
 #include "World.h"
 #include "GameFramework/Actor.h"
 
-OutlinerEditorPanel::OutlinerEditorPanel()
-{
-    GEngineLoop.GetWorld()->OnSelectedObject.BindLambda(
-        [this](UObject* Obj)
-        {
-            this->SelectedObject = Obj;
-        }
-    );
-}
-
 
 void OutlinerEditorPanel::Render()
 {
