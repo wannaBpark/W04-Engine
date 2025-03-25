@@ -9,9 +9,9 @@ UMaterial* FManagerOBJ::CreateMaterial(FObjMaterialInfo materialInfo)
         return materialMap[materialInfo.MTLName];
 
     UMaterial* newMaterial = FObjectFactory::ConstructObject<UMaterial>();
-    newMaterial->SetmaterialInfo(materialInfo);
+    newMaterial->SetMaterialInfo(materialInfo);
     materialMap.Add(materialInfo.MTLName, newMaterial);
-    return nullptr;
+    return newMaterial;
 }
 
 UMaterial* FManagerOBJ::GetMaterial(FString name)

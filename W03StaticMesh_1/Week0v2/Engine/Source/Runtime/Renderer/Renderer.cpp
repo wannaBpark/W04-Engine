@@ -146,7 +146,7 @@ void FRenderer::RenderPrimitive(ID3D11Buffer* pVectexBuffer, UINT numVertices, I
     Graphics->DeviceContext->DrawIndexed(numIndices, 0, 0);
 }
 
-void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<UMaterial*> overrideMaterial)
+void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<FStaticMaterial*> materials, TArray<UMaterial*> overrideMaterial)
 {
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &renderData->VertexBuffer, &Stride, &offset);
@@ -158,13 +158,17 @@ void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<U
         Graphics->DeviceContext->DrawIndexed(renderData->Indices.Num(), 0, 0);
     }
 
+    if (materials.Num() > 2) {
+        int temp = 0;
+    }
+
     for (int subMeshIndex = 0; subMeshIndex < renderData->MaterialSubsets.Num(); subMeshIndex++) {
         int materialIndex = renderData->MaterialSubsets[subMeshIndex].MaterialIndex;
 
         if (overrideMaterial[materialIndex] != nullptr)
-            UpdateMaterial(overrideMaterial[materialIndex]->GetmaterialInfo());
+            UpdateMaterial(overrideMaterial[materialIndex]->GetMaterialInfo());
         else
-            UpdateMaterial(renderData->Materials[materialIndex]);
+            UpdateMaterial(materials[materialIndex]->Material->GetMaterialInfo());
 
         if (renderData->IndexBuffer) { // index draw
             uint64 startIndex = renderData->MaterialSubsets[subMeshIndex].IndexStart;
