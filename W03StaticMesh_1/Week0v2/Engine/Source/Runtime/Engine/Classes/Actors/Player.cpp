@@ -7,6 +7,7 @@
 #include "BaseGizmos/TransformGizmo.h"
 #include "Camera/CameraComponent.h"
 #include "Components/LightComponent.h"
+#include "LevelEditor/SLevelEditor.h"
 #include "Math/MathUtility.h"
 
 
@@ -39,7 +40,8 @@ void UPlayer::Input()
 
             FVector pickPosition;
 
-            ScreenToViewSpace(mousePos.x, mousePos.y, GEngineLoop.View, GEngineLoop.Projection, pickPosition);
+            const auto& ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+            ScreenToViewSpace(mousePos.x, mousePos.y, ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix(), pickPosition);
             bool res = PickGizmo(pickPosition);
             if (!res) PickActor(pickPosition);
         }
@@ -292,7 +294,7 @@ int UPlayer::RayIntersectsObject(const FVector& pickPosition, UPrimitiveComponen
     // ���� ��ȯ ���
     FMatrix worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
 
-    FMatrix ViewMatrix = GEngineLoop.View;
+    FMatrix ViewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
     FMatrix inverseMatrix = FMatrix::Inverse(worldMatrix * ViewMatrix);
 
     FVector cameraOrigin = {0, 0, 0};
