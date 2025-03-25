@@ -7,8 +7,6 @@ class OutlinerEditorPanel : public UEditorPanel
 public:
     OutlinerEditorPanel();
 
-    ~OutlinerEditorPanel();
-    
 public:
     virtual void Render() override;
     virtual void OnResize(HWND hWnd) override;

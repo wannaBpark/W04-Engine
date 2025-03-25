@@ -138,7 +138,7 @@ public: // line shader
     void ClearRenderArr();
     void Render(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
     void RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
-    void RenderGizmos(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void RenderGizmos(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
     void RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
     void RenderBillboards(UWorld* World,std::shared_ptr<FEditorViewportClient> ActiveViewport);
 private:

@@ -322,7 +322,7 @@ void UPlayer::PickedObjControl()
 
         // USceneComponent* pObj = GetWorld()->GetPickingObj();
         AActor* PickedActor = GetWorld()->GetPickedActor();
-        auto Gizmo = static_cast<UPrimitiveComponent*>(GetWorld()->GetPickingGizmo());
+        UGizmoBaseComponent* Gizmo = static_cast<UGizmoBaseComponent*>(GetWorld()->GetPickingGizmo());
         switch (cMode)
         {
         case CM_TRANSLATION:
@@ -335,13 +335,15 @@ void UPlayer::PickedObjControl()
         case CM_ROTATION:
             ControlRotation(PickedActor->GetRootComponent(), Gizmo, deltaX, deltaY);
             break;
+        default:
+            break;
         }
         // ���ο� ���콺 ��ġ ����
         m_LastMousePos = currentMousePos;
     }
 }
 
-void UPlayer::ControlRotation(USceneComponent* pObj, UPrimitiveComponent* Gizmo, int32 deltaX, int32 deltaY)
+void UPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
     FVector cameraForward = GetWorld()->GetCamera()->GetForwardVector();
     FVector cameraRight = GetWorld()->GetCamera()->GetRightVector();
@@ -381,7 +383,7 @@ void UPlayer::ControlRotation(USceneComponent* pObj, UPrimitiveComponent* Gizmo,
     }
 }
 
-void UPlayer::ControlTranslation(USceneComponent* pObj, UPrimitiveComponent* Gizmo, int32 deltaX, int32 deltaY)
+void UPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
     float deltaXf = static_cast<float>(deltaX);
     float deltaYf = static_cast<float>(deltaY);
@@ -452,7 +454,7 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UPrimitiveComponent* Giz
     }
 }
 
-void UPlayer::ControlScale(USceneComponent* pObj, UPrimitiveComponent* Gizmo, int32 deltaX, int32 deltaY)
+void UPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
     FVector vecObjToCamera = GetWorld()->GetCamera()->GetWorldLocation() - pObj->GetWorldLocation();
     float deltaXf = static_cast<float>(deltaX);

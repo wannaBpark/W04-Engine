@@ -1,5 +1,6 @@
 #include "GizmoBaseComponent.h"
 
+
 int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
     int nIntersections = 0;

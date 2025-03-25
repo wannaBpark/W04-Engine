@@ -22,7 +22,7 @@ void FResourceMgr::Initialize(FRenderer* renderer, FGraphicsDevice* device)
     //FManagerOBJ::LoadObjStaticMeshAsset("Assets//AxisCircleX.obj");
     //FManagerOBJ::LoadObjStaticMeshAsset("Assets//AxisCircleY.obj");
     //FManagerOBJ::LoadObjStaticMeshAsset("Assets//AxisCircleZ.obj");
-    FManagerOBJ::LoadObjStaticMeshAsset("Assets/helloBlender.obj");
+    // FManagerOBJ::LoadObjStaticMeshAsset("Assets/helloBlender.obj");
 
 	LoadTextureFromFile(device->Device, device->DeviceContext, L"Assets/Texture/ocean_sky.jpg");
 	LoadTextureFromFile(device->Device, device->DeviceContext, L"Assets/Texture/font.png");

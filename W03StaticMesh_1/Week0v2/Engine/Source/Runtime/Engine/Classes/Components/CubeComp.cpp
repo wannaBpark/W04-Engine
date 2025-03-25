@@ -7,11 +7,15 @@
 
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"
+
+#include "Engine/FLoaderOBJ.h"
+
 UCubeComp::UCubeComp()
 {
     SetType(StaticClass()->GetName());
     AABB.max = { 1,1,1 };
     AABB.min = { -1,-1,-1 };
+
 }
 
 UCubeComp::~UCubeComp()
@@ -21,6 +25,9 @@ UCubeComp::~UCubeComp()
 void UCubeComp::InitializeComponent()
 {
     Super::InitializeComponent();
+
+    FManagerOBJ::CreateStaticMesh("Assets/helloBlender.obj");
+    SetStaticMesh(FManagerOBJ::GetStaticMesh(L"helloBlender.obj"));
 }
 
 void UCubeComp::TickComponent(float DeltaTime)

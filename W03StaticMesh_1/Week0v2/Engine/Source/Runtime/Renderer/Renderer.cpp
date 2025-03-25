@@ -1035,22 +1035,40 @@ void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewpor
     }
 }
 
-void FRenderer::RenderGizmos(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
+void FRenderer::RenderGizmos(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
 {
-#pragma region GizmoDepth
-    ID3D11DepthStencilState* DepthStateDisable = Graphics->DepthStateDisable;
-    Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
-#pragma endregion GizmoDepth
+    if (!World->GetPickedActor())
+    {
+        return;
+    }
+
+    #pragma region GizmoDepth
+        ID3D11DepthStencilState* DepthStateDisable = Graphics->DepthStateDisable;
+        Graphics->DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
+    #pragma endregion GizmoDepth
 
     //  fill solid,  Wirframe 에서도 제대로 렌더링되기 위함
     Graphics->DeviceContext->RSSetState(FEngineLoop::graphicDevice.RasterizerStateSOLID);
-
+    
     for (auto GizmoComp : GizmoObjs)
     {
-        if (!World->GetPickedActor() || World->GetPlayer()->GetControlMode() != CM_TRANSLATION)
-            return;
-        FMatrix Model = JungleMath::CreateModelMatrix(
-            GizmoComp->GetWorldLocation(),
+        
+        if ((GizmoComp->GetGizmoType()==UGizmoBaseComponent::ArrowX ||
+            GizmoComp->GetGizmoType()==UGizmoBaseComponent::ArrowY ||
+            GizmoComp->GetGizmoType()==UGizmoBaseComponent::ArrowZ)
+            && World->GetPlayer()->GetControlMode() != CM_TRANSLATION)
+            continue;
+        else if ((GizmoComp->GetGizmoType()==UGizmoBaseComponent::ScaleX ||
+            GizmoComp->GetGizmoType()==UGizmoBaseComponent::ScaleY ||
+            GizmoComp->GetGizmoType()==UGizmoBaseComponent::ScaleZ)
+            && World->GetPlayer()->GetControlMode() != CM_SCALE)
+            continue;
+        else if ((GizmoComp->GetGizmoType()==UGizmoBaseComponent::CircleX ||
+            GizmoComp->GetGizmoType()==UGizmoBaseComponent::CircleY ||
+            GizmoComp->GetGizmoType()==UGizmoBaseComponent::CircleZ)
+            && World->GetPlayer()->GetControlMode() != CM_ROTATION)
+            continue;
+        FMatrix Model = JungleMath::CreateModelMatrix(GizmoComp->GetWorldLocation(),
             GizmoComp->GetWorldRotation(),
             GizmoComp->GetWorldScale()
         );
@@ -1064,10 +1082,10 @@ void FRenderer::RenderGizmos(UWorld* World, std::shared_ptr<FEditorViewportClien
         else
             UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
 
-        if (!GizmoComp->GetStaticMesh()) return;
+        if (!GizmoComp->GetStaticMesh()) continue;
 
         OBJ::FStaticMeshRenderData* renderData = GizmoComp->GetStaticMesh()->GetRenderData();
-        if (renderData == nullptr) return;
+        if (renderData == nullptr) continue;
 
         RenderPrimitive(renderData, GizmoComp->GetStaticMesh()->GetMaterials(), GizmoComp->GetOverrideMaterials());
     }
