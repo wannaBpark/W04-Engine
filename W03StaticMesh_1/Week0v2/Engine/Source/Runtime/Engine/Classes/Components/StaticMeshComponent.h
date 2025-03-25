@@ -7,12 +7,12 @@ class UStaticMeshComponent : public UMeshComponent
     DECLARE_CLASS(UStaticMeshComponent, USceneComponent)
 
 public:
-    UStaticMeshComponent();
-    ~UStaticMeshComponent();
+    UStaticMeshComponent() {}
+    ~UStaticMeshComponent() {}
 
-    virtual void Initialize() override;
-    virtual void Update(double deltaTime) override;
-    virtual void Release() override;
+    virtual void Initialize() override {}
+    virtual void Update(double deltaTime) override {}
+    virtual void Release() override {}
     virtual void Render() override;
 
     virtual uint32 GetNumMaterials() const override ;
@@ -20,6 +20,8 @@ public:
     virtual uint32 GetMaterialIndex(FName MaterialSlotName) const override;
     virtual TArray<FName> GetMaterialSlotNames() const override;
     virtual void GetUsedMaterials(TArray<UMaterial*> Out) const override;
-private:
-    UStaticMesh* staticMesh;
+
+    virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
+protected:
+    UStaticMesh* staticMesh = nullptr;
 };

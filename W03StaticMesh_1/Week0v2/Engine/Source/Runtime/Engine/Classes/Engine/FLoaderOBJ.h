@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <fstream>
 #include <sstream>
 
@@ -134,12 +134,18 @@ struct FLoaderOBJ
                 }
             }
         }
+
+        if (!OutObjInfo.MaterialSubsets.IsEmpty())
+        {
+            FMaterialSubset& LastSubset = OutObjInfo.MaterialSubsets[OutObjInfo.MaterialSubsets.Num() - 1];
+            LastSubset.IndexCount = OutObjInfo.VertexIndices.Num() - LastSubset.IndexStart;
+        }
         
         return true;
     }
     
     // Material Parsing (*.obj to MaterialInfo)
-    static bool ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMesh& OutFStaticMesh)
+    static bool ParseMaterial(FObjInfo& OutObjInfo, OBJ::FStaticMeshRenderData& OutFStaticMesh)
     {
         // Subset
         OutFStaticMesh.MaterialSubsets = OutObjInfo.MaterialSubsets;
@@ -234,11 +240,11 @@ struct FLoaderOBJ
             {
                 LineStream >> Line;
                 OutFStaticMesh.Materials[MaterialIndex].DiffuseTextureName = Line;
-                
+
                 FWString TexturePath = OutObjInfo.PathName + OutFStaticMesh.Materials[MaterialIndex].DiffuseTextureName.ToWideString();
                 OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath = TexturePath;
                 OutFStaticMesh.Materials[MaterialIndex].bHasTexture = true;
-                
+
                 CreateTextureFromFile(OutFStaticMesh.Materials[MaterialIndex].DiffuseTexturePath);
             }
         }
@@ -246,8 +252,8 @@ struct FLoaderOBJ
         return true;
     }
     
-    // Convert the Raw data to Cooked data (FStaticMesh)
-    static bool ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMesh& OutStaticMesh)
+    // Convert the Raw data to Cooked data (FStaticMeshRenderData)
+    static bool ConvertToStaticMesh(const FObjInfo& RawData, OBJ::FStaticMeshRenderData& OutStaticMesh)
     {
         OutStaticMesh.ObjectName = RawData.ObjectName;
         OutStaticMesh.PathName = RawData.PathName;
@@ -279,7 +285,7 @@ struct FLoaderOBJ
                 if (tIdx != UINT32_MAX && tIdx < RawData.UVs.Num())
                 {
                     vertex.u = RawData.UVs[tIdx].x;
-                    vertex.v = RawData.UVs[tIdx].y;
+                    vertex.v = -RawData.UVs[tIdx].y;
                 }
 
                 if (nIdx != UINT32_MAX && nIdx < RawData.Normals.Num())
@@ -311,6 +317,9 @@ struct FLoaderOBJ
             OutStaticMesh.Indices.Add(index);
             
         }
+
+        // Calculate StaticMesh BoundingBox
+        ComputeBoundingBox(OutStaticMesh.Vertices, OutStaticMesh.BoundingBoxMin, OutStaticMesh.BoundingBoxMax);
         
         return true;
     }
@@ -332,14 +341,34 @@ struct FLoaderOBJ
 
         return true;
     }
+
+    static void ComputeBoundingBox(const TArray<FVertexSimple>& InVertices, FVector& OutMinVector, FVector& OutMaxVector)
+    {
+        FVector MinVector = { FLT_MAX, FLT_MAX, FLT_MAX };
+        FVector MaxVector = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+        
+        for (int32 i = 0; i < InVertices.Num(); i++)
+        {
+            MinVector.x = std::min(MinVector.x, InVertices[i].x);
+            MinVector.y = std::min(MinVector.y, InVertices[i].y);
+            MinVector.z = std::min(MinVector.z, InVertices[i].z);
+
+            MaxVector.x = std::max(MaxVector.x, InVertices[i].x);
+            MaxVector.y = std::max(MaxVector.y, InVertices[i].y);
+            MaxVector.z = std::max(MaxVector.z, InVertices[i].z);
+        }
+
+        OutMinVector = MinVector;
+        OutMaxVector = MaxVector;
+    }
 };
 
 struct FManagerOBJ
 {
 public:
-    static OBJ::FStaticMesh* LoadObjStaticMeshAsset(const FString& PathFileName)
+    static OBJ::FStaticMeshRenderData* LoadObjStaticMeshAsset(const FString& PathFileName)
     {
-        OBJ::FStaticMesh* NewStaticMesh = new OBJ::FStaticMesh();
+        OBJ::FStaticMeshRenderData* NewStaticMesh = new OBJ::FStaticMeshRenderData();
         
         if ( const auto It = ObjStaticMeshMap.Find(PathFileName))
         {
@@ -380,7 +409,7 @@ public:
             CombineMaterialIndex(*NewStaticMesh);
         }
         
-        // Convert FStaticMesh
+        // Convert FStaticMeshRenderData
         Result = FLoaderOBJ::ConvertToStaticMesh(NewObjInfo, *NewStaticMesh);
         if (!Result)
         {
@@ -393,7 +422,7 @@ public:
         return NewStaticMesh;
     }
     
-    static void CombineMaterialIndex(OBJ::FStaticMesh& OutFStaticMesh)
+    static void CombineMaterialIndex(OBJ::FStaticMeshRenderData& OutFStaticMesh)
     {
         for (int32 i = 0; i < OutFStaticMesh.MaterialSubsets.Num(); i++)
         {
@@ -409,7 +438,7 @@ public:
         }
     }
 
-    static bool SaveStaticMeshToBinary(const FWString& FilePath, const OBJ::FStaticMesh& StaticMesh)
+    static bool SaveStaticMeshToBinary(const FWString& FilePath, const OBJ::FStaticMeshRenderData& StaticMesh)
     {
         std::ofstream File(FilePath, std::ios::binary);
         if (!File.is_open())
@@ -474,11 +503,15 @@ public:
             File.write(reinterpret_cast<const char*>(&Subset.MaterialIndex), sizeof(Subset.MaterialIndex));
         }
 
+        // Bounding Box
+        File.write(reinterpret_cast<const char*>(&StaticMesh.BoundingBoxMin), sizeof(FVector));
+        File.write(reinterpret_cast<const char*>(&StaticMesh.BoundingBoxMax), sizeof(FVector));
+        
         File.close();
         return true;
     }
 
-    static bool LoadStaticMeshFromBinary(const FWString& FilePath, OBJ::FStaticMesh& OutStaticMesh)
+    static bool LoadStaticMeshFromBinary(const FWString& FilePath, OBJ::FStaticMeshRenderData& OutStaticMesh)
     {
         std::ifstream File(FilePath, std::ios::binary);
         if (!File.is_open())
@@ -569,9 +602,13 @@ public:
             File.read(reinterpret_cast<char*>(&Subset.MaterialIndex), sizeof(Subset.MaterialIndex));
         }
 
+        // Bounding Box
+        File.read(reinterpret_cast<char*>(&OutStaticMesh.BoundingBoxMin), sizeof(FVector));
+        File.read(reinterpret_cast<char*>(&OutStaticMesh.BoundingBoxMax), sizeof(FVector));
+        
         File.close();
 
-        // Texture Load 
+        // Texture Load
         if (Textures.Num() > 0)
         {
             for (const FWString& Texture : Textures)
@@ -587,5 +624,5 @@ public:
     }
 
 private:
-    static TMap<FString, OBJ::FStaticMesh*> ObjStaticMeshMap;
+    inline static TMap<FString, OBJ::FStaticMeshRenderData*> ObjStaticMeshMap;
 };

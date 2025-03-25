@@ -88,3 +88,11 @@ void FViewport::ResizeViewport(FRect Top, FRect Bottom, FRect Left, FRect Right)
     }
 }
 
+void FViewport::ResizeViewport(FRect newRect)
+{
+    viewport.TopLeftX = newRect.leftTopX;
+    viewport.TopLeftY = newRect.leftTopY;
+    viewport.Width = newRect.width;
+    viewport.Height = newRect.height;
+}
+

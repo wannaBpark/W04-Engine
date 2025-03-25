@@ -1,9 +1,9 @@
 #pragma once
-#include "Components/PrimitiveComponent.h"
+#include "Components/StaticMeshComponent.h"
 
-class UGizmoBaseComponent : public UPrimitiveComponent
+class UGizmoBaseComponent : public UStaticMeshComponent
 {
-    DECLARE_CLASS(UGizmoBaseComponent, UPrimitiveComponent)
+    DECLARE_CLASS(UGizmoBaseComponent, UStaticMeshComponent)
 
 public:
     UGizmoBaseComponent() = default;

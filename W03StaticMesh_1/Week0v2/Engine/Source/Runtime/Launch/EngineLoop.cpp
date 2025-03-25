@@ -126,6 +126,33 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 }
 
 
+void FEngineLoop::Render()
+{
+    graphicDevice.Prepare();
+    if (LevelEditor->IsMultiViewport()) {
+        std::shared_ptr<FEditorViewportClient> viewportClient = GetLevelEditor()->GetActiveViewportClient();
+        for (int i = 0;i < 4;++i)
+        {
+            LevelEditor->SetViewportClient(i);
+            graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetViewports()[i]->GetD3DViewport());
+            graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
+            renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
+            renderer.PrepareShader();
+            renderer.UpdateLightBuffer();
+            RenderWorld();
+        }
+        GetLevelEditor()->SetViewportClient(viewportClient);
+    }
+    else
+    {
+        graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetActiveViewportClient()->GetD3DViewport());
+        graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
+        renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
+        renderer.PrepareShader();
+        renderer.UpdateLightBuffer();
+        RenderWorld();
+    }
+}
 
 void FEngineLoop::Tick()
 {
@@ -154,21 +181,11 @@ void FEngineLoop::Tick()
 			}
 		}
 
+        Input();
 		GWorld->Tick(elapsedTime);
         LevelEditor->Tick(elapsedTime);
-        graphicDevice.Prepare();
-        std::shared_ptr<FEditorViewportClient> viewportClient = GetLevelEditor()->GetActiveViewportClient();
-        for (int i = 0;i < 4;++i)
-        {
-            LevelEditor->SetViewportClient(i);
-            graphicDevice.DeviceContext->RSSetViewports(1, &LevelEditor->GetViewports()[i]->GetD3DViewport());
-            graphicDevice.ChangeRasterizer(LevelEditor->GetActiveViewportClient()->GetViewMode());
-            renderer.ChangeViewMode(LevelEditor->GetActiveViewportClient()->GetViewMode());
-            renderer.PrepareShader();
-            renderer.UpdateLightBuffer();
-            Render();
-        }
-        GetLevelEditor()->SetViewportClient(viewportClient);
+        Render();
+
 		//graphicDevice.Prepare();
 		//renderer.PrepareShader();
 		//renderer.UpdateLightBuffer();
@@ -199,12 +216,11 @@ void FEngineLoop::Tick()
 	}
 }
 float a = 5;
-void FEngineLoop::Render()
+void FEngineLoop::RenderWorld()
 {
 	GWorld->Render();
 	GWorld->RenderBaseObject();
 	UPrimitiveBatch::GetInstance().RenderBatch(GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix(), GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix());
-    //UPrimitiveBatch::GetInstance().RenderBatch(View, Projection);
 }
 
 
@@ -215,15 +231,38 @@ float FEngineLoop::GetAspectRatio(IDXGISwapChain* swapChain)
 	return static_cast<float>(desc.BufferDesc.Width) / static_cast<float>(desc.BufferDesc.Height);
 }
 
+void FEngineLoop::Input()
+{
+    if (GetAsyncKeyState('M') & 0x8000)
+    {
+        if (!bTestInput)
+        {
+            bTestInput = true;
+            if (LevelEditor->IsMultiViewport())
+            {
+                LevelEditor->OffMultiViewport();
+            }
+            else
+                LevelEditor->OnMultiViewport();
+        }
+    }
+    else
+    {
+        bTestInput = false;
+    }
+}
+
 void FEngineLoop::Exit()
 {
-	GWorld->Release();
+    LevelEditor->Release();
+    GWorld->Release();
 	delete GWorld;
 	UIMgr->Shutdown();
 	delete UIMgr;
 	resourceMgr.Release(&renderer);
 	renderer.Release();
 	graphicDevice.Release();
+    
 }
 
 

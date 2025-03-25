@@ -21,28 +21,24 @@ public:
     ID3D11InputLayout* InputLayout = nullptr;
     ID3D11Buffer* ConstantBuffer = nullptr;
     ID3D11Buffer* LightingBuffer = nullptr;
-    ID3D11Buffer* LitUnlitBuffer = nullptr;
-    ID3D11Buffer* UUIDBuffer = nullptr;
+    ID3D11Buffer* FlagBuffer = nullptr;
+    ID3D11Buffer* MaterialConstantBuffer = nullptr;
 
     FLighting lightingData;
 
     uint32 Stride;
     uint32 Stride2;
 
-    ID3D11Buffer* NormalConstantBuffer = nullptr;
     struct FConstants {
         FMatrix MVP;      // 모델
-        float Flag;
-    };
-    struct FNormalConstants {
         FMatrix ModelMatrixInverseTranspose; // normal 변환을 위한 행렬
+        FVector4 UUIDColor;
+        float Flag;
+        FVector pad;
     };
     struct FLitUnlitConstants {
         int isLit; // 1 = Lit, 0 = Unlit 
-        float padding[3];
-    };
-    struct FUUIDConstants {
-        FVector4 UUIDColor; // UUID를 rgba로 변환한 값
+        FVector pad;
     };
 
 public:
@@ -53,6 +49,7 @@ public:
     //Render
     void RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices);
     void RenderPrimitive(ID3D11Buffer* pVectexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices);
+    void RenderPrimitive(OBJ::FStaticMeshRenderData* renderData);
    
     void RenderTexturedModelPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices, ID3D11ShaderResourceView* _TextureSRV, ID3D11SamplerState* _SamplerState);
     //Release
@@ -81,10 +78,9 @@ public:
 
     // update
     void UpdateLightBuffer();
-    void UpdateConstant(FMatrix _MVP, float _Flag);
-    void UpdateNormalConstantBuffer(FMatrix _Model);
+    void UpdateConstant(FMatrix _MVP, FMatrix _NormalMatrix, FVector4 _UUIDColor, float _Flag);
+    void UpdateMaterial(FObjMaterialInfo materialInfo);
     void UpdateLitUnlitConstantBuffer(int isLit);
-    void UpdateUUIDConstantBuffer(FVector4 UUIDColor);
 
 public://텍스쳐용 기능 추가
     ID3D11VertexShader* VertexTextureShader = nullptr;
