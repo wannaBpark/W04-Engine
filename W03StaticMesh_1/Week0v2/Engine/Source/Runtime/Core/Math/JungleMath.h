@@ -1,5 +1,7 @@
 #pragma once
 #include "Define.h"
+#include "Quat.h"
+
 class JungleMath
 {
 public:

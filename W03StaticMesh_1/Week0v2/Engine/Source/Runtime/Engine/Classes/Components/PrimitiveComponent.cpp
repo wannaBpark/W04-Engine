@@ -8,23 +8,14 @@ UPrimitiveComponent::~UPrimitiveComponent()
 {
 }
 
-void UPrimitiveComponent::Initialize()
+void UPrimitiveComponent::InitializeComponent()
 {
-	Super::Initialize();
+	Super::InitializeComponent();
 }
 
-void UPrimitiveComponent::Update(double deltaTime)
+void UPrimitiveComponent::TickComponent(float DeltaTime)
 {
-	Super::Update(deltaTime);
-}
-
-void UPrimitiveComponent::Release()
-{
-}
-
-void UPrimitiveComponent::Render()
-{
-
+	Super::TickComponent(DeltaTime);
 }
 
 int UPrimitiveComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)

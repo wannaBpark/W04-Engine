@@ -1,18 +1,16 @@
 #pragma once
-#include "Engine/Source/Runtime/Engine/Classes/Components/SceneComponent.h"
+#include "GameFramework/Actor.h"
+
 
 class UStaticMeshComponent;
-class UTransformGizmo : public USceneComponent
+class UTransformGizmo : public AActor
 {
-    DECLARE_CLASS(UTransformGizmo, USceneComponent)
+    DECLARE_CLASS(UTransformGizmo, AActor)
 
+public:
     UTransformGizmo();
-    virtual ~UTransformGizmo() override;
 
-    virtual void Initialize() override;
-    virtual void Update(double deltaTime) override;
-    virtual void Release() override;
-    virtual void Render() override;
+    virtual void Tick(float DeltaTime) override;
 
     TArray<UStaticMeshComponent*>& GetArrowArr() { return ArrowArr; }
     TArray<UStaticMeshComponent*>& GetDiscArr() { return CircleArr; }

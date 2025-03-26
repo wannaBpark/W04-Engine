@@ -1,8 +1,6 @@
 #pragma once
-#include <unordered_map>
 #include <memory>
 #include "Texture.h"
-#include "Define.h"
 #include "Container/Map.h"
 
 class FRenderer;

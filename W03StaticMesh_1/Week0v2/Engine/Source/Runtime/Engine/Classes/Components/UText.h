@@ -9,10 +9,8 @@ public:
     UText();
     virtual ~UText() override;
 
-    virtual void Initialize() override;
-    virtual void Update(double deltaTime) override;
-    virtual void Release() override;
-    virtual void Render() override;
+    virtual void InitializeComponent() override;
+    virtual void TickComponent(float DeltaTime) override;
     void ClearText();
     void SetText(FWString _text);
     FWString GetText() { return text; }

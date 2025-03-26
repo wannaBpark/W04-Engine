@@ -1,10 +1,6 @@
 #pragma once
 #include "ImGUI/imgui.h"
-#include "ImGUI/imgui_internal.h"
-#include "ImGUI/imgui_impl_dx11.h"
-#include "ImGUI/imgui_impl_win32.h"
 #include "Define.h"
-#include "UnrealEd/EditorPanel.h"
 #include "PropertyEditor/IWindowToggleable.h"
 
 enum class LogLevel { Display, Warning, Error };

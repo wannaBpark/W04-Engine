@@ -4,13 +4,9 @@
 #include <wincodec.h>
 #include <ranges>
 #include "Define.h"
-#include "Components/CubeComp.h"
-#include "Components/Quad.h"
 #include "Components/SkySphereComponent.h"
-#include "Components/SphereComp.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "DirectXTK/Include/DDSTextureLoader.h"
-#include "Renderer/Renderer.h"
 #include "Engine/FLoaderOBJ.h"
 
 void FResourceMgr::Initialize(FRenderer* renderer, FGraphicsDevice* device)

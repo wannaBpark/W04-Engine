@@ -12,21 +12,19 @@ UCameraComponent::~UCameraComponent()
 {
 }
 
-void UCameraComponent::Initialize()
+void UCameraComponent::InitializeComponent()
 {
-	Super::Initialize();
+	Super::InitializeComponent();
 	RelativeLocation = FVector(0.0f, 0.0f, 0.5f);
 	FOV = 60.f;
 }
 
-void UCameraComponent::Update(double deltaTime)
+void UCameraComponent::TickComponent(float DeltaTime)
 {
+    Super::TickComponent(DeltaTime);
+
 	Input();
 	QuatRotation = JungleMath::EulerToQuaternion(RelativeRotation);
-}
-
-void UCameraComponent::Release()
-{
 }
 
 void UCameraComponent::Input()

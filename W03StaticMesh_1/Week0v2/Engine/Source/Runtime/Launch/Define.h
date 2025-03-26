@@ -9,10 +9,12 @@
 #include "Math/Vector.h"
 #include "Math/Vector4.h"
 #include "Math/Matrix.h"
-#include "Math/Quat.h"
 
 
 #define UE_LOG Console::GetInstance().AddLog
+
+#define _TCHAR_DEFINED
+#include <d3d11.h>
 
 #include "UserInterface/Console.h"
 

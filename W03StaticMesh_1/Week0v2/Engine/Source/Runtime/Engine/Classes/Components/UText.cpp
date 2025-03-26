@@ -1,9 +1,7 @@
 #include "UText.h"
 
 #include "World.h"
-#include "Engine/Source/Runtime/Engine/Camera/CameraComponent.h"
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
-#include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"
 
@@ -14,22 +12,21 @@ UText::UText()
 
 UText::~UText()
 {
-    if (vertexTextBuffer)
-    {
-        vertexTextBuffer->Release();
-        vertexTextBuffer = nullptr;
-    }
+	if (vertexTextBuffer)
+	{
+		vertexTextBuffer->Release();
+		vertexTextBuffer = nullptr;
+	}
 }
 
-void UText::Initialize()
+void UText::InitializeComponent()
 {
-    Super::Initialize();
+    Super::InitializeComponent();
 }
 
-void UText::Update(double deltaTime)
+void UText::TickComponent(float DeltaTime)
 {
-
-    Super::Update(deltaTime);
+	Super::TickComponent(DeltaTime);
 
     //FVector newCamera = GetWorld()->GetCamera()->GetForwardVector();
     //newCamera.z = 0;
@@ -43,15 +40,6 @@ void UText::Update(double deltaTime)
     //RelativeRotation.z = degree + 90;
 }
 
-
-void UText::Release()
-{
-}
-
-void UText::Render()
-{
-    TextMVPRendering();
-}
 void UText::ClearText()
 {
     vertexTextureArr.Empty();
