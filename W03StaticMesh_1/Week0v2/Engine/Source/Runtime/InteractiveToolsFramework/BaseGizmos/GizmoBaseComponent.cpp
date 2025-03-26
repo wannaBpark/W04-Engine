@@ -1,5 +1,9 @@
 #include "GizmoBaseComponent.h"
 
+UGizmoBaseComponent::~UGizmoBaseComponent()
+{
+}
+
 int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
     int nIntersections = 0;
@@ -44,4 +48,24 @@ int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 
     }
     return nIntersections;
+}
+
+void UGizmoBaseComponent::Initialize()
+{
+    UStaticMeshComponent::Initialize();
+}
+
+void UGizmoBaseComponent::Update(double deltaTime)
+{
+    UStaticMeshComponent::Update(deltaTime);
+}
+
+void UGizmoBaseComponent::Release()
+{
+    UStaticMeshComponent::Release();
+}
+
+void UGizmoBaseComponent::Render()
+{
+    UStaticMeshComponent::Render();
 }

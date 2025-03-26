@@ -165,6 +165,8 @@ struct FPoint
 };
 struct FBoundingBox
 {
+    FBoundingBox(){}
+    FBoundingBox(FVector _min, FVector _max) : min(_min), max(_max) {}
 	FVector min; // Minimum extents
 	float pad;
 	FVector max; // Maximum extents
@@ -287,5 +289,22 @@ struct FMaterialConstants {
     float SpecularScalar;
     FVector EmmisiveColor;
     float MaterialPad0;
+};
+
+struct FConstants {
+    FMatrix MVP;      // 모델
+    FMatrix ModelMatrixInverseTranspose; // normal 변환을 위한 행렬
+    FVector4 UUIDColor;
+    bool IsSelected;
+    FVector pad;
+};
+struct FLitUnlitConstants {
+    int isLit; // 1 = Lit, 0 = Unlit 
+    FVector pad;
+};
+
+struct FSubMeshConstants {
+    bool isSelectedSubMesh;
+    FVector pad;
 };
 

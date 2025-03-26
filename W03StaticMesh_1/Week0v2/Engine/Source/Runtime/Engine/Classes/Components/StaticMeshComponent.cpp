@@ -31,7 +31,7 @@ void UStaticMeshComponent::Render()
     if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
         UPrimitiveBatch::GetInstance().RenderAABB(AABB, GetWorldLocation(), Model);
 
-    FEngineLoop::renderer.RenderPrimitive(renderData, staticMesh->GetMaterials(), OverrideMaterials);
+    FEngineLoop::renderer.RenderPrimitive(renderData, staticMesh->GetMaterials(), OverrideMaterials, selectedSubMeshIndex);
 }
 
 uint32 UStaticMeshComponent::GetNumMaterials() const

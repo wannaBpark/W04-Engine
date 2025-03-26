@@ -78,40 +78,6 @@ void UBillboardComponent::Render()
 
 int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
-
-	/*
-	FMatrix worldMatrix = CreateBillboardMatrix();
-	FMatrix ViewMatrix = GEngineLoop.View;
-	FMatrix inverseMatrix = FMatrix::Inverse(worldMatrix * ViewMatrix);
-
-	FVector cameraOrigin = { 0,0,0 };
-	FVector pickRayOrigin = inverseMatrix.TransformPosition(cameraOrigin);
-
-
-	POINT mousePos;
-	GetCursorPos(&mousePos);
-	ScreenToClient(GEngineLoop.hWnd, &mousePos);
-
-	D3D11_VIEWPORT viewport;
-	UINT numViewports = 1;
-	FEngineLoop::graphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
-	float screenWidth = viewport.Width;
-	float screenHeight = viewport.Height;
-
-	FVector pickPosition;
-	int screenX = mousePos.x;
-	int screenY = mousePos.y;
-	FMatrix projectionMatrix = GetEngine().Projection;
-	pickPosition.x = ((2.0f * screenX / viewport.Width) - 1) / projectionMatrix[0][0];
-	pickPosition.y = -((2.0f * screenY / viewport.Height) - 1) / projectionMatrix[1][1];
-	pickPosition.z = 1.0f; // Near Plane
-
-	FVector _rayDirection = inverseMatrix.TransformPosition(pickPosition);
-	_rayDirection = (_rayDirection - pickRayOrigin).Normalize(); // local 좌표축의 ray
-
-	return Super::CheckRayIntersection(pickRayOrigin, _rayDirection, pfNearHitDistance);
-	*/
-	
 	TArray<FVector> quad;
 	for (int i = 0; i < 4; i++)
 	{
@@ -119,7 +85,6 @@ int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 			quadTextureVertices[i].y, quadTextureVertices[i].z));
 	}
 	return CheckPickingOnNDC(quad,pfNearHitDistance);
-
 }
 
 

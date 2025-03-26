@@ -56,6 +56,7 @@ void FEditorViewportClient::Input()
     if (io.WantCaptureMouse) return;
     if (GetAsyncKeyState(VK_RBUTTON) & 0x8000) // VK_RBUTTON은 마우스 오른쪽 버튼을 나타냄
     {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_None);
         if (!bRightMouseDown)
         {
             // 마우스 오른쪽 버튼을 처음 눌렀을 때, 마우스 위치 초기화
@@ -82,8 +83,8 @@ void FEditorViewportClient::Input()
                 PivotMoveRight(deltaX);
                 PivotMoveUp(deltaY);
             }
-            // 새로운 마우스 위치 저장
-            lastMousePos = currentMousePos;
+
+            SetCursorPos(lastMousePos.x, lastMousePos.y);
         }
         if (GetAsyncKeyState('A') & 0x8000)
         {
@@ -112,6 +113,7 @@ void FEditorViewportClient::Input()
     }
     else
     {
+        ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
         bRightMouseDown = false; // 마우스 오른쪽 버튼을 떼면 상태 초기화
     }
 }
@@ -215,12 +217,12 @@ void FEditorViewportClient::CameraRotatePitch(float _Value)
 
 void FEditorViewportClient::PivotMoveRight(float _Value)
 {
-    Pivot = Pivot + ViewTransformOrthographic.GetRightVector() * _Value * 0.01f;
+    Pivot = Pivot + ViewTransformOrthographic.GetRightVector() * _Value * -0.05f;
 }
 
 void FEditorViewportClient::PivotMoveUp(float _Value)
 {
-    Pivot = Pivot + ViewTransformOrthographic.GetUpVector() * _Value * -0.01f;
+    Pivot = Pivot + ViewTransformOrthographic.GetUpVector() * _Value * 0.05f;
 }
 
 void FEditorViewportClient::UpdateViewMatrix()

@@ -8,9 +8,18 @@
 #include <d3dcompiler.h>
 #include "EngineBaseTypes.h"
 #include "Define.h"
+#include "Container/Set.h"
+
+class ULightComponentBase;
+class UWorld;
 class FGraphicsDevice;
 class UMaterial;
 struct FStaticMaterial;
+class UObject;
+class FEditorViewportClient;
+class UBillboardComponent;
+class UStaticMeshComponent;
+class UGizmoBaseComponent;
 class FRenderer 
 {
 
@@ -25,23 +34,12 @@ public:
     ID3D11Buffer* LightingBuffer = nullptr;
     ID3D11Buffer* FlagBuffer = nullptr;
     ID3D11Buffer* MaterialConstantBuffer = nullptr;
+    ID3D11Buffer* SubMeshConstantBuffer = nullptr;
 
     FLighting lightingData;
 
     uint32 Stride;
     uint32 Stride2;
-
-    struct FConstants {
-        FMatrix MVP;      // 모델
-        FMatrix ModelMatrixInverseTranspose; // normal 변환을 위한 행렬
-        FVector4 UUIDColor;
-        float Flag;
-        FVector pad;
-    };
-    struct FLitUnlitConstants {
-        int isLit; // 1 = Lit, 0 = Unlit 
-        FVector pad;
-    };
 
 public:
     void Initialize(FGraphicsDevice* graphics);
@@ -51,7 +49,7 @@ public:
     //Render
     void RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices);
     void RenderPrimitive(ID3D11Buffer* pVectexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices);
-    void RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<FStaticMaterial*> materials, TArray<UMaterial*> overrideMaterial);
+    void RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<FStaticMaterial*> materials, TArray<UMaterial*> overrideMaterial, int selectedSubMeshIndex);
    
     void RenderTexturedModelPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices, ID3D11ShaderResourceView* _TextureSRV, ID3D11SamplerState* _SamplerState);
     //Release
@@ -80,9 +78,10 @@ public:
 
     // update
     void UpdateLightBuffer();
-    void UpdateConstant(FMatrix _MVP, FMatrix _NormalMatrix, FVector4 _UUIDColor, float _Flag);
+    void UpdateConstant(FMatrix _MVP, FMatrix _NormalMatrix, FVector4 _UUIDColor, bool _IsSelected);
     void UpdateMaterial(FObjMaterialInfo materialInfo);
-    void UpdateLitUnlitConstantBuffer(int isLit);
+    void UpdateLitUnlitConstant(int isLit);
+    void UpdateSubMeshConstant(bool isSelected);
 
 public://텍스쳐용 기능 추가
     ID3D11VertexShader* VertexTextureShader = nullptr;
@@ -135,8 +134,21 @@ public: // line shader
     void UpdateOBBBuffer(ID3D11Buffer* pBoundingBoxBuffer, const TArray<FOBB>& BoundingBoxes, int numBoundingBoxes);
     void UpdateConesBuffer(ID3D11Buffer* pConeBuffer, const TArray<FCone>& Cones, int numCones);
 
+    //Render Pass Demo
+    void PrepareRender(TArray<UObject*>& Objects);
+    void ClearRenderArr();
+    void Render(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void RenderGizmos(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void RenderBillboards(UWorld* World,std::shared_ptr<FEditorViewportClient> ActiveViewport);
+private:
+    TArray<UStaticMeshComponent*> StaticMeshObjs;
+    TArray<UGizmoBaseComponent*> GizmoObjs;
+    TArray<UBillboardComponent*> BillboardObjs;
+    TArray<ULightComponentBase*> LightObjs;
 
- public:
+public:
     ID3D11VertexShader* VertexLineShader = nullptr;
     ID3D11PixelShader* PixelLineShader = nullptr;
     ID3D11Buffer* GridConstantBuffer = nullptr;

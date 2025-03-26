@@ -17,7 +17,7 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealClient.h"
 #include "LevelEditor/SLevelEditor.h"
-
+#include "BaseGizmos/GizmoBaseComponent.h"
 
 using namespace DirectX;
 
@@ -322,16 +322,15 @@ int UPlayer::RayIntersectsObject(const FVector& pickPosition, UPrimitiveComponen
 
 void UPlayer::PickedObjControl()
 {
-	// ���콺 �̵��� ���
 	if (GetWorld()->GetPickingObj() && GetWorld()->GetPickingGizmo()) {
 		POINT currentMousePos;
 		GetCursorPos(&currentMousePos);
-		// ���콺 �̵� ���� ���
+
 		int32 deltaX = currentMousePos.x - m_LastMousePos.x;
 		int32 deltaY = currentMousePos.y - m_LastMousePos.y;
 
 		USceneComponent* pObj = GetWorld()->GetPickingObj();
-		UPrimitiveComponent* Gizmo = static_cast<UPrimitiveComponent*>(GetWorld()->GetPickingGizmo());
+		UGizmoBaseComponent* Gizmo = static_cast<UGizmoBaseComponent*>(GetWorld()->GetPickingGizmo());
 		switch (cMode)
 		{
 		case CM_TRANSLATION:
@@ -349,7 +348,7 @@ void UPlayer::PickedObjControl()
 	}
 }
 
-void UPlayer::ControlRotation(USceneComponent* pObj, UPrimitiveComponent* Gizmo, int32 deltaX, int32 deltaY)
+void UPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
 
 		FVector cameraForward = GetWorld()->GetCamera()->GetForwardVector();
@@ -360,19 +359,19 @@ void UPlayer::ControlRotation(USceneComponent* pObj, UPrimitiveComponent* Gizmo,
 
 		FQuat rotationDelta;
 
-		if (Gizmo->GetType() == "CircleX") {
+		if (Gizmo->GetGizmoType() == UGizmoBaseComponent::CircleX) {
 			float rotationAmount = (cameraUp.z >= 0 ? -1.0f : 1.0f) * deltaY * 0.01f;
 			rotationAmount = rotationAmount + (cameraRight.x >= 0 ? 1.0f : -1.0f) * deltaX * 0.01f;
 
 			rotationDelta = FQuat(FVector(1.0f, 0.0f, 0.0f), rotationAmount); // ���� X �� ���� ȸ��
 		}
-		else if (Gizmo->GetType() == "CircleY") {
+		else if (Gizmo->GetGizmoType()==UGizmoBaseComponent::CircleY) {
 			float rotationAmount = (cameraRight.x >= 0 ? 1.0f : -1.0f) * deltaX * 0.01f;
 			rotationAmount = rotationAmount + (cameraUp.z >= 0 ? 1.0f : -1.0f) * deltaY * 0.01f;
 
 			rotationDelta = FQuat(FVector(0.0f, 1.0f, 0.0f), rotationAmount); // ���� Y �� ���� ȸ��
 		}
-		else if (Gizmo->GetType() == "CircleZ") {
+		else if (Gizmo->GetGizmoType()==UGizmoBaseComponent::CircleZ) {
 			float rotationAmount = (cameraForward.x <= 0 ? -1.0f : 1.0f) * deltaX * 0.01f;
 			rotationDelta = FQuat(FVector(0.0f, 0.0f, 1.0f), rotationAmount); // ���� Z �� ���� ȸ��
 		}
@@ -384,7 +383,7 @@ void UPlayer::ControlRotation(USceneComponent* pObj, UPrimitiveComponent* Gizmo,
 		}
 }
 
-void UPlayer::ControlTranslation(USceneComponent* pObj, UPrimitiveComponent* Gizmo, int32 deltaX, int32 deltaY)
+void UPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
 	float deltaXf = static_cast<float>(deltaX);
 	float deltaYf = static_cast<float>(deltaY);
@@ -394,15 +393,15 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UPrimitiveComponent* Giz
 	FVector worldMoveDir = (cameraRight * deltaXf + cameraUp * -deltaYf) * 0.01f;
 
 	if (cdMode == CDM_LOCAL) {
-		if (Gizmo->GetType() == "ArrowX") {
+		if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowX) {
 			float moveAmount = worldMoveDir.Dot(pObj->GetForwardVector());
 			pObj->AddLocation(pObj->GetForwardVector() * moveAmount);
 		}
-		else if (Gizmo->GetType() == "ArrowY") {
+		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY) {
 			float moveAmount = worldMoveDir.Dot(pObj->GetRightVector());
 			pObj->AddLocation(pObj->GetRightVector() * moveAmount);
 		}
-		else if (Gizmo->GetType() == "ArrowZ") {
+		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ) {
 			float moveAmount = worldMoveDir.Dot(pObj->GetUpVector());
 			pObj->AddLocation(pObj->GetUpVector() * moveAmount);
 		}
@@ -410,7 +409,7 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UPrimitiveComponent* Giz
 	else if (cdMode == CDM_WORLD)
 	{
 
-		if (Gizmo->GetType() == "ArrowX")
+		if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowX)
 		{
 			vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
 			float dotResult = vecObjToCamera.Dot(FVector(1.0f, 0.0f, 0.0f));
@@ -427,7 +426,7 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UPrimitiveComponent* Giz
 				pObj->AddLocation(FVector(1.0f, 0.0f, 0.0f) * deltaXf * -0.01f);
 			}
 		}
-		else if (Gizmo->GetType() == "ArrowY")
+		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY)
 		{
 			vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
 			float dotResult = vecObjToCamera.Dot(FVector(0.0f, 1.0f, 0.0f));
@@ -442,19 +441,19 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UPrimitiveComponent* Giz
 			else
 				pObj->AddLocation(FVector(0.0f, 1.0f, 0.0f) * deltaXf * -0.01f);
 		}	
-		else if (Gizmo->GetType() == "ArrowZ")
+		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
 		{
 			pObj->AddLocation(FVector(0.0f, 0.0f, 1.0f) * deltaYf * -0.01f);
 		}
 	}
 }
 
-void UPlayer::ControlScale(USceneComponent* pObj, UPrimitiveComponent* Gizmo, int32 deltaX, int32 deltaY)
+void UPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
 	FVector vecObjToCamera = GetWorld()->GetCamera()->GetWorldLocation() - pObj->GetWorldLocation();
 	float deltaXf = static_cast<float>(deltaX);
 	float deltaYf = static_cast<float>(deltaY);
-	if (Gizmo->GetType() == "ScaleX")
+	if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ScaleX)
 	{
 		vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
 		float dotResult = vecObjToCamera.Dot(FVector(1.0f, 0.0f, 0.0f));
@@ -471,7 +470,7 @@ void UPlayer::ControlScale(USceneComponent* pObj, UPrimitiveComponent* Gizmo, in
 			pObj->AddScale(FVector(1.0f, 0.0f, 0.0f) * deltaXf * -0.01f);
 		}
 	}
-	else if (Gizmo->GetType() == "ScaleY")
+	else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ScaleY)
 	{
 		vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
 		float dotResult = vecObjToCamera.Dot(FVector(0.0f, 1.0f, 0.0f));
@@ -486,7 +485,7 @@ void UPlayer::ControlScale(USceneComponent* pObj, UPrimitiveComponent* Gizmo, in
 		else
 			pObj->AddScale(FVector(0.0f, 1.0f, 0.0f) * deltaXf * -0.01f);
 	}
-	else if (Gizmo->GetType() == "ScaleZ")
+	else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ScaleZ)
 	{
 		pObj->AddScale(FVector(0.0f, 0.0f, 1.0f) * deltaYf * -0.01f);
 	}
