@@ -6,16 +6,6 @@
 
 void OutlinerEditorPanel::Render()
 {
-    // Please change code... bnb
-    static bool Once = false;
-    if (!Once)
-    {
-        GEngineLoop.GetWorld()->OnSelectedObject.BindLambda([this](UObject* Obj)
-        {
-           this->SelectedObject = Obj;
-        });
-        Once = true;
-    }
     /* Pre Setup */
     ImGuiIO& io = ImGui::GetIO();
     
@@ -45,36 +35,18 @@ void OutlinerEditorPanel::Render()
 
     if (ImGui::TreeNode("Primitives")) // 트리 노드 생성
     {
-        static int selected = -1; // 선택된 항목 저장용 변수
-        
-        // Actor 리스트
-        // for (int32 i = 0; i < GEngineLoop.GetWorld()->GetObjectArr().Num();i++)
-        // {
-        //     if(!GEngineLoop.GetWorld()->GetObjectArr()[i]->IsA(USceneComponent::StaticClass()))
-        //         continue;
-        //     // 선택 가능 항목 (Selectable)
-        //     if (ImGui::Selectable(*GEngineLoop.GetWorld()->GetObjectArr()[i]->GetName(), selected == i))
-        //     {
-        //         selected = i; // 선택된 아이템 업데이트
-        //         GEngineLoop.GetWorld()->SetPickingObj(GEngineLoop.GetWorld()->GetObjectArr()[i]);
-        //     }
-        // }
         UWorld* World = GEngineLoop.GetWorld();
-        static int Selected = -1; // 선택된 항목 저장용 변수
-        int Index = 0;
         for (AActor* Actor : World->GetActors())
         {
-            if (ImGui::Selectable(*Actor->GetActorLabel(), Selected == Index))
+            if (ImGui::Selectable(*Actor->GetActorLabel(), World->GetPickedActor() == Actor))
             {
-                Selected = Index;
                 World->SetPickedActor(Actor);
+                break;
             }
-            ++Index;
         }
         ImGui::TreePop(); // 트리 닫기
     }
     ImGui::End();
-    
 }
     
 void OutlinerEditorPanel::OnResize(HWND hWnd)

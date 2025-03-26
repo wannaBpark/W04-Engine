@@ -1,7 +1,5 @@
 #pragma once
 #include "Define.h"
-#include "Delegates/Delegate.h"
-#include "Delegates/DelegateCombination.h"
 #include "Container/Set.h"
 #include "UObject/ObjectFactory.h"
 #include "UObject/ObjectMacros.h"
@@ -14,8 +12,6 @@ class UCameraComponent;
 class UPlayer;
 class USceneComponent;
 class UTransformGizmo;
-
-DECLARE_DELEGATE_OneParam(FOnSelectedObject, AActor*);
 
 
 class UWorld : public UObject
@@ -73,14 +69,11 @@ public:
     void SetPickedActor(AActor* InActor)
     {
         PickedActor = InActor;
-        OnSelectedObject.ExecuteIfBound(InActor);
     }
 
     UObject* GetWorldGizmo() const { return worldGizmo; }
     USceneComponent* GetPickingGizmo() const { return pickingGizmo; }
     void SetPickingGizmo(UObject* Object);
-
-    FOnSelectedObject OnSelectedObject;
 };
 
 

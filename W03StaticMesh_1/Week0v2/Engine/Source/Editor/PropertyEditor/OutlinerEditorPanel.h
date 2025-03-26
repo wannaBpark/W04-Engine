@@ -13,5 +13,5 @@ public:
     
 private:
     float Width = 0, Height = 0;
-    UObject* SelectedObject = nullptr;
+    AActor* SelectedActor = nullptr;
 };
