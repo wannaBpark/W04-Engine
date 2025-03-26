@@ -360,7 +360,7 @@ void PropertyEditorPanel::RenderForMaterial(UStaticMeshComponent* StaticMeshComp
 
 void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
 {
-    ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(380, 400), ImGuiCond_Once);
     ImGui::Begin("Material Viewer", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNav);
 
     static ImGuiSelectableFlags BaseFlag = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_None | ImGuiColorEditFlags_NoAlpha;
@@ -376,10 +376,10 @@ void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
     float da = 1.0f;
     float DiffuseColorPick[4] = { dr, dg, db, da };
 
-    ImGui::Text("Change Property");
+    ImGui::Text("Material Name |");
     ImGui::SameLine();
     ImGui::Text(*Material->GetMaterialInfo().MTLName);
-    ImGui::Indent();
+    ImGui::Separator();
 
     ImGui::Text("  Diffuse Color");
     ImGui::SameLine();
@@ -432,15 +432,20 @@ void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
         FVector NewColor = { EmissiveColorPick[0], EmissiveColorPick[1], EmissiveColorPick[2] };
         Material->SetEmissive(NewColor);
     }
-    ImGui::Unindent();
 
-    ImGui::NewLine();
-    ImGui::Text("Change Material");
-    ImGui::Indent();
-    ImGui::Text("Material Slot    CurMaterial");
-    ImGui::Text(GetData(SelectedStaticMeshComp->GetMaterialSlotNames()[SelectedMaterialIndex].ToString()));
+    ImGui::Spacing();
+    ImGui::Separator();
+    
+    ImGui::Text("Choose Material");
+    ImGui::Spacing();
+    
+    ImGui::Text("Material Slot Name |");
     ImGui::SameLine();
+    ImGui::Text(GetData(SelectedStaticMeshComp->GetMaterialSlotNames()[SelectedMaterialIndex].ToString()));
 
+    ImGui::Text("Override Material |");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(160);
     // 메테리얼 이름 목록을 const char* 배열로 변환
     std::vector<const char*> materialChars;
     for (const auto& material : FManagerOBJ::GetMaterials()) {
@@ -455,10 +460,7 @@ void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
         UMaterial* material = FManagerOBJ::GetMaterial(materialChars[CurMaterialIndex]);
         SelectedStaticMeshComp->SetMaterial(SelectedMaterialIndex, material);
     }
-
-    ImGui::Unindent();
-
-    ImGui::NewLine();
+    
     if (ImGui::Button("Close"))
     {
         SelectedMaterialIndex = -1;
@@ -475,9 +477,12 @@ void PropertyEditorPanel::RenderCreateMaterialView()
 
     static ImGuiSelectableFlags BaseFlag = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_None | ImGuiColorEditFlags_NoAlpha;
 
-    char materialName[256] = "텍스트를 입력하세요";
+    ImGui::Text("New Name");
+    ImGui::SameLine();
+    static char materialName[256] = "New Material";
     // 기본 텍스트 입력 필드
-    if (ImGui::InputText("라벨", materialName, IM_ARRAYSIZE(materialName))) {
+    ImGui::SetNextItemWidth(128);
+    if (ImGui::InputText("##NewName", materialName, IM_ARRAYSIZE(materialName))) {
         tempMaterialInfo.MTLName = materialName;
     }
 
