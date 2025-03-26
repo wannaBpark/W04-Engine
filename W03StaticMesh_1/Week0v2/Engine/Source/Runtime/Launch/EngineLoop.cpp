@@ -56,6 +56,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
         ViewportTypePanel::GetInstance().OnResize(hWnd);
         break;
     case WM_MOUSEWHEEL:
+        if (ImGui::GetIO().WantCaptureMouse)
+            return 0;
         zDelta = GET_WHEEL_DELTA_WPARAM(wParam); // 휠 회전 값 (+120 / -120)
         if (GEngineLoop.GetLevelEditor())
         {
