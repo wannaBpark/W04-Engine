@@ -24,7 +24,7 @@ UStaticMesh::~UStaticMesh()
 
 uint32 UStaticMesh::GetMaterialIndex(FName MaterialSlotName) const
 {
-    for (uint32 materialIndex = 0; materialIndex < materials.Len(); materialIndex++) {
+    for (uint32 materialIndex = 0; materialIndex < materials.Num(); materialIndex++) {
         if (materials[materialIndex]->MaterialSlotName == MaterialSlotName)
             return materialIndex;
     }
@@ -32,10 +32,11 @@ uint32 UStaticMesh::GetMaterialIndex(FName MaterialSlotName) const
     return -1;
 }
 
-void UStaticMesh::GetUsedMaterials(TArray<UMaterial*> Out) const
+void UStaticMesh::GetUsedMaterials(TArray<UMaterial*>& Out) const
 {
-    for (uint32 materialIndex = 0; materialIndex < materials.Len(); materialIndex++) {
-        Out.Add(materials[materialIndex]->Material);
+    for (const FStaticMaterial* Material : materials)
+    {
+        Out.Emplace(Material->Material);
     }
 }
 
