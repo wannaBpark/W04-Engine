@@ -12,13 +12,13 @@ void UWorld::Initialize()
 {
     // TODO: Load Scene
     CreateBaseObject();
-    SpawnObject(OBJ_CUBE);
-     FManagerOBJ::CreateStaticMesh("Assets/Dodge/Dodge.obj");
-     UStaticMeshComponent* mySummerCar = FObjectFactory::ConstructObject<UStaticMeshComponent>();
-     UStaticMesh* tesmp = FManagerOBJ::GetStaticMesh(L"Dodge.obj");
-     mySummerCar->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Dodge.obj"));
-    mySummerCar->GetMaterial(0)->SetDiffuse(FVector(0.3f,0.4f,0.5f));
-    GUObjectArray.Add(mySummerCar);
+    FManagerOBJ::CreateStaticMesh("Assets/Dodge/Dodge.obj");
+
+    // TODO: StaticMeshActor로 생성
+    AActor* SpawnedActor = SpawnActor<AActor>();
+    UStaticMeshComponent* mySummerCar = SpawnedActor->AddComponent<UStaticMeshComponent>();
+    mySummerCar->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Dodge.obj"));
+    mySummerCar->GetMaterial(0)->SetDiffuse(FVector(0.3f, 0.4f, 0.5f));
 }
 
 void UWorld::CreateBaseObject()

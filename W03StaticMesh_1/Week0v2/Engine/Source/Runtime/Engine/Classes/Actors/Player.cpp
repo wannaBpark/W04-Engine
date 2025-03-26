@@ -274,7 +274,7 @@ void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMat
     pickPosition.z = 1.0f; // Near Plane
 }
 
-int UPlayer::RayIntersectsObject(const FVector& pickPosition, UPrimitiveComponent* obj, float& hitDistance, int& intersectCount) const
+int UPlayer::RayIntersectsObject(const FVector& pickPosition, USceneComponent* obj, float& hitDistance, int& intersectCount) const
 {
     // ������Ʈ�� ���� ��ȯ ��� ���� (��ġ, ȸ��, ũ�� ����)
     FMatrix scaleMatrix = FMatrix::CreateScale(
