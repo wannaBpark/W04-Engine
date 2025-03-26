@@ -48,7 +48,7 @@ private:
     /** Actor가 Spawn되었고, 아직 BeginPlay가 호출되지 않은 Actor들 */
     TArray<AActor*> PendingBeginPlayActors;
 
-    AActor* PickedActor = nullptr;
+    AActor* SelectedActor = nullptr;
 
     USceneComponent* pickingGizmo = nullptr;
     UCameraComponent* camera = nullptr;
@@ -65,10 +65,10 @@ public:
 
 
     // EditorManager 같은데로 보내기
-    AActor* GetPickedActor() const { return PickedActor; }
+    AActor* GetSelectedActor() const { return SelectedActor; }
     void SetPickedActor(AActor* InActor)
     {
-        PickedActor = InActor;
+        SelectedActor = InActor;
     }
 
     UObject* GetWorldGizmo() const { return worldGizmo; }

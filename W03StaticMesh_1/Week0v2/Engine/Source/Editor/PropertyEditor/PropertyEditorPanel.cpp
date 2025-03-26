@@ -38,7 +38,7 @@ void PropertyEditorPanel::Render()
     ImGui::Begin("Detail", nullptr, PanelFlags);
     
     AEditorPlayer* player = GEngineLoop.GetWorld()->GetEditorPlayer();
-    AActor* PickedActor = GEngineLoop.GetWorld()->GetPickedActor();
+    AActor* PickedActor = GEngineLoop.GetWorld()->GetSelectedActor();
     if (PickedActor)
     {
         ImGui::SetItemDefaultFocus();
