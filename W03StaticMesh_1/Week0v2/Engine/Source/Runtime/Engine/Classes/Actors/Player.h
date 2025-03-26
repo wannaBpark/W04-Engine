@@ -8,13 +8,12 @@ class UGizmoArrowComponent;
 class USceneComponent;
 class UPrimitiveComponent;
 
-class UPlayer : public AActor
+class AEditorPlayer : public AActor
 {
-    DECLARE_CLASS(UPlayer, AActor)
+    DECLARE_CLASS(AEditorPlayer, AActor)
 
-    UPlayer();
+    AEditorPlayer();
 
-    // TODO: AActor에 맞게 수정하기
     virtual void Tick(float DeltaTime) override;
 
     void Input();

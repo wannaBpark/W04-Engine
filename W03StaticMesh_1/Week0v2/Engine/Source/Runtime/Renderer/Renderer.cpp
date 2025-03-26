@@ -1060,17 +1060,17 @@ void FRenderer::RenderGizmos(const UWorld* World, const std::shared_ptr<FEditorV
         if ((GizmoComp->GetGizmoType()==UGizmoBaseComponent::ArrowX ||
             GizmoComp->GetGizmoType()==UGizmoBaseComponent::ArrowY ||
             GizmoComp->GetGizmoType()==UGizmoBaseComponent::ArrowZ)
-            && World->GetPlayer()->GetControlMode() != CM_TRANSLATION)
+            && World->GetEditorPlayer()->GetControlMode() != CM_TRANSLATION)
             continue;
         else if ((GizmoComp->GetGizmoType()==UGizmoBaseComponent::ScaleX ||
             GizmoComp->GetGizmoType()==UGizmoBaseComponent::ScaleY ||
             GizmoComp->GetGizmoType()==UGizmoBaseComponent::ScaleZ)
-            && World->GetPlayer()->GetControlMode() != CM_SCALE)
+            && World->GetEditorPlayer()->GetControlMode() != CM_SCALE)
             continue;
         else if ((GizmoComp->GetGizmoType()==UGizmoBaseComponent::CircleX ||
             GizmoComp->GetGizmoType()==UGizmoBaseComponent::CircleY ||
             GizmoComp->GetGizmoType()==UGizmoBaseComponent::CircleZ)
-            && World->GetPlayer()->GetControlMode() != CM_ROTATION)
+            && World->GetEditorPlayer()->GetControlMode() != CM_ROTATION)
             continue;
         FMatrix Model = JungleMath::CreateModelMatrix(GizmoComp->GetWorldLocation(),
             GizmoComp->GetWorldRotation(),

@@ -23,9 +23,9 @@ void UWorld::Initialize()
 
 void UWorld::CreateBaseObject()
 {
-    if (localPlayer == nullptr)
+    if (EditorPlayer == nullptr)
     {
-        localPlayer = FObjectFactory::ConstructObject<UPlayer>();;
+        EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>();;
     }
 
     if (camera == nullptr)
@@ -71,10 +71,10 @@ void UWorld::ReleaseBaseObject()
         camera = nullptr;
     }
 
-    if (localPlayer)
+    if (EditorPlayer)
     {
-        delete localPlayer;
-        localPlayer = nullptr;
+        delete EditorPlayer;
+        EditorPlayer = nullptr;
     }
 
 }
@@ -82,7 +82,7 @@ void UWorld::ReleaseBaseObject()
 void UWorld::Tick(float DeltaTime)
 {
 	camera->TickComponent(DeltaTime);
-	localPlayer->Tick(DeltaTime);
+	EditorPlayer->Tick(DeltaTime);
 	LocalGizmo->Tick(DeltaTime);
 
     // SpawnActor()에 의해 Actor가 생성된 경우, 여기서 BeginPlay 호출

@@ -15,17 +15,17 @@
 
 using namespace DirectX;
 
-UPlayer::UPlayer()
+AEditorPlayer::AEditorPlayer()
 {
 }
 
-void UPlayer::Tick(float DeltaTime)
+void AEditorPlayer::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     Input();
 }
 
-void UPlayer::Input()
+void AEditorPlayer::Input()
 {
     if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
     {
@@ -115,7 +115,7 @@ void UPlayer::Input()
     }
 }
 
-bool UPlayer::PickGizmo(FVector& pickPosition)
+bool AEditorPlayer::PickGizmo(FVector& pickPosition)
 {
     bool isPickedGizmo = false;
     if (GetWorld()->GetPickedActor())
@@ -206,7 +206,7 @@ bool UPlayer::PickGizmo(FVector& pickPosition)
     return isPickedGizmo;
 }
 
-void UPlayer::PickActor(const FVector& pickPosition)
+void AEditorPlayer::PickActor(const FVector& pickPosition)
 {
     if (!(ShowFlags::GetInstance().currentFlags & EEngineShowFlags::SF_Primitives)) return;
 
@@ -251,17 +251,17 @@ void UPlayer::PickActor(const FVector& pickPosition)
     }
 }
 
-void UPlayer::AddControlMode()
+void AEditorPlayer::AddControlMode()
 {
     cMode = static_cast<ControlMode>((cMode + 1) % CM_END);
 }
 
-void UPlayer::AddCoordiMode()
+void AEditorPlayer::AddCoordiMode()
 {
     cdMode = static_cast<CoordiMode>((cdMode + 1) % CDM_END);
 }
 
-void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& pickPosition) const
+void AEditorPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& pickPosition) const
 {
     D3D11_VIEWPORT viewport;
     UINT numViewports = 1;
@@ -274,7 +274,7 @@ void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMat
     pickPosition.z = 1.0f; // Near Plane
 }
 
-int UPlayer::RayIntersectsObject(const FVector& pickPosition, USceneComponent* obj, float& hitDistance, int& intersectCount) const
+int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneComponent* obj, float& hitDistance, int& intersectCount) const
 {
     // ������Ʈ�� ���� ��ȯ ��� ���� (��ġ, ȸ��, ũ�� ����)
     FMatrix scaleMatrix = FMatrix::CreateScale(
@@ -309,7 +309,7 @@ int UPlayer::RayIntersectsObject(const FVector& pickPosition, USceneComponent* o
     return intersectCount;
 }
 
-void UPlayer::PickedObjControl()
+void AEditorPlayer::PickedObjControl()
 {
     // ���콺 �̵��� ���
     if (GetWorld()->GetPickedActor() && GetWorld()->GetPickingGizmo())
@@ -343,7 +343,7 @@ void UPlayer::PickedObjControl()
     }
 }
 
-void UPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
+void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
     FVector cameraForward = GetWorld()->GetCamera()->GetForwardVector();
     FVector cameraRight = GetWorld()->GetCamera()->GetRightVector();
@@ -383,7 +383,7 @@ void UPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo,
     }
 }
 
-void UPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
+void AEditorPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
     float deltaXf = static_cast<float>(deltaX);
     float deltaYf = static_cast<float>(deltaY);
@@ -454,7 +454,7 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Giz
     }
 }
 
-void UPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
+void AEditorPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
     FVector vecObjToCamera = GetWorld()->GetCamera()->GetWorldLocation() - pObj->GetWorldLocation();
     float deltaXf = static_cast<float>(deltaX);

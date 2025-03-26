@@ -37,7 +37,7 @@ void PropertyEditorPanel::Render()
     /* Render Start */
     ImGui::Begin("Detail", nullptr, PanelFlags);
     
-    UPlayer* player = GEngineLoop.GetWorld()->GetPlayer();
+    AEditorPlayer* player = GEngineLoop.GetWorld()->GetEditorPlayer();
     AActor* PickedActor = GEngineLoop.GetWorld()->GetPickedActor();
     if (PickedActor)
     {

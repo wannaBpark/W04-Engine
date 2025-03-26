@@ -9,7 +9,7 @@ class AActor;
 class UObject;
 class UGizmoArrowComponent;
 class UCameraComponent;
-class UPlayer;
+class AEditorPlayer;
 class USceneComponent;
 class UTransformGizmo;
 
@@ -52,7 +52,7 @@ private:
 
     USceneComponent* pickingGizmo = nullptr;
     UCameraComponent* camera = nullptr;
-    UPlayer* localPlayer = nullptr;
+    AEditorPlayer* EditorPlayer = nullptr;
 
 public:
     UObject* worldGizmo = nullptr;
@@ -61,7 +61,7 @@ public:
 
     UTransformGizmo* LocalGizmo = nullptr;
     UCameraComponent* GetCamera() const { return camera; }
-    UPlayer* GetPlayer() const { return localPlayer; }
+    AEditorPlayer* GetEditorPlayer() const { return EditorPlayer; }
 
 
     // EditorManager 같은데로 보내기

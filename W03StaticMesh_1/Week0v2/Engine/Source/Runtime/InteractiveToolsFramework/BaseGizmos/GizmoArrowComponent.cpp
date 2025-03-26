@@ -33,7 +33,7 @@ void UGizmoArrowComponent::TickComponent(float DeltaTime)
 //     FEngineLoop::graphicDevice.DeviceContext->OMSetDepthStencilState(DepthStateDisable, 0);
 // #pragma endregion GizmoDepth
 
-//     if (!GetWorld()->GetPickingObj() || GetWorld()->GetPlayer()->GetControlMode() != CM_TRANSLATION)
+//     if (!GetWorld()->GetPickingObj() || GetWorld()->GetEditorPlayer()->GetControlMode() != CM_TRANSLATION)
 //         return;
 //     if (!staticMesh) return;
 
