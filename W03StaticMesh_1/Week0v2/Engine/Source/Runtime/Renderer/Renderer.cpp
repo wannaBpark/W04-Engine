@@ -104,6 +104,7 @@ void FRenderer::PrepareShader() const
         Graphics->DeviceContext->PSSetConstantBuffers(2, 1, &LightingBuffer);
         Graphics->DeviceContext->PSSetConstantBuffers(3, 1, &FlagBuffer);
         Graphics->DeviceContext->PSSetConstantBuffers(4, 1, &SubMeshConstantBuffer);
+        Graphics->DeviceContext->PSSetConstantBuffers(5, 1, &TextureConstantBufer);
     }
 }
 
@@ -352,6 +353,9 @@ void FRenderer::CreateConstantBuffer()
     
     constantbufferdesc.ByteWidth = sizeof(FSubMeshConstants) + 0xf & 0xfffffff0;
     Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &SubMeshConstantBuffer);
+
+    constantbufferdesc.ByteWidth = sizeof(FTextureConstants) + 0xf & 0xfffffff0;
+    Graphics->Device->CreateBuffer(&constantbufferdesc, nullptr, &TextureConstantBufer);
 }
 
 void FRenderer::CreateLightingBuffer()
@@ -404,6 +408,12 @@ void FRenderer::ReleaseConstantBuffer()
     {
         SubMeshConstantBuffer->Release();
         SubMeshConstantBuffer = nullptr;
+    }
+
+    if (TextureConstantBufer)
+    {
+        TextureConstantBufer->Release();
+        TextureConstantBufer = nullptr;
     }
 }
 
@@ -503,6 +513,20 @@ void FRenderer::UpdateSubMeshConstant(bool isSelected) const
             constants->isSelectedSubMesh = isSelected;
         }
         Graphics->DeviceContext->Unmap(SubMeshConstantBuffer, 0);
+    }
+}
+
+void FRenderer::UpdateTextureConstant(float UOffset, float VOffset)
+{
+    if (TextureConstantBufer) {
+        D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU �� �޸� �ּ� ����
+        Graphics->DeviceContext->Map(TextureConstantBufer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR);
+        FTextureConstants* constants = (FTextureConstants*)constantbufferMSR.pData; //GPU �޸� ���� ����
+        {
+            constants->UOffset = UOffset;
+            constants->VOffset = VOffset;
+        }
+        Graphics->DeviceContext->Unmap(TextureConstantBufer, 0);
     }
 }
 

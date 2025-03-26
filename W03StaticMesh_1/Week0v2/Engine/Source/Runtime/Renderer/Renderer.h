@@ -34,6 +34,7 @@ public:
     ID3D11Buffer* FlagBuffer = nullptr;
     ID3D11Buffer* MaterialConstantBuffer = nullptr;
     ID3D11Buffer* SubMeshConstantBuffer = nullptr;
+    ID3D11Buffer* TextureConstantBufer = nullptr;
 
     FLighting lightingData;
 
@@ -81,6 +82,7 @@ public:
     void UpdateMaterial(const FObjMaterialInfo& MaterialInfo) const;
     void UpdateLitUnlitConstant(int isLit) const;
     void UpdateSubMeshConstant(bool isSelected) const;
+    void UpdateTextureConstant(float UOffset, float VOffset);
 
 public://텍스쳐용 기능 추가
     ID3D11VertexShader* VertexTextureShader = nullptr;
