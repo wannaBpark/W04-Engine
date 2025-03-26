@@ -42,20 +42,24 @@ TArray<FName> UStaticMeshComponent::GetMaterialSlotNames() const
     TArray<FName> MaterialNames;
     if (staticMesh == nullptr) return MaterialNames;
 
-    for (uint32 MaterialIndex = 0; MaterialIndex < staticMesh->GetMaterials().Len(); MaterialIndex++) {
-        MaterialNames.Add(staticMesh->GetMaterials()[MaterialIndex]->MaterialSlotName);
+    for (const FStaticMaterial* Material : staticMesh->GetMaterials())
+    {
+        MaterialNames.Emplace(Material->MaterialSlotName);
     }
 
     return MaterialNames;
 }
 
-void UStaticMeshComponent::GetUsedMaterials(TArray<UMaterial*> Out) const
+void UStaticMeshComponent::GetUsedMaterials(TArray<UMaterial*>& Out) const
 {
     if (staticMesh == nullptr) return;
     staticMesh->GetUsedMaterials(Out);
-    for (int materialIndex = 0; materialIndex < GetNumMaterials(); materialIndex++) {
+    for (int materialIndex = 0; materialIndex < GetNumMaterials(); materialIndex++)
+    {
         if (OverrideMaterials[materialIndex] != nullptr)
+        {
             Out[materialIndex] = OverrideMaterials[materialIndex];
+        }
     }
 }
 
