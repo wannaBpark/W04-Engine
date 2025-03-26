@@ -22,7 +22,7 @@ private:
     /* Materials Settings */
     void RenderForMaterial(UStaticMeshComponent* StaticMeshComp);
     void RenderMaterialView(UMaterial* Material);
-    void RenderSubMeshView(UStaticMeshComponent* StaticMeshComp);
+    void RenderCreateMaterialView();
 private:
     float Width = 0, Height = 0;
     FVector Location = FVector(0, 0, 0);
@@ -33,4 +33,6 @@ private:
     int SelectedMaterialIndex = -1;
     int CurMaterialIndex = -1;
     UStaticMeshComponent* SelectedStaticMeshComp = nullptr;
+    FObjMaterialInfo tempMaterialInfo;
+    bool IsCreateMaterial;
 };
