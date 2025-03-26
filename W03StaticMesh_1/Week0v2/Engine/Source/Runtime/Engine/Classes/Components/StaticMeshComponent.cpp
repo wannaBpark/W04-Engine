@@ -65,14 +65,14 @@ TArray<FName> UStaticMeshComponent::GetMaterialSlotNames() const
     TArray<FName> MaterialNames;
     if (staticMesh == nullptr) return MaterialNames;
 
-    for (uint32 MaterialIndex = 0; MaterialIndex < staticMesh->GetMaterials().Len(); MaterialIndex++) {
-        MaterialNames.Add(staticMesh->GetMaterials()[MaterialIndex]->MaterialSlotName);
+    for (auto& material : staticMesh->GetMaterials()) {
+        MaterialNames.Add(material->MaterialSlotName);
     }
 
     return MaterialNames;
 }
 
-void UStaticMeshComponent::GetUsedMaterials(TArray<UMaterial*> Out) const
+void UStaticMeshComponent::GetUsedMaterials(TArray<UMaterial*>& Out) const
 {
     if (staticMesh == nullptr) return;
     staticMesh->GetUsedMaterials(Out);
