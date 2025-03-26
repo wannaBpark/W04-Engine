@@ -7,6 +7,8 @@
 #include "Components/SphereComp.h"
 #include "Components/UParticleSubUVComp.h"
 #include "Components/UText.h"
+#include "Engine/FLoaderOBJ.h"
+#include "Engine/StaticMeshActor.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 #include "UnrealEd/EditorViewportClient.h"
@@ -263,9 +265,11 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 }
                 case OBJ_CUBE:
                 {
-                    SpawnedActor = World->SpawnActor<AActor>();
-                    SpawnedActor->SetActorLabel(TEXT("OBJ_CUBE"));
-                    SpawnedActor->AddComponent<UCubeComp>();
+                    AStaticMeshActor* TempActor = World->SpawnActor<AStaticMeshActor>();
+                    TempActor->SetActorLabel(TEXT("OBJ_CUBE"));
+                    UStaticMeshComponent* MeshComp = TempActor->GetStaticMeshComponent();
+                    FManagerOBJ::CreateStaticMesh("Assets/helloBlender.obj");
+                    MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"helloBlender.obj"));
                     break;
                 }
                 case OBJ_SpotLight:
