@@ -159,9 +159,6 @@
     <ClInclude Include="Engine\Source\Editor\UnrealEd\EditorViewportClient.h">
       <Filter>Engine\Source\Editor\UnrealEd</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Source\Editor\UnrealEd\EditorWindow.h">
-      <Filter>Engine\Source\Editor\UnrealEd</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Source\Editor\UnrealEd\PrimitiveBatch.cpp">
       <Filter>Engine\Source\Editor\UnrealEd</Filter>
     </ClCompile>
@@ -345,9 +342,6 @@
     <ClCompile Include="Engine\Source\Runtime\Launch\EngineLoop.cpp">
       <Filter>Engine\Source\Runtime\Launch</Filter>
     </ClCompile>
-    <ClInclude Include="Engine\Source\Runtime\Launch\EngineLoop.h">
-      <Filter>Engine\Source\Runtime\Launch</Filter>
-    </ClInclude>
     <ClCompile Include="Engine\Source\Runtime\Launch\Launch.cpp">
       <Filter>Engine\Source\Runtime\Launch</Filter>
     </ClCompile>
@@ -438,11 +432,22 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.cpp">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components\Engine</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Source\Editor\LevelEditor\SLevelEditor.cpp" />
+    <ClCompile Include="Engine\Source\Editor\PropertyEditor\ViewportTypePanel.cpp" />
+    <ClCompile Include="Engine\Source\Editor\UnrealEd\ImGuiWidget.cpp" />
+    <ClCompile Include="Engine\Source\Editor\UnrealEd\UnrealEdEventRouter.cpp" />
+    <ClCompile Include="Engine\Source\Editor\PropertyEditor\ControlEditorPanel.cpp" />
+    <ClCompile Include="Engine\Source\Editor\PropertyEditor\OutlinerEditorPanel.cpp" />
+    <ClCompile Include="Engine\Source\Editor\PropertyEditor\PropertyEditorPanel.cpp" />
+    <ClCompile Include="Engine\Source\Editor\UnrealEd\UnrealEd.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Slate\Widgets\Layout\SSplitter.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\UnrealClient.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\SlateCore\Widgets\SWindow.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\ThirdParty\DirectXTK\Include\DDSTextureLoader.h" />
     <ClInclude Include="Engine\Source\Runtime\Launch\ImGuiManager.h" />
-    <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\NameTypes.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Container\Array.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Container\ContainerAllocator.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Container\CString.h" />
@@ -472,6 +477,23 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\ResourceMgr.h">
       <Filter>Engine\Source\Runtime\Engine\Classes\Components\Engine</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\Source\Runtime\Core\Delegates\Delegate.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Delegates\DelegateCombination.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\ViewportClient.h" />
+    <ClInclude Include="Engine\Source\Editor\LevelEditor\SLevelEditor.h" />
+    <ClInclude Include="Engine\Source\Editor\PropertyEditor\ViewportTypePanel.h" />
+    <ClInclude Include="Engine\Source\Editor\UnrealEd\ImGuiWidget.h" />
+    <ClInclude Include="Engine\Source\Editor\PropertyEditor\ControlEditorPanel.h" />
+    <ClInclude Include="Engine\Source\Editor\PropertyEditor\OutlinerEditorPanel.h" />
+    <ClInclude Include="Engine\Source\Editor\PropertyEditor\PropertyEditorPanel.h" />
+    <ClInclude Include="Engine\Source\Editor\UnrealEd\UnrealEd.h" />
+    <ClInclude Include="Engine\Source\Editor\UnrealEd\UnrealEdEventRouter.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\UnrealClient.h" />
+    <ClInclude Include="Engine\Source\Editor\UnrealEd\EditorPanel.h" />
+    <ClInclude Include="Engine\Source\Runtime\Serialization\Serializer.h" />
+    <ClInclude Include="Engine\Source\Runtime\SlateCore\Widgets\SWindow.h" />
+    <ClInclude Include="Engine\Source\Runtime\Slate\Widgets\Layout\SSplitter.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PixelTextureShader.hlsl">
@@ -486,10 +508,10 @@
     <FxCompile Include="Shaders\VertexTextureShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\VertexMaterialShader.hlsl">
+    <FxCompile Include="Shaders\StaticMeshVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\PixelMaterialShader.hlsl">
+    <FxCompile Include="Shaders\StaticMeshPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
