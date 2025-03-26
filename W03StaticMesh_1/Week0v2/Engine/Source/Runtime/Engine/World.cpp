@@ -33,12 +33,17 @@ void UWorld::Initialize()
     LoadData(loadData);
     CreateBaseObject();
     SpawnObject(OBJ_CUBE);
-     FManagerOBJ::CreateStaticMesh("Assets/Dodge/Dodge.obj");
-     UStaticMeshComponent* mySummerCar = FObjectFactory::ConstructObject<UStaticMeshComponent>();
-     UStaticMesh* tesmp = FManagerOBJ::GetStaticMesh(L"Dodge.obj");
-     mySummerCar->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Dodge.obj"));
+    FManagerOBJ::CreateStaticMesh("Assets/Dodge/Dodge.obj");
+    UStaticMeshComponent* mySummerCar = FObjectFactory::ConstructObject<UStaticMeshComponent>();
+    mySummerCar->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Dodge.obj"));
     mySummerCar->GetMaterial(0)->SetDiffuse(FVector(0.3f,0.4f,0.5f));
     GUObjectArray.Add(mySummerCar);
+
+    FManagerOBJ::CreateStaticMesh("Assets/SkySphere.obj");
+    USkySphereComponent* skySphere = FObjectFactory::ConstructObject<USkySphereComponent>();
+    skySphere->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"SkySphere.obj"));
+    skySphere->GetStaticMesh()->GetMaterials()[0]->Material->SetDiffuse(FVector((float)32/255, (float)171/255, (float)191/255));
+    GUObjectArray.Add(skySphere);
 }
 
 void UWorld::CreateBaseObject()
@@ -58,20 +63,7 @@ void UWorld::CreateBaseObject()
         UObject* pLocalGizmo = FObjectFactory::ConstructObject<UTransformGizmo>();
         LocalGizmo = static_cast<UTransformGizmo*>(pLocalGizmo);
     }
-
-     FManagerOBJ::CreateStaticMesh("Assets/Dodge/Dodge.obj");
-    // UStaticMeshComponent* mySummerCar = FObjectFactory::ConstructObject<UStaticMeshComponent>();
-    // UStaticMesh* tesmp = FManagerOBJ::GetStaticMesh(L"Dodge.obj");
-    // mySummerCar->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Dodge.obj"));
-    //mySummerCar->GetMaterial(0)->SetDiffuse(FVector(0.3f,0.4f,0.5f));
-    // mySummerCar->GetMaterial(1)->SetDiffuse(FVector(1.0f,0.2f,0.2f));
-    //mySummerCar->GetMaterial(2)->SetDiffuse(FVector(0.0f,0.4f,0.4f));
-    //mySummerCar->GetMaterial(3)->SetDiffuse(FVector(0.8f,0.8f,0.0f));
-    // GUObjectArray.Add(mySummerCar);
 }
-    //  mySummerCar->GetMaterial(1)->SetDiffuse(FVector(1.0f,0.2f,0.2f));
-    // // mySummerCar->GetMaterial(2)->SetDiffuse(FVector(0.0f,0.4f,0.4f));
-    // // mySummerCar->GetMaterial(3)->SetDiffuse(FVector(0.8f,0.8f,0.0f));
 
 void UWorld::ReleaseBaseObject()
 {

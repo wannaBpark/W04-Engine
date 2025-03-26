@@ -22,6 +22,8 @@ void USkySphereComponent::Initialize()
 
 void USkySphereComponent::Update(double deltaTime)
 {
+    UOffset += 0.005f;
+    VOffset += 0.005f; 
 }
 
 void USkySphereComponent::Release()

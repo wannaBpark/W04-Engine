@@ -13,7 +13,7 @@
 #include "Math/JungleMath.h"
 #include "UObject/Casts.h"
 #include "UObject/Object.h"
-
+#include "Components/SkySphereComponent.h"
 void FRenderer::Initialize(FGraphicsDevice* graphics) {
     Graphics = graphics;
     CreateShader();
@@ -956,11 +956,21 @@ void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewpor
         // 노말 회전시 필요 행렬
         FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
         FVector4 UUIDColor = StaticMeshComp->EncodeUUID() / 255.0f;
-        if (StaticMeshComp == World->GetPickingObj()) {
+        if (StaticMeshComp == World->GetPickingObj())
+        {
             UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
         }
         else
             UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+
+        if (USkySphereComponent* skysphere = Cast<USkySphereComponent>(StaticMeshComp))
+        {
+            UpdateTextureConstant(skysphere->UOffset, skysphere->VOffset);
+        }
+        else
+        {
+            UpdateTextureConstant(0, 0);
+        }
 
         if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
         {

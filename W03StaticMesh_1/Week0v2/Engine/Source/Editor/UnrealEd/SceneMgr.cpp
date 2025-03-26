@@ -58,7 +58,6 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
                 {
                     obj = FObjectFactory::ConstructObject<USkySphereComponent>();
                     USkySphereComponent* skySphere = static_cast<USkySphereComponent*>(obj);
-                    skySphere->SetTexture(L"Assets/Texture/ocean_sky.jpg");
                 }
             }
 

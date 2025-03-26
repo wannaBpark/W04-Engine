@@ -13,12 +13,8 @@ public:
     virtual void		Update(double deltaTime)		override;
     virtual void		Release()					override;
     virtual	void		Render()					override;
+    float UOffset = 0;
+    float VOffset = 0;
 protected:
-    std::shared_ptr<FTexture> Texture;
-public:
-    void SetTexture(const FWString& filename)
-    {
-        Texture = FEngineLoop::resourceMgr.GetTexture(filename);
-    }
 };
 
