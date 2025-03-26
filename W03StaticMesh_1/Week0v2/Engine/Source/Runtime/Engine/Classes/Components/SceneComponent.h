@@ -14,6 +14,7 @@ public:
     virtual void Update(double deltaTime) override;
     virtual void Release() override;
     virtual void Render() override;
+    virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance);
     virtual FVector GetForwardVector();
     virtual FVector GetRightVector();
     virtual FVector GetUpVector();

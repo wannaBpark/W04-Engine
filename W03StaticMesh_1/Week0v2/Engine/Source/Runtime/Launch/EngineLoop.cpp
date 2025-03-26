@@ -199,7 +199,7 @@ void FEngineLoop::Tick()
 		UIMgr->BeginFrame();
 	    UnrealEditor->Render();
 	    
-		// Console::GetInstance().Draw();
+		Console::GetInstance().Draw();
 		// ControlPanel::GetInstance().Draw(GetWorld(),elapsedTime);
 		// PropertyPanel::GetInstance().Draw(GetWorld());
 		// Outliner::GetInstance().Draw(GetWorld());
