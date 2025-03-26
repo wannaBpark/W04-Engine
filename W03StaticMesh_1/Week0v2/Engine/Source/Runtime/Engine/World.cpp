@@ -40,11 +40,14 @@ void UWorld::CreateBaseObject()
         LocalGizmo = FObjectFactory::ConstructObject<UTransformGizmo>();
     }
 
-    //  FManagerOBJ::CreateStaticMesh("Assets/Dodge/Dodge.obj");
-    //  UStaticMeshComponent* mySummerCar = FObjectFactory::ConstructObject<UStaticMeshComponent>();
-    //  UStaticMesh* tesmp = FManagerOBJ::GetStaticMesh(L"Dodge.obj");
-    //  mySummerCar->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Dodge.obj"));
-    // mySummerCar->GetMaterial(0)->SetDiffuse(FVector(0.3f,0.4f,0.5f));
+     FManagerOBJ::CreateStaticMesh("Assets/Dodge/Dodge.obj");
+    // UStaticMeshComponent* mySummerCar = FObjectFactory::ConstructObject<UStaticMeshComponent>();
+    // UStaticMesh* tesmp = FManagerOBJ::GetStaticMesh(L"Dodge.obj");
+    // mySummerCar->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Dodge.obj"));
+    //mySummerCar->GetMaterial(0)->SetDiffuse(FVector(0.3f,0.4f,0.5f));
+    // mySummerCar->GetMaterial(1)->SetDiffuse(FVector(1.0f,0.2f,0.2f));
+    //mySummerCar->GetMaterial(2)->SetDiffuse(FVector(0.0f,0.4f,0.4f));
+    //mySummerCar->GetMaterial(3)->SetDiffuse(FVector(0.8f,0.8f,0.0f));
     // GUObjectArray.Add(mySummerCar);
 }
     //  mySummerCar->GetMaterial(1)->SetDiffuse(FVector(1.0f,0.2f,0.2f));
