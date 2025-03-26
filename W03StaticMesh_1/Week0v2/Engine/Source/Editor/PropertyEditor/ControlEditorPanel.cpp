@@ -283,6 +283,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     ParticleComponent->SetTexture(L"Assets/Texture/T_Explosion_SubUV.png");
                     ParticleComponent->SetRowColumnCount(6, 6);
                     ParticleComponent->SetScale(FVector(10.0f, 10.0f, 1.0f));
+                    ParticleComponent->Activate();
                     break;
                 }
                 case OBJ_Text:

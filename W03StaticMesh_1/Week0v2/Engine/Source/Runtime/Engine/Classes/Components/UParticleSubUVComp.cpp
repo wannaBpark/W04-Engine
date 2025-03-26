@@ -8,6 +8,7 @@
 UParticleSubUVComp::UParticleSubUVComp()
 {
     SetType(StaticClass()->GetName());
+    bIsLoop = true;
 }
 
 UParticleSubUVComp::~UParticleSubUVComp()
@@ -52,7 +53,10 @@ void UParticleSubUVComp::TickComponent(float DeltaTime)
 		indexV = 0;
 
 	    // TODO: 파티클 제거는 따로 안하고, Actor에 LifeTime을 설정하든가, 파티클의 Activate 설정을 추가하던가 하기로
-	    Deactivate();
+	    if (!bIsLoop)
+	    {
+            Deactivate();
+	    }
 	    // DestroyComponent();
 		// GetWorld()->ThrowAwayObj(this);
 		// GetWorld()->SetPickingObj(nullptr);

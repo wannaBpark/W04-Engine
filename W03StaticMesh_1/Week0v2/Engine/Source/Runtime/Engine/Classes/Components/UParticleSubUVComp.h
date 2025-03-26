@@ -16,8 +16,11 @@ public:
 
     ID3D11Buffer* vertexSubUVBuffer;
     UINT numTextVertices;
-private:
 
+protected:
+    bool bIsLoop = true;
+
+private:
     int indexU = 0;
     int indexV = 0;
     float second = 0;
