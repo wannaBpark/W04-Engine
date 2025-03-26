@@ -45,7 +45,6 @@ private:
     UnrealEd* UnrealEditor;
     bool bIsExit = false;
     const int32 targetFPS = 60;
-
     bool bTestInput = false;
 
 public:

@@ -2,6 +2,8 @@
 #include <cstdarg>
 #include <cstdio>
 
+#include "UnrealEd/EditorViewportClient.h"
+
 
 // 싱글톤 인스턴스 반환
 Console& Console::GetInstance() {
@@ -37,19 +39,22 @@ void Console::AddLog(LogLevel level, const char* fmt, ...) {
 void Console::Draw() {
     if (!bWasOpen) return;
     // 창 크기 및 위치 계산
-    float controllWindowWidth = static_cast<float>(width) * 20.5f;
-    float expandedHeight = static_cast<float>(height) * 0.55f;
-    float collapsedHeight = 500.0f; // 접었을 때 높이
-    float controllWindowHeight = bExpand ? expandedHeight : collapsedHeight;
-
-    float controllWindowPosX = (static_cast<float>(width) - controllWindowWidth);
-    float controllWindowPosY = 100;//(static_cast<float>(height) - controllWindowHeight);
-
-    // 창 크기와 위치 설정
-    ImGui::SetNextWindowPos(ImVec2(controllWindowPosX, controllWindowPosY));
-    ImGui::SetNextWindowSize(ImVec2(controllWindowWidth, controllWindowHeight), ImGuiCond_Always);
-
+    ImVec2 displaySize = ImGui::GetIO().DisplaySize;
+    
+    // 콘솔 창의 크기와 위치 설정
+    float expandedHeight = displaySize.y * 0.4f; // 확장된 상태일 때 높이 (예: 화면의 40%)
+    float collapsedHeight = 30.0f;               // 축소된 상태일 때 높이
+    float currentHeight = bExpand ? expandedHeight : collapsedHeight;
+    
+    // 왼쪽 하단에 위치하도록 계산 (창의 좌측 하단이 화면의 좌측 하단에 위치)
+    ImVec2 windowSize(displaySize.x * 0.5f, currentHeight); // 폭은 화면의 40%
+    ImVec2 windowPos(0, displaySize.y - currentHeight);
+    
+    // 창 위치와 크기를 고정
+    ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always);
+    ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
     // 창을 표시하고 닫힘 여부 확인
+    overlay.Render(GEngineLoop.graphicDevice.DeviceContext, width, height);
     bExpand = ImGui::Begin("Console", &bWasOpen);
     if (!bExpand) {
         ImGui::End();
@@ -62,15 +67,7 @@ void Console::Draw() {
         return;
     }
     
-
-
     // 버튼 UI (로그 수준별 추가)
-    if (ImGui::Button("Add LogTemp")) { AddLog(LogLevel::Display, "LogTemp message"); }
-    ImGui::SameLine();
-    if (ImGui::Button("Add Warning")) { AddLog(LogLevel::Warning, "Warning message"); }
-    ImGui::SameLine();
-    if (ImGui::Button("Add Error")) { AddLog(LogLevel::Error, "Error message"); }
-    ImGui::SameLine();
     if (ImGui::Button("Clear")) { Clear(); }
     ImGui::SameLine();
     if (ImGui::Button("Copy")) { ImGui::LogToClipboard(); }
@@ -128,6 +125,8 @@ void Console::Draw() {
     if (ImGui::InputText("Input", inputBuf, IM_ARRAYSIZE(inputBuf), ImGuiInputTextFlags_EnterReturnsTrue)) {
         if (inputBuf[0]) {
             AddLog(LogLevel::Display, ">> %s", inputBuf);
+            std::string command(inputBuf);
+            ExecuteCommand(command);
             history.Add(std::string(inputBuf));
             historyPos = -1;
             scrollToBottom = true; // 자동 스크롤
@@ -143,6 +142,32 @@ void Console::Draw() {
 
     ImGui::End();
 }
+
+void Console::ExecuteCommand(const std::string& command)
+{
+    AddLog(LogLevel::Display, "Executing command: %s", command.c_str());
+
+    if (command == "clear")
+    {
+        Clear();
+    }
+    else if (command == "help")
+    {
+        AddLog(LogLevel::Display, "Available commands:");
+        AddLog(LogLevel::Display, " - clear: Clears the console");
+        AddLog(LogLevel::Display, " - help: Shows available commands");
+        AddLog(LogLevel::Display, " - stat fps: Toggle FPS display");
+        AddLog(LogLevel::Display, " - stat memory: Toggle Memory display");
+        AddLog(LogLevel::Display, " - stat none: Hide all stat overlays");
+    }
+    else if (command.rfind("stat ", 0) == 0) { // stat 명령어 처리
+        overlay.ToggleStat(command);
+    }
+    else {
+        AddLog(LogLevel::Error, "Unknown command: %s", command.c_str());
+    }
+}
+
 void Console::OnResize(HWND hWindow)
 {
     RECT clientRect;
