@@ -1,5 +1,6 @@
 #pragma once
 #include "ActorComponent.h"
+#include "Math/Quat.h"
 #include "UObject/ObjectMacros.h"
 
 class USceneComponent : public UActorComponent
@@ -10,10 +11,8 @@ public:
     USceneComponent();
     virtual ~USceneComponent() override;
 
-    virtual void Initialize() override;
-    virtual void Update(double deltaTime) override;
-    virtual void Release() override;
-    virtual void Render() override;
+    virtual void InitializeComponent() override;
+    virtual void TickComponent(float DeltaTime) override;
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance);
     virtual FVector GetForwardVector();
     virtual FVector GetRightVector();
@@ -22,13 +21,12 @@ public:
     void AddRotation(FVector _added);
     void AddScale(FVector _added);
 
-    void AddChild(USceneComponent* _newChild);
-
 protected:
     FVector RelativeLocation;
     FVector RelativeRotation;
     FQuat QuatRotation;
     FVector RelativeScale3D;
+
     USceneComponent* AttachParent = nullptr;
     TArray<USceneComponent*> AttachChildren;
 
@@ -46,11 +44,10 @@ public:
     virtual void SetRotation(FVector _newRot);
     void SetRotation(FQuat _newRot) { QuatRotation = _newRot; }
     void SetScale(FVector _newScale) { RelativeScale3D = _newScale; }
-    void SetParent(USceneComponent* _parent) { AttachParent = _parent; }
+    void SetupAttachment(USceneComponent* InParent);
 
 private:
     class UTextUUID* uuidText = nullptr;
 
 public:
-    virtual void RenderUUID() override;
 };

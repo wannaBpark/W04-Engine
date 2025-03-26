@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/Source/Runtime/CoreUObject/UObject/Object.h"
+#include "GameFramework/Actor.h"
 #include "UObject/ObjectMacros.h"
 #include "UObject/ObjectTypes.h"
 class UGizmoBaseComponent;
@@ -7,28 +7,23 @@ class UGizmoArrowComponent;
 class USceneComponent;
 class UPrimitiveComponent;
 
-class UPlayer : public UObject
+class AEditorPlayer : public AActor
 {
-    DECLARE_CLASS(UPlayer, UObject)
+    DECLARE_CLASS(AEditorPlayer, AActor)
 
-    UPlayer();
-    virtual ~UPlayer() override;
+    AEditorPlayer();
 
-    virtual void Initialize() override;
-    virtual void Update(double deltaTime) override;
-    virtual void Release() override;
+    virtual void Tick(float DeltaTime) override;
 
     void Input();
     bool PickGizmo(FVector& rayOrigin);
-    void PickObj(FVector& pickPosition);
+    void PickActor(const FVector& pickPosition);
     void AddControlMode();
     void AddCoordiMode();
-    void DeletePickedObj();
 
 private:
-    int RayIntersectsObject(const FVector& pickPosition, USceneComponent* obj, float& hitDistance, int& intersectCount);
-    void ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& rayOrigin);
-    void ScreenToWorldRay(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, bool bOrtho, FVector& outRayOrigin, FVector& outRayDir);
+    int RayIntersectsObject(const FVector& pickPosition, USceneComponent* obj, float& hitDistance, int& intersectCount) const;
+    void ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& rayOrigin) const;
     void PickedObjControl();
     void ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY);
     void ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY);

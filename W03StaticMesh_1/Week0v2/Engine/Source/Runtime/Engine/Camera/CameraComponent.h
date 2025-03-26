@@ -9,9 +9,8 @@ public:
     UCameraComponent();
     virtual ~UCameraComponent() override;
 
-    virtual void Initialize() override;
-    virtual void Update(double deltaTime) override;
-    virtual void Release() override;
+    virtual void InitializeComponent() override;
+    virtual void TickComponent(float DeltaTime) override;
 
     void Input();
     void MoveForward(float _Value);

@@ -9,7 +9,6 @@ public:
     UGizmoCircleComponent();
     virtual ~UGizmoCircleComponent() override;
     virtual bool IntersectsRay(const FVector& rayOrigin, const FVector& rayDir, float& dist);
-    virtual void Render() override;
 
     float GetInnerRadius() const { return inner; }
     void SetInnerRadius(float value) { inner = value; }

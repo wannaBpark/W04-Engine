@@ -1,6 +1,5 @@
 #pragma once
 #include "Engine/Source/Runtime/Engine/Classes/Components/SceneComponent.h"
-#include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 
 class UPrimitiveComponent : public USceneComponent
 {
@@ -10,10 +9,8 @@ public:
     UPrimitiveComponent();
     virtual ~UPrimitiveComponent() override;
 
-    virtual void Initialize() override;
-    virtual void Update(double deltaTime) override;
-    virtual void Release() override;
-    virtual void Render() override;
+    virtual void InitializeComponent() override;
+    virtual void TickComponent(float DeltaTime) override;
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance);
     bool IntersectRayTriangle(
         const FVector& rayOrigin, const FVector& rayDirection,

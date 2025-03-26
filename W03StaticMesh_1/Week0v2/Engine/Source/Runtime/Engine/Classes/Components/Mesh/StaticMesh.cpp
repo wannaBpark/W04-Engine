@@ -34,8 +34,9 @@ uint32 UStaticMesh::GetMaterialIndex(FName MaterialSlotName) const
 
 void UStaticMesh::GetUsedMaterials(TArray<UMaterial*>& Out) const
 {
-    for (uint32 materialIndex = 0; materialIndex < materials.Num(); materialIndex++) {
-        Out.Add(materials[materialIndex]->Material);
+    for (const FStaticMaterial* Material : materials)
+    {
+        Out.Emplace(Material->Material);
     }
 }
 

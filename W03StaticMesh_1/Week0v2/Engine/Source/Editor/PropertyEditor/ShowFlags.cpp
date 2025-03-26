@@ -1,6 +1,5 @@
 #include "PropertyEditor/ShowFlags.h"
 #include "World.h"
-#include "Components/PrimitiveComponent.h"
 
 ShowFlags::ShowFlags()
 {

@@ -1,8 +1,8 @@
 #include "PropertyEditorPanel.h"
 
+#include "World.h"
+#include "Actors/Player.h"
 #include "Components/LightComponent.h"
-#include "Components/Player.h"
-#include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/UText.h"
 #include "Engine/FLoaderOBJ.h"
@@ -38,18 +38,18 @@ void PropertyEditorPanel::Render()
     /* Render Start */
     ImGui::Begin("Detail", nullptr, PanelFlags);
     
-    UPlayer* player = GEngineLoop.GetWorld()->GetPlayer();
-    USceneComponent* PickObj = GEngineLoop.GetWorld()->GetPickingObj();
-    if (PickObj)
+    AEditorPlayer* player = GEngineLoop.GetWorld()->GetEditorPlayer();
+    AActor* PickedActor = GEngineLoop.GetWorld()->GetSelectedActor();
+    if (PickedActor)
     {
         ImGui::SetItemDefaultFocus();
         // TreeNode 배경색을 변경 (기본 상태)
         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
         if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
         {
-            Location = PickObj->GetWorldLocation();
-            Rotation = PickObj->GetWorldRotation();
-            Scale = PickObj->GetWorldScale();
+            Location = PickedActor->GetActorLocation();
+            Rotation = PickedActor->GetActorRotation();
+            Scale = PickedActor->GetActorScale();
             
             FImGuiWidget::DrawVec3Control("Location", Location, 0, 85);
             ImGui::Spacing();
@@ -60,9 +60,9 @@ void PropertyEditorPanel::Render()
             FImGuiWidget::DrawVec3Control("Scale", Scale, 0, 85);
             ImGui::Spacing();
 
-            PickObj->SetLocation(Location);
-            PickObj->SetRotation(Rotation);
-            PickObj->SetScale(Scale);
+            PickedActor->SetActorLocation(Location);
+            PickedActor->SetActorRotation(Rotation);
+            PickedActor->SetActorScale(Scale);
             
             std::string coordiButtonLabel;
             if (player->GetCoordiMode() == CoordiMode::CDM_WORLD)
@@ -79,7 +79,9 @@ void PropertyEditorPanel::Render()
         ImGui::PopStyleColor();
     }
 
-    if (ULightComponentBase* lightObj = Cast<ULightComponentBase>(PickObj))
+    // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
+    if (PickedActor)
+    if (ULightComponentBase* lightObj = Cast<ULightComponentBase>(PickedActor->GetRootComponent()))
     {
         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
         if (ImGui::TreeNodeEx("SpotLight Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
@@ -155,7 +157,9 @@ void PropertyEditorPanel::Render()
         ImGui::PopStyleColor();
     }
 
-    if (UText* textOBj = Cast<UText>(PickObj))
+    // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
+    if (PickedActor)
+    if (UText* textOBj = Cast<UText>(PickedActor->GetRootComponent()))
     {
         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
         if (ImGui::TreeNodeEx("Text Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
@@ -189,7 +193,9 @@ void PropertyEditorPanel::Render()
         ImGui::PopStyleColor();
     }
 
-    if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(PickObj))
+    // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
+    if (PickedActor)
+    if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(PickedActor->GetRootComponent()))
     {
         RenderForStaticMesh(StaticMeshComponent);
         RenderForMaterial(StaticMeshComponent);
@@ -197,7 +203,7 @@ void PropertyEditorPanel::Render()
     ImGui::End();
 }
 
-void PropertyEditorPanel::RGBToHSV(float r, float g, float b, float& h, float& s, float& v)
+void PropertyEditorPanel::RGBToHSV(float r, float g, float b, float& h, float& s, float& v) const
 {
     float mx = FMath::Max(r, FMath::Max(g, b));
     float mn = FMath::Min(r, FMath::Min(g, b));
@@ -234,7 +240,7 @@ void PropertyEditorPanel::RGBToHSV(float r, float g, float b, float& h, float& s
     }
 }
 
-void PropertyEditorPanel::HSVToRGB(float h, float s, float v, float& r, float& g, float& b)
+void PropertyEditorPanel::HSVToRGB(float h, float s, float v, float& r, float& g, float& b) const
 {
     // h: 0~360, s:0~1, v:0~1
     float c = v * s;
