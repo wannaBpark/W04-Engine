@@ -6,6 +6,7 @@
 #include "LevelEditor/SLevelEditor.h"
 #include "Engine/FLoaderOBJ.h"
 #include "Classes/Components/StaticMeshComponent.h"
+#include "Engine/StaticMeshActor.h"
 
 
 void UWorld::Initialize()
@@ -14,9 +15,8 @@ void UWorld::Initialize()
     CreateBaseObject();
     FManagerOBJ::CreateStaticMesh("Assets/Dodge/Dodge.obj");
 
-    // TODO: StaticMeshActor로 생성
-    AActor* SpawnedActor = SpawnActor<AActor>();
-    UStaticMeshComponent* mySummerCar = SpawnedActor->AddComponent<UStaticMeshComponent>();
+    AStaticMeshActor* SpawnedActor = SpawnActor<AStaticMeshActor>();
+    UStaticMeshComponent* mySummerCar = SpawnedActor->GetStaticMeshComponent();
     mySummerCar->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Dodge.obj"));
     mySummerCar->GetMaterial(0)->SetDiffuse(FVector(0.3f, 0.4f, 0.5f));
 }
