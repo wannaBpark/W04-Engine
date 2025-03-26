@@ -9,6 +9,7 @@
 #include "Components/UText.h"
 #include "Engine/FLoaderOBJ.h"
 #include "Engine/StaticMeshActor.h"
+#include "ImGUI/imgui_internal.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 #include "UnrealEd/EditorViewportClient.h"
@@ -136,6 +137,11 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
                 if (FileName != nullptr)
                 {
                     std::cout << FileName << std::endl;
+
+                    if (FManagerOBJ::CreateStaticMesh(FileName) == nullptr)
+                    {
+                        tinyfd_messageBox("Error", "파일을 불러올 수 없습니다.", "ok", "error", 1);
+                    }
                 }
             }
             
