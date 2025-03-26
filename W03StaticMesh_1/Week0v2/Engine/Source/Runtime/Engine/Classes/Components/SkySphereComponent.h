@@ -13,13 +13,7 @@ public:
 
     virtual void InitializeComponent() override;
     virtual void TickComponent(float DeltaTime) override;
+    float UOffset = 0;
+    float VOffset = 0;
 
-protected:
-    std::shared_ptr<FTexture> Texture;
-
-public:
-    void SetTexture(const FWString& filename)
-    {
-        Texture = FEngineLoop::resourceMgr.GetTexture(filename);
-    }
 };

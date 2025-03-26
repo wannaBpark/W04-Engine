@@ -1,5 +1,6 @@
 ﻿#include "Player.h"
 
+#include "UnrealClient.h"
 #include "World.h"
 #include "BaseGizmos/GizmoArrowComponent.h"
 #include "BaseGizmos/GizmoCircleComponent.h"
@@ -224,7 +225,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     const UActorComponent* Possible = nullptr;
     int maxIntersect = 0;
     float minDistance = FLT_MAX;
-    for (const auto iter : GUObjectArray.GetObjectItemArrayUnsafe()) // TODO: TObjectRange<PrimitiveComponent>로 사용
+    for (const auto iter : TObjectRange<UPrimitiveComponent>())
     {
         UPrimitiveComponent* pObj;
         if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())
@@ -373,7 +374,6 @@ void AEditorPlayer::PickedObjControl()
         default:
             break;
         }
-        // ���ο� ���콺 ��ġ ����
         m_LastMousePos = currentMousePos;
     }
 }
@@ -419,125 +419,87 @@ void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* 
 
 void AEditorPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
-   float scaler = 0.0f;
-    std::shared_ptr<FEditorViewportClient> activeViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
-    if (activeViewport->IsPerspective())
+    float DeltaX = static_cast<float>(deltaX);
+    float DeltaY = static_cast<float>(deltaY);
+    auto ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
+
+    FVector CamearRight = ActiveViewport->GetViewportType() == LVT_Perspective ?
+        ActiveViewport->ViewTransformPerspective.GetRightVector() : ActiveViewport->ViewTransformOrthographic.GetRightVector();
+    FVector CameraUp = ActiveViewport->GetViewportType() == LVT_Perspective ?
+        ActiveViewport->ViewTransformPerspective.GetUpVector() : ActiveViewport->ViewTransformOrthographic.GetUpVector();
+    
+    FVector WorldMoveDirection = (CamearRight * DeltaX + CameraUp * -DeltaY) * 0.1f;
+    
+    if (cdMode == CDM_LOCAL)
     {
-        scaler =abs((activeViewport->ViewTransformPerspective.GetLocation()-
-            GetWorld()->GetSelectedActor()->GetActorLocation()).Magnitude());
-        scaler *= 0.1f;
+        if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowX)
+        {
+            float moveAmount = WorldMoveDirection.Dot(pObj->GetForwardVector());
+            pObj->AddLocation(pObj->GetForwardVector() * moveAmount);
+        }
+        else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY)
+        {
+            float moveAmount = WorldMoveDirection.Dot(pObj->GetRightVector());
+            pObj->AddLocation(pObj->GetRightVector() * moveAmount);
+        }
+        else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
+        {
+            float moveAmount = WorldMoveDirection.Dot(pObj->GetUpVector());
+            pObj->AddLocation(pObj->GetUpVector() * moveAmount);
+        }
     }
-    else
+    else if (cdMode == CDM_WORLD)
     {
-        scaler = activeViewport->orthoSize * 0.1f;
+        // 월드 좌표계에서 카메라 방향을 고려한 이동
+        if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowX)
+        {
+            // 카메라의 오른쪽 방향을 X축 이동에 사용
+            FVector moveDir = CamearRight * DeltaX * 0.05f;
+            pObj->AddLocation(FVector(moveDir.x, 0.0f, 0.0f));
+        }
+        else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY)
+        {
+            // 카메라의 오른쪽 방향을 Y축 이동에 사용
+            FVector moveDir = CamearRight * DeltaX * 0.05f;
+            pObj->AddLocation(FVector(0.0f, moveDir.y, 0.0f));
+        }
+        else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
+        {
+            // 카메라의 위쪽 방향을 Z축 이동에 사용
+            FVector moveDir = CameraUp * -DeltaY * 0.05f;
+            pObj->AddLocation(FVector(0.0f, 0.0f, moveDir.z));
+        }
     }
-    deltaX  *= abs(scaler);
-    deltaY  *= abs(scaler);
-	float deltaXf = static_cast<float>(deltaX);
-	float deltaYf = static_cast<float>(deltaY);
-	FVector vecObjToCamera = GetWorld()->GetCamera()->GetWorldLocation() - pObj->GetWorldLocation();
-	FVector cameraRight = GetWorld()->GetCamera()->GetRightVector();
-	FVector cameraUp = GetWorld()->GetCamera()->GetUpVector();
-	FVector worldMoveDir = (cameraRight * deltaXf + cameraUp * -deltaYf) * 0.01f;
-
-	if (cdMode == CDM_LOCAL) {
-		if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowX) {
-			float moveAmount = worldMoveDir.Dot(pObj->GetForwardVector());
-			pObj->AddLocation(pObj->GetForwardVector() * moveAmount);
-		}
-		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY) {
-			float moveAmount = worldMoveDir.Dot(pObj->GetRightVector());
-			pObj->AddLocation(pObj->GetRightVector() * moveAmount * -1.0f);
-		}
-		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ) {
-			float moveAmount = worldMoveDir.Dot(pObj->GetUpVector());
-			pObj->AddLocation(pObj->GetUpVector() * moveAmount);
-		}
-	}
-	else if (cdMode == CDM_WORLD)
-	{
-
-		if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowX)
-		{
-			vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
-			float dotResult = vecObjToCamera.Dot(FVector(1.0f, 0.0f, 0.0f));
-			dotResult = dotResult / vecObjToCamera.Magnitude();
-			float rad = acosf(dotResult);
-			float degree = JungleMath::RadToDeg(rad);
-			FVector crossResult = vecObjToCamera.Cross(FVector(1.0f, 0.0f, 0.0f));
-			if (crossResult.z > 0)
-				degree *= -1.0f;
-
-			if ( 0 < degree && degree <  180.0f)
-				pObj->AddLocation(FVector(1.0f, 0.0f, 0.0f) * deltaXf * 0.01f);
-			else if (degree < 0 && degree > -180.0f) {
-				pObj->AddLocation(FVector(1.0f, 0.0f, 0.0f) * deltaXf * -0.01f);
-			}
-		}
-		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY)
-		{
-			vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
-			float dotResult = vecObjToCamera.Dot(FVector(0.0f, 1.0f, 0.0f));
-			dotResult = dotResult / vecObjToCamera.Magnitude();
-			float rad = acosf(dotResult);
-			float degree = JungleMath::RadToDeg(rad);
-			FVector crossResult = vecObjToCamera.Cross(FVector(0.0f, 1.0f, 0.0f));
-			if (crossResult.z > 0)
-				degree *= -1.0f;
-			if (0 < degree && degree < 180)
-				pObj->AddLocation(FVector(0.0f, 1.0f, 0.0f) * deltaXf * -0.01f);
-			else
-				pObj->AddLocation(FVector(0.0f, 1.0f, 0.0f) * deltaXf * 0.01f);
-		}	
-		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
-		{
-			pObj->AddLocation(FVector(0.0f, 0.0f, 1.0f) * deltaYf * -0.01f);
-		}
-	}
 }
 
 void AEditorPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
-    FVector vecObjToCamera = GetWorld()->GetCamera()->GetWorldLocation() - pObj->GetWorldLocation();
-    float deltaXf = static_cast<float>(deltaX);
-    float deltaYf = static_cast<float>(deltaY);
+    float DeltaX = static_cast<float>(deltaX);
+    float DeltaY = static_cast<float>(deltaY);
+    auto ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
+
+    FVector CamearRight = ActiveViewport->GetViewportType() == LVT_Perspective ?
+        ActiveViewport->ViewTransformPerspective.GetRightVector() : ActiveViewport->ViewTransformOrthographic.GetRightVector();
+    FVector CameraUp = ActiveViewport->GetViewportType() == LVT_Perspective ?
+        ActiveViewport->ViewTransformPerspective.GetUpVector() : ActiveViewport->ViewTransformOrthographic.GetUpVector();
+    
+    // 월드 좌표계에서 카메라 방향을 고려한 이동
     if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ScaleX)
     {
-        vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
-        float dotResult = vecObjToCamera.Dot(FVector(1.0f, 0.0f, 0.0f));
-        dotResult = dotResult / vecObjToCamera.Magnitude();
-        float rad = acosf(dotResult);
-        float degree = FMath::RadiansToDegrees(rad);
-        FVector crossResult = vecObjToCamera.Cross(FVector(1.0f, 0.0f, 0.0f));
-        if (crossResult.z > 0)
-            degree *= -1.0f;
-        //UE_LOG(LogLevel::Error, "%f", degree);
-
-        if (0 < degree && degree < 180.0f)
-            pObj->AddScale(FVector(1.0f, 0.0f, 0.0f) * deltaXf * 0.01f);
-        else if (degree < 0 && degree > -180.0f)
-        {
-            pObj->AddScale(FVector(1.0f, 0.0f, 0.0f) * deltaXf * -0.01f);
-        }
+        // 카메라의 오른쪽 방향을 X축 이동에 사용
+        FVector moveDir = CamearRight * DeltaX * 0.05f;
+        pObj->AddScale(FVector(moveDir.x, 0.0f, 0.0f));
     }
     else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ScaleY)
     {
-        vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
-        float dotResult = vecObjToCamera.Dot(FVector(0.0f, 1.0f, 0.0f));
-        dotResult = dotResult / vecObjToCamera.Magnitude();
-        float rad = acosf(dotResult);
-        float degree = FMath::RadiansToDegrees(rad);
-        FVector crossResult = vecObjToCamera.Cross(FVector(0.0f, 1.0f, 0.0f));
-        if (crossResult.z > 0)
-            degree *= -1.0f;
-        //UE_LOG(LogLevel::Error, "%f", degree);
-        if (0 < degree && degree < 180)
-            pObj->AddScale(FVector(0.0f, 1.0f, 0.0f) * deltaXf * 0.01f);
-        else
-            pObj->AddScale(FVector(0.0f, 1.0f, 0.0f) * deltaXf * -0.01f);
+        // 카메라의 오른쪽 방향을 Y축 이동에 사용
+        FVector moveDir = CamearRight * DeltaX * 0.05f;
+        pObj->AddScale(FVector(0.0f, moveDir.y, 0.0f));
     }
     else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ScaleZ)
     {
-        pObj->AddScale(FVector(0.0f, 0.0f, 1.0f) * deltaYf * -0.01f);
+        // 카메라의 위쪽 방향을 Z축 이동에 사용
+        FVector moveDir = CameraUp * -DeltaY * 0.05f;
+        pObj->AddScale(FVector(0.0f, 0.0f, moveDir.z));
     }
 }

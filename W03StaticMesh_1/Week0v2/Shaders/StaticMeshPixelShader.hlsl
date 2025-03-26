@@ -107,7 +107,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
     
     output.UUID = UUID;
     
-    float3 texColor = Textures.Sample(Sampler, input.texcoord);
+    float3 texColor = Textures.Sample(Sampler, input.texcoord + UVOffset);
     float3 color;
     if (texColor.g == 0) // TODO: boolean으로 변경
         color = saturate(Material.DiffuseColor);

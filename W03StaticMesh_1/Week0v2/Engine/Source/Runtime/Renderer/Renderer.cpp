@@ -19,7 +19,7 @@
 #include "UObject/Object.h"
 #include "PropertyEditor/ShowFlags.h"
 #include "UObject/UObjectIterator.h"
-
+#include "Components/SkySphereComponent.h"
 
 void FRenderer::Initialize(FGraphicsDevice* graphics)
 {
@@ -190,7 +190,7 @@ void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<F
 
     if (renderData->MaterialSubsets.Num() == 0)
     {
-        // no material
+        // no submesh
         Graphics->DeviceContext->DrawIndexed(renderData->Indices.Num(), 0, 0);
     }
 
@@ -199,10 +199,6 @@ void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<F
         int materialIndex = renderData->MaterialSubsets[subMeshIndex].MaterialIndex;
 
         subMeshIndex == selectedSubMeshIndex ? UpdateSubMeshConstant(true) : UpdateSubMeshConstant(false);
-
-        if (subMeshIndex == selectedSubMeshIndex) {
-            int temp = 0;
-        }
 
         overrideMaterial[materialIndex] != nullptr ? 
             UpdateMaterial(overrideMaterial[materialIndex]->GetMaterialInfo()) : UpdateMaterial(materials[materialIndex]->Material->GetMaterialInfo());
@@ -1044,6 +1040,15 @@ void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewpor
         }
         else
             UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+
+        if (USkySphereComponent* skysphere = Cast<USkySphereComponent>(StaticMeshComp))
+        {
+            UpdateTextureConstant(skysphere->UOffset, skysphere->VOffset);
+        }
+        else
+        {
+            UpdateTextureConstant(0, 0);
+        }
 
         if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
         {
