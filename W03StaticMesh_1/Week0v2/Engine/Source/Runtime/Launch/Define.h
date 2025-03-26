@@ -46,6 +46,7 @@ struct FObjInfo
 {
     FWString ObjectName; // OBJ File Name
     FWString PathName; // OBJ File Paths
+    FString DisplayName; // Display Name
     FString MatName; // OBJ MTL File Name
     
     // Group
@@ -111,6 +112,7 @@ namespace OBJ
     {
         FWString ObjectName;
         FWString PathName;
+        FString DisplayName;
         
         TArray<FVertexSimple> Vertices;
         TArray<UINT> Indices;
@@ -163,6 +165,8 @@ struct FPoint
 };
 struct FBoundingBox
 {
+    FBoundingBox(){}
+    FBoundingBox(FVector _min, FVector _max) : min(_min), max(_max) {}
 	FVector min; // Minimum extents
 	float pad;
 	FVector max; // Maximum extents

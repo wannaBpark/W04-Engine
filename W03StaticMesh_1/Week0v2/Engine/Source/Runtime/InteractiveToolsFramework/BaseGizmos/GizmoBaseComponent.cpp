@@ -1,14 +1,18 @@
 #include "GizmoBaseComponent.h"
 
+UGizmoBaseComponent::~UGizmoBaseComponent()
+{
+}
+
 int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
     int nIntersections = 0;
     if (staticMesh == nullptr) return 0;
     OBJ::FStaticMeshRenderData* renderData = staticMesh->GetRenderData();
     FVertexSimple* vertices = renderData->Vertices.GetData();
-    int vCount = renderData->Vertices.Len();
+    int vCount = renderData->Vertices.Num();
     UINT* indices = renderData->Indices.GetData();
-    int iCount = renderData->Indices.Len();
+    int iCount = renderData->Indices.Num();
 
     if (!vertices) return 0;
     BYTE* pbPositions = reinterpret_cast<BYTE*>(renderData->Vertices.GetData());
@@ -44,4 +48,24 @@ int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 
     }
     return nIntersections;
+}
+
+void UGizmoBaseComponent::Initialize()
+{
+    UStaticMeshComponent::Initialize();
+}
+
+void UGizmoBaseComponent::Update(double deltaTime)
+{
+    UStaticMeshComponent::Update(deltaTime);
+}
+
+void UGizmoBaseComponent::Release()
+{
+    UStaticMeshComponent::Release();
+}
+
+void UGizmoBaseComponent::Render()
+{
+    UStaticMeshComponent::Render();
 }

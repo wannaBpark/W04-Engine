@@ -13,7 +13,7 @@ public:
     ~UStaticMesh();
     TArray<FStaticMaterial*> GetMaterials() const { return materials; }
     uint32 GetMaterialIndex(FName MaterialSlotName) const;
-    void GetUsedMaterials(TArray<UMaterial*> Out) const;
+    void GetUsedMaterials(TArray<UMaterial*>& Out) const;
     OBJ::FStaticMeshRenderData* GetRenderData() const { return staticMeshRenderData; }
 
     void SetData(OBJ::FStaticMeshRenderData* renderData);

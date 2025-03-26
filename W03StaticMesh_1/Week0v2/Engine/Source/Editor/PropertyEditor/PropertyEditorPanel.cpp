@@ -5,6 +5,7 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/UText.h"
+#include "Engine/FLoaderOBJ.h"
 #include "Math/MathUtility.h"
 #include "UnrealEd/ImGuiWidget.h"
 #include "UObject/Casts.h"
@@ -190,6 +191,7 @@ void PropertyEditorPanel::Render()
     if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(PickObj))
     {
         RenderForStaticMesh(StaticMeshComponent);
+        RenderForMaterial(StaticMeshComponent);
     }
     ImGui::End();
 }
@@ -251,6 +253,45 @@ void PropertyEditorPanel::HSVToRGB(float h, float s, float v, float& r, float& g
 
 void PropertyEditorPanel::RenderForStaticMesh(UStaticMeshComponent* StaticMeshComp)
 {
+    if (StaticMeshComp->GetStaticMesh() == nullptr)
+    {
+        return;
+    }
+    
+    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+    if (ImGui::TreeNodeEx("Static Mesh", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
+    {
+        ImGui::Text("StaticMesh");
+        ImGui::SameLine();
+
+        FString PreviewName = StaticMeshComp->GetStaticMesh()->GetRenderData()->DisplayName;
+        const TMap<FWString, UStaticMesh*> Meshes = FManagerOBJ::GetStaticMeshes();
+        if (ImGui::BeginCombo("##StaticMesh", GetData(PreviewName), ImGuiComboFlags_None))
+        {
+            for (auto Mesh : Meshes)
+            {
+                if (ImGui::Selectable(GetData(Mesh.Value->GetRenderData()->DisplayName), false))
+                {
+                    StaticMeshComp->SetStaticMesh(Mesh.Value);
+                }
+            }
+
+            ImGui::EndCombo();
+        }
+        
+        ImGui::TreePop();
+    }
+    ImGui::PopStyleColor();
+}
+
+
+void PropertyEditorPanel::RenderForMaterial(UStaticMeshComponent* StaticMeshComp)
+{
+    if (StaticMeshComp->GetStaticMesh() == nullptr)
+    {
+        return;
+    }
+    
     ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
     if (ImGui::TreeNodeEx("Materials", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
     {
