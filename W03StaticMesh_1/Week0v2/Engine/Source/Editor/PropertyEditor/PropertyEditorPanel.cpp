@@ -9,6 +9,7 @@
 #include "Math/MathUtility.h"
 #include "UnrealEd/ImGuiWidget.h"
 #include "UObject/Casts.h"
+#include "UObject/ObjectFactory.h"
 
 void PropertyEditorPanel::Render()
 {
@@ -307,6 +308,10 @@ void PropertyEditorPanel::RenderForMaterial(UStaticMeshComponent* StaticMeshComp
                 }
             }
         }
+
+        if (ImGui::Button("    +    ")) {
+            IsCreateMaterial = true;
+        }
         
         ImGui::TreePop();
     }
@@ -321,12 +326,16 @@ void PropertyEditorPanel::RenderForMaterial(UStaticMeshComponent* StaticMeshComp
             {
                 if (ImGui::IsMouseDoubleClicked(0))
                 {
-                    std::cout << GetData(StaticMeshComp->GetMaterialSlotNames()[i].ToString()) << std::endl;
                     StaticMeshComp->SetselectedSubMeshIndex(i);
-                    int temp = StaticMeshComp->GetselectedSubMeshIndex();
                     SelectedStaticMeshComp = StaticMeshComp;
                 }
             }
+        }
+        std::string temp = "clear subset";
+        if (ImGui::Selectable(temp.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
+        {
+            if (ImGui::IsMouseDoubleClicked(0))
+                StaticMeshComp->SetselectedSubMeshIndex(-1);
         }
 
         ImGui::TreePop();
@@ -338,11 +347,14 @@ void PropertyEditorPanel::RenderForMaterial(UStaticMeshComponent* StaticMeshComp
     {
         RenderMaterialView(SelectedStaticMeshComp->GetMaterial(SelectedMaterialIndex));
     }
+    if (IsCreateMaterial) {
+        RenderCreateMaterialView();
+    }
 }
 
 void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
 {
-    ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_Once);
     ImGui::Begin("Material Viewer", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNav);
 
     static ImGuiSelectableFlags BaseFlag = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_None | ImGuiColorEditFlags_NoAlpha;
@@ -357,6 +369,11 @@ void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
     float db = MatDiffuseColor.z;
     float da = 1.0f;
     float DiffuseColorPick[4] = { dr, dg, db, da };
+
+    ImGui::Text("Change Property");
+    ImGui::SameLine();
+    ImGui::Text(*Material->GetMaterialInfo().MTLName);
+    ImGui::Indent();
 
     ImGui::Text("  Diffuse Color");
     ImGui::SameLine();
@@ -409,7 +426,33 @@ void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
         FVector NewColor = { EmissiveColorPick[0], EmissiveColorPick[1], EmissiveColorPick[2] };
         Material->SetEmissive(NewColor);
     }
+    ImGui::Unindent();
 
+    ImGui::NewLine();
+    ImGui::Text("Change Material");
+    ImGui::Indent();
+    ImGui::Text("Material Slot    CurMaterial");
+    ImGui::Text(GetData(SelectedStaticMeshComp->GetMaterialSlotNames()[SelectedMaterialIndex].ToString()));
+    ImGui::SameLine();
+
+    // 메테리얼 이름 목록을 const char* 배열로 변환
+    std::vector<const char*> materialChars;
+    for (const auto& material : FManagerOBJ::GetMaterials()) {
+        materialChars.push_back(*material.Value->GetMaterialInfo().MTLName);
+    }
+
+    //// 드롭다운 표시 (currentMaterialIndex가 범위를 벗어나지 않도록 확인)
+    //if (currentMaterialIndex >= FManagerOBJ::GetMaterialNum())
+    //    currentMaterialIndex = 0;
+
+    if (ImGui::Combo("##MaterialDropdown", &CurMaterialIndex, materialChars.data(), FManagerOBJ::GetMaterialNum())) {
+        UMaterial* material = FManagerOBJ::GetMaterial(materialChars[CurMaterialIndex]);
+        SelectedStaticMeshComp->SetMaterial(SelectedMaterialIndex, material);
+    }
+
+    ImGui::Unindent();
+
+    ImGui::NewLine();
     if (ImGui::Button("Close"))
     {
         SelectedMaterialIndex = -1;
@@ -419,9 +462,98 @@ void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
     ImGui::End();
 }
 
-void PropertyEditorPanel::RenderSubMeshView(UStaticMeshComponent* StaticMeshComp)
+void PropertyEditorPanel::RenderCreateMaterialView()
 {
-    
+    ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_Once);
+    ImGui::Begin("Create Material Viewer", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNav);
+
+    static ImGuiSelectableFlags BaseFlag = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_None | ImGuiColorEditFlags_NoAlpha;
+
+    char materialName[256] = "텍스트를 입력하세요";
+    // 기본 텍스트 입력 필드
+    if (ImGui::InputText("라벨", materialName, IM_ARRAYSIZE(materialName))) {
+        tempMaterialInfo.MTLName = materialName;
+    }
+
+    FVector MatDiffuseColor = tempMaterialInfo.Diffuse;
+    FVector MatSpecularColor = tempMaterialInfo.Specular;
+    FVector MatAmbientColor = tempMaterialInfo.Ambient;
+    FVector MatEmissiveColor = tempMaterialInfo.Emissive;
+
+    float dr = MatDiffuseColor.x;
+    float dg = MatDiffuseColor.y;
+    float db = MatDiffuseColor.z;
+    float da = 1.0f;
+    float DiffuseColorPick[4] = { dr, dg, db, da };
+
+    ImGui::Text("Set Property");
+    ImGui::Indent();
+
+    ImGui::Text("  Diffuse Color");
+    ImGui::SameLine();
+    if (ImGui::ColorEdit4("Diffuse##Color", (float*)&DiffuseColorPick, BaseFlag))
+    {
+        FVector NewColor = { DiffuseColorPick[0], DiffuseColorPick[1], DiffuseColorPick[2] };
+        tempMaterialInfo.Diffuse = NewColor;
+    }
+
+    float sr = MatSpecularColor.x;
+    float sg = MatSpecularColor.y;
+    float sb = MatSpecularColor.z;
+    float sa = 1.0f;
+    float SpecularColorPick[4] = { sr, sg, sb, sa };
+
+    ImGui::Text("Specular Color");
+    ImGui::SameLine();
+    if (ImGui::ColorEdit4("Specular##Color", (float*)&SpecularColorPick, BaseFlag))
+    {
+        FVector NewColor = { SpecularColorPick[0], SpecularColorPick[1], SpecularColorPick[2] };
+        tempMaterialInfo.Specular = NewColor;
+    }
+
+
+    float ar = MatAmbientColor.x;
+    float ag = MatAmbientColor.y;
+    float ab = MatAmbientColor.z;
+    float aa = 1.0f;
+    float AmbientColorPick[4] = { ar, ag, ab, aa };
+
+    ImGui::Text("Ambient Color");
+    ImGui::SameLine();
+    if (ImGui::ColorEdit4("Ambient##Color", (float*)&AmbientColorPick, BaseFlag))
+    {
+        FVector NewColor = { AmbientColorPick[0], AmbientColorPick[1], AmbientColorPick[2] };
+        tempMaterialInfo.Ambient = NewColor;
+    }
+
+
+    float er = MatEmissiveColor.x;
+    float eg = MatEmissiveColor.y;
+    float eb = MatEmissiveColor.z;
+    float ea = 1.0f;
+    float EmissiveColorPick[4] = { er, eg, eb, ea };
+
+    ImGui::Text("Emissive Color");
+    ImGui::SameLine();
+    if (ImGui::ColorEdit4("Emissive##Color", (float*)&EmissiveColorPick, BaseFlag))
+    {
+        FVector NewColor = { EmissiveColorPick[0], EmissiveColorPick[1], EmissiveColorPick[2] };
+        tempMaterialInfo.Emissive = NewColor;
+    }
+    ImGui::Unindent();
+
+    ImGui::NewLine();
+    if (ImGui::Button("Create Material")) {
+        FManagerOBJ::CreateMaterial(tempMaterialInfo);
+    }
+
+    ImGui::NewLine();
+    if (ImGui::Button("Close"))
+    {
+        IsCreateMaterial = false;
+    }
+
+    ImGui::End();
 }
 
 void PropertyEditorPanel::OnResize(HWND hWnd)

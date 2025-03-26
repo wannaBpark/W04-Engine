@@ -49,6 +49,12 @@ cbuffer SubMeshConstants : register(b4)
     float3 SubMeshPad0;
 }
 
+cbuffer TextureConstants : register(b5)
+{
+    float2 UVOffset;
+    float2 TexturePad0;
+}
+
 struct PS_INPUT
 {
     float4 position : SV_POSITION; // 변환된 화면 좌표
@@ -118,7 +124,6 @@ PS_OUTPUT mainPS(PS_INPUT input)
     }
     
     // 발광 색상 추가
-    color += Material.EmissiveColor;
 
     if (IsLit == 1) // 조명이 적용되는 경우
     {
@@ -144,6 +149,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
         }
         
         // 투명도 적용
+        color += Material.EmissiveColor;
         output.color = float4(color, Material.TransparencyScalar);
         return output;
     }
@@ -155,7 +161,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
             return output;
         }
         
-        output.color = PaperTexture(color);
+        output.color = float4(color, 1);
         // 투명도 적용
         output.color.a = Material.TransparencyScalar;
             

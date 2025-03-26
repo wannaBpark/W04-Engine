@@ -308,3 +308,9 @@ struct FSubMeshConstants {
     FVector pad;
 };
 
+struct FTextureConstants {
+    float UOffset;
+    float VOffset;
+    float pad0;
+    float pad1;
+};
