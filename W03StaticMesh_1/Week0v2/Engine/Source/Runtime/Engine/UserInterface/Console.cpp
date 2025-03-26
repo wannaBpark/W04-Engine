@@ -37,13 +37,13 @@ void Console::AddLog(LogLevel level, const char* fmt, ...) {
 void Console::Draw() {
     if (!bWasOpen) return;
     // 창 크기 및 위치 계산
-    float controllWindowWidth = static_cast<float>(width) * 0.5f;
-    float expandedHeight = static_cast<float>(height) * 0.35f;
-    float collapsedHeight = 25.0f; // 접었을 때 높이
+    float controllWindowWidth = static_cast<float>(width) * 20.5f;
+    float expandedHeight = static_cast<float>(height) * 0.55f;
+    float collapsedHeight = 500.0f; // 접었을 때 높이
     float controllWindowHeight = bExpand ? expandedHeight : collapsedHeight;
 
     float controllWindowPosX = (static_cast<float>(width) - controllWindowWidth);
-    float controllWindowPosY = (static_cast<float>(height) - controllWindowHeight);
+    float controllWindowPosY = 100;//(static_cast<float>(height) - controllWindowHeight);
 
     // 창 크기와 위치 설정
     ImGui::SetNextWindowPos(ImVec2(controllWindowPosX, controllWindowPosY));

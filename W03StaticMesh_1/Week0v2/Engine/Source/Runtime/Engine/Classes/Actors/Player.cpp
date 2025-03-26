@@ -8,9 +8,11 @@
 #include "Camera/CameraComponent.h"
 #include "Components/LightComponent.h"
 #include "LevelEditor/SLevelEditor.h"
+#include "Math/JungleMath.h"
 #include "Math/MathUtility.h"
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
+#include "UObject/UObjectIterator.h"
 
 
 using namespace DirectX;
@@ -27,6 +29,8 @@ void AEditorPlayer::Tick(float DeltaTime)
 
 void AEditorPlayer::Input()
 {
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse) return;
     if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
     {
         if (!bLeftMouseDown)
@@ -37,12 +41,19 @@ void AEditorPlayer::Input()
             GetCursorPos(&mousePos);
             GetCursorPos(&m_LastMousePos);
 
+            uint32 UUID = GetEngine().graphicDevice.GetPixelUUID(mousePos);
+            // TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
+            for ( const auto obj : TObjectRange<USceneComponent>())
+            {
+                if (obj->GetUUID() != UUID) continue;
 
-            ScreenToClient(GEngineLoop.hWnd, &mousePos);
+                UE_LOG(LogLevel::Display, *obj->GetName());
+            }
+            ScreenToClient(GetEngine().hWnd, &mousePos);
 
             FVector pickPosition;
 
-            const auto& ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+            const auto& ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
             ScreenToViewSpace(mousePos.x, mousePos.y, ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix(), pickPosition);
             bool res = PickGizmo(pickPosition);
             if (!res) PickActor(pickPosition);
@@ -261,62 +272,89 @@ void AEditorPlayer::AddCoordiMode()
     cdMode = static_cast<CoordiMode>((cdMode + 1) % CDM_END);
 }
 
-void AEditorPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& pickPosition) const
+void AEditorPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMatrix, const FMatrix& projectionMatrix, FVector& pickPosition)
 {
-    D3D11_VIEWPORT viewport;
-    UINT numViewports = 1;
-    FEngineLoop::graphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
-    float screenWidth = viewport.Width;
-    float screenHeight = viewport.Height;
+    D3D11_VIEWPORT viewport = GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetD3DViewport();
+    
+    float viewportX = screenX - viewport.TopLeftX;
+    float viewportY = screenY - viewport.TopLeftY;
 
-    pickPosition.x = ((2.0f * screenX / viewport.Width) - 1) / projectionMatrix[0][0];
-    pickPosition.y = -((2.0f * screenY / viewport.Height) - 1) / projectionMatrix[1][1];
-    pickPosition.z = 1.0f; // Near Plane
+    pickPosition.x = ((2.0f * viewportX / viewport.Width) - 1) / projectionMatrix[0][0];
+    pickPosition.y = -((2.0f * viewportY / viewport.Height) - 1) / projectionMatrix[1][1];
+    if (GetEngine().GetLevelEditor()->GetActiveViewportClient()->IsOrtho())
+    {
+        pickPosition.z = 0.0f;  // 오쏘 모드에서는 unproject 시 near plane 위치를 기준
+    }
+    else
+    {
+        pickPosition.z = 1.0f;  // 퍼스펙티브 모드: near plane
+    }
 }
 
-int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneComponent* obj, float& hitDistance, int& intersectCount) const
+int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneComponent* obj, float& hitDistance, int& intersectCount)
 {
-    // ������Ʈ�� ���� ��ȯ ��� ���� (��ġ, ȸ��, ũ�� ����)
-    FMatrix scaleMatrix = FMatrix::CreateScale(
-        obj->GetWorldScale().x,
-        obj->GetWorldScale().y,
-        obj->GetWorldScale().z
-    );
+	FMatrix scaleMatrix = FMatrix::CreateScale(
+		obj->GetWorldScale().x,
+		obj->GetWorldScale().y,
+		obj->GetWorldScale().z
+	);
+	FMatrix rotationMatrix = FMatrix::CreateRotation(
+		obj->GetWorldRotation().x,
+		obj->GetWorldRotation().y,
+		obj->GetWorldRotation().z
+	);
 
-    //FMatrix rotationMatrix = JungleMath::CreateRotationMatrix(obj->GetWorldRotation());
-    //FMatrix rotationMatrix = JungleMath::EulerToQuaternion(obj->GetWorldRotation()).ToMatrix();
-    FMatrix rotationMatrix = FMatrix::CreateRotation(
-        obj->GetWorldRotation().x,
-        obj->GetWorldRotation().y,
-        obj->GetWorldRotation().z
-    );
+	FMatrix translationMatrix = FMatrix::CreateTranslationMatrix(obj->GetWorldLocation());
 
-    FMatrix translationMatrix = FMatrix::CreateTranslationMatrix(obj->GetWorldLocation());
+	// ���� ��ȯ ���
+	FMatrix worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
+	FMatrix viewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
+    
+    bool bIsOrtho = GetEngine().GetLevelEditor()->GetActiveViewportClient()->IsOrtho();
+    
 
-    // ���� ��ȯ ���
-    FMatrix worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
+    if (bIsOrtho)
+    {
+        // 오쏘 모드: ScreenToViewSpace()에서 계산된 pickPosition이 클립/뷰 좌표라고 가정
+        FMatrix inverseView = FMatrix::Inverse(viewMatrix);
+        // pickPosition을 월드 좌표로 변환
+        FVector worldPickPos = inverseView.TransformPosition(pickPosition);  
+        // 오쏘에서는 픽킹 원점은 unproject된 픽셀의 위치
+        FVector rayOrigin = worldPickPos;
+        // 레이 방향은 카메라의 정면 방향 (평행)
+        FVector orthoRayDir = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformOrthographic.GetForwardVector().Normalize();
 
-    FMatrix ViewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
-    FMatrix inverseMatrix = FMatrix::Inverse(worldMatrix * ViewMatrix);
+        // 객체의 로컬 좌표계로 변환
+        FMatrix localMatrix = FMatrix::Inverse(worldMatrix);
+        FVector localRayOrigin = localMatrix.TransformPosition(rayOrigin);
+        FVector localRayDir = (localMatrix.TransformPosition(rayOrigin + orthoRayDir) - localRayOrigin).Normalize();
 
-    FVector cameraOrigin = {0, 0, 0};
+        UE_LOG(LogLevel::Error, "Local Ray Origin: %f %f %f", localRayOrigin.x, localRayOrigin.y, localRayOrigin.z);
+        UE_LOG(LogLevel::Error, "Local Ray Direction: %f %f %f", orthoRayDir.x, orthoRayDir.y, orthoRayDir.z);
 
-    FVector pickRayOrigin = inverseMatrix.TransformPosition(cameraOrigin);
-    FVector rayDirection = inverseMatrix.TransformPosition(pickPosition);
-    rayDirection = (rayDirection - pickRayOrigin).Normalize(); // local ��ǥ���� ray
-    intersectCount = obj->CheckRayIntersection(pickRayOrigin, rayDirection, hitDistance);
+        intersectCount = obj->CheckRayIntersection(localRayOrigin, localRayDir, hitDistance);
+        return intersectCount;
+    }
+    else
+    {
+        FMatrix inverseMatrix = FMatrix::Inverse(worldMatrix * viewMatrix);
+        FVector cameraOrigin = { 0,0,0 };
+        FVector pickRayOrigin = inverseMatrix.TransformPosition(cameraOrigin);
+        // 퍼스펙티브 모드의 기존 로직 사용
+        FVector transformedPick = inverseMatrix.TransformPosition(pickPosition);
+        FVector rayDirection = (transformedPick - pickRayOrigin).Normalize();
 
-    return intersectCount;
+        intersectCount = obj->CheckRayIntersection(pickRayOrigin, rayDirection, hitDistance);
+        return intersectCount;
+    }
 }
 
 void AEditorPlayer::PickedObjControl()
 {
-    // ���콺 �̵��� ���
     if (GetWorld()->GetSelectedActor() && GetWorld()->GetPickingGizmo())
     {
         POINT currentMousePos;
         GetCursorPos(&currentMousePos);
-        // ���콺 �̵� ���� ���
         int32 deltaX = currentMousePos.x - m_LastMousePos.x;
         int32 deltaY = currentMousePos.y - m_LastMousePos.y;
 
@@ -349,7 +387,6 @@ void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* 
     FVector cameraRight = GetWorld()->GetCamera()->GetRightVector();
     FVector cameraUp = GetWorld()->GetCamera()->GetUpVector();
 
-    // ���� ���� ȸ���� ��������
     FQuat currentRotation = pObj->GetQuat();
 
     FQuat rotationDelta;
@@ -385,73 +422,81 @@ void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* 
 
 void AEditorPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
-    float deltaXf = static_cast<float>(deltaX);
-    float deltaYf = static_cast<float>(deltaY);
-    FVector vecObjToCamera = GetWorld()->GetCamera()->GetWorldLocation() - pObj->GetWorldLocation();
-    FVector cameraRight = GetWorld()->GetCamera()->GetRightVector();
-    FVector cameraUp = GetWorld()->GetCamera()->GetUpVector();
-    FVector worldMoveDir = (cameraRight * deltaXf + cameraUp * -deltaYf) * 0.01f;
-
-    if (cdMode == CDM_LOCAL)
+   float scaler = 0.0f;
+    std::shared_ptr<FEditorViewportClient> activeViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
+    if (activeViewport->IsPerspective())
     {
-        if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowX)
-        {
-            float moveAmount = worldMoveDir.Dot(pObj->GetForwardVector());
-            pObj->AddLocation(pObj->GetForwardVector() * moveAmount);
-        }
-        else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY)
-        {
-            float moveAmount = worldMoveDir.Dot(pObj->GetRightVector());
-            pObj->AddLocation(pObj->GetRightVector() * moveAmount);
-        }
-        else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
-        {
-            float moveAmount = worldMoveDir.Dot(pObj->GetUpVector());
-            pObj->AddLocation(pObj->GetUpVector() * moveAmount);
-        }
+        scaler =abs((activeViewport->ViewTransformPerspective.GetLocation()-
+            GetWorld()->GetSelectedActor()->GetActorLocation()).Magnitude());
+        scaler *= 0.1f;
     }
-    else if (cdMode == CDM_WORLD)
+    else
     {
-        if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowX)
-        {
-            vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
-            float dotResult = vecObjToCamera.Dot(FVector(1.0f, 0.0f, 0.0f));
-            dotResult = dotResult / vecObjToCamera.Magnitude();
-            float rad = acosf(dotResult);
-            float degree = FMath::RadiansToDegrees(rad);
-            FVector crossResult = vecObjToCamera.Cross(FVector(1.0f, 0.0f, 0.0f));
-            if (crossResult.z > 0)
-                degree *= -1.0f;
-            //UE_LOG(LogLevel::Error, "%f", degree);
-
-            if (0 < degree && degree < 180.0f)
-                pObj->AddLocation(FVector(1.0f, 0.0f, 0.0f) * deltaXf * 0.01f);
-            else if (degree < 0 && degree > -180.0f)
-            {
-                pObj->AddLocation(FVector(1.0f, 0.0f, 0.0f) * deltaXf * -0.01f);
-            }
-        }
-        else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY)
-        {
-            vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
-            float dotResult = vecObjToCamera.Dot(FVector(0.0f, 1.0f, 0.0f));
-            dotResult = dotResult / vecObjToCamera.Magnitude();
-            float rad = acosf(dotResult);
-            float degree = FMath::RadiansToDegrees(rad);
-            FVector crossResult = vecObjToCamera.Cross(FVector(0.0f, 1.0f, 0.0f));
-            if (crossResult.z > 0)
-                degree *= -1.0f;
-            //UE_LOG(LogLevel::Error, "%f", degree);
-            if (0 < degree && degree < 180)
-                pObj->AddLocation(FVector(0.0f, 1.0f, 0.0f) * deltaXf * 0.01f);
-            else
-                pObj->AddLocation(FVector(0.0f, 1.0f, 0.0f) * deltaXf * -0.01f);
-        }
-        else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
-        {
-            pObj->AddLocation(FVector(0.0f, 0.0f, 1.0f) * deltaYf * -0.01f);
-        }
+        scaler = activeViewport->orthoSize * 0.1f;
     }
+    deltaX  *= abs(scaler);
+    deltaY  *= abs(scaler);
+	float deltaXf = static_cast<float>(deltaX);
+	float deltaYf = static_cast<float>(deltaY);
+	FVector vecObjToCamera = GetWorld()->GetCamera()->GetWorldLocation() - pObj->GetWorldLocation();
+	FVector cameraRight = GetWorld()->GetCamera()->GetRightVector();
+	FVector cameraUp = GetWorld()->GetCamera()->GetUpVector();
+	FVector worldMoveDir = (cameraRight * deltaXf + cameraUp * -deltaYf) * 0.01f;
+
+	if (cdMode == CDM_LOCAL) {
+		if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowX) {
+			float moveAmount = worldMoveDir.Dot(pObj->GetForwardVector());
+			pObj->AddLocation(pObj->GetForwardVector() * moveAmount);
+		}
+		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY) {
+			float moveAmount = worldMoveDir.Dot(pObj->GetRightVector());
+			pObj->AddLocation(pObj->GetRightVector() * moveAmount * -1.0f);
+		}
+		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ) {
+			float moveAmount = worldMoveDir.Dot(pObj->GetUpVector());
+			pObj->AddLocation(pObj->GetUpVector() * moveAmount);
+		}
+	}
+	else if (cdMode == CDM_WORLD)
+	{
+
+		if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowX)
+		{
+			vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
+			float dotResult = vecObjToCamera.Dot(FVector(1.0f, 0.0f, 0.0f));
+			dotResult = dotResult / vecObjToCamera.Magnitude();
+			float rad = acosf(dotResult);
+			float degree = JungleMath::RadToDeg(rad);
+			FVector crossResult = vecObjToCamera.Cross(FVector(1.0f, 0.0f, 0.0f));
+			if (crossResult.z > 0)
+				degree *= -1.0f;
+
+			if ( 0 < degree && degree <  180.0f)
+				pObj->AddLocation(FVector(1.0f, 0.0f, 0.0f) * deltaXf * 0.01f);
+			else if (degree < 0 && degree > -180.0f) {
+				pObj->AddLocation(FVector(1.0f, 0.0f, 0.0f) * deltaXf * -0.01f);
+			}
+		}
+		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY)
+		{
+			vecObjToCamera = FVector(vecObjToCamera.x, vecObjToCamera.y, pObj->GetLocalLocation().z);
+			float dotResult = vecObjToCamera.Dot(FVector(0.0f, 1.0f, 0.0f));
+			dotResult = dotResult / vecObjToCamera.Magnitude();
+			float rad = acosf(dotResult);
+			float degree = JungleMath::RadToDeg(rad);
+			FVector crossResult = vecObjToCamera.Cross(FVector(0.0f, 1.0f, 0.0f));
+			if (crossResult.z > 0)
+				degree *= -1.0f;
+			if (0 < degree && degree < 180)
+				pObj->AddLocation(FVector(0.0f, 1.0f, 0.0f) * deltaXf * -0.01f);
+			else
+				pObj->AddLocation(FVector(0.0f, 1.0f, 0.0f) * deltaXf * 0.01f);
+		}	
+		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
+		{
+			pObj->AddLocation(FVector(0.0f, 0.0f, 1.0f) * deltaYf * -0.01f);
+		}
+	}
 }
 
 void AEditorPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)

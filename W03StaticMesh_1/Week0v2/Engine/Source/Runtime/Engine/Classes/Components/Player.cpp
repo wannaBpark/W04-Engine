@@ -283,8 +283,14 @@ void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMat
 
     pickPosition.x = ((2.0f * viewportX / viewport.Width) - 1) / projectionMatrix[0][0];
     pickPosition.y = -((2.0f * viewportY / viewport.Height) - 1) / projectionMatrix[1][1];
-	pickPosition.z = 1.0f; // Near Plane
-
+    if (GetEngine().GetLevelEditor()->GetActiveViewportClient()->IsOrtho())
+    {
+        pickPosition.z = 0.0f;  // 오쏘 모드에서는 unproject 시 near plane 위치를 기준
+    }
+    else
+    {
+        pickPosition.z = 1.0f;  // 퍼스펙티브 모드: near plane
+    }
 }
 int UPlayer::RayIntersectsObject(const FVector& pickPosition, USceneComponent* obj, float& hitDistance, int& intersectCount)
 {
@@ -293,9 +299,6 @@ int UPlayer::RayIntersectsObject(const FVector& pickPosition, USceneComponent* o
 		obj->GetWorldScale().y,
 		obj->GetWorldScale().z
 	);
-
-	//FMatrix rotationMatrix = JungleMath::CreateRotationMatrix(obj->GetWorldRotation());
-	//FMatrix rotationMatrix = JungleMath::EulerToQuaternion(obj->GetWorldRotation()).ToMatrix();
 	FMatrix rotationMatrix = FMatrix::CreateRotation(
 		obj->GetWorldRotation().x,
 		obj->GetWorldRotation().y,
@@ -306,18 +309,50 @@ int UPlayer::RayIntersectsObject(const FVector& pickPosition, USceneComponent* o
 
 	// ���� ��ȯ ���
 	FMatrix worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
+	FMatrix viewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
+    
+    bool bIsOrtho = GetEngine().GetLevelEditor()->GetActiveViewportClient()->IsOrtho();
+    
 
-	FMatrix ViewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
-	FMatrix inverseMatrix = FMatrix::Inverse(worldMatrix * ViewMatrix);
+    if (bIsOrtho)
+    {
+        // 오쏘 모드: ScreenToViewSpace()에서 계산된 pickPosition이 클립/뷰 좌표라고 가정
+        FMatrix inverseView = FMatrix::Inverse(viewMatrix);
+        // pickPosition을 월드 좌표로 변환
+        FVector worldPickPos = inverseView.TransformPosition(pickPosition);  
+        // 오쏘에서는 픽킹 원점은 unproject된 픽셀의 위치
+        FVector rayOrigin = worldPickPos;
+        // 레이 방향은 카메라의 정면 방향 (평행)
+        FVector orthoRayDir = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformOrthographic.GetForwardVector().Normalize();
 
-	FVector cameraOrigin = { 0,0,0 };
+        // 객체의 로컬 좌표계로 변환
+        FMatrix localMatrix = FMatrix::Inverse(worldMatrix);
+        FVector localRayOrigin = localMatrix.TransformPosition(rayOrigin);
+        FVector localRayDir = (localMatrix.TransformPosition(rayOrigin + orthoRayDir) - localRayOrigin).Normalize();
 
-	FVector pickRayOrigin = inverseMatrix.TransformPosition(cameraOrigin);
-	FVector rayDirection = inverseMatrix.TransformPosition(pickPosition);
-	rayDirection = (rayDirection - pickRayOrigin).Normalize(); // local ��ǥ���� ray
-	intersectCount = obj->CheckRayIntersection(pickRayOrigin, rayDirection, hitDistance);
-	
-	return intersectCount;
+        UE_LOG(LogLevel::Error, "Local Ray Origin: %f %f %f", localRayOrigin.x, localRayOrigin.y, localRayOrigin.z);
+        UE_LOG(LogLevel::Error, "Local Ray Direction: %f %f %f", orthoRayDir.x, orthoRayDir.y, orthoRayDir.z);
+
+        intersectCount = obj->CheckRayIntersection(localRayOrigin, localRayDir, hitDistance);
+        return intersectCount;
+    }
+    else
+    {
+        FMatrix inverseMatrix = FMatrix::Inverse(worldMatrix * viewMatrix);
+        FVector cameraOrigin = { 0,0,0 };
+        FVector pickRayOrigin = inverseMatrix.TransformPosition(cameraOrigin);
+        // 퍼스펙티브 모드의 기존 로직 사용
+        FVector transformedPick = inverseMatrix.TransformPosition(pickPosition);
+        FVector rayDirection = (transformedPick - pickRayOrigin).Normalize();
+
+        intersectCount = obj->CheckRayIntersection(pickRayOrigin, rayDirection, hitDistance);
+        return intersectCount;
+    }
+ //    UE_LOG(LogLevel::Error, "RayOrigin %f %f %f", pickRayOrigin.x, pickRayOrigin.y, pickRayOrigin.z);
+ //    UE_LOG(LogLevel::Error, "rayDirection %f %f %f", rayDirection.x, rayDirection.y, rayDirection.z);
+ //    intersectCount = obj->CheckRayIntersection(pickRayOrigin, rayDirection, hitDistance);
+	//
+	// return intersectCount;
 }
 
 void UPlayer::PickedObjControl()
@@ -351,7 +386,6 @@ void UPlayer::PickedObjControl()
 
 void UPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
-
 		FVector cameraForward = GetWorld()->GetCamera()->GetForwardVector();
 		FVector cameraRight = GetWorld()->GetCamera()->GetRightVector();
 		FVector cameraUp = GetWorld()->GetCamera()->GetUpVector();

@@ -130,17 +130,17 @@ float3 ComputeAxisPosition(uint axisInstanceID, uint vertexID)
     if (axisInstanceID == 0)
     {
         // X 축: 빨간색
-        end = float3(1000.0, 0.0, zOffset);
+        end = float3(1000000.0, 0.0, zOffset);
     }
     else if (axisInstanceID == 1)
     {
         // Y 축: 초록색
-        end = float3(0.0, 1000.0, zOffset);
+        end = float3(0.0, 1000000.0, zOffset);
     }
     else if (axisInstanceID == 2)
     {
         // Z 축: 파란색
-        end = float3(0.0, 0.0, 1000.0 + zOffset);
+        end = float3(0.0, 0.0, 1000000.0 + zOffset);
     }
     else
     {
