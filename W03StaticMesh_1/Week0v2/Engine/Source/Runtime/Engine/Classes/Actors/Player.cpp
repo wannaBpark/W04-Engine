@@ -225,7 +225,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     const UActorComponent* Possible = nullptr;
     int maxIntersect = 0;
     float minDistance = FLT_MAX;
-    for (const auto iter : GUObjectArray.GetObjectItemArrayUnsafe()) // TODO: TObjectRange<PrimitiveComponent>로 사용
+    for (const auto iter : TObjectRange<UPrimitiveComponent>())
     {
         UPrimitiveComponent* pObj;
         if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())
