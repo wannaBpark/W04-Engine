@@ -328,20 +328,8 @@ void UPlayer::PickedObjControl()
 
 		int32 deltaX = currentMousePos.x - m_LastMousePos.x;
 		int32 deltaY = currentMousePos.y - m_LastMousePos.y;
-	    float scaler = 0.0f;
-	    std::shared_ptr<FEditorViewportClient> activeViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
-	    if (activeViewport->IsPerspective())
-	    {
-	        scaler =abs((activeViewport->ViewTransformPerspective.GetLocation()-
-                GetWorld()->GetPickingObj()->GetLocalLocation()).Magnitude());
-	        scaler *= 0.1f;
-	    }
-	    else
-	    {
-	        scaler = activeViewport->orthoSize * 0.1f;
-	    }
-	    deltaX  *= abs(scaler);
-	    deltaY  *= abs(scaler);
+
+
 		USceneComponent* pObj = GetWorld()->GetPickingObj();
 		UGizmoBaseComponent* Gizmo = static_cast<UGizmoBaseComponent*>(GetWorld()->GetPickingGizmo());
 		switch (cMode)
@@ -398,6 +386,20 @@ void UPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo,
 
 void UPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
+    float scaler = 0.0f;
+    std::shared_ptr<FEditorViewportClient> activeViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
+    if (activeViewport->IsPerspective())
+    {
+        scaler =abs((activeViewport->ViewTransformPerspective.GetLocation()-
+            GetWorld()->GetPickingObj()->GetLocalLocation()).Magnitude());
+        scaler *= 0.1f;
+    }
+    else
+    {
+        scaler = activeViewport->orthoSize * 0.1f;
+    }
+    deltaX  *= abs(scaler);
+    deltaY  *= abs(scaler);
 	float deltaXf = static_cast<float>(deltaX);
 	float deltaYf = static_cast<float>(deltaY);
 	FVector vecObjToCamera = GetWorld()->GetCamera()->GetWorldLocation() - pObj->GetWorldLocation();
