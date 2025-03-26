@@ -49,6 +49,12 @@ cbuffer SubMeshConstants : register(b4)
     float3 SubMeshPad0;
 }
 
+cbuffer TextureConstants : register(b5)
+{
+    float2 UVOffset;
+    float2 TexturePad0;
+}
+
 struct PS_INPUT
 {
     float4 position : SV_POSITION; // 변환된 화면 좌표
