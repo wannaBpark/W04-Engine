@@ -52,7 +52,7 @@ void UWorld::CreateBaseObject()
         LocalGizmo = static_cast<UTransformGizmo*>(pLocalGizmo);
     }
 
-    // FManagerOBJ::CreateStaticMesh("Assets/Dodge/Dodge.obj");
+     FManagerOBJ::CreateStaticMesh("Assets/Dodge/Dodge.obj");
     // UStaticMeshComponent* mySummerCar = FObjectFactory::ConstructObject<UStaticMeshComponent>();
     // UStaticMesh* tesmp = FManagerOBJ::GetStaticMesh(L"Dodge.obj");
     // mySummerCar->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"Dodge.obj"));

@@ -321,12 +321,16 @@ void PropertyEditorPanel::RenderForMaterial(UStaticMeshComponent* StaticMeshComp
             {
                 if (ImGui::IsMouseDoubleClicked(0))
                 {
-                    std::cout << GetData(StaticMeshComp->GetMaterialSlotNames()[i].ToString()) << std::endl;
                     StaticMeshComp->SetselectedSubMeshIndex(i);
-                    int temp = StaticMeshComp->GetselectedSubMeshIndex();
                     SelectedStaticMeshComp = StaticMeshComp;
                 }
             }
+        }
+        std::string temp = "clear subset";
+        if (ImGui::Selectable(temp.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
+        {
+            if (ImGui::IsMouseDoubleClicked(0))
+                StaticMeshComp->SetselectedSubMeshIndex(-1);
         }
 
         ImGui::TreePop();
@@ -342,7 +346,7 @@ void PropertyEditorPanel::RenderForMaterial(UStaticMeshComponent* StaticMeshComp
 
 void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
 {
-    ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(300, 500), ImGuiCond_Once);
     ImGui::Begin("Material Viewer", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNav);
 
     static ImGuiSelectableFlags BaseFlag = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_None | ImGuiColorEditFlags_NoAlpha;
@@ -357,6 +361,9 @@ void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
     float db = MatDiffuseColor.z;
     float da = 1.0f;
     float DiffuseColorPick[4] = { dr, dg, db, da };
+
+    ImGui::Text("Change Property");
+    ImGui::Indent();
 
     ImGui::Text("  Diffuse Color");
     ImGui::SameLine();
@@ -409,7 +416,32 @@ void PropertyEditorPanel::RenderMaterialView(UMaterial* Material)
         FVector NewColor = { EmissiveColorPick[0], EmissiveColorPick[1], EmissiveColorPick[2] };
         Material->SetEmissive(NewColor);
     }
+    ImGui::Unindent();
 
+    ImGui::NewLine();
+    ImGui::Text("Change Material");
+    ImGui::Indent();
+    ImGui::Text(GetData(SelectedStaticMeshComp->GetMaterialSlotNames()[SelectedMaterialIndex].ToString()));
+    ImGui::SameLine();
+
+    // 메테리얼 이름 목록을 const char* 배열로 변환
+    std::vector<const char*> materialChars;
+    for (const auto& material : FManagerOBJ::GetMaterials()) {
+        materialChars.push_back(*material.Value->GetMaterialInfo().MTLName);
+    }
+
+    //// 드롭다운 표시 (currentMaterialIndex가 범위를 벗어나지 않도록 확인)
+    //if (currentMaterialIndex >= FManagerOBJ::GetMaterialNum())
+    //    currentMaterialIndex = 0;
+
+    if (ImGui::Combo("##MaterialDropdown", &CurMaterialIndex, materialChars.data(), FManagerOBJ::GetMaterialNum())) {
+        UMaterial* material = FManagerOBJ::GetMaterial(materialChars[CurMaterialIndex]);
+        SelectedStaticMeshComp->SetMaterial(SelectedMaterialIndex, material);
+    }
+
+    ImGui::Unindent();
+
+    ImGui::NewLine();
     if (ImGui::Button("Close"))
     {
         SelectedMaterialIndex = -1;

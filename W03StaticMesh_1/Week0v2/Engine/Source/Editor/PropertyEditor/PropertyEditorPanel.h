@@ -30,6 +30,7 @@ private:
     FVector Scale = FVector(0, 0, 0);
 
     /* Material Property */
-    uint32 SelectedMaterialIndex = -1;
+    int SelectedMaterialIndex = -1;
+    int CurMaterialIndex = -1;
     UStaticMeshComponent* SelectedStaticMeshComp = nullptr;
 };
