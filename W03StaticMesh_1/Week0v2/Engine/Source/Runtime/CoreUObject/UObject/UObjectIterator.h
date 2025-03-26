@@ -12,6 +12,7 @@
  * @tparam T 순회할 UObject 타입 또는 그 파생 클래스
  */
 template <typename T>
+    requires std::derived_from<T, UObject>
 class TObjectIterator
 {
 public:
@@ -84,6 +85,7 @@ protected:
  * @tparam T 순회할 UObject 타입 또는 그 파생 클래스
  */
 template <typename T>
+    requires std::derived_from<T, UObject>
 struct TObjectRange
 {
     TObjectRange(bool bIncludeDerivedClasses = true)
