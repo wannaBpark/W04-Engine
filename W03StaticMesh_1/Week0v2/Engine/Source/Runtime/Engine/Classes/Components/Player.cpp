@@ -386,7 +386,6 @@ void UPlayer::PickedObjControl()
 
 void UPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
-
 		FVector cameraForward = GetWorld()->GetCamera()->GetForwardVector();
 		FVector cameraRight = GetWorld()->GetCamera()->GetRightVector();
 		FVector cameraUp = GetWorld()->GetCamera()->GetUpVector();
