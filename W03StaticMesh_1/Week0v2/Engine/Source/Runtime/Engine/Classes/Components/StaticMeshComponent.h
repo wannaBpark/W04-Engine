@@ -4,7 +4,7 @@
 
 class UStaticMeshComponent : public UMeshComponent
 {
-    DECLARE_CLASS(UStaticMeshComponent, USceneComponent)
+    DECLARE_CLASS(UStaticMeshComponent, UMeshComponent)
 
 public:
     UStaticMeshComponent() = default;

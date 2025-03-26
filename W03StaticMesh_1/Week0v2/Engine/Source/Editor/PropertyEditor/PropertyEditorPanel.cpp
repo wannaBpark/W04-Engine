@@ -259,6 +259,11 @@ void PropertyEditorPanel::HSVToRGB(float h, float s, float v, float& r, float& g
 
 void PropertyEditorPanel::RenderForStaticMesh(UStaticMeshComponent* StaticMeshComp)
 {
+    if (StaticMeshComp->GetStaticMesh() == nullptr)
+    {
+        return;
+    }
+    
     ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
     if (ImGui::TreeNodeEx("Static Mesh", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
     {
@@ -288,6 +293,11 @@ void PropertyEditorPanel::RenderForStaticMesh(UStaticMeshComponent* StaticMeshCo
 
 void PropertyEditorPanel::RenderForMaterial(UStaticMeshComponent* StaticMeshComp)
 {
+    if (StaticMeshComp->GetStaticMesh() == nullptr)
+    {
+        return;
+    }
+    
     ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
     if (ImGui::TreeNodeEx("Materials", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
     {
