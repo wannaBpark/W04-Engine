@@ -12,6 +12,7 @@ void FUObjectArray::AddObject(UObject* Object)
 void FUObjectArray::MarkRemoveObject(UObject* Object)
 {
     ObjObjects.Remove(Object);
+    RemoveFromClassMap(Object);  // UObjectHashTable에서 Object를 제외
     PendingDestroyObjects.AddUnique(Object);
 }
 
@@ -19,7 +20,6 @@ void FUObjectArray::ProcessPendingDestroyObjects()
 {
     for (UObject* Object : PendingDestroyObjects)
     {
-        RemoveFromClassMap(Object);
         delete Object;
     }
     PendingDestroyObjects.Empty();
