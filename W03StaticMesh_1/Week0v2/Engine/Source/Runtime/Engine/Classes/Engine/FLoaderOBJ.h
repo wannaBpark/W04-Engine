@@ -23,6 +23,8 @@ struct FLoaderOBJ
 
         OutObjInfo.PathName = ObjFilePath.ToWideString().substr(0, ObjFilePath.ToWideString().find_last_of(L"\\/") + 1);
         OutObjInfo.ObjectName = ObjFilePath.ToWideString().substr(ObjFilePath.ToWideString().find_last_of(L"\\/") + 1);
+        std::string str = GetData(ObjFilePath);
+        OutObjInfo.DisplayName = str.substr(str.find_last_of('/') + 1, str.find_last_of('.') - str.find_last_of('/') - 1);
 
         std::string Line;
 
@@ -301,6 +303,7 @@ struct FLoaderOBJ
     {
         OutStaticMesh.ObjectName = RawData.ObjectName;
         OutStaticMesh.PathName = RawData.PathName;
+        OutStaticMesh.DisplayName = RawData.DisplayName;
 
         // 고유 정점을 기반으로 FVertexSimple 배열 생성
         TMap<std::string, uint32> vertexMap; // 중복 체크용
@@ -501,6 +504,9 @@ public:
         // Path Name
         Serializer::WriteFWString(File, StaticMesh.PathName);
 
+        // Display Name
+        Serializer::WriteFString(File, StaticMesh.DisplayName);
+
         // Vertices
         uint32 VertexCount = StaticMesh.Vertices.Num();
         File.write(reinterpret_cast<const char*>(&VertexCount), sizeof(VertexCount));
@@ -575,6 +581,9 @@ public:
 
         // Path Name
         Serializer::ReadFWString(File, OutStaticMesh.PathName);
+
+        // Display Name
+        Serializer::ReadFString(File, OutStaticMesh.DisplayName);
 
         // Vertices
         uint32 VertexCount = 0;
@@ -675,6 +684,7 @@ public:
     static UMaterial* GetMaterial(FString name);
     static UStaticMesh* CreateStaticMesh(FString filePath);
     static UStaticMesh* GetStaticMesh(FWString name);
+    static const TMap<FWString, UStaticMesh*>& GetStaticMeshes() { return staticMeshMap; }
 
 private:
     inline static TMap<FString, OBJ::FStaticMeshRenderData*> ObjStaticMeshMap;
