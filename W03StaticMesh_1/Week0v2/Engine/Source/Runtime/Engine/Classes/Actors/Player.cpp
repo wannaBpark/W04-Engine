@@ -329,10 +329,7 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
         FMatrix localMatrix = FMatrix::Inverse(worldMatrix);
         FVector localRayOrigin = localMatrix.TransformPosition(rayOrigin);
         FVector localRayDir = (localMatrix.TransformPosition(rayOrigin + orthoRayDir) - localRayOrigin).Normalize();
-
-        UE_LOG(LogLevel::Error, "Local Ray Origin: %f %f %f", localRayOrigin.x, localRayOrigin.y, localRayOrigin.z);
-        UE_LOG(LogLevel::Error, "Local Ray Direction: %f %f %f", orthoRayDir.x, orthoRayDir.y, orthoRayDir.z);
-
+        
         intersectCount = obj->CheckRayIntersection(localRayOrigin, localRayDir, hitDistance);
         return intersectCount;
     }
@@ -344,7 +341,7 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
         // 퍼스펙티브 모드의 기존 로직 사용
         FVector transformedPick = inverseMatrix.TransformPosition(pickPosition);
         FVector rayDirection = (transformedPick - pickRayOrigin).Normalize();
-
+        
         intersectCount = obj->CheckRayIntersection(pickRayOrigin, rayDirection, hitDistance);
         return intersectCount;
     }

@@ -195,23 +195,11 @@ void FEngineLoop::Tick()
         GWorld->Tick(elapsedTime);
         LevelEditor->Tick(elapsedTime);
         Render();
-
-        //graphicDevice.Prepare();
-        //renderer.PrepareShader();
-        //renderer.UpdateLightBuffer();
-        ////GWorld->Render();
-        //Render();
-
         UIMgr->BeginFrame();
         UnrealEditor->Render();
 
         Console::GetInstance().Draw();
-        // ControlPanel::GetInstance().Draw(GetWorld(),elapsedTime);
-        // PropertyPanel::GetInstance().Draw(GetWorld());
-        // Outliner::GetInstance().Draw(GetWorld());
-        // ShowFlags::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
-        // ViewModeDropdown::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
-        // ViewportTypePanel::GetInstance().Draw(LevelEditor->GetActiveViewportClient());
+
         UIMgr->EndFrame();
 
         // Pending 처리된 오브젝트 제거
