@@ -2,7 +2,6 @@
 
 #include "UClass.h"
 #include "UObjectHash.h"
-#include "Engine/Source/Runtime/Core/Math/JungleMath.h"
 
 
 UClass* UObject::StaticClass()

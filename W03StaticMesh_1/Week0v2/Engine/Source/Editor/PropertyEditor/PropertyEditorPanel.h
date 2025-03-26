@@ -15,8 +15,11 @@ private:
     void RGBToHSV(float r, float g, float b, float& h, float& s, float& v) const;
     void HSVToRGB(float h, float s, float v, float& r, float& g, float& b) const;
 
-    /* Materials Settings */
+    /* Static Mesh Settings */
     void RenderForStaticMesh(UStaticMeshComponent* StaticMeshComp);
+    
+    /* Materials Settings */
+    void RenderForMaterial(UStaticMeshComponent* StaticMeshComp);
     void RenderMaterialView(UMaterial* Material);
     void RenderSubMeshView(UStaticMeshComponent* StaticMeshComp);
 private:
