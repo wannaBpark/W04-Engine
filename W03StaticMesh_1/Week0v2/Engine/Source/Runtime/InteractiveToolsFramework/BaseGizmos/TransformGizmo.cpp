@@ -20,33 +20,6 @@ UTransformGizmo::UTransformGizmo()
     FManagerOBJ::CreateStaticMesh("Assets/gizmo_scale_y.obj");
     FManagerOBJ::CreateStaticMesh("Assets/gizmo_scale_z.obj");
     
-    // FObjMaterialInfo YAxisMaterialInfo = {
-    //     "YAxisMaterial",                // MTLName
-    //     false,                         // bHasTexture
-    //     false,                         // bTransparent
-    //     FVector(0.0f, 1.0f, 0.0f),     // Diffuse
-    //     FVector(1.0f, 1.0f, 1.0f),     // Specular
-    //     FVector(0.2f, 0.2f, 0.2f),     // Ambient
-    //     FVector(0.0f, 0.0f, 0.0f),     // Emissive
-    //     32.0f,                         // SpecularScalar
-    //     1.0f,                          // DensityScalar
-    //     1.0f,                          // TransparencyScalar
-    // };
-    // FObjMaterialInfo ZAxisMaterialInfo = {
-    // "ZAxisMaterial",                // MTLName
-    // false,                         // bHasTexture
-    // false,                         // bTransparent
-    // FVector(0.0f, 0.0f, 1.0f),     // Diffuse
-    // FVector(1.0f, 1.0f, 1.0f),     // Specular
-    // FVector(0.2f, 0.2f, 0.2f),     // Ambient
-    // FVector(0.0f, 0.0f, 0.0f),     // Emissive
-    // 32.0f,                         // SpecularScalar
-    // 1.0f,                          // DensityScalar
-    // 1.0f,                          // TransparencyScalar
-    // };
-    // FManagerOBJ::CreateMaterial(YAxisMaterialInfo);
-    // FManagerOBJ::CreateMaterial(ZAxisMaterialInfo);
-
     UGizmoArrowComponent* locationX = FObjectFactory::ConstructObject<UGizmoArrowComponent>();
     locationX->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"gizmo_loc_x.obj"));
 	locationX->SetParent(this);
@@ -156,10 +129,4 @@ void UTransformGizmo::Release()
 
 void UTransformGizmo::Render()
 {
-	// for (int i = 0;i < 3;i++)
-	// {
-	// 	ArrowArr[i]->Render();
-	// 	CircleArr[i]->Render();
-	// 	RectangleArr[i]->Render();
-	// }
 }

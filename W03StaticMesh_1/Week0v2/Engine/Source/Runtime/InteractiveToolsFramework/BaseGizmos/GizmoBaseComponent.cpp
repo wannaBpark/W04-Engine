@@ -1,5 +1,7 @@
 #include "GizmoBaseComponent.h"
 
+#include "LevelEditor/SLevelEditor.h"
+
 UGizmoBaseComponent::~UGizmoBaseComponent()
 {
 }
@@ -58,6 +60,22 @@ void UGizmoBaseComponent::Initialize()
 void UGizmoBaseComponent::Update(double deltaTime)
 {
     UStaticMeshComponent::Update(deltaTime);
+    if (GetWorld()->GetPickingObj())
+    {
+        std::shared_ptr<FEditorViewportClient> activeViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
+        if (activeViewport->IsPerspective())
+        {
+            float scaler =abs((activeViewport->ViewTransformPerspective.GetLocation()-
+                GetWorld()->GetPickingObj()->GetLocalLocation()).Magnitude());
+            scaler *= 0.1f;
+            RelativeScale3D = FVector( scaler,scaler,scaler);
+        }
+        else
+        {
+            float scaler = activeViewport->orthoSize * 0.1f;
+            RelativeScale3D = FVector( scaler,scaler,scaler);
+        }
+    }
 }
 
 void UGizmoBaseComponent::Release()
