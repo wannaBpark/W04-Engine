@@ -306,7 +306,7 @@ struct FLitUnlitConstants {
 };
 
 struct FSubMeshConstants {
-    bool isSelectedSubMesh;
+    float isSelectedSubMesh;
     FVector pad;
 };
 

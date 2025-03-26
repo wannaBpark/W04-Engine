@@ -190,7 +190,7 @@ void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<F
 
     if (renderData->MaterialSubsets.Num() == 0)
     {
-        // no material
+        // no submesh
         Graphics->DeviceContext->DrawIndexed(renderData->Indices.Num(), 0, 0);
     }
 
@@ -199,10 +199,6 @@ void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<F
         int materialIndex = renderData->MaterialSubsets[subMeshIndex].MaterialIndex;
 
         subMeshIndex == selectedSubMeshIndex ? UpdateSubMeshConstant(true) : UpdateSubMeshConstant(false);
-
-        if (subMeshIndex == selectedSubMeshIndex) {
-            int temp = 0;
-        }
 
         overrideMaterial[materialIndex] != nullptr ? 
             UpdateMaterial(overrideMaterial[materialIndex]->GetMaterialInfo()) : UpdateMaterial(materials[materialIndex]->Material->GetMaterialInfo());
