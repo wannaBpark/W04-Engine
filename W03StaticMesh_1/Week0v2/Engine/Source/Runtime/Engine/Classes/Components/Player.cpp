@@ -18,6 +18,7 @@
 #include "UnrealClient.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "BaseGizmos/GizmoBaseComponent.h"
+#include "UObject/Casts.h"
 
 using namespace DirectX;
 
@@ -223,12 +224,11 @@ void UPlayer::PickObj(FVector& pickPosition)
 			float minDistance = FLT_MAX;
 	for (auto iter : GetWorld()->GetObjectArr())
 	{
-		UPrimitiveComponent* pObj = nullptr;
-		if (iter->IsA(UPrimitiveComponent::StaticClass()) || iter->IsA(ULightComponentBase::StaticClass())) {
-			pObj = static_cast<UPrimitiveComponent*>(iter);
-		}
-		else
-			continue;
+		USceneComponent* pObj = nullptr;
+	    if (Cast<UGizmoBaseComponent>(iter))
+	        continue;
+		if (!(pObj = Cast<USceneComponent>(iter)))
+		    continue;
 		if (pObj && !pObj->IsA(UGizmoBaseComponent::StaticClass()))
 		{
 			float Distance = 0.0f;
@@ -286,7 +286,7 @@ void UPlayer::ScreenToViewSpace(int screenX, int screenY, const FMatrix& viewMat
 	pickPosition.z = 1.0f; // Near Plane
 
 }
-int UPlayer::RayIntersectsObject(const FVector& pickPosition, UPrimitiveComponent* obj, float& hitDistance, int& intersectCount)
+int UPlayer::RayIntersectsObject(const FVector& pickPosition, USceneComponent* obj, float& hitDistance, int& intersectCount)
 {
 	FMatrix scaleMatrix = FMatrix::CreateScale(
 		obj->GetWorldScale().x,
@@ -328,6 +328,7 @@ void UPlayer::PickedObjControl()
 
 		int32 deltaX = currentMousePos.x - m_LastMousePos.x;
 		int32 deltaY = currentMousePos.y - m_LastMousePos.y;
+
 
 		USceneComponent* pObj = GetWorld()->GetPickingObj();
 		UGizmoBaseComponent* Gizmo = static_cast<UGizmoBaseComponent*>(GetWorld()->GetPickingGizmo());
@@ -385,6 +386,20 @@ void UPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo,
 
 void UPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
+    float scaler = 0.0f;
+    std::shared_ptr<FEditorViewportClient> activeViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
+    if (activeViewport->IsPerspective())
+    {
+        scaler =abs((activeViewport->ViewTransformPerspective.GetLocation()-
+            GetWorld()->GetPickingObj()->GetLocalLocation()).Magnitude());
+        scaler *= 0.1f;
+    }
+    else
+    {
+        scaler = activeViewport->orthoSize * 0.1f;
+    }
+    deltaX  *= abs(scaler);
+    deltaY  *= abs(scaler);
 	float deltaXf = static_cast<float>(deltaX);
 	float deltaYf = static_cast<float>(deltaY);
 	FVector vecObjToCamera = GetWorld()->GetCamera()->GetWorldLocation() - pObj->GetWorldLocation();
@@ -399,7 +414,7 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Giz
 		}
 		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowY) {
 			float moveAmount = worldMoveDir.Dot(pObj->GetRightVector());
-			pObj->AddLocation(pObj->GetRightVector() * moveAmount);
+			pObj->AddLocation(pObj->GetRightVector() * moveAmount * -1.0f);
 		}
 		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ) {
 			float moveAmount = worldMoveDir.Dot(pObj->GetUpVector());
@@ -437,9 +452,9 @@ void UPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Giz
 			if (crossResult.z > 0)
 				degree *= -1.0f;
 			if (0 < degree && degree < 180)
-				pObj->AddLocation(FVector(0.0f, 1.0f, 0.0f) * deltaXf * 0.01f);
-			else
 				pObj->AddLocation(FVector(0.0f, 1.0f, 0.0f) * deltaXf * -0.01f);
+			else
+				pObj->AddLocation(FVector(0.0f, 1.0f, 0.0f) * deltaXf * 0.01f);
 		}	
 		else if (Gizmo->GetGizmoType() == UGizmoBaseComponent::ArrowZ)
 		{

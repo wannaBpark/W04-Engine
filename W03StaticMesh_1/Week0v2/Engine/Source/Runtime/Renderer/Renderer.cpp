@@ -1022,10 +1022,6 @@ void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewpor
 
         if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
         {
-            // UPrimitiveBatch::GetInstance().RenderAABB(
-            //         FBoundingBox(StaticMeshComp->GetStaticMesh()->GetRenderData()->BoundingBoxMin, StaticMeshComp->GetStaticMesh()->GetRenderData()->BoundingBoxMax),
-            //             StaticMeshComp->GetWorldLocation(),
-            //                 Model);
             UPrimitiveBatch::GetInstance().RenderAABB(
                 StaticMeshComp->GetBoundingBox(),
                 StaticMeshComp->GetWorldLocation(),

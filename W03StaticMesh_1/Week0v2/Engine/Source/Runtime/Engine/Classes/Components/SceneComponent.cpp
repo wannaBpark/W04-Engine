@@ -23,6 +23,12 @@ void USceneComponent::TickComponent(float DeltaTime)
 }
 
 
+int USceneComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
+{
+    int nIntersections = 0;
+    return nIntersections;
+}
+
 FVector USceneComponent::GetForwardVector()
 {
 	FVector Forward = FVector(1.f, 0.f, 0.0f);
