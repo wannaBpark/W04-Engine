@@ -89,6 +89,9 @@ public:
     SizeType Find(const T& Item);
     bool Find(const T& Item, SizeType& Index);
 
+    /** 요소가 존재하는지 확인합니다. */
+    bool Contains(const T& Item) const;
+
     /** Array Size를 가져옵니다. */
     SizeType Num() const;
 
@@ -287,6 +290,19 @@ bool TArray<T, Allocator>::Find(const T& Item, SizeType& Index)
 {
     Index = Find(Item);
     return (Index != -1);
+}
+
+template <typename T, typename Allocator>
+bool TArray<T, Allocator>::Contains(const T& Item) const
+{
+    for (const T* Data = GetData(), *DataEnd = Data + Num(); Data != DataEnd; ++Data)
+    {
+        if (*Data == Item)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 template <typename T, typename Allocator>

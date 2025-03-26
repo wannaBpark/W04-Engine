@@ -34,29 +34,22 @@ void ULightComponentBase::SetRadius(float r)
     radius = r;
 }
 
-void ULightComponentBase::Render()
-{
-    texture2D->Render();
-    FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), {1,1,1});
-    //FMatrix MVP = Model * GetEngine().View * GetEngine().Projection;
-    UPrimitiveBatch::GetInstance().AddCone(GetWorldLocation(), radius, 15, 140, color, Model);
-    UPrimitiveBatch::GetInstance().RenderOBB(AABB, GetWorldLocation(), Model);
-}
-
 void ULightComponentBase::InitializeLight()
 {
     texture2D = new UBillboardComponent();
     texture2D->SetTexture(L"Assets/Texture/spotLight.png");
-    texture2D->Initialize();
+    texture2D->InitializeComponent();
     AABB.max = { 1.f,1.f,0.1f };
     AABB.min = { -1.f,-1.f,-0.1f };
     color = { 1,1,1,1 };
     radius = 5;
 }
 
-void ULightComponentBase::Update(double deltaTime)
+void ULightComponentBase::TickComponent(float DeltaTime)
 {
-    texture2D->Update(deltaTime);
+    Super::TickComponent(DeltaTime);
+
+    texture2D->TickComponent(DeltaTime);
     texture2D->SetLocation(GetWorldLocation());
 
 }

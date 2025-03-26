@@ -2,7 +2,6 @@
 #include "SlateCore/Widgets/SWindow.h"
 #include "Container/Map.h"
 #include "fstream"
-#include "ostream"
 #include "sstream"
 class SSplitter : public SWindow
 {

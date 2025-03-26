@@ -1,7 +1,5 @@
 #include "UBillboardComponent.h"
-#include "Math/JungleMath.h"
-#include "Components/Player.h"
-#include "Editor/PropertyEditor/ShowFlags.h"
+#include "Actors/Player.h"
 #include "QuadTexture.h"
 #include "Define.h"
 #include <DirectXMath.h>
@@ -10,6 +8,7 @@
 #include "Math/MathUtility.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"
+#include "PropertyEditor/ShowFlags.h"
 
 
 UBillboardComponent::UBillboardComponent()
@@ -31,48 +30,17 @@ UBillboardComponent::~UBillboardComponent()
 	}
 }
 
-void UBillboardComponent::Initialize()
+void UBillboardComponent::InitializeComponent()
 {
-    Super::Initialize();
+    Super::InitializeComponent();
 	CreateQuadTextureVertexBuffer();
 }
 
 
 
-void UBillboardComponent::Update(double deltaTime)
+void UBillboardComponent::TickComponent(float DeltaTime)
 {
-    Super::Update(deltaTime);
-}
-
-void UBillboardComponent::Release()
-{
-}
-
-void UBillboardComponent::Render()
-{
-	FEngineLoop::renderer.PrepareTextureShader();
-	//FEngineLoop::renderer.UpdateSubUVConstant(0, 0);
-	//FEngineLoop::renderer.PrepareSubUVConstant();
-
-	FMatrix Model = CreateBillboardMatrix();
-
-	// 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
-    FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
-    FVector4 UUIDColor = EncodeUUID() / 255.0f;
-	if (this == GetWorld()->GetPickingGizmo()) {
-		FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor,true);
-	}
-	else
-		FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
-
-	if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
-
-	FEngineLoop::renderer.RenderTexturePrimitive(vertexTextureBuffer,numVertices,
-		indexTextureBuffer,numIndices,Texture->TextureSRV,Texture->SamplerState);
-	}
-
-	FEngineLoop::renderer.PrepareShader();
+    Super::TickComponent(DeltaTime);
 }
 
 

@@ -5,8 +5,9 @@
 class UGizmoBaseComponent : public UStaticMeshComponent
 {
     DECLARE_CLASS(UGizmoBaseComponent, UStaticMeshComponent)
+
 public:
-    enum GizmoType
+    enum GizmoType : uint8
     {
         ArrowX,
         ArrowY,
@@ -20,17 +21,14 @@ public:
     };
 public:
     UGizmoBaseComponent() = default;
-    virtual ~UGizmoBaseComponent();
 
     virtual int CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance) override;
+    virtual void TickComponent(float DeltaTime) override;
 
-    virtual void Initialize() override;
-    virtual void Update(double deltaTime) override;
-    virtual void Release() override;
-    virtual void Render() override;
 private:
     GizmoType gizmoType;
+
 public:
-    GizmoType GetGizmoType() { return gizmoType; }
+    GizmoType GetGizmoType() const { return gizmoType; }
     void SetGizmoType(GizmoType _gizmoType) { gizmoType = _gizmoType; }
 };

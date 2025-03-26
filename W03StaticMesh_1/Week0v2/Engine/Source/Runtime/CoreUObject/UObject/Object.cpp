@@ -1,8 +1,7 @@
 #include "Engine/Source/Runtime/CoreUObject/UObject/Object.h"
 
-#include "ObjectMacros.h"
 #include "UClass.h"
-#include "Engine/Source/Runtime/Core/Math/JungleMath.h"
+#include "UObjectHash.h"
 
 
 UClass* UObject::StaticClass()
@@ -13,34 +12,9 @@ UClass* UObject::StaticClass()
 
 UObject::UObject()
     : UUID(0)
-    , InternalIndex(0)
+    // TODO: Object를 생성할 때 직접 설정하기
+    , InternalIndex(std::numeric_limits<uint32>::max())
     , NamePrivate("None")
-{
-}
-
-UObject::~UObject()
-{
-}
-
-void UObject::Initialize()
-{
-    // BUG: Array가 변경될경우 Index가 잘못될 가능성이 있음
-    // InternalIndex = static_cast<uint32>(GetWorld()->GetObjectArr().Num() - 1);
-}
-
-void UObject::Update(double deltaTime)
-{
-}
-
-void UObject::Release()
-{
-}
-
-void UObject::Render()
-{
-}
-
-void UObject::RenderUUID()
 {
 }
 

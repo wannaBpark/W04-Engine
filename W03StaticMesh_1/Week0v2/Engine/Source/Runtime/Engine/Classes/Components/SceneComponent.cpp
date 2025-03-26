@@ -11,32 +11,17 @@ USceneComponent::~USceneComponent()
 {
 	if (uuidText) delete uuidText;
 }
-void USceneComponent::Initialize()
+void USceneComponent::InitializeComponent()
 {
-	//테스트용 텍스트
-	uuidText = new UTextUUID();
-	uuidText->SetTexture(L"Assets/Texture/UUID_Font.dds");
-	uuidText->SetRowColumnCount(1, 11);
-	uuidText->SetUUID(GetUUID());
-	uuidText->SetUUIDParent(this);
-	//SetText전에 RowColumn 반드시 설정
+    Super::InitializeComponent();
 
-	Super::Initialize();
 }
 
-void USceneComponent::Update(double deltaTime)
+void USceneComponent::TickComponent(float DeltaTime)
 {
-	Super::Update(deltaTime);
+	Super::TickComponent(DeltaTime);
 }
 
-
-void USceneComponent::Release()
-{
-}
-
-void USceneComponent::Render()
-{
-}
 
 int USceneComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
@@ -84,11 +69,6 @@ void USceneComponent::AddScale(FVector _added)
 
 }
 
-void USceneComponent::AddChild(USceneComponent* _newChild)
-{
-	AttachChildren.Add(_newChild);
-}
-
 FVector USceneComponent::GetWorldRotation()
 {
 	if (AttachParent)
@@ -130,7 +110,18 @@ void USceneComponent::SetRotation(FVector _newRot)
 	QuatRotation = JungleMath::EulerToQuaternion(_newRot);
 }
 
-void USceneComponent::RenderUUID()
+void USceneComponent::SetupAttachment(USceneComponent* InParent)
 {
-	if (uuidText) uuidText->Render();
+    if (
+        InParent != AttachParent                                  // 설정하려는 Parent가 기존의 Parent와 다르거나
+        && InParent != this                                       // InParent가 본인이 아니고
+        && InParent != nullptr                                    // InParent가 유효한 포인터 이며
+        && (
+            AttachParent == nullptr                               // AttachParent도 유효하며
+            || !AttachParent->AttachChildren.Contains(this)  // 이미 AttachParent의 자식이 아닌 경우
+        ) 
+    ) {
+        AttachParent = InParent;
+        InParent->AttachChildren.AddUnique(this);
+    }
 }

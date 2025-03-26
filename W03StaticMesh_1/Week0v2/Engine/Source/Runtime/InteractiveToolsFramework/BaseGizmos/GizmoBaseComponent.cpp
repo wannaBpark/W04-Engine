@@ -1,10 +1,10 @@
 #include "GizmoBaseComponent.h"
 
+#include "World.h"
+#include "GameFramework/Actor.h"
 #include "LevelEditor/SLevelEditor.h"
+#include "UnrealEd/EditorViewportClient.h"
 
-UGizmoBaseComponent::~UGizmoBaseComponent()
-{
-}
 
 int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
@@ -52,21 +52,18 @@ int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
     return nIntersections;
 }
 
-void UGizmoBaseComponent::Initialize()
+void UGizmoBaseComponent::TickComponent(float DeltaTime)
 {
-    UStaticMeshComponent::Initialize();
-}
+    Super::TickComponent(DeltaTime);
 
-void UGizmoBaseComponent::Update(double deltaTime)
-{
-    UStaticMeshComponent::Update(deltaTime);
-    if (GetWorld()->GetPickingObj())
+    if (AActor* PickedActor = GetWorld()->GetSelectedActor())
     {
         std::shared_ptr<FEditorViewportClient> activeViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
         if (activeViewport->IsPerspective())
         {
-            float scaler =abs((activeViewport->ViewTransformPerspective.GetLocation()-
-                GetWorld()->GetPickingObj()->GetLocalLocation()).Magnitude());
+            float scaler = abs(
+                (activeViewport->ViewTransformPerspective.GetLocation() - PickedActor->GetRootComponent()->GetLocalLocation()).Magnitude()
+            );
             scaler *= 0.1f;
             RelativeScale3D = FVector( scaler,scaler,scaler);
         }
@@ -76,14 +73,4 @@ void UGizmoBaseComponent::Update(double deltaTime)
             RelativeScale3D = FVector( scaler,scaler,scaler);
         }
     }
-}
-
-void UGizmoBaseComponent::Release()
-{
-    UStaticMeshComponent::Release();
-}
-
-void UGizmoBaseComponent::Render()
-{
-    UStaticMeshComponent::Render();
 }

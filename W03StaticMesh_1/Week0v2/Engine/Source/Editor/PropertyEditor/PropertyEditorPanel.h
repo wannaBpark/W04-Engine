@@ -1,6 +1,5 @@
 #pragma once
 #include "Components/ActorComponent.h"
-#include "ImGUI/imgui.h"
 #include "UnrealEd/EditorPanel.h"
 
 class UStaticMeshComponent;
@@ -13,8 +12,8 @@ public:
 
 
 private:
-    void RGBToHSV(float r, float g, float b, float& h, float& s, float& v);
-    void HSVToRGB(float h, float s, float v, float& r, float& g, float& b);
+    void RGBToHSV(float r, float g, float b, float& h, float& s, float& v) const;
+    void HSVToRGB(float h, float s, float v, float& r, float& g, float& b) const;
 
     /* Static Mesh Settings */
     void RenderForStaticMesh(UStaticMeshComponent* StaticMeshComp);

@@ -1,38 +1,10 @@
 #include "Components/StaticMeshComponent.h"
+
+#include "World.h"
 #include "Launch/EngineLoop.h"
 #include "UObject/ObjectFactory.h"
-#include "Math/JungleMath.h"
-#include "UnrealEd/EditorViewportClient.h"
-#include "LevelEditor/SLevelEditor.h"
-#include "Define.h"
+#include "UnrealEd/PrimitiveBatch.h"
 
-UStaticMeshComponent::UStaticMeshComponent()
-{
-    
-}
-
-void UStaticMeshComponent::Render()
-{
-    if (!staticMesh) return;
-
-    OBJ::FStaticMeshRenderData* renderData = staticMesh->GetRenderData();
-    if (renderData == nullptr) return;
-
-    FMatrix Model = JungleMath::CreateModelMatrix(GetWorldLocation(), GetWorldRotation(), GetWorldScale());
-    // 최종 MVP 행렬
-    FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
-    FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
-    FVector4 UUIDColor = EncodeUUID() / 255.0f;
-    if (this == GetWorld()->GetPickingObj())
-        FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
-    else
-        FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
-
-    if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
-        UPrimitiveBatch::GetInstance().RenderAABB(AABB, GetWorldLocation(), Model);
-
-    FEngineLoop::renderer.RenderPrimitive(renderData, staticMesh->GetMaterials(), OverrideMaterials, selectedSubMeshIndex);
-}
 
 uint32 UStaticMeshComponent::GetNumMaterials() const
 {
@@ -43,14 +15,19 @@ uint32 UStaticMeshComponent::GetNumMaterials() const
 
 UMaterial* UStaticMeshComponent::GetMaterial(uint32 ElementIndex) const
 {
-    if (staticMesh == nullptr) return nullptr;
-
-    if (OverrideMaterials[ElementIndex] != nullptr)
-        return OverrideMaterials[ElementIndex];
-
-    if (staticMesh->GetMaterials().IsValidIndex(ElementIndex)) {
-        return staticMesh->GetMaterials()[ElementIndex]->Material;
+    if (staticMesh != nullptr)
+    {
+        if (OverrideMaterials[ElementIndex] != nullptr)
+        {
+            return OverrideMaterials[ElementIndex];
+        }
+    
+        if (staticMesh->GetMaterials().IsValidIndex(ElementIndex))
+        {
+            return staticMesh->GetMaterials()[ElementIndex]->Material;
+        }
     }
+    return nullptr;
 }
 
 uint32 UStaticMeshComponent::GetMaterialIndex(FName MaterialSlotName) const
@@ -65,8 +42,9 @@ TArray<FName> UStaticMeshComponent::GetMaterialSlotNames() const
     TArray<FName> MaterialNames;
     if (staticMesh == nullptr) return MaterialNames;
 
-    for (auto& material : staticMesh->GetMaterials()) {
-        MaterialNames.Add(material->MaterialSlotName);
+    for (const FStaticMaterial* Material : staticMesh->GetMaterials())
+    {
+        MaterialNames.Emplace(Material->MaterialSlotName);
     }
 
     return MaterialNames;
@@ -76,9 +54,12 @@ void UStaticMeshComponent::GetUsedMaterials(TArray<UMaterial*>& Out) const
 {
     if (staticMesh == nullptr) return;
     staticMesh->GetUsedMaterials(Out);
-    for (int materialIndex = 0; materialIndex < GetNumMaterials(); materialIndex++) {
+    for (int materialIndex = 0; materialIndex < GetNumMaterials(); materialIndex++)
+    {
         if (OverrideMaterials[materialIndex] != nullptr)
+        {
             Out[materialIndex] = OverrideMaterials[materialIndex];
+        }
     }
 }
 

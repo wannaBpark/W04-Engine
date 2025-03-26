@@ -1,7 +1,5 @@
 #pragma once
 #include "IWindowToggleable.h"
-#include "Define.h"
-#include "EngineBaseTypes.h"
 #include "UnrealEd/EditorViewportClient.h"
 class ViewportTypePanel : public IWindowToggleable
 {

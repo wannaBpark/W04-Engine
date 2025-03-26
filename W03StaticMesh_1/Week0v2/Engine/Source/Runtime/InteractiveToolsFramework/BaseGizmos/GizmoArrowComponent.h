@@ -10,10 +10,8 @@ public:
     UGizmoArrowComponent();
     virtual ~UGizmoArrowComponent() override;
 
-    virtual void Initialize() override;
-    virtual void Update(double deltaTime) override;
-    virtual void Release() override;
-    virtual void Render() override;
+    virtual void InitializeComponent() override;
+    virtual void TickComponent(float DeltaTime) override;
 
 private:
     ARROW_DIR Dir;
