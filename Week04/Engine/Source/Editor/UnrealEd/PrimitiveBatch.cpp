@@ -1,11 +1,11 @@
 #include "PrimitiveBatch.h"
 #include "EngineLoop.h"
 #include "UnrealEd/EditorViewportClient.h"
-extern FEngineLoop GEngineLoop;
+
 
 UPrimitiveBatch::UPrimitiveBatch()
 {
-    GenerateGrid(5, 5000);
+    GenerateGrid(100, 500);
 }
 
 UPrimitiveBatch::~UPrimitiveBatch()
