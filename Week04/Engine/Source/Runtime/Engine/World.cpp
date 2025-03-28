@@ -142,28 +142,29 @@ void UWorld::SetPickingGizmo(UObject* Object)
 	pickingGizmo = Cast<USceneComponent>(Object);
 }
 
-void UWorld::SetOctreeSystem(TArray<UPrimitiveComponent*>& Components)
+void UWorld::SetOctreeSystem(const TArray<UPrimitiveComponent*>& Components)
 {
-    OctreeSystem* Octree = this->GetOctreeSystem();
-    if (!Octree)
+    if (OctreeSystem* Octree = this->GetOctreeSystem())
+    {
+        delete Octree;
+
+        TArray<UPrimitiveComponent*> WorldComps;
+        for (const auto& obj : Components)
+        {
+            WorldComps.Add(obj);
+        }
+        Octree = new OctreeSystem();
+        this->SetOctreeSystem(Octree);
+        Octree->Build(WorldComps);
+    }
+    else
     {
         // 옥트리가 없으면 새로 생성
         Octree = new OctreeSystem();
         // FBoundingBox BBox; BBox.min = -10; BBox.max = 10;
         //Octree->Root = new OctreeNode(BBox, 10);
         this->SetOctreeSystem(Octree); // 월드에 옥트리 시스템 연결
-        Octree->Build({ Components });
+        Octree->Build(Components);
         //Octree->Build({ MeshComp });    // 첫 번째 컴포넌트를 포함하여 옥트리 초기화
-    }
-    else // 기존 옥트리에 컴포넌트 추가
-    {
-        TArray<UPrimitiveComponent*> WorldComps;
-        delete Octree;
-        for (const auto& obj : TObjectRange<UPrimitiveComponent>()) {
-            WorldComps.Add(obj);
-        }
-        OctreeSystem* Octree = new OctreeSystem();
-        this->SetOctreeSystem(Octree);
-        Octree->Build(WorldComps);
     }
 }

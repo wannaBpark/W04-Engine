@@ -79,7 +79,7 @@ public:
 
     void SetOctreeSystem(OctreeSystem* InOctree) { Octree = InOctree; }
     OctreeSystem* GetOctreeSystem() { return Octree; }
-    void SetOctreeSystem(TArray<UPrimitiveComponent*>& Components);
+    void SetOctreeSystem(const TArray<UPrimitiveComponent*>& Components);
 };
 
 
