@@ -11,9 +11,15 @@
 #include "Components/SkySphereComponent.h"
 #include "Camera/CameraComponent.h"
 #include "UObject/Casts.h"
-
+#include <tinyfiledialogs/tinyfiledialogs.h>
+#include "Editor/LevelEditor/SLevelEditor.h"
+#include "Editor/UnrealEd/EditorViewportClient.h"
+#include <Engine/FLoaderOBJ.h>
+#include <Engine/StaticMeshActor.h>
+#include "Runtime/Engine/World.h"
 using json = nlohmann::json;
 
+//JSON 문자열 파싱해서 Scene Data 객체 구성.
 SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
 {
     SceneData sceneData;
@@ -104,9 +110,7 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
             if (value.contains("FOV")) camera->SetFOV(value["FOV"].get<float>());
             if (value.contains("NearClip")) camera->SetNearClip(value["NearClip"].get<float>());
             if (value.contains("FarClip")) camera->SetNearClip(value["FarClip"].get<float>());
-            
-            
-            sceneData.Cameras[id] = camera;
+           
         }
     }
     catch (const std::exception& e) {
@@ -119,28 +123,84 @@ SceneData FSceneMgr::ParseSceneData(const FString& jsonStr)
     return sceneData;
 }
 
-FString FSceneMgr::LoadSceneFromFile(const FString& filename)
+bool FSceneMgr::LoadSceneFromFile(const FString& filename)
 {
-    std::ifstream inFile(*filename);
-    if (!inFile) {
-        UE_LOG(LogLevel::Error, "Failed to open file for reading: %s", *filename);
-        return FString();
+    if (filename.IsEmpty()) {
+        tinyfd_messageBox("Error", "파일을 불러올 수 없습니다.", "ok", "error", 1);
+        ImGui::End();
+        return false;
     }
 
-    json j;
+    std::ifstream sceneFile(*filename);
+    if (!sceneFile.is_open()) {
+        tinyfd_messageBox("Error", "파일을 열 수 없습니다.", "ok", "error", 1);
+        ImGui::End();
+        return false;
+    }
+
+    std::stringstream buffer;
+    buffer << sceneFile.rdbuf();
+
+    json jsonData = json::parse(buffer.str());
+    UWorld* World = GEngineLoop.GetWorld();
+
     try {
-        inFile >> j; // JSON 파일 읽기
+        if (jsonData.contains("PerspectiveCamera"))
+        {
+            auto camData = jsonData["PerspectiveCamera"];
+            FVector Location(camData["Location"][0], camData["Location"][1], camData["Location"][2]);
+            FVector Rotation(camData["Rotation"][0], camData["Rotation"][1], camData["Rotation"][2]);
+            float FOV = camData["FOV"][0];
+
+            auto Viewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+            Viewport->ViewTransformPerspective.SetLocation(Location);
+            Viewport->ViewTransformPerspective.SetRotation(Rotation);
+            Viewport->ViewFOV = FOV;
+        }
+        if (jsonData.contains("Primitives"))
+        {
+            auto& primitives = jsonData["Primitives"];
+            for (auto& [uuid, obj] : primitives.items())
+            {
+                std::string type = obj["Type"];
+                FVector location(obj["Location"][0], obj["Location"][1], obj["Location"][2]);
+                FVector rotation(obj["Rotation"][0], obj["Rotation"][1], obj["Rotation"][2]);
+                FVector scale(obj["Scale"][0], obj["Scale"][1], obj["Scale"][2]);
+
+                if (type == "StaticMeshComp")
+                {
+                    std::string objPath = std::string(obj["ObjStaticMeshAsset"]);
+                    FManagerOBJ::CreateStaticMesh(objPath);
+
+                    AStaticMeshActor* actor = World->SpawnActor<AStaticMeshActor>();
+                    std::filesystem::path filePath(objPath);
+                    std::string fileNameOnly = filePath.filename().string(); // 파일명만 추출
+
+                    actor->SetActorLabel(TEXT("Loaded_StaticMesh"));
+                    UStaticMeshComponent* MeshComp = actor->GetStaticMeshComponent();
+                    MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(FString(fileNameOnly).ToWideString()));
+                    actor->SetActorLocation(location);
+                    actor->SetActorRotation(rotation);
+                    actor->SetActorScale(scale);
+
+                    World->SetPickedActor(actor);
+                }
+
+            }
+        }
     }
     catch (const std::exception& e) {
         UE_LOG(LogLevel::Error, "Error parsing JSON: %s", e.what());
-        return FString();
+        return false;
     }
 
-    inFile.close();
+    return true;
+   // inFile.close();
 
-    return j.dump(4);
+    //return j.dump(4);
 }
 
+// SceneData 객체를 json 문자열로 직렬화.
 std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
 {
     json j;
@@ -193,6 +253,7 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
     return j.dump(4); // 4는 들여쓰기 수준
 }
 
+// SceneData를 json으로 직렬화하여 파일에 저장.
 bool FSceneMgr::SaveSceneToFile(const FString& filename, const SceneData& sceneData)
 {
     std::ofstream outFile(*filename);

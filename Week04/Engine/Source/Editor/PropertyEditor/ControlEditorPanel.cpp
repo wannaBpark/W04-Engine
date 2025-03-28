@@ -15,7 +15,7 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "PropertyEditor/ShowFlags.h"
 #include "JSON/json.hpp"
-//#include <UnrealEd/SceneMgr.cpp>
+#include "UnrealEd/SceneMgr.h"
 
 using json = nlohmann::json;
 void ControlEditorPanel::Render()
@@ -94,80 +94,22 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
         {
             // TODO: New Scene
         }
-
         if (ImGui::MenuItem("Load Scene"))
         {
-            char const * lFilterPatterns[1]={"*.scene"};
-            const char* FileName =  tinyfd_openFileDialog("Open Scene File", "", 1, lFilterPatterns,"Scene(.scene) file", 0);
-
-            if (FileName == nullptr)
+            char const* lFilterPatterns[1] = { "*.scene" };
+            const char* FileName = tinyfd_openFileDialog("Open Scene File", "", 1, lFilterPatterns, "Scene(.scene) file", 0);
+            if (FileName)
             {
-                tinyfd_messageBox("Error", "파일을 불러올 수 없습니다.", "ok", "error", 1);
-                ImGui::End();
-                return;
-            }
-            std::ifstream sceneFile(FileName);
-            if (!sceneFile.is_open())
-            {
-                tinyfd_messageBox("Error", "파일을 열 수 없습니다.", "ok", "error", 1);
-                ImGui::End();
-                return;
-            }
+                bool result = FSceneMgr::LoadSceneFromFile(FileName);
 
-            std::stringstream buffer;
-            buffer << sceneFile.rdbuf();
-
-
-            json jsonData = json::parse(buffer.str());
-            UWorld* World = GEngineLoop.GetWorld();
-
-            if (jsonData.contains("PerspectiveCamera"))
-            {
-                auto camData = jsonData["PerspectiveCamera"];
-                FVector Location(camData["Location"][0], camData["Location"][1], camData["Location"][2]);
-                FVector Rotation(camData["Rotation"][0], camData["Rotation"][1], camData["Rotation"][2]);
-                float FOV = camData["FOV"][0];
-
-                auto Viewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
-               Viewport->ViewTransformPerspective.SetLocation(Location);
-               Viewport->ViewTransformPerspective.SetRotation(Rotation);
-               Viewport->ViewFOV = FOV;
-            }
-
-            if (jsonData.contains("Primitives"))
-            {
-                auto& primitives = jsonData["Primitives"];
-                for (auto& [uuid, obj] : primitives.items())
+                if (result==true)
                 {
-                    std::string type = obj["Type"];
-                    FVector location(obj["Location"][0], obj["Location"][1], obj["Location"][2]);
-                    FVector rotation(obj["Rotation"][0], obj["Rotation"][1], obj["Rotation"][2]);
-                    FVector scale(obj["Scale"][0], obj["Scale"][1], obj["Scale"][2]);
-
-                    if (type == "StaticMeshComp")
-                    {
-                        std::string objPath = std::string(obj["ObjStaticMeshAsset"]);
-                        FManagerOBJ::CreateStaticMesh(objPath);
-
-                        AStaticMeshActor* actor = World->SpawnActor<AStaticMeshActor>();
-                        std::filesystem::path filePath(objPath);
-                        std::string fileNameOnly = filePath.filename().string(); // 파일명만 추출
-                        
-                        actor->SetActorLabel(TEXT("Loaded_StaticMesh"));
-                        UStaticMeshComponent* MeshComp = actor->GetStaticMeshComponent();
-                        MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(FString(fileNameOnly).ToWideString()));
-                        actor->SetActorLocation(location);
-                        actor->SetActorRotation(rotation);
-                        actor->SetActorScale(scale);
-
-                        World->SetPickedActor(actor);
-                    }
-
+                    tinyfd_messageBox("알림", "씬이 성공적으로 로드되었습니다.", "ok", "info", 1);
+                }
+                else {
+                    tinyfd_messageBox("알림", "씬 로드를 실패했습니다.", "ok", "info", 1);
                 }
             }
-
-            tinyfd_messageBox("알림", "씬이 성공적으로 로드되었습니다.", "ok", "info", 1);
-
         }
 
         ImGui::Separator();
