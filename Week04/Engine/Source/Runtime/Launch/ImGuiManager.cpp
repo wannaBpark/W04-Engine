@@ -36,21 +36,21 @@ void UImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceCont
     PreferenceStyle();
 }
 
-void UImGuiManager::BeginFrame()
+void UImGuiManager::BeginFrame() const
 {
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 }
 
-void UImGuiManager::EndFrame()
+void UImGuiManager::EndFrame() const
 {
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
 
 /* GUI Style Preference */
-void UImGuiManager::PreferenceStyle()
+void UImGuiManager::PreferenceStyle() const
 {
     // Window
     ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.9f);
@@ -93,7 +93,7 @@ void UImGuiManager::PreferenceStyle()
     ImGui::GetStyle().Colors[ImGuiCol_TabUnfocusedActive] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
 }
 
-void UImGuiManager::Shutdown()
+void UImGuiManager::Shutdown() const
 {
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
