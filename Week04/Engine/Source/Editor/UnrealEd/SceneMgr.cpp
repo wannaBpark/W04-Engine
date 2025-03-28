@@ -144,6 +144,7 @@ bool FSceneMgr::LoadSceneFromFile(const FString& filename)
     json jsonData = json::parse(buffer.str());
     UWorld* World = GEngineLoop.GetWorld();
 
+    // TODO : Parsing 부분 함수 분리 필요.
     try {
         if (jsonData.contains("PerspectiveCamera"))
         {
