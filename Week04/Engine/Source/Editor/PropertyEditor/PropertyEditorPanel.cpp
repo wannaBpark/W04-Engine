@@ -65,7 +65,7 @@ void PropertyEditorPanel::Render()
             if ((PickedActor->GetActorLocation()- Location).Magnitude() > 0.2f)
             {
                 GEngineLoop.GetWorld()->GetOctreeSystem()->UpdateComponentPosition(
-                    dynamic_cast<UPrimitiveComponent*>(PickedActor->GetRootComponent())
+                    Cast<UPrimitiveComponent>(PickedActor->GetRootComponent())
                 );
             }
             // ---------------------------------- //
