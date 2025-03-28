@@ -10,7 +10,7 @@ class OctreeNode
 public:
     FBoundingBox Bounds;
     TArray<UPrimitiveComponent*> Components;
-    OctreeNode* Children[8] = { nullptr };
+    OctreeNode* Children[8]{ nullptr };
     int Depth{ 0 };
     inline static const int MAX_DEPTH = 5;          // 최대 깊이
     inline static const int MAX_OBJECTS = 12;       // 한 부모가 최대로 가질 자식 수
@@ -29,6 +29,16 @@ public:
         TArray<UPrimitiveComponent*>& OutComponents);
     void UpdateComponent(UPrimitiveComponent* Comp);
     void RemoveComponent(UPrimitiveComponent* Comp);
+
+    void CollectComponents(TArray<UPrimitiveComponent*>& OutComponents)
+    {
+        for (auto& MyComp : Components) OutComponents.Add(MyComp);
+        if (Children[0]) {
+            for (auto& Child : Children) {
+                Child->CollectComponents(OutComponents);
+            }
+        }
+    }
 };
 
 class OctreeSystem

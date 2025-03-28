@@ -283,6 +283,19 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     //MeshComp->AABB.min = MeshComp->AABB.min + Location - 1.0f;
                     //MeshComp->AABB.max = MeshComp->AABB.max + Location + 1.0f;
                     // 옥트리 시스템 가져오기 또는 초기화
+                    TArray<UPrimitiveComponent*> CompArr;
+                    CompArr.Add(MeshComp);
+                    for (int i = 0; i < 10; i++) {
+                        for (int j = 0; j < 10; ++j) {
+                            AStaticMeshActor* TempActor = World->SpawnActor<AStaticMeshActor>();        // 여기서 Static Mesh Actor Spawn
+                            TempActor->SetActorLabel(TEXT("OBJ_CUBE"));
+                            UStaticMeshComponent* MeshComp = TempActor->GetStaticMeshComponent();
+                            FManagerOBJ::CreateStaticMesh("Assets/helloBlender.obj");
+                            MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"helloBlender.obj"));
+                            MeshComp->SetLocation(FVector(i*3, j*3, 0));
+                            CompArr.Add(MeshComp);
+                        }
+                    }
                     OctreeSystem* Octree = World->GetOctreeSystem();
                     if (!Octree)
                     {
@@ -291,7 +304,8 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                         // FBoundingBox BBox; BBox.min = -10; BBox.max = 10;
                         //Octree->Root = new OctreeNode(BBox, 10);
                         World->SetOctreeSystem(Octree); // 월드에 옥트리 시스템 연결
-                        Octree->Build({ MeshComp });    // 첫 번째 컴포넌트를 포함하여 옥트리 초기화
+                        Octree->Build({ CompArr });
+                        //Octree->Build({ MeshComp });    // 첫 번째 컴포넌트를 포함하여 옥트리 초기화
                     }
                     else // 기존 옥트리에 컴포넌트 추가
                     {

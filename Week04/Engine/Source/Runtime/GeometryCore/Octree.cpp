@@ -37,8 +37,8 @@ void OctreeNode::Insert(UPrimitiveComponent* Comp)
 void OctreeNode::Subdivide()  
 {
     // 작은 객체가 많을 경우 조기 분할 중지
-    float NodeSize = (Bounds.max.x - Bounds.min.x);
-    if (NodeSize < 100.0f) return; // 최소 크기 제한
+    //float NodeSize = (Bounds.max.x - Bounds.min.x);
+    //if (NodeSize < 100.0f) return; // 최소 크기 제한
 
    FVector Center = (Bounds.min + Bounds.max) * 0.5f;  
    FVector HalfExtent = (Bounds.max - Bounds.min) * 0.5f;  
@@ -87,16 +87,22 @@ void OctreeNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPri
     float Distance;
     if (!Bounds.Intersect(Origin, Dir, Distance)) return;
 
+    UE_LOG(LogLevel::Display, "Bounds Min : %.1f, %.1f, %.1f", Bounds.min.x, Bounds.min.y, Bounds.min.z);
+    UE_LOG(LogLevel::Display, "Bounds Max : %.1f, %.1f, %.1f", Bounds.max.x, Bounds.max.y, Bounds.max.z);
+
     // 자식 노드가 있으면 재귀적 탐색
     if (Children[0] != nullptr) {
         for (auto& Child : Children) {
             Child->QueryRay(Origin, Dir, OutComponents);
+            //UE_LOG(LogLevel::Display, "Find More Child");
         }
     }
     else {
         // leaf 노드 (더 이상 분할할 자식이 없으면) 자기 자신을 Output 컴포넌트 추가
         for (auto& MyComp : Components) {
+            int idx = 0;
             OutComponents.Add(MyComp);
+            //UE_LOG(LogLevel::Display, "Leaf Node No.%d", ++idx);
         }
     }
 }
@@ -136,26 +142,44 @@ void OctreeNode::UpdateComponent(UPrimitiveComponent* Comp)
 
 void OctreeNode::RemoveComponent(UPrimitiveComponent* Comp)
 {
-    // 자식 노드가 있는 경우, 해당 자식 노드로 전달
+    // 현재 노드의 Components 배열에서 모든 항목 제거
+    while (Components.Contains(Comp))
+    {
+        int32 Index = Components.Find(Comp);
+        Components.RemoveAt(Index);
+    }
+    // 자식 노드가 있다면 재귀적으로 모두 제거
     if (Children[0]) {
         for (auto& Child : Children) {
             Child->RemoveComponent(Comp);
         }
     }
-    else {
-        // 리프 노드에서 컴포넌트를 제거
-        int32 Index = Components.Find(Comp);
-        if (Index != INDEX_NONE) {
-            Components.RemoveAt(Index);
-        }
-    }
+    //// 자식 노드가 있는 경우, 해당 자식 노드로 전달
+    //if (Children[0]) {
+    //    for (auto& Child : Children) {
+    //        Child->RemoveComponent(Comp);
+    //    }
+    //}
+    //else {
+    //    // 리프 노드에서 컴포넌트를 제거
+    //    int32 Index = Components.Find(Comp);
+    //    if (Index != INDEX_NONE) {
+    //        Components.RemoveAt(Index);
+    //    }
+    //}
 }
 
 void OctreeSystem::Build(const TArray<UPrimitiveComponent*>& Components)  
 {  
-   // 전체 컴포넌트 AABB 계산  
+    // 기존 트리의 모든 컴포넌트 수집
+    TArray<UPrimitiveComponent*> AllComponents;
+    if (Root) {
+        Root->CollectComponents(AllComponents);
+    }
+    for (auto& NewComp : Components) AllComponents.Add(NewComp);
+   // 입력된 새로운 컴포넌트들 AABB 계산  
    FVector SceneMin(FLT_MAX), SceneMax(-FLT_MAX);  
-   for (auto& Comp : Components)  
+   for (auto& Comp : AllComponents)
    {  
        FMatrix Model = JungleMath::CreateModelMatrix(
            Comp->GetWorldLocation(),
@@ -170,16 +194,19 @@ void OctreeSystem::Build(const TArray<UPrimitiveComponent*>& Components)
        SceneMax = SceneMax.ComponentMax(WorldBBox.max);
    } 
    if (Root) {
-       SceneMin = SceneMin.ComponentMin(Root->Bounds.min);
-       SceneMax = SceneMax.ComponentMax(Root->Bounds.max);
+       //SceneMin = SceneMin.ComponentMin(Root->Bounds.min);
+       //SceneMax = SceneMax.ComponentMax(Root->Bounds.max);
        delete Root;
+       //Root->Bounds = { SceneMin, SceneMax };
    }
+   //else {
+       Root = new OctreeNode(FBoundingBox(SceneMin, SceneMax));
+   //}
    // 현재 Root의 월드 박스와 비교하여 다시 설정
-   Root = new OctreeNode(FBoundingBox(SceneMin, SceneMax));  
    UE_LOG(LogLevel::Display, "Min Bounding Box : %.2f %.2f %.2f", SceneMin.x, SceneMin.y, SceneMin.z);
    UE_LOG(LogLevel::Display, "Max Bounding Box : %.2f %.2f %.2f", SceneMax.x, SceneMax.y, SceneMax.z);
 
-   for (auto& Comp : Components) {  
+   for (auto& Comp : AllComponents) {
        Root->Insert(Comp);  
    }  
 }  
