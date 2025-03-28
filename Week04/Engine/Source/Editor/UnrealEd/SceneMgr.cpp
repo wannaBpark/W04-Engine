@@ -158,6 +158,8 @@ bool FSceneMgr::LoadSceneFromFile(const FString& filename)
             Viewport->ViewTransformPerspective.SetRotation(Rotation);
             Viewport->ViewFOV = FOV;
         }
+        // [NOTE] UStaticMeshComp 배열을 옥트리 시스템에 추가 필요
+        TArray<UPrimitiveComponent*> StaticComps;
         if (jsonData.contains("Primitives"))
         {
             auto& primitives = jsonData["Primitives"];
@@ -185,10 +187,12 @@ bool FSceneMgr::LoadSceneFromFile(const FString& filename)
                     actor->SetActorScale(scale);
 
                     World->SetPickedActor(actor);
+                    StaticComps.Add(MeshComp);
                 }
 
             }
         }
+        World->SetOctreeSystem(StaticComps);
     }
     catch (const std::exception& e) {
         UE_LOG(LogLevel::Error, "Error parsing JSON: %s", e.what());

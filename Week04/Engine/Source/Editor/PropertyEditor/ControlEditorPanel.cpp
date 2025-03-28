@@ -284,41 +284,26 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     UStaticMeshComponent* MeshComp = TempActor->GetStaticMeshComponent();
                     FManagerOBJ::CreateStaticMesh("Assets/helloBlender.obj");
                     MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"helloBlender.obj"));
-
+                    
                     //FVector Location = FVector(rand() % 20, rand() % 20, 0.0f);
                     //MeshComp->SetLocation(Location);
                     //MeshComp->AABB.min = MeshComp->AABB.min + Location - 1.0f;
                     //MeshComp->AABB.max = MeshComp->AABB.max + Location + 1.0f;
                     // 옥트리 시스템 가져오기 또는 초기화
-                    TArray<UPrimitiveComponent*> CompArr;
-                    CompArr.Add(MeshComp);
-                    for (int i = 0; i < 10; i++) {
-                        for (int j = 0; j < 10; ++j) {
-                            AStaticMeshActor* TempActor = World->SpawnActor<AStaticMeshActor>();        // 여기서 Static Mesh Actor Spawn
-                            TempActor->SetActorLabel(TEXT("OBJ_CUBE"));
-                            UStaticMeshComponent* MeshComp = TempActor->GetStaticMeshComponent();
-                            FManagerOBJ::CreateStaticMesh("Assets/helloBlender.obj");
-                            MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"helloBlender.obj"));
-                            MeshComp->SetLocation(FVector(i*3, j*3, 0));
-                            CompArr.Add(MeshComp);
-                        }
-                    }
-                    OctreeSystem* Octree = World->GetOctreeSystem();
-                    if (!Octree)
-                    {
-                        // 옥트리가 없으면 새로 생성
-                        Octree = new OctreeSystem();
-                        // FBoundingBox BBox; BBox.min = -10; BBox.max = 10;
-                        //Octree->Root = new OctreeNode(BBox, 10);
-                        World->SetOctreeSystem(Octree); // 월드에 옥트리 시스템 연결
-                        Octree->Build({ CompArr });
-                        //Octree->Build({ MeshComp });    // 첫 번째 컴포넌트를 포함하여 옥트리 초기화
-                    }
-                    else // 기존 옥트리에 컴포넌트 추가
-                    {
-                        
-                        Octree->AddComponent(MeshComp);
-                    }
+                    //TArray<UPrimitiveComponent*> CompArr;
+                    //CompArr.Add(MeshComp);
+                    //for (int i = 0; i < 200; i++) {
+                    //    for (int j = 0; j < 200; ++j) {
+                    //        AStaticMeshActor* TempActor = World->SpawnActor<AStaticMeshActor>();        // 여기서 Static Mesh Actor Spawn
+                    //        TempActor->SetActorLabel(TEXT("OBJ_CUBE"));
+                    //        UStaticMeshComponent* MeshComp = TempActor->GetStaticMeshComponent();
+                    //        FManagerOBJ::CreateStaticMesh("Assets/helloBlender.obj");
+                    //        MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"helloBlender.obj"));
+                    //        MeshComp->SetLocation(FVector(i*3, j*3, 0));
+                    //        CompArr.Add(MeshComp);
+                    //    }
+                    //}
+                    
                     // ---------------------- //
                     break;
                 }
@@ -383,6 +368,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
 
         UWorld* World = GEngineLoop.GetWorld();
 
+        TArray<UPrimitiveComponent*> AppleComps;
         if (ImGui::Button("Make Apple!")) {
 
             for (int x = 0; x < appleCountX; ++x)
@@ -400,10 +386,13 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                         UStaticMeshComponent* MeshComp = StaticMeshActor->GetStaticMeshComponent();
                         FManagerOBJ::CreateStaticMesh("Data/apple_mid.obj");
                         MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"apple_mid.obj"));
+                        
+                        AppleComps.Add(MeshComp);
                     }
                 }
             }
         }
+        World->SetOctreeSystem(AppleComps);
         ImGui::EndPopup();
     }
 }

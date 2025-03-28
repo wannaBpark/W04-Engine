@@ -253,7 +253,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     TArray<UPrimitiveComponent*> CandidateComponents;
     Ray MyRay = GetRayDirection(pickPosition);
     Octree->Root->QueryRay(MyRay.Origin, MyRay.Direction, CandidateComponents);
-
+    UE_LOG(LogLevel::Display, " Candidate Count : %d", CandidateComponents.Num());
     //for (const auto iter : TObjectRange<UPrimitiveComponent>())
     for (const auto iter : CandidateComponents)
     {

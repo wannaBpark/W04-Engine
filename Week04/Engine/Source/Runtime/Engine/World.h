@@ -12,8 +12,8 @@ class UCameraComponent;
 class AEditorPlayer;
 class USceneComponent;
 class UTransformGizmo;
-
 class OctreeSystem;
+class UPrimitiveComponent;
 
 class UWorld : public UObject
 {
@@ -79,6 +79,7 @@ public:
 
     void SetOctreeSystem(OctreeSystem* InOctree) { Octree = InOctree; }
     OctreeSystem* GetOctreeSystem() { return Octree; }
+    void SetOctreeSystem(TArray<UPrimitiveComponent*>& Components);
 };
 
 
@@ -94,3 +95,5 @@ T* UWorld::SpawnActor()
     PendingBeginPlayActors.Add(Actor);
     return Actor;
 }
+
+

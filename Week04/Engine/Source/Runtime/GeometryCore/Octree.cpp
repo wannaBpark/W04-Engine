@@ -87,8 +87,8 @@ void OctreeNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPri
     float Distance;
     if (!Bounds.Intersect(Origin, Dir, Distance)) return;
 
-    UE_LOG(LogLevel::Display, "Bounds Min : %.1f, %.1f, %.1f", Bounds.min.x, Bounds.min.y, Bounds.min.z);
-    UE_LOG(LogLevel::Display, "Bounds Max : %.1f, %.1f, %.1f", Bounds.max.x, Bounds.max.y, Bounds.max.z);
+    //UE_LOG(LogLevel::Display, "Bounds Min : %.1f, %.1f, %.1f", Bounds.min.x, Bounds.min.y, Bounds.min.z);
+    //UE_LOG(LogLevel::Display, "Bounds Max : %.1f, %.1f, %.1f", Bounds.max.x, Bounds.max.y, Bounds.max.z);
 
     // 자식 노드가 있으면 재귀적 탐색
     if (Children[0] != nullptr) {
@@ -203,8 +203,8 @@ void OctreeSystem::Build(const TArray<UPrimitiveComponent*>& Components)
        Root = new OctreeNode(FBoundingBox(SceneMin, SceneMax));
    //}
    // 현재 Root의 월드 박스와 비교하여 다시 설정
-   UE_LOG(LogLevel::Display, "Min Bounding Box : %.2f %.2f %.2f", SceneMin.x, SceneMin.y, SceneMin.z);
-   UE_LOG(LogLevel::Display, "Max Bounding Box : %.2f %.2f %.2f", SceneMax.x, SceneMax.y, SceneMax.z);
+   //UE_LOG(LogLevel::Display, "Min Bounding Box : %.2f %.2f %.2f", SceneMin.x, SceneMin.y, SceneMin.z);
+   //UE_LOG(LogLevel::Display, "Max Bounding Box : %.2f %.2f %.2f", SceneMax.x, SceneMax.y, SceneMax.z);
 
    for (auto& Comp : AllComponents) {
        Root->Insert(Comp);  
@@ -231,7 +231,7 @@ void OctreeSystem::UpdateComponentPosition(UPrimitiveComponent* Comp)
     // 컴포넌트를 옥트리에서 제거
     if (Root) {
         Root->RemoveComponent(Comp);
-        UE_LOG(LogLevel::Display, "Remove Component");
+        //UE_LOG(LogLevel::Display, "Remove Component");
     }
 
     // 컴포넌트를 다시 삽입
