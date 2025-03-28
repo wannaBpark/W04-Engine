@@ -1,4 +1,6 @@
 #pragma once
+#include "Core/HAL/PlatformType.h"
+
 
 #ifndef __ICON_FONT_INDEX__
 
@@ -8,10 +10,11 @@
 
 #endif // !__ICON_FONT_INDEX__
 
-class UEditorPanel
+class IEditorPanel
 {
 public:
-    virtual ~UEditorPanel() = default;
+    virtual ~IEditorPanel() = default;
+
     virtual void Render() = 0;
     virtual void OnResize(HWND hWnd) = 0;
 };

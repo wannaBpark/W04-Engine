@@ -124,7 +124,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     LevelEditor = new SLevelEditor();
     LevelEditor->Initialize();
 
-    GWorld = new UWorld;
+    GWorld = FObjectFactory::ConstructObject<UWorld>();
     GWorld->Initialize();
 
     return 0;
@@ -248,7 +248,8 @@ void FEngineLoop::Exit()
 {
     LevelEditor->Release();
     GWorld->Release();
-    delete GWorld;
+    GUObjectArray.MarkRemoveObject(GWorld);
+    GUObjectArray.ProcessPendingDestroyObjects();
     UIMgr->Shutdown();
     delete UIMgr;
     resourceMgr.Release(&renderer);

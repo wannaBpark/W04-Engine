@@ -1,6 +1,7 @@
 #include "Player.h"
 
 #include "UnrealClient.h"
+#include "WindowsPlatformTime.h"
 #include "World.h"
 #include "BaseGizmos/GizmoArrowComponent.h"
 #include "BaseGizmos/GizmoCircleComponent.h"
@@ -12,6 +13,7 @@
 #include "Math/JungleMath.h"
 #include "Math/MathUtility.h"
 #include "PropertyEditor/ShowFlags.h"
+#include "Stats/Stats.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UObject/UObjectIterator.h"
 #include "GeometryCore/Octree.h"
@@ -20,9 +22,8 @@
 
 using namespace DirectX;
 
-AEditorPlayer::AEditorPlayer()
-{
-}
+// Picking 성능 측정 저장용 static 구조체
+AEditorPlayer::FPickingTimeInfo AEditorPlayer::PickingTimeInfo{};
 
 void AEditorPlayer::Tick(float DeltaTime)
 {
@@ -38,6 +39,7 @@ void AEditorPlayer::Input()
     {
         if (!bLeftMouseDown)
         {
+            QUICK_SCOPE_CYCLE_COUNTER(PickingTime);
             bLeftMouseDown = true;
 
             POINT mousePos;
@@ -60,6 +62,15 @@ void AEditorPlayer::Input()
             ScreenToViewSpace(mousePos.x, mousePos.y, ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix(), pickPosition);
             bool res = PickGizmo(pickPosition);
             if (!res) PickActor(pickPosition);
+
+            PickingTimeInfo.LastPickingTime.store(
+                static_cast<float>(CycleCount_PickingTime.Finish())
+                * FPlatformTime::GetSecondsPerCycle()
+                * 1000.0f,
+                std::memory_order_relaxed
+            );
+            PickingTimeInfo.NumAttempts.fetch_add(1, std::memory_order_relaxed);
+            PickingTimeInfo.AccumulatedTime.fetch_add(PickingTimeInfo.LastPickingTime, std::memory_order_relaxed);
         }
         else
         {
@@ -129,7 +140,7 @@ void AEditorPlayer::Input()
     }
 }
 
-bool AEditorPlayer::PickGizmo(FVector& pickPosition)
+bool AEditorPlayer::PickGizmo(const FVector& rayOrigin)
 {
     bool isPickedGizmo = false;
     if (GetWorld()->GetSelectedActor())             // 현재 선택된 액터가 있다면
@@ -143,7 +154,7 @@ bool AEditorPlayer::PickGizmo(FVector& pickPosition)
                 float Distance = 0.0f;
                 int currentIntersectCount = 0;
                 if (!iter) continue;
-                if (RayIntersectsObject(pickPosition, iter, Distance, currentIntersectCount))
+                if (RayIntersectsObject(rayOrigin, iter, Distance, currentIntersectCount))
                 {
                     if (Distance < minDistance)
                     {
@@ -171,7 +182,7 @@ bool AEditorPlayer::PickGizmo(FVector& pickPosition)
                 int currentIntersectCount = 0;
                 //UPrimitiveComponent* localGizmo = dynamic_cast<UPrimitiveComponent*>(GetWorld()->LocalGizmo[i]);
                 if (!iter) continue;
-                if (RayIntersectsObject(pickPosition, iter, Distance, currentIntersectCount))
+                if (RayIntersectsObject(rayOrigin, iter, Distance, currentIntersectCount))
                 {
                     if (Distance < minDistance)
                     {
@@ -198,7 +209,7 @@ bool AEditorPlayer::PickGizmo(FVector& pickPosition)
                 float Distance = 0.0f;
                 int currentIntersectCount = 0;
                 if (!iter) continue;
-                if (RayIntersectsObject(pickPosition, iter, Distance, currentIntersectCount))
+                if (RayIntersectsObject(rayOrigin, iter, Distance, currentIntersectCount))
                 {
                     if (Distance < minDistance)
                     {
@@ -401,7 +412,7 @@ void AEditorPlayer::PickedObjControl()
     }
 }
 
-void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
+void AEditorPlayer::ControlRotation(USceneComponent* pObj, const UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
     FVector cameraForward = GetWorld()->GetCamera()->GetForwardVector();
     FVector cameraRight = GetWorld()->GetCamera()->GetRightVector();
@@ -440,7 +451,7 @@ void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* 
     }
 }
 
-void AEditorPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
+void AEditorPlayer::ControlTranslation(USceneComponent* pObj, const UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
     float DeltaX = static_cast<float>(deltaX);
     float DeltaY = static_cast<float>(deltaY);
@@ -501,7 +512,7 @@ void AEditorPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponen
     // ------------------------------------ // 
 }
 
-void AEditorPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
+void AEditorPlayer::ControlScale(USceneComponent* pObj, const UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
     float DeltaX = static_cast<float>(deltaX);
     float DeltaY = static_cast<float>(deltaY);

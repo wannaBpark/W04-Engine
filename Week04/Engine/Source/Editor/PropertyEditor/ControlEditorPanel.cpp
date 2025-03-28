@@ -15,7 +15,10 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "PropertyEditor/ShowFlags.h"
 #include "Runtime/GeometryCore/Octree.h"
+#include "JSON/json.hpp"
+#include "UnrealEd/SceneMgr.h"
 
+using json = nlohmann::json;
 void ControlEditorPanel::Render()
 {
     /* Pre Setup */
@@ -92,20 +95,22 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
         {
             // TODO: New Scene
         }
-
         if (ImGui::MenuItem("Load Scene"))
         {
-            char const * lFilterPatterns[1]={"*.scene"};
-            const char* FileName =  tinyfd_openFileDialog("Open Scene File", "", 1, lFilterPatterns,"Scene(.scene) file", 0);
-
-            if (FileName == nullptr)
+            char const* lFilterPatterns[1] = { "*.scene" };
+            const char* FileName = tinyfd_openFileDialog("Open Scene File", "", 1, lFilterPatterns, "Scene(.scene) file", 0);
+            if (FileName)
             {
-                tinyfd_messageBox("Error", "파일을 불러올 수 없습니다.", "ok", "error", 1);
-                ImGui::End();
-                return;
-            }
+                bool result = FSceneMgr::LoadSceneFromFile(FileName);
 
-            // TODO: Load Scene
+                if (result==true)
+                {
+                    tinyfd_messageBox("알림", "씬이 성공적으로 로드되었습니다.", "ok", "info", 1);
+                }
+                else {
+                    tinyfd_messageBox("알림", "씬 로드를 실패했습니다.", "ok", "info", 1);
+                }
+            }
         }
 
         ImGui::Separator();
@@ -113,6 +118,7 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
         if (ImGui::MenuItem("Save Scene"))
         {
             char const * lFilterPatterns[1]={"*.scene"};
+            // 파일 저장 다이얼로그 띄우고 사용자가 입력한 저장 경로 및 파일 이름을 가져옴.
             const char* FileName =  tinyfd_saveFileDialog("Save Scene File", "", 1, lFilterPatterns,"Scene(.scene) file");
 
             if (FileName == nullptr)
@@ -121,8 +127,9 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
                 return;
             }
 
+            //ScneData currentSceneData = GengineLoop.GetWorld()->ExprotSceneData();
             // TODO: Save Scene
-
+            
             tinyfd_messageBox("알림", "저장되었습니다.", "ok", "info", 1);
         }
 
@@ -353,6 +360,47 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 if (SpawnedActor)
                 {
                     World->SetPickedActor(SpawnedActor);
+                }
+            }
+        }
+        ImGui::EndPopup();
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Apple Maker"))
+    {
+        ImGui::OpenPopup("AppleMakerControl");
+    }
+
+    if (ImGui::BeginPopup("AppleMakerControl"))
+    {
+        ImGui::Text("AppleMaker");
+        ImGui::InputInt("countX", &appleCountX);
+        ImGui::InputInt("countY", &appleCountY);
+        ImGui::InputInt("countZ", &appleCountZ);
+        ImGui::InputFloat("spacing", &appleSpacing);
+
+        UWorld* World = GEngineLoop.GetWorld();
+
+        if (ImGui::Button("Make Apple!")) {
+
+            for (int x = 0; x < appleCountX; ++x)
+            {
+                for (int y = 0; y < appleCountY; ++y)
+                {
+                    for (int z = 0; z < appleCountZ; ++z)
+                    {
+                        AStaticMeshActor* StaticMeshActor = World->SpawnActor<AStaticMeshActor>();
+                        std::string AppleActorName = "Apple(" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + ")";
+                        StaticMeshActor->SetActorLabel(AppleActorName);
+                        FVector offset(x * appleSpacing, y * appleSpacing, z * appleSpacing);
+                        StaticMeshActor->GetRootComponent()->SetLocation(offset);
+
+                        UStaticMeshComponent* MeshComp = StaticMeshActor->GetStaticMeshComponent();
+                        FManagerOBJ::CreateStaticMesh("Data/apple_mid.obj");
+                        MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"apple_mid.obj"));
+                    }
                 }
             }
         }
