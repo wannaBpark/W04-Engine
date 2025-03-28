@@ -2,7 +2,7 @@
 #include "Components/ActorComponent.h"
 #include "UnrealEd/EditorPanel.h"
 
-class ControlEditorPanel : public UEditorPanel
+class ControlEditorPanel : public IEditorPanel
 {
 public:
     virtual void Render() override;
