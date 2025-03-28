@@ -182,11 +182,25 @@ void FRenderer::RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, I
 
 void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<FStaticMaterial*> materials, TArray<UMaterial*> overrideMaterial, int selectedSubMeshIndex = -1) const
 {
+    /**
+     * Material Sort
+     *
+     * 1. HashTable에 TMap<Material, TArray<RenderData>>, Material은 Name으로 Hasing
+     * 2. for (const auto& [Material, RenderData] : HashTable)
+     * 3.   TArray OverridedList{}
+     * 4.   UpdateMaterial(Material)
+     * 5.   if (overrideMaterial[materialIndex])
+     * 6.       OverridedList.Add(RenderData)
+     * 7. 
+     */
+
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &renderData->VertexBuffer, &Stride, &offset);
 
     if (renderData->IndexBuffer)
+    {
         Graphics->DeviceContext->IASetIndexBuffer(renderData->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+    }
 
     if (renderData->MaterialSubsets.Num() == 0)
     {
@@ -198,10 +212,13 @@ void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<F
     {
         int materialIndex = renderData->MaterialSubsets[subMeshIndex].MaterialIndex;
 
-        subMeshIndex == selectedSubMeshIndex ? UpdateSubMeshConstant(true) : UpdateSubMeshConstant(false);
+        subMeshIndex == selectedSubMeshIndex
+            ? UpdateSubMeshConstant(true)
+            : UpdateSubMeshConstant(false);
 
-        overrideMaterial[materialIndex] != nullptr ? 
-            UpdateMaterial(overrideMaterial[materialIndex]->GetMaterialInfo()) : UpdateMaterial(materials[materialIndex]->Material->GetMaterialInfo());
+        overrideMaterial[materialIndex] != nullptr
+            ? UpdateMaterial(overrideMaterial[materialIndex]->GetMaterialInfo())
+            : UpdateMaterial(materials[materialIndex]->Material->GetMaterialInfo());
 
         if (renderData->IndexBuffer)
         {
@@ -1022,6 +1039,12 @@ void FRenderer::Render(UWorld* World, std::shared_ptr<FEditorViewportClient> Act
 void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
     PrepareShader();
+
+    /**
+     *  1. for (UStaticMeshComponent* StaticMeshComp : StaticMeshObjs)
+     *  2.      
+     */
+
     for (UStaticMeshComponent* StaticMeshComp : StaticMeshObjs)
     {
         FMatrix Model = JungleMath::CreateModelMatrix(
