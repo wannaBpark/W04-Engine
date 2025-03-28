@@ -1,4 +1,4 @@
-﻿#include "ControlEditorPanel.h"
+#include "ControlEditorPanel.h"
 
 #include "World.h"
 #include "Actors/Player.h"
@@ -271,7 +271,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 }
                 case OBJ_CUBE:
                 {
-                    AStaticMeshActor* TempActor = World->SpawnActor<AStaticMeshActor>();
+                    AStaticMeshActor* TempActor = World->SpawnActor<AStaticMeshActor>();        // 여기서 Static Mesh Actor Spawn
                     TempActor->SetActorLabel(TEXT("OBJ_CUBE"));
                     UStaticMeshComponent* MeshComp = TempActor->GetStaticMeshComponent();
                     FManagerOBJ::CreateStaticMesh("Assets/helloBlender.obj");

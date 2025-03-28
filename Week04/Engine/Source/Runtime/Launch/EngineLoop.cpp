@@ -110,17 +110,17 @@ int32 FEngineLoop::PreInit()
 int32 FEngineLoop::Init(HINSTANCE hInstance)
 {
     /* must be initialized before window. */
-    UnrealEditor = new UnrealEd();
-    UnrealEditor->Initialize();
+    UnrealEditor = new UnrealEd();          // Editor 패널 초기화
+    UnrealEditor->Initialize();             
 
-    WindowInit(hInstance);
+    WindowInit(hInstance);                  // 윈도우 및 핸들러 함수 초기화, 해상도는 하드 코딩 되어 있음
     graphicDevice.Initialize(hWnd);
     renderer.Initialize(&graphicDevice);
 
     UIMgr = new UImGuiManager;
     UIMgr->Initialize(hWnd, graphicDevice.Device, graphicDevice.DeviceContext);
 
-    resourceMgr.Initialize(&renderer, &graphicDevice);
+    resourceMgr.Initialize(&renderer, &graphicDevice);          // texture 파일을 프리로드
     LevelEditor = new SLevelEditor();
     LevelEditor->Initialize();
 

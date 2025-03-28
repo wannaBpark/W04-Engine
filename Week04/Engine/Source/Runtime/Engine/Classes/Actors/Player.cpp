@@ -1,4 +1,4 @@
-﻿#include "Player.h"
+#include "Player.h"
 
 #include "UnrealClient.h"
 #include "World.h"
@@ -130,11 +130,11 @@ void AEditorPlayer::Input()
 bool AEditorPlayer::PickGizmo(FVector& pickPosition)
 {
     bool isPickedGizmo = false;
-    if (GetWorld()->GetSelectedActor())
+    if (GetWorld()->GetSelectedActor())             // 현재 선택된 액터가 있다면
     {
         if (cMode == CM_TRANSLATION)
         {
-            for (auto iter : GetWorld()->LocalGizmo->GetArrowArr())
+            for (auto iter : GetWorld()->LocalGizmo->GetArrowArr()) // 3개의 ArrowArr 순회
             {
                 int maxIntersect = 0;
                 float minDistance = FLT_MAX;
@@ -161,7 +161,7 @@ bool AEditorPlayer::PickGizmo(FVector& pickPosition)
         }
         else if (cMode == CM_ROTATION)
         {
-            for (auto iter : GetWorld()->LocalGizmo->GetDiscArr())
+            for (auto iter : GetWorld()->LocalGizmo->GetDiscArr())          // 3개의 rotation 디스크 모양 교차 검사
             {
                 int maxIntersect = 0;
                 float minDistance = FLT_MAX;
@@ -260,6 +260,10 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     if (Possible)
     {
         GetWorld()->SetPickedActor(Possible->GetOwner());
+    }
+    else 
+    {
+        GetWorld()->SetPickedActor(nullptr);
     }
 }
 
