@@ -1,4 +1,5 @@
 ﻿#include "FpsIndicator.h"
+#include "Actors/Player.h"
 #include "ImGUI/imgui.h"
 
 
@@ -24,7 +25,14 @@ void FFpsIndicator::Render()
 
     // FPS 정보 출력
     const float Fps = ImGui::GetIO().Framerate;
+    const AEditorPlayer::FPickingTimeInfo& PickingTimeInfo = AEditorPlayer::PickingTimeInfo;
     ImGui::Text("FPS: %.1f (%.1f ms)", Fps, 1000.0f / Fps);
+    ImGui::Text(
+        "Picking Time %ums, Num Attempts %u, Accumulated Time %llums",
+        PickingTimeInfo.LastPickingTime.load(),
+        PickingTimeInfo.NumAttempts.load(),
+        PickingTimeInfo.AccumulatedTime.load()
+    );
     ImGui::PopStyleColor();
     ImGui::End();
 }
