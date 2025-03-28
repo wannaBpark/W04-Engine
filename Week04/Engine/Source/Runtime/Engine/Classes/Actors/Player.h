@@ -28,6 +28,7 @@ private:
     void ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY);
     void ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY);
     void ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY);
+    Ray GetRayDirection(const FVector& pickPosition);
     bool bLeftMouseDown = false;
     bool bRightMouseDown = false;
     bool bSpaceDown = false;

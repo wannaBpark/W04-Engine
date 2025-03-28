@@ -4,6 +4,7 @@
 #include "BaseGizmos/TransformGizmo.h"
 #include "Camera/CameraComponent.h"
 #include "LevelEditor/SLevelEditor.h"
+#include "Runtime/GeometryCore/Octree.h"
 
 
 void UWorld::Initialize()

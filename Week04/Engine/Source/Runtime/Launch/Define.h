@@ -165,6 +165,13 @@ struct FPoint
 
     float x, y;
 };
+
+struct Ray 
+{
+    FVector Origin;
+    FVector Direction;
+};
+
 struct FBoundingBox
 {
     FBoundingBox(){}
@@ -247,6 +254,13 @@ struct FBoundingBox
         outDistance = (tmin >= 0.0f) ? tmin : 0.0f;
 
         return true;
+    }
+
+    bool Intersects(const FBoundingBox& Other) const
+    {
+        return (min.x <= Other.max.x && max.x >= Other.min.x) &&
+            (min.y <= Other.max.y && max.y >= Other.min.y) &&
+            (min.z <= Other.max.z && max.z >= Other.min.z);
     }
 
 };

@@ -13,6 +13,7 @@ class AEditorPlayer;
 class USceneComponent;
 class UTransformGizmo;
 
+class OctreeSystem;
 
 class UWorld : public UObject
 {
@@ -53,6 +54,7 @@ private:
     USceneComponent* pickingGizmo = nullptr;
     UCameraComponent* camera = nullptr;
     AEditorPlayer* EditorPlayer = nullptr;
+    OctreeSystem* Octree;
 
 public:
     UObject* worldGizmo = nullptr;
@@ -74,6 +76,9 @@ public:
     UObject* GetWorldGizmo() const { return worldGizmo; }
     USceneComponent* GetPickingGizmo() const { return pickingGizmo; }
     void SetPickingGizmo(UObject* Object);
+
+    void SetOctreeSystem(OctreeSystem* InOctree) { Octree = InOctree; }
+    OctreeSystem* GetOctreeSystem() { return Octree; }
 };
 
 

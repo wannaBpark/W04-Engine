@@ -14,6 +14,7 @@
 #include "tinyfiledialogs/tinyfiledialogs.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "PropertyEditor/ShowFlags.h"
+#include "Runtime/GeometryCore/Octree.h"
 
 void ControlEditorPanel::Render()
 {
@@ -276,6 +277,22 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     UStaticMeshComponent* MeshComp = TempActor->GetStaticMeshComponent();
                     FManagerOBJ::CreateStaticMesh("Assets/helloBlender.obj");
                     MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"helloBlender.obj"));
+
+                    // 옥트리 시스템 가져오기 또는 초기화
+                    OctreeSystem* Octree = World->GetOctreeSystem();
+                    if (!Octree)
+                    {
+                        // 옥트리가 없으면 새로 생성
+                        Octree = new OctreeSystem();
+                        World->SetOctreeSystem(Octree); // 월드에 옥트리 시스템 연결
+                        Octree->Build({ MeshComp });    // 첫 번째 컴포넌트를 포함하여 옥트리 초기화
+                    }
+                    else // 기존 옥트리에 컴포넌트 추가
+                    {
+                        
+                        Octree->AddComponent(MeshComp);
+                    }
+                    // ---------------------- //
                     break;
                 }
                 case OBJ_SpotLight:

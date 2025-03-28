@@ -14,6 +14,8 @@
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UObject/UObjectIterator.h"
+#include "GeometryCore/Octree.h"
+
 
 
 using namespace DirectX;
@@ -48,7 +50,7 @@ void AEditorPlayer::Input()
             {
                 if (obj->GetUUID() != UUID) continue;
 
-                UE_LOG(LogLevel::Display, *obj->GetName());
+                UE_LOG(LogLevel::Display, "%s Pixel Pick", *obj->GetName());
             }
             ScreenToClient(GetEngine().hWnd, &mousePos);
 
@@ -225,7 +227,24 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     const UActorComponent* Possible = nullptr;
     int maxIntersect = 0;
     float minDistance = FLT_MAX;
-    for (const auto iter : TObjectRange<UPrimitiveComponent>())
+
+    // 옥트리 시스템 가져오기
+    UWorld* World = GetWorld();
+    OctreeSystem* Octree = World->GetOctreeSystem();
+    if (!Octree || !Octree->Root)
+    {
+        // 옥트리가 없으면 기존 방식으로 폴백
+        UE_LOG(LogLevel::Display, "Octree not initialized!");
+        return;
+    }
+
+    // 옥트리에서 후보 컴포넌트 추출
+    TArray<UPrimitiveComponent*> CandidateComponents;
+    Ray MyRay = GetRayDirection(pickPosition);
+    Octree->Root->QueryRay(MyRay.Origin, MyRay.Direction, CandidateComponents);
+
+    //for (const auto iter : TObjectRange<UPrimitiveComponent>())
+    for (const auto iter : CandidateComponents)
     {
         UPrimitiveComponent* pObj;
         if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())
@@ -506,4 +525,30 @@ void AEditorPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Giz
         FVector moveDir = CameraUp * -DeltaY * 0.05f;
         pObj->AddScale(FVector(0.0f, 0.0f, moveDir.z));
     }
+}
+
+Ray AEditorPlayer::GetRayDirection(const FVector& pickPosition)
+{
+    Ray result;
+    FMatrix viewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
+    bool bIsOrtho = GetEngine().GetLevelEditor()->GetActiveViewportClient()->IsOrtho();
+
+    if (bIsOrtho)
+    {
+        FMatrix inverseView = FMatrix::Inverse(viewMatrix);
+        result.Origin = inverseView.TransformPosition(pickPosition);
+        result.Direction = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformOrthographic.GetForwardVector().Normalize();
+    }
+    else
+    {
+        FMatrix inverseViewMatrix = FMatrix::Inverse(viewMatrix);
+        FVector cameraOrigin = { 0,0,0 };
+        result.Origin = inverseViewMatrix.TransformPosition(cameraOrigin);
+        FVector transformedPick = inverseViewMatrix.TransformPosition(pickPosition);
+        result.Direction = (transformedPick - result.Origin).Normalize();
+    }
+
+    return result;
+
+
 }
