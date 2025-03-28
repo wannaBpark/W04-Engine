@@ -46,31 +46,9 @@ void StatOverlay::Render() const
         | ImGuiWindowFlags_NoMove
         | ImGuiWindowFlags_NoScrollbar
         | ImGuiWindowFlags_NoBackground
-        | ImGuiWindowFlags_NoNav
-        | ImGuiWindowFlags_NoNavInputs
-        | ImGuiWindowFlags_NoNavFocus
+        | ImGuiWindowFlags_NoInputs
     ))
     {
-        // FPS 계산
-        float fps = ImGui::GetIO().Framerate;
-        float ms_per_frame = 1000.0f / fps;
-
-        // 윈도우 위치 설정 (좌상단)
-        ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);
-
-        // 상호작용 비활성화 플래그 설정
-        ImGui::SetNextWindowBgAlpha(0.5f); // 투명도 설정 (선택 사항)
-        ImGui::Begin("FPS Indicator", nullptr, 
-                     ImGuiWindowFlags_NoTitleBar | 
-                     ImGuiWindowFlags_NoResize | 
-                     ImGuiWindowFlags_NoMove | 
-                     ImGuiWindowFlags_NoInputs | 
-                     ImGuiWindowFlags_AlwaysAutoResize);
-
-        // FPS 정보 출력
-        ImGui::Text("FPS: %.1f (%.1f ms/frame)", fps, ms_per_frame);
-        ImGui::End();
-
         if (showFPS)
         {
             ImGui::Text("FPS: %.2f (%.2fms)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
