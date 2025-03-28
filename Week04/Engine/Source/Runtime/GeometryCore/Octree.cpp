@@ -1,21 +1,37 @@
 #include "Octree.h"  
 #include "Engine/Source/Runtime/Engine/Classes/Components/PrimitiveComponent.h"   
+#include "Editor/UnrealEd/PrimitiveBatch.h"
+#include "Runtime/Core/Math/JungleMath.h"
 
 void OctreeNode::Insert(UPrimitiveComponent* Comp)  
 {  
-   // AABB 교차 검사  
-   if (!Comp->AABB.Intersects(Bounds)) return;  
+   // AABB 교차 검사
+   FMatrix Model = JungleMath::CreateModelMatrix(
+       Comp->GetWorldLocation(),
+       Comp->GetWorldRotation(),
+       Comp->GetWorldScale()
+   );
+   FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
+       Comp->AABB, Comp->GetWorldLocation(), Model
+   );
+   if (!WorldBBox.Intersects(Bounds)) return;
 
+   // 자식이 없거나, 들고 있는 최대 수보다 많고 아직 depth가 넉넉할 때
    if (!Children[0] && Components.Num() >= MAX_OBJECTS && Depth < MAX_DEPTH)  
    {  
        Subdivide();  
    }  
 
-   if (Children[0]) {  
-       for (auto& Child : Children) { Child->Insert(Comp); }  
-   } else {  
-       Components.Add(Comp);  
-   }  
+   if (Children[0] != nullptr) {
+       // 여러 자식과 교차할 수 있으므로, 모든 해당 자식에 삽입  
+       for (auto& Child : Children) {
+           if (Child->Bounds.Intersects(WorldBBox))
+               Child->Insert(Comp);
+       }
+   }
+   else {
+       Components.Add(Comp);
+   }
 }  
 
 void OctreeNode::Subdivide()  
@@ -39,18 +55,31 @@ void OctreeNode::Subdivide()
        Center                                   // 우상단 뒤  
    };  
 
-   for (register size_t i = 0; i < 8; ++i)  
+   for (size_t i{ 0 }; i < 8; ++i)
    {  
        FVector ChildMax = ChildMins[i] + HalfExtent;  
        Children[i] = new OctreeNode(FBoundingBox(ChildMins[i], ChildMax), Depth+1);  
    }  
 
-   // 기존 컴포넌트 재분배  
-   for (auto& Comp : Components) {  
-       for (auto& Child : Children) {  
-           Child->Insert(Comp);  
-       }  
-   }  
+   // 기존 컴포넌트 재분배 후, 부모 배열 초기화  
+   TArray<UPrimitiveComponent*> OldComponents = Components;
+   Components.Empty();
+
+   // 컴포넌트가 해당 자식 노드와 교차하면 삽입
+   for (auto& Comp : OldComponents) {
+       for (auto& Child : Children) {
+           FMatrix Model = JungleMath::CreateModelMatrix(
+               Comp->GetWorldLocation(),
+               Comp->GetWorldRotation(),
+               Comp->GetWorldScale()
+           );
+           FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
+               Comp->AABB, Comp->GetWorldLocation(), Model
+           );
+           if (Child->Bounds.Intersects(WorldBBox))
+               Child->Insert(Comp);
+       }
+   }
 }  
 
 void OctreeNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPrimitiveComponent*>& OutComponents)  
@@ -59,21 +88,68 @@ void OctreeNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPri
     if (!Bounds.Intersect(Origin, Dir, Distance)) return;
 
     // 자식 노드가 있으면 재귀적 탐색
-    if (Children[0] != nullptr)
-    {
-        for (auto& Child : Children)
-        {
+    if (Children[0] != nullptr) {
+        for (auto& Child : Children) {
             Child->QueryRay(Origin, Dir, OutComponents);
         }
     }
-    else
-    {
+    else {
         // leaf 노드 (더 이상 분할할 자식이 없으면) 자기 자신을 Output 컴포넌트 추가
         for (auto& MyComp : Components) {
             OutComponents.Add(MyComp);
         }
     }
-}  
+}
+
+void OctreeNode::UpdateComponent(UPrimitiveComponent* Comp)
+{
+    // 컴포넌트가 현재 노드의 Bounds에 포함되지 않으면 삭제
+    FMatrix Model = JungleMath::CreateModelMatrix(
+        Comp->GetWorldLocation(),
+        Comp->GetWorldRotation(),
+        Comp->GetWorldScale()
+    );
+    FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
+        Comp->AABB, Comp->GetWorldLocation(), Model
+    );
+    if (!WorldBBox.Intersects(Bounds)) {
+        RemoveComponent(Comp);
+        return;
+    }
+
+    // 자식 노드가 있는 경우, 해당 자식 노드로 전달
+    if (Children[0]) {
+        for (auto& Child : Children) {
+            if (Child->Bounds.Intersects(WorldBBox)) {
+                Child->UpdateComponent(Comp);
+                return;
+            }
+        }
+    }
+
+    // 리프 노드인 경우, 컴포넌트를 업데이트
+    int32 Index = Components.Find(Comp);
+    if (Index != INDEX_NONE) {
+        Components[Index] = Comp; // 컴포넌트 업데이트
+    }
+}
+
+void OctreeNode::RemoveComponent(UPrimitiveComponent* Comp)
+{
+    // 자식 노드가 있는 경우, 해당 자식 노드로 전달
+    if (Children[0]) {
+        for (auto& Child : Children) {
+            Child->RemoveComponent(Comp);
+        }
+    }
+    else {
+        // 리프 노드에서 컴포넌트를 제거
+        int32 Index = Components.Find(Comp);
+        if (Index != INDEX_NONE) {
+            Components.RemoveAt(Index);
+        }
+    }
+}
 
 void OctreeSystem::Build(const TArray<UPrimitiveComponent*>& Components)  
 {  
@@ -81,13 +157,27 @@ void OctreeSystem::Build(const TArray<UPrimitiveComponent*>& Components)
    FVector SceneMin(FLT_MAX), SceneMax(-FLT_MAX);  
    for (auto& Comp : Components)  
    {  
-       auto& AABB = Comp->AABB;  
-       SceneMin = SceneMin.ComponentMin(AABB.min);  
-       SceneMin = SceneMin.ComponentMin(AABB.max);  
-   }  
-
-   if (Root) delete Root;  
+       FMatrix Model = JungleMath::CreateModelMatrix(
+           Comp->GetWorldLocation(),
+           Comp->GetWorldRotation(),
+           Comp->GetWorldScale()
+       );
+       FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
+           Comp->AABB, Comp->GetWorldLocation(), Model
+       );
+       //auto& AABB = Comp->AABB;  
+       SceneMin = SceneMin.ComponentMin(WorldBBox.min);
+       SceneMax = SceneMax.ComponentMax(WorldBBox.max);
+   } 
+   if (Root) {
+       SceneMin = SceneMin.ComponentMin(Root->Bounds.min);
+       SceneMax = SceneMax.ComponentMax(Root->Bounds.max);
+       delete Root;
+   }
+   // 현재 Root의 월드 박스와 비교하여 다시 설정
    Root = new OctreeNode(FBoundingBox(SceneMin, SceneMax));  
+   UE_LOG(LogLevel::Display, "Min Bounding Box : %.2f %.2f %.2f", SceneMin.x, SceneMin.y, SceneMin.z);
+   UE_LOG(LogLevel::Display, "Max Bounding Box : %.2f %.2f %.2f", SceneMax.x, SceneMax.y, SceneMax.z);
 
    for (auto& Comp : Components) {  
        Root->Insert(Comp);  
@@ -96,8 +186,27 @@ void OctreeSystem::Build(const TArray<UPrimitiveComponent*>& Components)
 
 void OctreeSystem::AddComponent(UPrimitiveComponent* Comp)  
 {  
-   if (Root && Root->Bounds.Intersects(Comp->AABB)) //부모가 포함할 수 있으면 삽입  
+    FMatrix Model = JungleMath::CreateModelMatrix( Comp->GetWorldLocation(), Comp->GetWorldRotation(), Comp->GetWorldScale() );
+    FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
+        Comp->AABB, Comp->GetWorldLocation(), Model
+    );
+
+    if (Root && Root->Bounds.Contains(WorldBBox)) //부모가 감쌀 수 있으면 삽입  
        Root->Insert(Comp);  
-   else  
+    else
        Build({ Comp }); // 루트 범위 재설정 (지우고 다시 범위 설정)  
+}
+
+
+// 위치 변화가 있는 컴포넌트를 옥트리에서 제거 or 삽입
+void OctreeSystem::UpdateComponentPosition(UPrimitiveComponent* Comp)
+{
+    // 컴포넌트를 옥트리에서 제거
+    if (Root) {
+        Root->RemoveComponent(Comp);
+        UE_LOG(LogLevel::Display, "Remove Component");
+    }
+
+    // 컴포넌트를 다시 삽입
+    AddComponent(Comp);
 }

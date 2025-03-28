@@ -10,6 +10,7 @@
 #include "UnrealEd/ImGuiWidget.h"
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
+#include "GeometryCore/Octree.h"
 
 void PropertyEditorPanel::Render()
 {
@@ -60,6 +61,14 @@ void PropertyEditorPanel::Render()
             FImGuiWidget::DrawVec3Control("Scale", Scale, 0, 85);
             ImGui::Spacing();
 
+            // Actor 위치 변화시 옥트리 바운딩 박스 재설정
+            if ((PickedActor->GetActorLocation()- Location).Magnitude() > 0.2f)
+            {
+                GEngineLoop.GetWorld()->GetOctreeSystem()->UpdateComponentPosition(
+                    dynamic_cast<UPrimitiveComponent*>(PickedActor->GetRootComponent())
+                );
+            }
+            // ---------------------------------- //
             PickedActor->SetActorLocation(Location);
             PickedActor->SetActorRotation(Rotation);
             PickedActor->SetActorScale(Scale);

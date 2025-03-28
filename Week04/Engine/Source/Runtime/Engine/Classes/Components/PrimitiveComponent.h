@@ -17,7 +17,6 @@ public:
         const FVector& v0, const FVector& v1, const FVector& v2, float& hitDistance
     );
     FBoundingBox AABB;
-
 private:
     FString m_Type;
 

@@ -263,6 +263,13 @@ struct FBoundingBox
             (min.z <= Other.max.z && max.z >= Other.min.z);
     }
 
+    // 다른 AABB가 완전히 내부에 있는지 검사
+    bool Contains(const FBoundingBox& Other) const
+    {
+        return (Other.min.x >= min.x) && (Other.max.x <= max.x) &&
+            (Other.min.y >= min.y) && (Other.max.y <= max.y) &&
+            (Other.min.z >= min.z) && (Other.max.z <= max.z);
+    }
 };
 struct FCone
 {

@@ -278,12 +278,18 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     FManagerOBJ::CreateStaticMesh("Assets/helloBlender.obj");
                     MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"helloBlender.obj"));
 
+                    //FVector Location = FVector(rand() % 20, rand() % 20, 0.0f);
+                    //MeshComp->SetLocation(Location);
+                    //MeshComp->AABB.min = MeshComp->AABB.min + Location - 1.0f;
+                    //MeshComp->AABB.max = MeshComp->AABB.max + Location + 1.0f;
                     // 옥트리 시스템 가져오기 또는 초기화
                     OctreeSystem* Octree = World->GetOctreeSystem();
                     if (!Octree)
                     {
                         // 옥트리가 없으면 새로 생성
                         Octree = new OctreeSystem();
+                        // FBoundingBox BBox; BBox.min = -10; BBox.max = 10;
+                        //Octree->Root = new OctreeNode(BBox, 10);
                         World->SetOctreeSystem(Octree); // 월드에 옥트리 시스템 연결
                         Octree->Build({ MeshComp });    // 첫 번째 컴포넌트를 포함하여 옥트리 초기화
                     }

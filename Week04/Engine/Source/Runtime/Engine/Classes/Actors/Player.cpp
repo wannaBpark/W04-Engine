@@ -493,6 +493,12 @@ void AEditorPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponen
             pObj->AddLocation(FVector(0.0f, 0.0f, moveDir.z));
         }
     }
+
+    // 변화가 있을 때 pObj의 바운딩 박스 위치 업데이트
+    UWorld* World = GetWorld();
+    OctreeSystem* Octree = World->GetOctreeSystem();
+
+    // ------------------------------------ // 
 }
 
 void AEditorPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
