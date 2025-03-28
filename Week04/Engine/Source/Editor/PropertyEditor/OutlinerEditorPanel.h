@@ -2,7 +2,7 @@
 #include "Components/ActorComponent.h"
 #include "UnrealEd/EditorPanel.h"
 
-class OutlinerEditorPanel : public UEditorPanel
+class OutlinerEditorPanel : public IEditorPanel
 {
 public:
     OutlinerEditorPanel() = default;

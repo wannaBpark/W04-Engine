@@ -4,7 +4,7 @@
 
 class UStaticMeshComponent;
 
-class PropertyEditorPanel : public UEditorPanel
+class PropertyEditorPanel : public IEditorPanel
 {
 public:
     virtual void Render() override;
