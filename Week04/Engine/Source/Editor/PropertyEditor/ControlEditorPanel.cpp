@@ -1,4 +1,4 @@
-﻿#include "ControlEditorPanel.h"
+#include "ControlEditorPanel.h"
 
 #include "World.h"
 #include "Actors/Player.h"
@@ -14,7 +14,10 @@
 #include "tinyfiledialogs/tinyfiledialogs.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "PropertyEditor/ShowFlags.h"
+#include "JSON/json.hpp"
+//#include <UnrealEd/SceneMgr.cpp>
 
+using json = nlohmann::json;
 void ControlEditorPanel::Render()
 {
     /* Pre Setup */
@@ -103,8 +106,68 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
                 ImGui::End();
                 return;
             }
+            std::ifstream sceneFile(FileName);
+            if (!sceneFile.is_open())
+            {
+                tinyfd_messageBox("Error", "파일을 열 수 없습니다.", "ok", "error", 1);
+                ImGui::End();
+                return;
+            }
 
-            // TODO: Load Scene
+            std::stringstream buffer;
+            buffer << sceneFile.rdbuf();
+
+
+            json jsonData = json::parse(buffer.str());
+            UWorld* World = GEngineLoop.GetWorld();
+
+            if (jsonData.contains("PerspectiveCamera"))
+            {
+                auto camData = jsonData["PerspectiveCamera"];
+                FVector Location(camData["Location"][0], camData["Location"][1], camData["Location"][2]);
+                FVector Rotation(camData["Rotation"][0], camData["Rotation"][1], camData["Rotation"][2]);
+                float FOV = camData["FOV"][0];
+
+                auto Viewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+               Viewport->ViewTransformPerspective.SetLocation(Location);
+               Viewport->ViewTransformPerspective.SetRotation(Rotation);
+               Viewport->ViewFOV = FOV;
+            }
+
+            if (jsonData.contains("Primitives"))
+            {
+                auto& primitives = jsonData["Primitives"];
+                for (auto& [uuid, obj] : primitives.items())
+                {
+                    std::string type = obj["Type"];
+                    FVector location(obj["Location"][0], obj["Location"][1], obj["Location"][2]);
+                    FVector rotation(obj["Rotation"][0], obj["Rotation"][1], obj["Rotation"][2]);
+                    FVector scale(obj["Scale"][0], obj["Scale"][1], obj["Scale"][2]);
+
+                    if (type == "StaticMeshComp")
+                    {
+                        std::string objPath = std::string(obj["ObjStaticMeshAsset"]);
+                        FManagerOBJ::CreateStaticMesh(objPath);
+
+                        AStaticMeshActor* actor = World->SpawnActor<AStaticMeshActor>();
+                        std::filesystem::path filePath(objPath);
+                        std::string fileNameOnly = filePath.filename().string(); // 파일명만 추출
+                        
+                        actor->SetActorLabel(TEXT("Loaded_StaticMesh"));
+                        UStaticMeshComponent* MeshComp = actor->GetStaticMeshComponent();
+                        MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(FString(fileNameOnly).ToWideString()));
+                        actor->SetActorLocation(location);
+                        actor->SetActorRotation(rotation);
+                        actor->SetActorScale(scale);
+
+                        World->SetPickedActor(actor);
+                    }
+
+                }
+            }
+
+            tinyfd_messageBox("알림", "씬이 성공적으로 로드되었습니다.", "ok", "info", 1);
+
         }
 
         ImGui::Separator();
@@ -112,6 +175,7 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
         if (ImGui::MenuItem("Save Scene"))
         {
             char const * lFilterPatterns[1]={"*.scene"};
+            // 파일 저장 다이얼로그 띄우고 사용자가 입력한 저장 경로 및 파일 이름을 가져옴.
             const char* FileName =  tinyfd_saveFileDialog("Save Scene File", "", 1, lFilterPatterns,"Scene(.scene) file");
 
             if (FileName == nullptr)
@@ -120,8 +184,9 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
                 return;
             }
 
+            //ScneData currentSceneData = GengineLoop.GetWorld()->ExprotSceneData();
             // TODO: Save Scene
-
+            
             tinyfd_messageBox("알림", "저장되었습니다.", "ok", "info", 1);
         }
 
@@ -316,6 +381,47 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 if (SpawnedActor)
                 {
                     World->SetPickedActor(SpawnedActor);
+                }
+            }
+        }
+        ImGui::EndPopup();
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Apple Maker"))
+    {
+        ImGui::OpenPopup("AppleMakerControl");
+    }
+
+    if (ImGui::BeginPopup("AppleMakerControl"))
+    {
+        ImGui::Text("AppleMaker");
+        ImGui::InputInt("countX", &appleCountX);
+        ImGui::InputInt("countY", &appleCountY);
+        ImGui::InputInt("countZ", &appleCountZ);
+        ImGui::InputFloat("spacing", &appleSpacing);
+
+        UWorld* World = GEngineLoop.GetWorld();
+
+        if (ImGui::Button("Make Apple!")) {
+
+            for (int x = 0; x < appleCountX; ++x)
+            {
+                for (int y = 0; y < appleCountY; ++y)
+                {
+                    for (int z = 0; z < appleCountZ; ++z)
+                    {
+                        AStaticMeshActor* StaticMeshActor = World->SpawnActor<AStaticMeshActor>();
+                        std::string AppleActorName = "Apple(" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + ")";
+                        StaticMeshActor->SetActorLabel(AppleActorName);
+                        FVector offset(x * appleSpacing, y * appleSpacing, z * appleSpacing);
+                        StaticMeshActor->GetRootComponent()->SetLocation(offset);
+
+                        UStaticMeshComponent* MeshComp = StaticMeshActor->GetStaticMeshComponent();
+                        FManagerOBJ::CreateStaticMesh("Data/apple_mid.obj");
+                        MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"apple_mid.obj"));
+                    }
                 }
             }
         }
