@@ -3,6 +3,60 @@
 #include "Editor/UnrealEd/PrimitiveBatch.h"
 #include "Runtime/Core/Math/JungleMath.h"
 
+#pragma region Query Frustum Intersection
+void OctreeNode::QueryFrustum(const FFrustum& Frustum, TArray<UPrimitiveComponent*>& OutComponents)
+{
+    // 현재 노드의 AABB가 프러스텀과 교차하지 않으면 가지치기
+    if (!Frustum.Intersects(Bounds))
+        return;
+
+    // 자식 노드가 있다면 재귀적으로 호출
+    if (Children[0] != nullptr)
+    {
+        for (auto& Child : Children)
+        {
+            Child->QueryFrustum(Frustum, OutComponents);
+        }
+    }
+    else
+    {
+        // 리프 노드이면 해당 컴포넌트들을 결과에 추가
+        for (auto& Comp : Components)
+        {
+            OutComponents.Add(Comp);
+        }
+    }
+}
+
+void OctreeNode::QueryFrustumUnique(const FFrustum& Frustum, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs)
+{
+    // 현재 노드의 AABB가 프러스텀과 교차하지 않으면 가지치기
+    if (!Frustum.Intersects(Bounds)) { return; }
+
+    // 자식 노드가 있으면 재귀적으로 호출
+    if (Children[0] != nullptr)
+    {
+        for (auto& Child : Children)
+        {
+            Child->QueryFrustumUnique(Frustum, OutComponents, UniqueUUIDs);
+        }
+    }
+    else
+    {
+        // 리프 노드이면 각 컴포넌트의 UUID를 검사하여 중복 없이 추가
+        for (auto& Comp : Components)
+        {
+            uint32 UUID = Comp->GetUUID(); // UPrimitiveComponent의 고유 식별자
+            if (!UniqueUUIDs.Contains(UUID))
+            {
+                UniqueUUIDs.Add(UUID);
+                OutComponents.Add(Comp);
+            }
+        }
+    }
+}
+#pragma endregion
+
 void OctreeNode::Insert(UPrimitiveComponent* Comp)  
 {  
    // AABB 교차 검사
@@ -64,7 +118,6 @@ void OctreeNode::Subdivide()
     // 기존 컴포넌트 재분배 후, 부모 배열 초기화
     TArray<UPrimitiveComponent*> OldComponents;
     std::swap(OldComponents, Components);
-
     // 컴포넌트가 해당 자식 노드와 교차하면 삽입
     for (auto& Comp : OldComponents)
     {
@@ -84,7 +137,7 @@ void OctreeNode::Subdivide()
             }
         }
     }
-}  
+} 
 
 void OctreeNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPrimitiveComponent*>& OutComponents)  
 {

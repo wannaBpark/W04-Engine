@@ -46,6 +46,8 @@ void AEditorPlayer::Input()
             GetCursorPos(&mousePos);
             GetCursorPos(&m_LastMousePos);
 
+			// 컬러 피킹 부분입니다
+//#if _DEBUG
             uint32 UUID = GetEngine().graphicDevice.GetPixelUUID(mousePos);
             // TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
             for ( const auto obj : TObjectRange<USceneComponent>())
@@ -54,6 +56,7 @@ void AEditorPlayer::Input()
 
                 UE_LOG(LogLevel::Display, "%s Pixel Pick", *obj->GetName());
             }
+//#endif
             ScreenToClient(GetEngine().hWnd, &mousePos);
 
             FVector pickPosition;
@@ -248,13 +251,27 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
         UE_LOG(LogLevel::Display, "Octree not initialized!");
         return;
     }
-
+#pragma region Octree Components Ray Intersects
     // 옥트리에서 후보 컴포넌트 추출
     TArray<UPrimitiveComponent*> CandidateComponents;
     Ray MyRay = GetRayDirection(pickPosition);
     Octree->Root->QueryRay(MyRay.Origin, MyRay.Direction, CandidateComponents);
     UE_LOG(LogLevel::Display, " Candidate Count : %d", CandidateComponents.Num());
     //for (const auto iter : TObjectRange<UPrimitiveComponent>())
+#pragma endregion
+
+#pragma region Octree Intersects Frustum Components
+	// 프러스텀과 겹치는 오브젝트만 추출
+    TArray< UPrimitiveComponent*> FrustumOctreeComps;
+	TSet<UPrimitiveComponent*> FrustumOctreeUniqueComps;
+    TSet<uint32> UniqueUUIDs;
+    FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
+    Octree->Root->QueryFrustumUnique(Frustum, FrustumOctreeUniqueComps, UniqueUUIDs);
+    Octree->Root->QueryFrustum(Frustum, FrustumOctreeComps);
+    // 각각 옥트리와 겹치는 개수 (중복O, 중복 제거)를 차례로 출력합니다
+    UE_LOG(LogLevel::Display, " Frustum & Octree Basic Count : %d", FrustumOctreeComps.Num()); 
+    UE_LOG(LogLevel::Display, " Frustum & Octree Unique Count : %d", FrustumOctreeUniqueComps.Num());
+#pragma endregion
     for (const auto iter : CandidateComponents)
     {
         UPrimitiveComponent* pObj;

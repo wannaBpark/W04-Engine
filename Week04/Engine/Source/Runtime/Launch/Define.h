@@ -271,6 +271,51 @@ struct FBoundingBox
             (Other.min.z >= min.z) && (Other.max.z <= max.z);
     }
 };
+
+// 평면 정의
+struct FPlane
+{
+    FVector Normal;  // 평면의 법선 벡터
+    float D;         // 평면 방정식의 D 값
+
+    // 기본 생성자
+    FPlane() : Normal(FVector::ZeroVector), D(0) {}
+
+    // 법선과 한 점을 이용하여 평면 정의
+    FPlane(const FVector& InNormal, const FVector& Point)
+        : Normal(InNormal.Normalize()), D(-Normal.Dot(Point)) {
+    }
+    // 점이 평면과의 거리를 구함 (Ax + By + Cz + D)
+    float PlaneDot(const FVector& Point) const
+    {
+        return Normal.Dot(Point) + D;
+    }
+};
+// 프러스텀 정의
+struct FFrustum
+{
+    FPlane Planes[6]; // 6개 평면: Left, Right, Top, Bottom, Near, Far
+
+    // AABB와 프러스텀의 교차 여부 검사
+    FORCENOINLINE bool Intersects(const FBoundingBox& Box) const
+    {
+        for (int i = 0; i < 6; ++i)
+        {
+            const FPlane& plane = Planes[i];
+            // n-vertex 계산 (평면 반대 방향 최소점)
+            FVector p;
+            p.x = (plane.Normal.x >= 0) ? Box.max.x : Box.min.x;
+            p.y = (plane.Normal.y >= 0) ? Box.max.y : Box.min.y;
+            p.z = (plane.Normal.z >= 0) ? Box.max.z : Box.min.z;
+
+            //UE_LOG(LogLevel::Display, "Plane %d dot < 0 ", i);
+            if (plane.PlaneDot(p) < 0) // 평면 외부에 있으면
+                return false;
+        }
+        return true;
+    }
+};
+
 struct FCone
 {
     FVector ConeApex; // 원뿔의 꼭짓점
