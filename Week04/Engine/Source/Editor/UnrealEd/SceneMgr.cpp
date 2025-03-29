@@ -146,45 +146,72 @@ bool FSceneMgr::LoadSceneFromFile(const FString& filename)
 
     // TODO : Parsing 부분 함수 분리 필요.
     try {
+#pragma region 멀티 뷰포트 관련 로드
+        //if (jsonData.contains("PerspectiveCamera"))
+        //{
+        //    auto camData = jsonData["PerspectiveCamera"];
+
+        //    std::shared_ptr<FEditorViewportClient>* clients = GEngineLoop.GetLevelEditor()->GetViewports();
+
+        //    if (clients)
+        //    {
+        //        for (auto& [key, value] : camData.items())
+        //        {
+        //            int index = std::stoi(key);
+        //            if (index < 0 || index >= 4) continue;
+        //            if (clients[index] == nullptr) continue;
+
+        //            auto& client = clients[index];
+
+        //            // 위치 및 회전
+        //            FVector Location, Rotation;
+        //            if (value.contains("Location") && value["Location"].is_array())
+        //                Location = FVector(value["Location"][0], value["Location"][1], value["Location"][2]);
+
+        //            if (value.contains("Rotation") && value["Rotation"].is_array())
+        //                Rotation = FVector(value["Rotation"][0], value["Rotation"][1], value["Rotation"][2]);
+
+        //            float FOV = value.contains("FOV") ? value["FOV"].get<float>() : 60.0f;
+        //            float nearClip = value.contains("NearClip") ? value["NearClip"].get<float>() : 0.1f;
+        //            float farClip = value.contains("FarClip") ? value["FarClip"].get<float>() : 100000.0f;
+
+        //            client->ViewTransformPerspective.SetLocation(Location);
+        //            client->ViewTransformPerspective.SetRotation(Rotation);
+        //            client->ViewFOV = FOV;
+        //            client->nearPlane = nearClip;
+        //            client->farPlane = farClip;
+
+        //            client->UpdateViewMatrix();
+        //            client->UpdateProjectionMatrix();
+        //        }
+        //    }
+        //}
+#pragma endregion
+#pragma region 단일 뷰포트 관련 로드
         if (jsonData.contains("PerspectiveCamera"))
         {
             auto camData = jsonData["PerspectiveCamera"];
-
+            FVector Location(camData["Location"][0], camData["Location"][1], camData["Location"][2]);
+            FVector Rotation(camData["Rotation"][0], camData["Rotation"][1], camData["Rotation"][2]);
+            float FOV = camData["FOV"][0];
+            float nearClip = camData["NearClip"][0];
+            float farClip = camData["FarClip"][0];
+            
             std::shared_ptr<FEditorViewportClient>* clients = GEngineLoop.GetLevelEditor()->GetViewports();
 
-            if (clients)
-            {
-                for (auto& [key, value] : camData.items())
-                {
-                    int index = std::stoi(key);
-                    if (index < 0 || index >= 4) continue;
-                    if (clients[index] == nullptr) continue;
-
-                    auto& client = clients[index];
-
-                    // 위치 및 회전
-                    FVector Location, Rotation;
-                    if (value.contains("Location") && value["Location"].is_array())
-                        Location = FVector(value["Location"][0], value["Location"][1], value["Location"][2]);
-
-                    if (value.contains("Rotation") && value["Rotation"].is_array())
-                        Rotation = FVector(value["Rotation"][0], value["Rotation"][1], value["Rotation"][2]);
-
-                    float FOV = value.contains("FOV") ? value["FOV"].get<float>() : 60.0f;
-                    float nearClip = value.contains("NearClip") ? value["NearClip"].get<float>() : 0.1f;
-                    float farClip = value.contains("FarClip") ? value["FarClip"].get<float>() : 100000.0f;
-
-                    client->ViewTransformPerspective.SetLocation(Location);
-                    client->ViewTransformPerspective.SetRotation(Rotation);
-                    client->ViewFOV = FOV;
-                    client->nearPlane = nearClip;
-                    client->farPlane = farClip;
-
-                    client->UpdateViewMatrix();
-                    client->UpdateProjectionMatrix();
-                }
+            // 모든 뷰포트에 set하지만 실질적으로 perspective viewport에만 제대로 적용.
+            for (int i = 0; i < 4; i++) {
+                auto& client = clients[i];
+                client->ViewTransformPerspective.SetLocation(Location);
+                client->ViewTransformPerspective.SetRotation(Rotation);
+                client->ViewFOV = FOV;
+                client->nearPlane = nearClip;
+                client->farPlane = farClip;
+                client->UpdateViewMatrix();
+                client->UpdateProjectionMatrix();
             }
         }
+#pragma endrigon
         if (jsonData.contains("Primitives"))
         {
             auto& primitives = jsonData["Primitives"];
@@ -234,11 +261,14 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
     json j;
 
     // Version과 NextUUID 저장
-    j["Version"] = sceneData.Version;
+    // TODO : Version정보 제거
+    //j["Version"] = sceneData.Version;
     j["NextUUID"] = sceneData.NextUUID;
-
+    
+#pragma region primitiveComponent 관련 저장 주석
+    // FIXME : worldData bake 과정 수정 후 확인 필요.
     // Primitives 처리 (C++17 스타일)
-    for (const auto& [Id, Obj] : sceneData.Primitives)
+   /* for (const auto& [Id, Obj] : sceneData.Primitives)
     {
         USceneComponent* primitive = static_cast<USceneComponent*>(Obj);
         std::vector<float> Location = { primitive->GetWorldLocation().x,primitive->GetWorldLocation().y,primitive->GetWorldLocation().z };
@@ -257,42 +287,70 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
              {"Type", primitiveName}
         };
 
-        // StaticMesh라면 추가 정보
+        */
+        // //StaticMesh라면 추가 정보
         //if (primitiveName == "StaticMeshComp")
         //{
         //    UStaticMeshComponent* staticMesh = dynamic_cast<UStaticMeshComponent*>(primitive);
         //    if (staticMesh && staticMesh->GetStaticMesh())
         //    {
-        //        j["ObjStaticMeshAsset"] = staticMesh->GetStaticMesh()->GetRenderData()->PathName(); // 예: "Data/apple_mid.obj"
+        //        FWString name = staticMesh->GetStaticMesh()->GetRenderData()->ObjectName;
+        //        //std::string str(name.begin(), name.end());
+        //        j["ObjStaticMeshAsset"] = name; // 예: "Data/apple_mid.obj"
         //    }
         //}
 
-        //j["Primitives"][std::to_string(Id)] = primitiveJson;
-    }
+   //       j["Primitives"][std::to_string(Id)] = primitiveJson;
+ //}
+#pragma endregion
 
+#pragma region 멀티 뷰포트 관련 씬 저장 주석
 
-    std::shared_ptr<FEditorViewportClient>* viewportClient = GEngineLoop.GetLevelEditor()->GetViewports();
-    if (viewportClient) {
-        int id = 0;
-        for (auto& client : std::span(viewportClient, 4))
-        {
-            if(!client) continue;
-            const FVector& loc = client->ViewTransformPerspective.GetLocation();
-            const FVector& rot = client->ViewTransformPerspective.GetRotation();
-            float fov = client->ViewFOV;
-            float nearClip = client->nearPlane;
-            float farClip = client->farPlane;
+    //std::shared_ptr<FEditorViewportClient>* viewportClient = GEngineLoop.GetLevelEditor()->GetViewports();
+    //if (viewportClient) {
+    //    // FIXME : 카메라 id값 임의 설정
+    //    int id = 0;
+    //    for (auto& client : std::span(viewportClient, 4))
+    //    {
+    //        if(!client) continue;
+    //        const FVector& loc = client->ViewTransformPerspective.GetLocation();
+    //        const FVector& rot = client->ViewTransformPerspective.GetRotation();
+    //        float fov = client->ViewFOV;
+    //        float nearClip = client->nearPlane;
+    //        float farClip = client->farPlane;
 
-            j["PerspectiveCamera"][std::to_string(id)] = {
-                {"Location", { loc.x, loc.y, loc.z }},
-                {"Rotation", { rot.x, rot.y, rot.z }},
-                {"FOV", fov},
-                {"NearClip", nearClip},
-                {"FarClip", farClip}
-            };
-            id++; 
-        }
-    }
+    //        j["PerspectiveCamera"][std::to_string(id)] = {
+    //            {"Location", { loc.x, loc.y, loc.z }},
+    //            {"Rotation", { rot.x, rot.y, rot.z }},
+    //            {"FOV", fov},
+    //            {"NearClip", nearClip},
+    //            {"FarClip", farClip}
+    //        };
+    //        id++; 
+    //    }
+    //}
+#pragma endregion
+
+#pragma region 싱글 뷰포트 관련 씬 저장
+    // 활성화 뷰포트 기준 저장.
+    std::shared_ptr<FEditorViewportClient> client = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+    
+    //FIXME : 예외 처리
+    if (!client)    return "";
+    const FVector& loc = client->ViewTransformPerspective.GetLocation();
+    const FVector& rot = client->ViewTransformPerspective.GetRotation();
+    float fov = client->ViewFOV;
+    float nearClip = client->nearPlane;
+    float farClip = client->farPlane;
+
+    j["PerspectiveCamera"] = {
+        {"Location", { loc.x, loc.y, loc.z }},
+        {"Rotation", { rot.x, rot.y, rot.z }},
+        {"FOV",       std::vector<float>{fov}},
+        {"NearClip",  std::vector<float>{nearClip}},   
+        {"FarClip",   std::vector<float>{farClip}}     
+    };
+#pragma endregion
     return j.dump(4); // 4는 들여쓰기 수준
 }
 
@@ -314,6 +372,7 @@ bool FSceneMgr::SaveSceneToFile(const FString& filename)
     return true;
 }
 
+//FIXME : 현재 primitive component 들 데이터 bake 안되는 상태.
 SceneData FSceneMgr::GetWorldSceneData() {
     SceneData sceneData;
     sceneData.Version = 1;
