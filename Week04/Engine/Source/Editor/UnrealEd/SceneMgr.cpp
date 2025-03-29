@@ -149,14 +149,48 @@ bool FSceneMgr::LoadSceneFromFile(const FString& filename)
         if (jsonData.contains("PerspectiveCamera"))
         {
             auto camData = jsonData["PerspectiveCamera"];
-            FVector Location(camData["Location"][0], camData["Location"][1], camData["Location"][2]);
-            FVector Rotation(camData["Rotation"][0], camData["Rotation"][1], camData["Rotation"][2]);
-            float FOV = camData["FOV"][0];
 
-            auto Viewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
-            Viewport->ViewTransformPerspective.SetLocation(Location);
-            Viewport->ViewTransformPerspective.SetRotation(Rotation);
-            Viewport->ViewFOV = FOV;
+            std::shared_ptr<FEditorViewportClient>* clients = GEngineLoop.GetLevelEditor()->GetViewports();
+
+            if (clients)
+            {
+                for (int i = 0; i < 4; ++i) // 최대 4개 뷰포트
+                {
+                    if (clients[i] == nullptr) continue;
+
+                    auto& client = clients[i];
+
+                    // 위치 및 회전
+                    FVector Location, Rotation;
+                    if (camData.contains("Location"))
+                    {
+                        auto loc = camData["Location"];
+                        if (loc.is_array() && loc.size() == 3)
+                            Location = FVector(loc[0], loc[1], loc[2]);
+                    }
+                    if (camData.contains("Rotation"))
+                    {
+                        auto rot = camData["Rotation"];
+                        if (rot.is_array() && rot.size() == 3)
+                            Rotation = FVector(rot[0], rot[1], rot[2]);
+                    }
+
+                    // FOV, near/far clip
+                    float FOV = camData.contains("FOV") ? camData["FOV"][0].get<float>() : 60.0f;
+                    float nearClip = camData.contains("NearClip") ? camData["NearClip"][0].get<float>() : 0.1f;
+                    float farClip = camData.contains("FarClip") ? camData["FarClip"][0].get<float>() : 10000.0f;
+
+                    client->ViewTransformPerspective.SetLocation(Location);
+                    client->ViewTransformPerspective.SetRotation(Rotation);
+                    client->ViewFOV = FOV;
+                    client->nearPlane = nearClip;
+                    client->farPlane = farClip;
+
+                    // View/projection matrix 갱신
+                    client->UpdateViewMatrix();
+                    client->UpdateProjectionMatrix();
+                }
+            }
         }
         if (jsonData.contains("Primitives"))
         {
@@ -223,40 +257,56 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
         if (pos != INDEX_NONE) {
             primitiveName = primitiveName.substr(0, pos);
         }
-        j["Primitives"][std::to_string(Id)] = {
-            {"Location", Location},
-            {"Rotation", Rotation},
-            {"Scale", Scale},
-            {"Type",primitiveName}
+        json primitiveJson = {
+             {"Location", Location},
+             {"Rotation", Rotation},
+             {"Scale", Scale},
+             {"Type", primitiveName}
         };
-    }
 
-    for (const auto& [id, camera] : sceneData.Cameras)
-    {
-        UCameraComponent* cameraComponent = static_cast<UCameraComponent*>(camera);
-        TArray<float> Location = { cameraComponent->GetWorldLocation().x, cameraComponent->GetWorldLocation().y, cameraComponent->GetWorldLocation().z };
-        TArray<float> Rotation = { 0.0f, cameraComponent->GetWorldRotation().y, cameraComponent->GetWorldRotation().z };
-        float FOV = cameraComponent->GetFOV();
-        float nearClip = cameraComponent->GetNearClip();
-        float farClip = cameraComponent->GetFarClip();
-    
-        //
-        j["PerspectiveCamera"][std::to_string(id)] = {
-            {"Location", Location},
-            {"Rotation", Rotation},
-            {"FOV", FOV},
-            {"NearClip", nearClip},
-            {"FarClip", farClip}
-        };
+        // StaticMesh라면 추가 정보
+        //if (primitiveName == "StaticMeshComp")
+        //{
+        //    UStaticMeshComponent* staticMesh = dynamic_cast<UStaticMeshComponent*>(primitive);
+        //    if (staticMesh && staticMesh->GetStaticMesh())
+        //    {
+        //        j["ObjStaticMeshAsset"] = staticMesh->GetStaticMesh()->GetRenderData()->PathName(); // 예: "Data/apple_mid.obj"
+        //    }
+        //}
+
+        //j["Primitives"][std::to_string(Id)] = primitiveJson;
     }
 
 
+    std::shared_ptr<FEditorViewportClient>* viewportClient = GEngineLoop.GetLevelEditor()->GetViewports();
+    if (viewportClient) {
+        int id = 0;
+        for (auto& client : std::span(viewportClient, 4))
+        {
+            if(!client) continue;
+            const FVector& loc = client->ViewTransformPerspective.GetLocation();
+            const FVector& rot = client->ViewTransformPerspective.GetRotation();
+            float fov = client->ViewFOV;
+            float nearClip = client->nearPlane;
+            float farClip = client->farPlane;
+
+            j["PerspectiveCamera"][std::to_string(id)] = {
+                {"Location", { loc.x, loc.y, loc.z }},
+                {"Rotation", { rot.x, rot.y, rot.z }},
+                {"FOV", fov},
+                {"NearClip", nearClip},
+                {"FarClip", farClip}
+            };
+            id++;
+        }
+    }
     return j.dump(4); // 4는 들여쓰기 수준
 }
 
 // SceneData를 json으로 직렬화하여 파일에 저장.
-bool FSceneMgr::SaveSceneToFile(const FString& filename, const SceneData& sceneData)
+bool FSceneMgr::SaveSceneToFile(const FString& filename)
 {
+    SceneData sceneData = GetWorldSceneData();
     std::ofstream outFile(*filename);
     if (!outFile) {
         FString errorMessage = "Failed to open file for writing: ";
@@ -269,5 +319,36 @@ bool FSceneMgr::SaveSceneToFile(const FString& filename, const SceneData& sceneD
     outFile.close();
 
     return true;
+}
+
+SceneData FSceneMgr::GetWorldSceneData() {
+    SceneData sceneData;
+    sceneData.Version = 1;
+    sceneData.NextUUID = 0;
+
+    const TSet<AActor*>& Actors = GEngineLoop.GetWorld()->GetActors();
+
+    for (AActor* Actor : Actors)
+    {
+        if (!Actor)
+            continue;
+
+        // 우선 루트 컴포넌트를 Primitive로 저장
+        if (USceneComponent* RootComp = Actor->GetRootComponent())
+        {
+            int32 Id = sceneData.NextUUID++;
+            sceneData.Primitives[Id] = RootComp;
+        }
+
+        // Actor 내부에 CameraComponent가 있을 경우 찾아 저장
+        // 여기선 RootComp 외에 camera 같은 멤버를 직접 가정
+        if (UCameraComponent* Camera = Actor->GetComponentByClass<UCameraComponent>())
+        {
+            int32 Id = sceneData.NextUUID++;
+            sceneData.Cameras[Id] = Camera;
+        }
+    }
+
+    return sceneData;
 }
 

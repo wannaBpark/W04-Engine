@@ -129,6 +129,7 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
             //ScneData currentSceneData = GengineLoop.GetWorld()->ExprotSceneData();
             // TODO: Save Scene
             
+            FSceneMgr::SaveSceneToFile(FileName);
             tinyfd_messageBox("알림", "저장되었습니다.", "ok", "info", 1);
         }
 
