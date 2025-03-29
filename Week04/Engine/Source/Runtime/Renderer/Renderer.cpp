@@ -21,6 +21,8 @@
 #include "UObject/UObjectIterator.h"
 #include "Components/SkySphereComponent.h"
 
+#define SAFE_RELEASE(p)       { if (p) { (p)->Release();  (p) = nullptr; } }
+
 void FRenderer::Initialize(FGraphicsDevice* graphics)
 {
     Graphics = graphics;
@@ -71,23 +73,9 @@ void FRenderer::CreateShader()
 
 void FRenderer::ReleaseShader()
 {
-    if (InputLayout)
-    {
-        InputLayout->Release();
-        InputLayout = nullptr;
-    }
-
-    if (PixelShader)
-    {
-        PixelShader->Release();
-        PixelShader = nullptr;
-    }
-
-    if (VertexShader)
-    {
-        VertexShader->Release();
-        VertexShader = nullptr;
-    }
+    SAFE_RELEASE(InputLayout);
+    SAFE_RELEASE(InputLayout);
+    SAFE_RELEASE(VertexShader);
 }
 
 void FRenderer::PrepareShader() const
@@ -376,41 +364,12 @@ void FRenderer::CreateLitUnlitBuffer()
 
 void FRenderer::ReleaseConstantBuffer()
 {
-    if (ConstantBuffer)
-    {
-        ConstantBuffer->Release();
-        ConstantBuffer = nullptr;
-    }
-
-    if (LightingBuffer)
-    {
-        LightingBuffer->Release();
-        LightingBuffer = nullptr;
-    }
-
-    if (FlagBuffer)
-    {
-        FlagBuffer->Release();
-        FlagBuffer = nullptr;
-    }
-
-    if (MaterialConstantBuffer)
-    {
-        MaterialConstantBuffer->Release();
-        MaterialConstantBuffer = nullptr;
-    }
-
-    if (SubMeshConstantBuffer)
-    {
-        SubMeshConstantBuffer->Release();
-        SubMeshConstantBuffer = nullptr;
-    }
-
-    if (TextureConstantBufer)
-    {
-        TextureConstantBufer->Release();
-        TextureConstantBufer = nullptr;
-    }
+    SAFE_RELEASE(ConstantBuffer);
+    SAFE_RELEASE(LightingBuffer);
+    SAFE_RELEASE(FlagBuffer);
+    SAFE_RELEASE(MaterialConstantBuffer);
+    SAFE_RELEASE(SubMeshConstantBuffer);
+    SAFE_RELEASE(TextureConstantBufer);
 }
 
 void FRenderer::UpdateLightBuffer() const
@@ -566,33 +525,11 @@ void FRenderer::CreateTextureShader()
 
 void FRenderer::ReleaseTextureShader()
 {
-    if (TextureInputLayout)
-    {
-        TextureInputLayout->Release();
-        TextureInputLayout = nullptr;
-    }
-
-    if (PixelTextureShader)
-    {
-        PixelTextureShader->Release();
-        PixelTextureShader = nullptr;
-    }
-
-    if (VertexTextureShader)
-    {
-        VertexTextureShader->Release();
-        VertexTextureShader = nullptr;
-    }
-    if (SubUVConstantBuffer)
-    {
-        SubUVConstantBuffer->Release();
-        SubUVConstantBuffer = nullptr;
-    }
-    if (ConstantBuffer)
-    {
-        ConstantBuffer->Release();
-        ConstantBuffer = nullptr;
-    }
+    SAFE_RELEASE(TextureInputLayout);
+    SAFE_RELEASE(PixelTextureShader);
+    SAFE_RELEASE(VertexTextureShader);
+    SAFE_RELEASE(SubUVConstantBuffer);
+    SAFE_RELEASE(ConstantBuffer);
 }
 
 void FRenderer::PrepareTextureShader() const
@@ -954,6 +891,7 @@ void FRenderer::UpdateLinePrimitveCountBuffer(int numBoundingBoxes, int numCones
     Graphics->DeviceContext->Unmap(LinePrimitiveBuffer, 0);
 }
 
+// 월드그리드, Bounding Box, Cone을 한 데 모아 배치 렌더링하는 코드
 void FRenderer::RenderBatch(
     const FGridParameters& gridParam, ID3D11Buffer* pVertexBuffer, int boundingBoxCount, int coneCount, int coneSegmentCount, int obbCount
 ) const
@@ -1009,14 +947,14 @@ void FRenderer::Render(UWorld* World, std::shared_ptr<FEditorViewportClient> Act
     UpdateLightBuffer();
     UPrimitiveBatch::GetInstance().RenderBatch(ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix());
 
-    if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))
+    if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives)) // Static Mesh 렌더
         RenderStaticMeshes(World, ActiveViewport);
     RenderGizmos(World, ActiveViewport);
-    if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))
+    if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))    // 빌보드 텍스트 렌더
         RenderBillboards(World, ActiveViewport);
     RenderLight(World, ActiveViewport);
     
-    ClearRenderArr();
+    ClearRenderArr(); // 왜 비워주는가?
 }
 
 void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)

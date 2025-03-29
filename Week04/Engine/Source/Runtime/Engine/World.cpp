@@ -4,6 +4,9 @@
 #include "BaseGizmos/TransformGizmo.h"
 #include "Camera/CameraComponent.h"
 #include "LevelEditor/SLevelEditor.h"
+#include "Runtime/GeometryCore/Octree.h"
+#include "UObject/UObjectIterator.h"
+#include "Components/PrimitiveComponent.h"
 
 
 void UWorld::Initialize()
@@ -137,4 +140,31 @@ bool UWorld::DestroyActor(AActor* ThisActor)
 void UWorld::SetPickingGizmo(UObject* Object)
 {
 	pickingGizmo = Cast<USceneComponent>(Object);
+}
+
+void UWorld::SetOctreeSystem(const TArray<UPrimitiveComponent*>& Components)
+{
+    if (OctreeSystem* Octree = this->GetOctreeSystem())
+    {
+        delete Octree;
+
+        TArray<UPrimitiveComponent*> WorldComps;
+        for (const auto& obj : Components)
+        {
+            WorldComps.Add(obj);
+        }
+        Octree = new OctreeSystem();
+        this->SetOctreeSystem(Octree);
+        Octree->Build(WorldComps);
+    }
+    else
+    {
+        // 옥트리가 없으면 새로 생성
+        Octree = new OctreeSystem();
+        // FBoundingBox BBox; BBox.min = -10; BBox.max = 10;
+        //Octree->Root = new OctreeNode(BBox, 10);
+        this->SetOctreeSystem(Octree); // 월드에 옥트리 시스템 연결
+        Octree->Build(Components);
+        //Octree->Build({ MeshComp });    // 첫 번째 컴포넌트를 포함하여 옥트리 초기화
+    }
 }
