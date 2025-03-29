@@ -17,6 +17,7 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "UObject/UObjectIterator.h"
 #include "GeometryCore/Octree.h"
+#include "GeometryCore/KDTree.h"
 
 
 
@@ -244,14 +245,24 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     // 옥트리 시스템 가져오기
     UWorld* World = GetWorld();
     OctreeSystem* Octree = World->GetOctreeSystem();
+    KDTreeSystem* KDTree = World->GetKDTreeSystem();
     if (!Octree || !Octree->Root)
     {
         // 옥트리가 없으면 기존 방식으로 폴백
         UE_LOG(LogLevel::Display, "Octree not initialized!");
         return;
     }
+    if (!KDTree || !KDTree->Root)
+    {
+        UE_LOG(LogLevel::Display, "KDTree not initialized!");
+        return;
+    }
 #pragma region Octree Components Ray Intersects
     // 옥트리에서 후보 컴포넌트 추출
+    TArray<UPrimitiveComponent*> KDComponents;
+    TSet<UPrimitiveComponent*> KDUniqueComps;
+    TSet<uint32> KDUniqueUUIDs;
+
     TArray<UPrimitiveComponent*> CandidateComponents;
     TSet<UPrimitiveComponent*> RayUniqueComps;
     TSet<uint32> RayUniqueUUIDs;
@@ -259,8 +270,15 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     Ray MyRay = GetRayDirection(pickPosition);
     //Octree->Root->QueryRay(MyRay.Origin, MyRay.Direction, CandidateComponents);
     Octree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, RayUniqueComps, RayUniqueUUIDs);
+    KDTree->Root->QueryRay(MyRay.Origin, MyRay.Direction, KDComponents);
+    //KDTree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, KDUniqueComps, KDUniqueUUIDs);
+    UE_LOG(LogLevel::Display, " Ray All Candidate Count : %d", KDComponents.Num());
+    //UE_LOG(LogLevel::Display, " Ray Unique Candidate Count : %d", KDUniqueComps.Num());
+
     //UE_LOG(LogLevel::Display, " Ray All Candidate Count : %d", CandidateComponents.Num());
     //UE_LOG(LogLevel::Display, " Ray Unique Candidate Count : %d", RayUniqueComps.Num());
+
+
 
 #pragma endregion
 

@@ -396,19 +396,6 @@ void OctreeNode::RemoveComponent(UPrimitiveComponent* Comp)
             Child->RemoveComponent(Comp);
         }
     }
-    //// 자식 노드가 있는 경우, 해당 자식 노드로 전달
-    //if (Children[0]) {
-    //    for (auto& Child : Children) {
-    //        Child->RemoveComponent(Comp);
-    //    }
-    //}
-    //else {
-    //    // 리프 노드에서 컴포넌트를 제거
-    //    int32 Index = Components.Find(Comp);
-    //    if (Index != INDEX_NONE) {
-    //        Components.RemoveAt(Index);
-    //    }
-    //}
 }
 
 void OctreeSystem::Build(const TArray<UPrimitiveComponent*>& Components)  
@@ -436,14 +423,10 @@ void OctreeSystem::Build(const TArray<UPrimitiveComponent*>& Components)
        SceneMax = SceneMax.ComponentMax(WorldBBox.max);
    } 
    if (Root) {
-       //SceneMin = SceneMin.ComponentMin(Root->Bounds.min);
-       //SceneMax = SceneMax.ComponentMax(Root->Bounds.max);
        delete Root;
-       //Root->Bounds = { SceneMin, SceneMax };
    }
-   //else {
-       Root = new OctreeNode(FBoundingBox(SceneMin, SceneMax));
-   //}
+   Root = new OctreeNode(FBoundingBox(SceneMin, SceneMax));
+
    // 현재 Root의 월드 박스와 비교하여 다시 설정
    //UE_LOG(LogLevel::Display, "Min Bounding Box : %.2f %.2f %.2f", SceneMin.x, SceneMin.y, SceneMin.z);
    //UE_LOG(LogLevel::Display, "Max Bounding Box : %.2f %.2f %.2f", SceneMax.x, SceneMax.y, SceneMax.z);
