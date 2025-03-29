@@ -21,18 +21,37 @@ class UBillboardComponent;
 class UStaticMeshComponent;
 class UGizmoBaseComponent;
 
+//~ Material Sort 관련 구조체
+/**
+ * StaticMesh의 Render Data를 가지고 있는 구조체
+ */
+struct FStaticMeshRenderInfo
+{
+    UStaticMeshComponent* StaticMeshComp;
+    ID3D11Buffer* VertexBuffer;
+    ID3D11Buffer* IndexBuffer;
+    FMatrix ModelMatrix;  // M
+    FMatrix MVP;          // MVP
+    FMatrix NormalMatrix; // Normal Matrix
+    FVector4 UUIDColor;
+    bool bIsSelected;     // Mesh가 선택되어 있는지 여부
+};
+
 /**
  * Material Sort에 사용되는 Subset정보를 가지고 있는 구조체
  */
-struct FSubsetInfo
+struct FSubsetRenderInfo
 {
-    ID3D11Buffer* VertexBuffer;
-    ID3D11Buffer* IndexBuffer;
+    std::shared_ptr<FStaticMeshRenderInfo> StaticMeshInfo;
     uint32 IndexCount;
     uint32 StartIndex;
     uint32 BaseVertexLocation;
-    FMatrix Transform;
+    bool bIsSubsetSelected;  // Subset이 선택되어있는지 여부
 };
+
+using MaterialSubsetRenderData = TMap<UMaterial*, TArray<FSubsetRenderInfo>>;
+//~ Material Sort 관련 구조체
+
 
 class FRenderer
 {
@@ -53,7 +72,7 @@ public:
     FLighting lightingData;
 
     uint32 Stride;
-    uint32 Stride2;
+    uint32 TextureStride;
 
     void Initialize(FGraphicsDevice* graphics);
 
@@ -63,11 +82,12 @@ public:
     void RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices) const;
     void RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices) const;
     void RenderPrimitive(
-        OBJ::FStaticMeshRenderData* renderData, TArray<FStaticMaterial*> materials, TArray<UMaterial*> overrideMaterial, int selectedSubMeshIndex
+        const OBJ::FStaticMeshRenderData* renderData, const TArray<FStaticMaterial*>& materials, const TArray<UMaterial*>&
+        overrideMaterial, int selectedSubMeshIndex = -1
     ) const;
 
     // Subset Optimizer
-    // void RenderPrimitive(const TMap<>);
+    void RenderPrimitive(const MaterialSubsetRenderData& SubsetRenderData) const;
 
     void RenderTexturedModelPrimitive(
         ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices, ID3D11ShaderResourceView* InTextureSRV,
@@ -103,14 +123,12 @@ public:
     void UpdateMaterial(const FObjMaterialInfo& MaterialInfo) const;
     void UpdateLitUnlitConstant(int isLit) const;
     void UpdateSubMeshConstant(bool isSelected) const;
-    void UpdateTextureConstant(float UOffset, float VOffset);
+    void UpdateTextureConstant(float UOffset, float VOffset) const;
 
     //텍스쳐용 기능 추가
     ID3D11VertexShader* VertexTextureShader = nullptr;
     ID3D11PixelShader* PixelTextureShader = nullptr;
     ID3D11InputLayout* TextureInputLayout = nullptr;
-
-    uint32 TextureStride;
 
     struct FSubUVConstant
     {
@@ -166,11 +184,11 @@ public:
     //Render Pass Demo
     void PrepareRender();
     void ClearRenderArr();
-    void Render(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
-    void RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
+    void RenderStaticMeshes(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
     void RenderGizmos(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
     void RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
-    void RenderBillboards(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    void RenderBillboards(UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
 
 private:
     TArray<UStaticMeshComponent*> StaticMeshObjs;
