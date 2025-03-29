@@ -37,49 +37,53 @@ void OctreeNode::Insert(UPrimitiveComponent* Comp)
 void OctreeNode::Subdivide()  
 {
     // 작은 객체가 많을 경우 조기 분할 중지
-    //float NodeSize = (Bounds.max.x - Bounds.min.x);
-    //if (NodeSize < 100.0f) return; // 최소 크기 제한
+    // float NodeSize = (Bounds.max.x - Bounds.min.x);
+    // if (NodeSize < 100.0f) return; // 최소 크기 제한
 
-   FVector Center = (Bounds.min + Bounds.max) * 0.5f;  
-   FVector HalfExtent = (Bounds.max - Bounds.min) * 0.5f;  
+    FVector Center = (Bounds.min + Bounds.max) * 0.5f;
+    FVector HalfExtent = (Bounds.max - Bounds.min) * 0.5f;
 
-   // 8개 영역 계산  
-   FVector ChildMins[8] = {  
-       Bounds.min,                            // 좌하단 앞  
-       FVector(Center.x, Bounds.min.y, Bounds.min.z), // 우하단 앞  
-       FVector(Bounds.min.x, Center.y, Bounds.min.z), // 좌상단 앞  
-       FVector(Center.x, Center.y, Bounds.min.z),     // 우상단 앞  
-       FVector(Bounds.min.x, Bounds.min.y, Center.z), // 좌하단 뒤  
-       FVector(Center.x, Bounds.min.y, Center.z),     // 우하단 뒤  
-       FVector(Bounds.min.x, Center.y, Center.z),     // 좌상단 뒤  
-       Center                                   // 우상단 뒤  
-   };  
+    // 8개 영역 계산
+    FVector ChildMins[8] = {
+        Bounds.min,                                    // 좌하단 앞
+        FVector(Center.x, Bounds.min.y, Bounds.min.z), // 우하단 앞
+        FVector(Bounds.min.x, Center.y, Bounds.min.z), // 좌상단 앞
+        FVector(Center.x, Center.y, Bounds.min.z),     // 우상단 앞
+        FVector(Bounds.min.x, Bounds.min.y, Center.z), // 좌하단 뒤
+        FVector(Center.x, Bounds.min.y, Center.z),     // 우하단 뒤
+        FVector(Bounds.min.x, Center.y, Center.z),     // 좌상단 뒤
+        Center                                         // 우상단 뒤
+    };
 
-   for (size_t i{ 0 }; i < 8; ++i)
-   {  
-       FVector ChildMax = ChildMins[i] + HalfExtent;  
-       Children[i] = new OctreeNode(FBoundingBox(ChildMins[i], ChildMax), Depth+1);  
-   }  
+    for (size_t i { 0 }; i < 8; ++i)
+    {
+        FVector ChildMax = ChildMins[i] + HalfExtent;
+        Children[i] = new OctreeNode(FBoundingBox(ChildMins[i], ChildMax), Depth + 1);
+    }
 
-   // 기존 컴포넌트 재분배 후, 부모 배열 초기화  
-   TArray<UPrimitiveComponent*> OldComponents = Components;
-   Components.Empty();
+    // 기존 컴포넌트 재분배 후, 부모 배열 초기화
+    TArray<UPrimitiveComponent*> OldComponents;
+    std::swap(OldComponents, Components);
 
-   // 컴포넌트가 해당 자식 노드와 교차하면 삽입
-   for (auto& Comp : OldComponents) {
-       for (auto& Child : Children) {
-           FMatrix Model = JungleMath::CreateModelMatrix(
-               Comp->GetWorldLocation(),
-               Comp->GetWorldRotation(),
-               Comp->GetWorldScale()
-           );
-           FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
-               Comp->AABB, Comp->GetWorldLocation(), Model
-           );
-           if (Child->Bounds.Intersects(WorldBBox))
-               Child->Insert(Comp);
-       }
-   }
+    // 컴포넌트가 해당 자식 노드와 교차하면 삽입
+    for (auto& Comp : OldComponents)
+    {
+        for (const auto& Child : Children)
+        {
+            FMatrix Model = JungleMath::CreateModelMatrix(
+                Comp->GetWorldLocation(),
+                Comp->GetWorldRotation(),
+                Comp->GetWorldScale()
+            );
+            FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
+                Comp->AABB, Comp->GetWorldLocation(), Model
+            );
+            if (Child->Bounds.Intersects(WorldBBox))
+            {
+                Child->Insert(Comp);
+            }
+        }
+    }
 }  
 
 void OctreeNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPrimitiveComponent*>& OutComponents)  

@@ -10,31 +10,45 @@ class OctreeNode
 public:
     FBoundingBox Bounds;
     TArray<UPrimitiveComponent*> Components;
-    OctreeNode* Children[8]{ nullptr };
-    int Depth{ 0 };
-    inline static const int MAX_DEPTH = 5;          // 최대 깊이
-    inline static const int MAX_OBJECTS = 12;       // 한 부모가 최대로 가질 자식 수
+    OctreeNode* Children[8] = { nullptr, };
+    int Depth = 0;
+    inline static constexpr int MAX_DEPTH = 5;    // 최대 깊이
+    inline static constexpr int MAX_OBJECTS = 12; // 한 부모가 최대로 가질 자식 수
 
     OctreeNode(const FBoundingBox& InBounds, int InDepth = 0)
-        : Bounds(InBounds), Depth(InDepth)
+        : Bounds(InBounds)
+        , Depth(InDepth)
     {
-
     }
 
-    ~OctreeNode() { for (auto& Child : Children) delete Child; }
+    ~OctreeNode()
+    {
+        for (const auto& Child : Children)
+        {
+            delete Child;
+        }
+    }
 
-    void Insert(UPrimitiveComponent * Comp);
+    void Insert(UPrimitiveComponent* Comp);
     void Subdivide();
-    void QueryRay(const FVector& Origin, const FVector& Dir,
-        TArray<UPrimitiveComponent*>& OutComponents);
+    void QueryRay(
+        const FVector& Origin, const FVector& Dir,
+        TArray<UPrimitiveComponent*>& OutComponents
+    );
     void UpdateComponent(UPrimitiveComponent* Comp);
     void RemoveComponent(UPrimitiveComponent* Comp);
 
     void CollectComponents(TArray<UPrimitiveComponent*>& OutComponents)
     {
-        for (auto& MyComp : Components) OutComponents.Add(MyComp);
-        if (Children[0]) {
-            for (auto& Child : Children) {
+        for (const auto& MyComp : Components)
+        {
+            OutComponents.Add(MyComp);
+        }
+
+        if (Children[0])
+        {
+            for (const auto& Child : Children)
+            {
                 Child->CollectComponents(OutComponents);
             }
         }
@@ -44,11 +58,10 @@ public:
 class OctreeSystem
 {
 public:
-    OctreeNode* Root{ nullptr };
+    OctreeNode* Root = nullptr;
 
     void Build(const TArray<UPrimitiveComponent*>& Components);
     void AddComponent(UPrimitiveComponent* Comp);
 
     void UpdateComponentPosition(UPrimitiveComponent* Comp);
-
 };
