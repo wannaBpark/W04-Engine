@@ -43,12 +43,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 }
             }
         }
-     Console::GetInstance().OnResize(hWnd);
-    // ControlPanel::GetInstance().OnResize(hWnd);
-    // PropertyPanel::GetInstance().OnResize(hWnd);
-    // Outliner::GetInstance().OnResize(hWnd);
-    // ViewModeDropdown::GetInstance().OnResize(hWnd);
-    // ShowFlags::GetInstance().OnResize(hWnd);
+        Console::GetInstance().OnResize(hWnd);
+        // ControlPanel::GetInstance().OnResize(hWnd);
+        // PropertyPanel::GetInstance().OnResize(hWnd);
+        // Outliner::GetInstance().OnResize(hWnd);
+        // ViewModeDropdown::GetInstance().OnResize(hWnd);
+        // ShowFlags::GetInstance().OnResize(hWnd);
         if (GEngineLoop.GetUnrealEditor())
         {
             GEngineLoop.GetUnrealEditor()->OnResize(hWnd);
