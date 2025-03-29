@@ -63,8 +63,8 @@ void AEditorPlayer::Input()
 
             const auto& ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
             ScreenToViewSpace(mousePos.x, mousePos.y, ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix(), pickPosition);
-            bool res = PickGizmo(pickPosition);
-            if (!res) PickActor(pickPosition);
+            /*bool res = PickGizmo(pickPosition);   
+            if (!res) */PickActor(pickPosition);
 
             PickingTimeInfo.LastPickingTime.store(
                 static_cast<float>(CycleCount_PickingTime.Finish())
@@ -260,7 +260,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     //Octree->Root->QueryRay(MyRay.Origin, MyRay.Direction, CandidateComponents);
     Octree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, RayUniqueComps, RayUniqueUUIDs);
     //UE_LOG(LogLevel::Display, " Ray All Candidate Count : %d", CandidateComponents.Num());
-    UE_LOG(LogLevel::Display, " Ray Unique Candidate Count : %d", RayUniqueComps.Num());
+    //UE_LOG(LogLevel::Display, " Ray Unique Candidate Count : %d", RayUniqueComps.Num());
 
 #pragma endregion
 

@@ -13,8 +13,8 @@ public:
     TArray<UPrimitiveComponent*> Components;
     OctreeNode* Children[8] = { nullptr, };
     int Depth = 0;
-    inline static constexpr int MAX_DEPTH = 12;    // 최대 깊이
-    inline static constexpr int MAX_OBJECTS = 15; // 한 부모가 최대로 가질 자식 수
+    inline static constexpr int MAX_DEPTH = 5;    // 최대 깊이
+    inline static constexpr int MAX_OBJECTS = 10; // 한 부모가 최대로 가질 자식 수
     inline static constexpr float LOOSE_FACTOR = 1.5f;  // 느슨한 경계 확장 계수
 
     OctreeNode(const FBoundingBox& InBounds, int InDepth = 0)
