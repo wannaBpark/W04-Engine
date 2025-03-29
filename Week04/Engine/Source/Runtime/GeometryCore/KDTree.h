@@ -27,8 +27,8 @@ public:
     KDTreeNode* Right;
 
     // 노드 분할 시 최대 저장 객체 수 및 최대 깊이 (상수)
-    static const int MAX_OBJECTS = 8;
-    static const int MAX_DEPTH = 10;
+    static const int MAX_OBJECTS = 10;
+    static const int MAX_DEPTH = 12;
 
 public:
     KDTreeNode(const FBoundingBox& InBounds, int InDepth);
@@ -53,6 +53,15 @@ public:
     void RemoveComponent(UPrimitiveComponent* Comp);
     // 컴포넌트 위치/상태 업데이트 (Bounds와 비교하여 노드 내 업데이트)
     void UpdateComponent(UPrimitiveComponent* Comp);
+
+    // 소프트웨어 Occlusion Test
+// 카메라에서 후보 객체의 중심까지의 ray를 따라, kd‑tree를 통해 occluder 후보들을 추출하여
+// 더 가까운 occluder가 있다면 occluded된 것으로 간주합니다.
+    //bool IsOccluded(UPrimitiveComponent* comp, const Camera& camera, KDTreeSystem* kdTree);
+
+    // 소프트웨어 Occlusion Culling 수행 함수
+    // kdTree에서 Frustum 쿼리를 통해 후보들을 추리고, 각 후보에 대해 occlusion 테스트를 수행합니다.
+    //void PerformSoftwareOcclusionCulling(KDTreeSystem* kdTree, const Camera& camera, TArray<UPrimitiveComponent*>& OutVisibleComponents);
 };
 
 class KDTreeSystem

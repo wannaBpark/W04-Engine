@@ -73,19 +73,19 @@ void KDTreeNode::Insert(UPrimitiveComponent* Comp)
     }
 
     // 좌측 자식의 Bounds에 완전히 포함되면 좌측에 삽입
-    if (Left->Bounds.Contains(WorldBBox))
+    if (Left->Bounds.Intersects(WorldBBox))
     {
         Left->Insert(Comp);
         return;
     }
     // 우측 자식의 Bounds에 완전히 포함되면 우측에 삽입
-    if (Right->Bounds.Contains(WorldBBox))
+    else if (Right->Bounds.Intersects(WorldBBox))
     {
         Right->Insert(Comp);
         return;
     }
     // 어느 한쪽에도 완전히 포함되지 않으면 현재 노드에 추가
-    Components.Add(Comp);
+    else Components.Add(Comp);
 }
 
 void KDTreeNode::Subdivide()
@@ -131,11 +131,11 @@ void KDTreeNode::Subdivide()
         FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
             Comp->AABB, Comp->GetWorldLocation(), Model
         );
-        if (Left->Bounds.Contains(WorldBBox))
+        if (Left->Bounds.Intersects(WorldBBox))
         {
             Left->Insert(Comp);
         }
-        else if (Right->Bounds.Contains(WorldBBox))
+        else if (Right->Bounds.Intersects(WorldBBox))
         {
             Right->Insert(Comp);
         }
@@ -152,16 +152,18 @@ void KDTreeNode::QueryFrustum(const FFrustum& Frustum, TArray<UPrimitiveComponen
     if (!Frustum.Intersects(Bounds))
         return;
 
-    // 현재 노드의 컴포넌트 추가
-    for (UPrimitiveComponent* Comp : Components)
-    {
-        OutComponents.Add(Comp);
-    }
+    
     // 자식 노드가 있다면 재귀적으로 호출
     if (Left)
         Left->QueryFrustum(Frustum, OutComponents);
     if (Right)
         Right->QueryFrustum(Frustum, OutComponents);
+    // 현재 노드의 컴포넌트 추가
+    
+    for (UPrimitiveComponent* Comp : Components)
+    {
+        OutComponents.Add(Comp);
+    }
 }
 
 void KDTreeNode::QueryFrustumUnique(const FFrustum& Frustum, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs)
@@ -189,15 +191,17 @@ void KDTreeNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPri
     float Distance;
     if (!Bounds.Intersect(Origin, Dir, Distance))
         return;
-
-    for (UPrimitiveComponent* Comp : Components)
-    {
-        OutComponents.Add(Comp);
-    }
+    
     if (Left)
         Left->QueryRay(Origin, Dir, OutComponents);
     if (Right)
         Right->QueryRay(Origin, Dir, OutComponents);
+    /*if (!Left && !Right)*/ {
+        for (UPrimitiveComponent*& Comp : Components)
+        {
+            OutComponents.Add(Comp);
+        }
+    }
 }
 
 void KDTreeNode::QueryRayUnique(const FVector& Origin, const FVector& Dir, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs)

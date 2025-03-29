@@ -64,8 +64,8 @@ void AEditorPlayer::Input()
 
             const auto& ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
             ScreenToViewSpace(mousePos.x, mousePos.y, ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix(), pickPosition);
-            /*bool res = PickGizmo(pickPosition);   
-            if (!res) */PickActor(pickPosition);
+            bool res = PickGizmo(pickPosition);   
+            if (!res) PickActor(pickPosition);
 
             PickingTimeInfo.LastPickingTime.store(
                 static_cast<float>(CycleCount_PickingTime.Finish())
@@ -269,7 +269,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
 
     Ray MyRay = GetRayDirection(pickPosition);
     //Octree->Root->QueryRay(MyRay.Origin, MyRay.Direction, CandidateComponents);
-    Octree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, RayUniqueComps, RayUniqueUUIDs);
+    //Octree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, RayUniqueComps, RayUniqueUUIDs);
     KDTree->Root->QueryRay(MyRay.Origin, MyRay.Direction, KDComponents);
     //KDTree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, KDUniqueComps, KDUniqueUUIDs);
     UE_LOG(LogLevel::Display, " Ray All Candidate Count : %d", KDComponents.Num());
@@ -295,7 +295,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
  //   UE_LOG(LogLevel::Display, " Frustum & Octree Unique Count : %d", FrustumOctreeUniqueComps.Num());
 #pragma endregion
     //for (const auto iter : FrustumOctreeUniqueComps)
-    for (const auto& iter : RayUniqueComps)
+    for (const auto& iter : KDComponents)
     {
         UPrimitiveComponent* pObj;
         if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())
