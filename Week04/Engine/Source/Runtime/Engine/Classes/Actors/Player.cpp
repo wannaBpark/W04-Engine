@@ -270,7 +270,8 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     Ray MyRay = GetRayDirection(pickPosition);
     //Octree->Root->QueryRay(MyRay.Origin, MyRay.Direction, CandidateComponents);
     //Octree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, RayUniqueComps, RayUniqueUUIDs);
-    KDTree->Root->QueryRay(MyRay.Origin, MyRay.Direction, KDComponents);
+    //KDTree->Root->QueryRay(MyRay.Origin, MyRay.Direction, KDComponents);
+    KDTree->FastRayPick(MyRay.Origin, MyRay.Direction, KDComponents);
     //KDTree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, KDUniqueComps, KDUniqueUUIDs);
     UE_LOG(LogLevel::Display, " Ray All Candidate Count : %d", KDComponents.Num());
     //UE_LOG(LogLevel::Display, " Ray Unique Candidate Count : %d", KDUniqueComps.Num());

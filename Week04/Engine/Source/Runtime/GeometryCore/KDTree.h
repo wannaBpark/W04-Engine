@@ -80,4 +80,7 @@ public:
 
     // 위치 변경 등으로 인한 업데이트
     void UpdateComponentPosition(UPrimitiveComponent* Comp);
+    void FastRayPick(const FVector& RayOrigin, const FVector& RayDir, TArray<UPrimitiveComponent*>& CandidateArray);
 };
+
+bool RayIntersectsObject(const FVector& RayOrigin, UPrimitiveComponent* Candidate, float& outDistance, int& outIntersectCount);
