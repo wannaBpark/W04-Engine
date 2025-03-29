@@ -15,6 +15,7 @@ public:
     static SceneData ParseSceneData(const FString& jsonStr);
     static bool LoadSceneFromFile(const FString& filename);
     static std::string SerializeSceneData(const SceneData& sceneData);
-    static bool SaveSceneToFile(const FString& filename, const SceneData& sceneData);
+    static bool SaveSceneToFile(const FString& filename);
+    static SceneData GetWorldSceneData();
 };
 
