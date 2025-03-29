@@ -572,11 +572,12 @@ void AEditorPlayer::UpdateVisibleStaticMeshComponents()
     if (!Octree || !Octree->Root) return;
 
     FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
-
+   
     // 보여지는 오브젝트들 초기화.
     Renderer->GetVisibleObjs().Empty();
-    TArray<UPrimitiveComponent*> FrustumComps;
-    Octree->Root->QueryFrustum(Frustum, FrustumComps);
+    TSet<UPrimitiveComponent*> FrustumComps;
+    TSet<uint32> UniqueUUIDs;
+    Octree->Root->QueryFrustumUnique(Frustum, FrustumComps, UniqueUUIDs);
     
     Renderer->SetVisibleObjs(FrustumComps);
     

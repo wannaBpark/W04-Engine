@@ -1118,12 +1118,12 @@ void FRenderer::RenderBillboards(UWorld* World, std::shared_ptr<FEditorViewportC
     PrepareShader();
 }
 
-TArray<UPrimitiveComponent*> FRenderer::GetVisibleObjs()
+TSet<UPrimitiveComponent*> FRenderer::GetVisibleObjs()
 {
     return VisibleObjs;
 }
 
-void FRenderer::SetVisibleObjs(TArray<UPrimitiveComponent*> comp)
+void FRenderer::SetVisibleObjs(TSet<UPrimitiveComponent*> comp)
 {
     VisibleObjs = comp;
 }

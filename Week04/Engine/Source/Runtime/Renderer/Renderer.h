@@ -145,7 +145,7 @@ public: // line shader
     void RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
     void RenderBillboards(UWorld* World,std::shared_ptr<FEditorViewportClient> ActiveViewport);
 private:
-    TArray<UPrimitiveComponent*> VisibleObjs;
+    TSet<UPrimitiveComponent*> VisibleObjs;
     TArray<UStaticMeshComponent*> StaticMeshObjs;
     TArray<UGizmoBaseComponent*> GizmoObjs;
     TArray<UBillboardComponent*> BillboardObjs;
@@ -161,7 +161,7 @@ public:
     ID3D11ShaderResourceView* pOBBSRV = nullptr;
     
 public:
-    TArray<UPrimitiveComponent*> GetVisibleObjs();
-    void SetVisibleObjs(TArray<UPrimitiveComponent*> comp);
+    TSet<UPrimitiveComponent*> GetVisibleObjs();
+    void SetVisibleObjs(TSet<UPrimitiveComponent*> comp);
 };
 
