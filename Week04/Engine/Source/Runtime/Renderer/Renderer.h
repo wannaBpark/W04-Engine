@@ -19,6 +19,7 @@ class FEditorViewportClient;
 class UBillboardComponent;
 class UStaticMeshComponent;
 class UGizmoBaseComponent;
+class UPrimitiveComponent;
 class FRenderer 
 {
 
@@ -144,6 +145,7 @@ public: // line shader
     void RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
     void RenderBillboards(UWorld* World,std::shared_ptr<FEditorViewportClient> ActiveViewport);
 private:
+    TArray<UPrimitiveComponent*> VisibleObjs;
     TArray<UStaticMeshComponent*> StaticMeshObjs;
     TArray<UGizmoBaseComponent*> GizmoObjs;
     TArray<UBillboardComponent*> BillboardObjs;
@@ -157,5 +159,9 @@ public:
     ID3D11ShaderResourceView* pBBSRV = nullptr;
     ID3D11ShaderResourceView* pConeSRV = nullptr;
     ID3D11ShaderResourceView* pOBBSRV = nullptr;
+    
+public:
+    TArray<UPrimitiveComponent*> GetVisibleObjs();
+    void SetVisibleObjs(TArray<UPrimitiveComponent*> comp);
 };
 

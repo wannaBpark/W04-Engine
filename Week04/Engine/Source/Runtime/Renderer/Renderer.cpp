@@ -20,6 +20,7 @@
 #include "PropertyEditor/ShowFlags.h"
 #include "UObject/UObjectIterator.h"
 #include "Components/SkySphereComponent.h"
+#include "Engine/Classes/Components/PrimitiveComponent.h"
 
 #define SAFE_RELEASE(p)       { if (p) { (p)->Release();  (p) = nullptr; } }
 
@@ -110,7 +111,6 @@ void FRenderer::ResetPixelShader() const
 
 void FRenderer::SetVertexShader(const FWString& filename, const FString& funcname, const FString& version)
 {
-    // ���� �߻��� ���ɼ��� ����
     if (Graphics == nullptr)
         assert(0);
     if (VertexShader != nullptr)
@@ -909,7 +909,10 @@ void FRenderer::RenderBatch(
 
 void FRenderer::PrepareRender()
 {
-    for (const auto iter : TObjectRange<USceneComponent>())
+    // ?? : TObjectRange<USceneComponent>()
+    //for (const auto iter : TObjectRange<USceneComponent>())
+
+    for (const auto iter : VisibleObjs)
     {
         if (UStaticMeshComponent* pStaticMeshComp = Cast<UStaticMeshComponent>(iter))
         {
@@ -960,6 +963,7 @@ void FRenderer::Render(UWorld* World, std::shared_ptr<FEditorViewportClient> Act
 void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
     PrepareShader();
+
     for (UStaticMeshComponent* StaticMeshComp : StaticMeshObjs)
     {
         FMatrix Model = JungleMath::CreateModelMatrix(
@@ -1113,6 +1117,17 @@ void FRenderer::RenderBillboards(UWorld* World, std::shared_ptr<FEditorViewportC
     }
     PrepareShader();
 }
+
+TArray<UPrimitiveComponent*> FRenderer::GetVisibleObjs()
+{
+    return VisibleObjs;
+}
+
+void FRenderer::SetVisibleObjs(TArray<UPrimitiveComponent*> comp)
+{
+    VisibleObjs = comp;
+}
+
 
 void FRenderer::RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {

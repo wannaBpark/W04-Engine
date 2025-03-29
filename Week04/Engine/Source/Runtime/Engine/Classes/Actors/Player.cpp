@@ -20,6 +20,7 @@
 
 
 
+
 using namespace DirectX;
 
 // Picking 성능 측정 저장용 static 구조체
@@ -29,6 +30,7 @@ void AEditorPlayer::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     Input();
+    UpdateVisibleStaticMeshComponents();
 }
 
 void AEditorPlayer::Input()
@@ -266,6 +268,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
 	TSet<UPrimitiveComponent*> FrustumOctreeUniqueComps;
     TSet<uint32> UniqueUUIDs;
     FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
+    
     Octree->Root->QueryFrustumUnique(Frustum, FrustumOctreeUniqueComps, UniqueUUIDs);
     Octree->Root->QueryFrustum(Frustum, FrustumOctreeComps);
     // 각각 옥트리와 겹치는 개수 (중복O, 중복 제거)를 차례로 출력합니다
@@ -559,6 +562,24 @@ void AEditorPlayer::ControlScale(USceneComponent* pObj, const UGizmoBaseComponen
         FVector moveDir = CameraUp * -DeltaY * 0.05f;
         pObj->AddScale(FVector(0.0f, 0.0f, moveDir.z));
     }
+}
+
+void AEditorPlayer::UpdateVisibleStaticMeshComponents()
+{
+    UWorld* World = GetWorld();
+    FRenderer* Renderer = &FEngineLoop::renderer;
+    OctreeSystem* Octree = World->GetOctreeSystem();
+    if (!Octree || !Octree->Root) return;
+
+    FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
+
+    // 보여지는 오브젝트들 초기화.
+    Renderer->GetVisibleObjs().Empty();
+    TArray<UPrimitiveComponent*> FrustumComps;
+    Octree->Root->QueryFrustum(Frustum, FrustumComps);
+    
+    Renderer->SetVisibleObjs(FrustumComps);
+    
 }
 
 Ray AEditorPlayer::GetRayDirection(const FVector& pickPosition)
