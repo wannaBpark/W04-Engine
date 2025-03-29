@@ -1,6 +1,7 @@
 #pragma once
 #include "Define.h"
 #include "Container/Array.h"
+#include "Container/Set.h"
 
 // TODO : 변경된 컴포넌트 재빌드 필요 (Octree->Build(DirtyComponents);
 class UPrimitiveComponent;
@@ -39,6 +40,8 @@ public:
             }
         }
     }
+    void QueryFrustum(const FFrustum& Frustum, TArray<UPrimitiveComponent*>& OutComponents);
+    void QueryFrustumUnique(const FFrustum& Frustum, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs);
 };
 
 class OctreeSystem
