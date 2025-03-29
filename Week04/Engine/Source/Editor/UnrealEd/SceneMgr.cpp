@@ -154,31 +154,25 @@ bool FSceneMgr::LoadSceneFromFile(const FString& filename)
 
             if (clients)
             {
-                for (int i = 0; i < 4; ++i) // 최대 4개 뷰포트
+                for (auto& [key, value] : camData.items())
                 {
-                    if (clients[i] == nullptr) continue;
+                    int index = std::stoi(key);
+                    if (index < 0 || index >= 4) continue;
+                    if (clients[index] == nullptr) continue;
 
-                    auto& client = clients[i];
+                    auto& client = clients[index];
 
                     // 위치 및 회전
                     FVector Location, Rotation;
-                    if (camData.contains("Location"))
-                    {
-                        auto loc = camData["Location"];
-                        if (loc.is_array() && loc.size() == 3)
-                            Location = FVector(loc[0], loc[1], loc[2]);
-                    }
-                    if (camData.contains("Rotation"))
-                    {
-                        auto rot = camData["Rotation"];
-                        if (rot.is_array() && rot.size() == 3)
-                            Rotation = FVector(rot[0], rot[1], rot[2]);
-                    }
+                    if (value.contains("Location") && value["Location"].is_array())
+                        Location = FVector(value["Location"][0], value["Location"][1], value["Location"][2]);
 
-                    // FOV, near/far clip
-                    float FOV = camData.contains("FOV") ? camData["FOV"][0].get<float>() : 60.0f;
-                    float nearClip = camData.contains("NearClip") ? camData["NearClip"][0].get<float>() : 0.1f;
-                    float farClip = camData.contains("FarClip") ? camData["FarClip"][0].get<float>() : 10000.0f;
+                    if (value.contains("Rotation") && value["Rotation"].is_array())
+                        Rotation = FVector(value["Rotation"][0], value["Rotation"][1], value["Rotation"][2]);
+
+                    float FOV = value.contains("FOV") ? value["FOV"].get<float>() : 60.0f;
+                    float nearClip = value.contains("NearClip") ? value["NearClip"].get<float>() : 0.1f;
+                    float farClip = value.contains("FarClip") ? value["FarClip"].get<float>() : 100000.0f;
 
                     client->ViewTransformPerspective.SetLocation(Location);
                     client->ViewTransformPerspective.SetRotation(Rotation);
@@ -186,7 +180,6 @@ bool FSceneMgr::LoadSceneFromFile(const FString& filename)
                     client->nearPlane = nearClip;
                     client->farPlane = farClip;
 
-                    // View/projection matrix 갱신
                     client->UpdateViewMatrix();
                     client->UpdateProjectionMatrix();
                 }
@@ -297,7 +290,7 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
                 {"NearClip", nearClip},
                 {"FarClip", farClip}
             };
-            id++;
+            id++; 
         }
     }
     return j.dump(4); // 4는 들여쓰기 수준
