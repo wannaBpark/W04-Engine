@@ -48,14 +48,14 @@ void AEditorPlayer::Input()
 
 			// 컬러 피킹 부분입니다
 //#if _DEBUG
-            uint32 UUID = GetEngine().graphicDevice.GetPixelUUID(mousePos);
-            // TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
-            for ( const auto obj : TObjectRange<USceneComponent>())
-            {
-                if (obj->GetUUID() != UUID) continue;
+            //uint32 UUID = GetEngine().graphicDevice.GetPixelUUID(mousePos);
+            //// TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
+            //for ( const auto obj : TObjectRange<USceneComponent>())
+            //{
+            //    if (obj->GetUUID() != UUID) continue;
 
-                UE_LOG(LogLevel::Display, "%s Pixel Pick", *obj->GetName());
-            }
+            //    UE_LOG(LogLevel::Display, "%s Pixel Pick", *obj->GetName());
+            //}
 //#endif
             ScreenToClient(GetEngine().hWnd, &mousePos);
 
@@ -68,8 +68,7 @@ void AEditorPlayer::Input()
 
             PickingTimeInfo.LastPickingTime.store(
                 static_cast<float>(CycleCount_PickingTime.Finish())
-                * FPlatformTime::GetSecondsPerCycle()
-                * 1000.0f,
+                * FPlatformTime::GetSecondsPerCycle() *1000.0f,
                 std::memory_order_relaxed
             );
             PickingTimeInfo.NumAttempts.fetch_add(1, std::memory_order_relaxed);
@@ -254,25 +253,31 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
 #pragma region Octree Components Ray Intersects
     // 옥트리에서 후보 컴포넌트 추출
     TArray<UPrimitiveComponent*> CandidateComponents;
+    TSet<UPrimitiveComponent*> RayUniqueComps;
+    TSet<uint32> RayUniqueUUIDs;
+
     Ray MyRay = GetRayDirection(pickPosition);
-    Octree->Root->QueryRay(MyRay.Origin, MyRay.Direction, CandidateComponents);
-    UE_LOG(LogLevel::Display, " Candidate Count : %d", CandidateComponents.Num());
-    //for (const auto iter : TObjectRange<UPrimitiveComponent>())
+    //Octree->Root->QueryRay(MyRay.Origin, MyRay.Direction, CandidateComponents);
+    Octree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, RayUniqueComps, RayUniqueUUIDs);
+    //UE_LOG(LogLevel::Display, " Ray All Candidate Count : %d", CandidateComponents.Num());
+    UE_LOG(LogLevel::Display, " Ray Unique Candidate Count : %d", RayUniqueComps.Num());
+
 #pragma endregion
 
 #pragma region Octree Intersects Frustum Components
 	// 프러스텀과 겹치는 오브젝트만 추출
-    TArray< UPrimitiveComponent*> FrustumOctreeComps;
-	TSet<UPrimitiveComponent*> FrustumOctreeUniqueComps;
-    TSet<uint32> UniqueUUIDs;
-    FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
-    Octree->Root->QueryFrustumUnique(Frustum, FrustumOctreeUniqueComps, UniqueUUIDs);
-    Octree->Root->QueryFrustum(Frustum, FrustumOctreeComps);
-    // 각각 옥트리와 겹치는 개수 (중복O, 중복 제거)를 차례로 출력합니다
-    UE_LOG(LogLevel::Display, " Frustum & Octree Basic Count : %d", FrustumOctreeComps.Num()); 
-    UE_LOG(LogLevel::Display, " Frustum & Octree Unique Count : %d", FrustumOctreeUniqueComps.Num());
+ //   TArray< UPrimitiveComponent*> FrustumOctreeComps;
+	//TSet<UPrimitiveComponent*> FrustumOctreeUniqueComps;
+ //   TSet<uint32> UniqueUUIDs;
+ //   FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
+ //   Octree->Root->QueryFrustumUnique(Frustum, FrustumOctreeUniqueComps, UniqueUUIDs);
+ //   Octree->Root->QueryFrustum(Frustum, FrustumOctreeComps);
+ //   // 각각 옥트리와 겹치는 개수 (중복O, 중복 제거)를 차례로 출력합니다
+ //   UE_LOG(LogLevel::Display, " Frustum & Octree Basic Count : %d", FrustumOctreeComps.Num()); 
+ //   UE_LOG(LogLevel::Display, " Frustum & Octree Unique Count : %d", FrustumOctreeUniqueComps.Num());
 #pragma endregion
-    for (const auto iter : CandidateComponents)
+    //for (const auto iter : FrustumOctreeUniqueComps)
+    for (const auto& iter : RayUniqueComps)
     {
         UPrimitiveComponent* pObj;
         if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())

@@ -56,39 +56,189 @@ void OctreeNode::QueryFrustumUnique(const FFrustum& Frustum, TSet<UPrimitiveComp
     }
 }
 #pragma endregion
+#if _LOOSEOCTREE
+void OctreeNode::Insert(UPrimitiveComponent* Comp)
+{
+    // 객체의 월드 AABB 계산
+    FMatrix Model = JungleMath::CreateModelMatrix(
+        Comp->GetWorldLocation(),
+        Comp->GetWorldRotation(),
+        Comp->GetWorldScale()
+    );
+    FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
+        Comp->AABB, Comp->GetWorldLocation(), Model
+    );
 
-void OctreeNode::Insert(UPrimitiveComponent* Comp)  
-{  
-   // AABB 교차 검사
-   FMatrix Model = JungleMath::CreateModelMatrix(
-       Comp->GetWorldLocation(),
-       Comp->GetWorldRotation(),
-       Comp->GetWorldScale()
-   );
-   FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
-       Comp->AABB, Comp->GetWorldLocation(), Model
-   );
-   if (!WorldBBox.Intersects(Bounds)) return;
+    // 현재 노드의 느슨한 경계(확장된 영역)와의 교차 여부를 체크
+    if (!WorldBBox.Intersects(GetLooseBounds()))
+        return;
 
-   // 자식이 없거나, 들고 있는 최대 수보다 많고 아직 depth가 넉넉할 때
-   if (!Children[0] && Components.Num() >= MAX_OBJECTS && Depth < MAX_DEPTH)  
-   {  
-       Subdivide();  
-   }  
+    // 자식이 없고, 최대 객체 수를 초과하며 아직 최대 깊이가 아니라면 분할
+    if (!Children[0] && Components.Num() >= MAX_OBJECTS && Depth < MAX_DEPTH)
+    {
+        Subdivide();
+    }
 
-   if (Children[0] != nullptr) {
-       // 여러 자식과 교차할 수 있으므로, 모든 해당 자식에 삽입  
-       for (auto& Child : Children) {
-           if (Child->Bounds.Intersects(WorldBBox))
-               Child->Insert(Comp);
-       }
-   }
-   else {
-       Components.Add(Comp);
-   }
-}  
+    // 자식 노드가 있다면, 각 자식의 느슨한 경계 내에 "완전히 포함"되는 노드에 삽입 시도
+    if (Children[0] != nullptr)
+    {
+        bool bInsertedIntoChild = false;
+        for (auto& Child : Children)
+        {
+            if (Child->GetLooseBounds().Contains(WorldBBox))
+            {
+                Child->Insert(Comp);
+                bInsertedIntoChild = true;
+                break;
+            }
+        }
+        // 어느 자식에도 완전히 포함되지 않으면 현재 노드에 보관
+        if (!bInsertedIntoChild)
+        {
+            Components.Add(Comp);
+        }
+        return;
+    }
+    else
+    {
+        Components.Add(Comp);
+    }
+}
+void OctreeNode::Subdivide()
+{
+    // 부모의 strict bounds를 기준으로 분할 (loose factor는 여기서 적용하지 않음)
+    FVector Center = (Bounds.min + Bounds.max) * 0.5f;
+    FVector HalfExtent = (Bounds.max - Bounds.min) * 0.5f;
 
-void OctreeNode::Subdivide()  
+    FVector ChildMins[8] = {
+        Bounds.min,                                    // 좌하단 앞
+        FVector(Center.x, Bounds.min.y, Bounds.min.z), // 우하단 앞
+        FVector(Bounds.min.x, Center.y, Bounds.min.z), // 좌상단 앞
+        FVector(Center.x, Center.y, Bounds.min.z),     // 우상단 앞
+        FVector(Bounds.min.x, Bounds.min.y, Center.z), // 좌하단 뒤
+        FVector(Center.x, Bounds.min.y, Center.z),     // 우하단 뒤
+        FVector(Bounds.min.x, Center.y, Center.z),     // 좌상단 뒤
+        Center                                         // 우상단 뒤
+    };
+
+    // 자식 노드의 strict bounds는 부모를 8분할한 영역 그대로 사용
+    for (size_t i = 0; i < 8; ++i)
+    {
+        FVector ChildMax = ChildMins[i] + HalfExtent; // loose factor 적용 없이 strict bounds 계산
+        Children[i] = new OctreeNode(FBoundingBox(ChildMins[i], ChildMax), Depth + 1);
+    }
+
+    // 기존에 현재 노드에 있던 컴포넌트들을 자식 노드로 재분배
+    TArray<UPrimitiveComponent*> OldComponents;
+    std::swap(OldComponents, Components);
+    for (auto& Comp : OldComponents)
+    {
+        bool bInserted = false;
+        FMatrix Model = JungleMath::CreateModelMatrix(
+            Comp->GetWorldLocation(),
+            Comp->GetWorldRotation(),
+            Comp->GetWorldScale()
+        );
+        FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
+            Comp->AABB, Comp->GetWorldLocation(), Model
+        );
+        for (auto& Child : Children)
+        {
+            if (Child->GetLooseBounds().Contains(WorldBBox))
+            {
+                Child->Insert(Comp);
+                bInserted = true;
+                break;
+            }
+        }
+        // 어느 자식에도 완전히 포함되지 않으면 현재 노드(부모)에 남김
+        if (!bInserted)
+        {
+            Components.Add(Comp);
+        }
+    }
+}
+void OctreeNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPrimitiveComponent*>& OutComponents)
+{
+    float Distance;
+    // 느슨한 경계를 기준으로 교차 검사
+    if (!GetLooseBounds().Intersect(Origin, Dir, Distance))
+        return;
+
+    if (Children[0] != nullptr)
+    {
+        for (auto& Child : Children)
+        {
+            Child->QueryRay(Origin, Dir, OutComponents);
+        }
+    }
+    else
+    {
+        for (auto& MyComp : Components)
+        {
+            OutComponents.Add(MyComp);
+        }
+    }
+}
+void OctreeNode::QueryRayUnique(const FVector& Origin, const FVector& Dir,
+    TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs)
+{
+    float Distance;
+    // strict Bounds 대신 느슨한 경계를 사용하여 ray와의 교차 판정
+    if (!GetLooseBounds().Intersect(Origin, Dir, Distance))
+        return;
+
+    // 자식 노드가 있으면 재귀적으로 탐색
+    if (Children[0] != nullptr) {
+        for (auto& Child : Children) {
+            Child->QueryRayUnique(Origin, Dir, OutComponents, UniqueUUIDs);
+        }
+    }
+    else {
+        // leaf 노드: 중복 없이 컴포넌트 추가
+        for (auto& MyComp : Components) {
+            uint32 UUID = MyComp->GetUUID(); // UPrimitiveComponent의 고유 식별자
+            if (!UniqueUUIDs.Contains(UUID))
+            {
+                UniqueUUIDs.Add(UUID);
+                OutComponents.Add(MyComp);
+            }
+        }
+    }
+}
+
+#else 
+
+void OctreeNode::Insert(UPrimitiveComponent* Comp)
+{
+    // AABB 교차 검사
+    FMatrix Model = JungleMath::CreateModelMatrix(
+        Comp->GetWorldLocation(),
+        Comp->GetWorldRotation(),
+        Comp->GetWorldScale()
+    );
+    FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
+        Comp->AABB, Comp->GetWorldLocation(), Model
+    );
+    if (!WorldBBox.Intersects(Bounds)) return;
+    // 자식이 없거나, 들고 있는 최대 수보다 많고 아직 depth가 넉넉할 때
+    if (!Children[0] && Components.Num() >= MAX_OBJECTS && Depth < MAX_DEPTH)
+    {
+        Subdivide();
+    }
+    if (Children[0] != nullptr) {
+        // 여러 자식과 교차할 수 있으므로, 모든 해당 자식에 삽입  
+        for (auto& Child : Children) {
+            if (Child->Bounds.Intersects(WorldBBox))
+                Child->Insert(Comp);
+        }
+    }
+    else {
+        Components.Add(Comp);
+    }
+}
+
+void OctreeNode::Subdivide()
 {
     // 작은 객체가 많을 경우 조기 분할 중지
     // float NodeSize = (Bounds.max.x - Bounds.min.x);
@@ -109,7 +259,7 @@ void OctreeNode::Subdivide()
         Center                                         // 우상단 뒤
     };
 
-    for (size_t i { 0 }; i < 8; ++i)
+    for (size_t i{ 0 }; i < 8; ++i)
     {
         FVector ChildMax = ChildMins[i] + HalfExtent;
         Children[i] = new OctreeNode(FBoundingBox(ChildMins[i], ChildMax), Depth + 1);
@@ -137,9 +287,8 @@ void OctreeNode::Subdivide()
             }
         }
     }
-} 
-
-void OctreeNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPrimitiveComponent*>& OutComponents)  
+}
+void OctreeNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPrimitiveComponent*>& OutComponents)
 {
     float Distance;
     if (!Bounds.Intersect(Origin, Dir, Distance)) return;
@@ -163,6 +312,32 @@ void OctreeNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPri
         }
     }
 }
+void OctreeNode::QueryRayUnique(const FVector& Origin, const FVector& Dir, 
+    TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs)
+{
+    float Distance;
+    if (!Bounds.Intersect(Origin, Dir, Distance)) return;
+
+    // 자식 노드가 있으면 재귀적 탐색
+    if (Children[0] != nullptr) {
+        for (auto& Child : Children) {
+            Child->QueryRayUnique(Origin, Dir, OutComponents, UniqueUUIDs);
+        }
+    }
+    else {
+        // leaf 노드 (더 이상 분할할 자식이 없으면) 자기 자신을 Output 컴포넌트 추가
+        for (auto& MyComp : Components) {
+            uint32 UUID = MyComp->GetUUID(); // UPrimitiveComponent의 고유 식별자
+            if (!UniqueUUIDs.Contains(UUID))
+            {
+                UniqueUUIDs.Add(UUID);
+                OutComponents.Add(MyComp);
+            }
+        }
+    }
+}
+#endif
+
 
 void OctreeNode::UpdateComponent(UPrimitiveComponent* Comp)
 {
