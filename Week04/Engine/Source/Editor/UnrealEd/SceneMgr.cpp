@@ -1,22 +1,22 @@
 #include "UnrealEd/SceneMgr.h"
-#include "JSON/json.hpp"
-#include "UObject/Object.h"
-#include "Components/SphereComp.h"
-#include "Components/CubeComp.h"
-#include "BaseGizmos/GizmoArrowComponent.h"
-#include "UObject/ObjectFactory.h"
 #include <fstream>
-#include "Components/UBillboardComponent.h"
+#include <tinyfiledialogs/tinyfiledialogs.h>
+#include "BaseGizmos/GizmoArrowComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Components/CubeComp.h"
 #include "Components/LightComponent.h"
 #include "Components/SkySphereComponent.h"
-#include "Camera/CameraComponent.h"
-#include "UObject/Casts.h"
-#include <tinyfiledialogs/tinyfiledialogs.h>
+#include "Components/SphereComp.h"
+#include "Components/UBillboardComponent.h"
 #include "Editor/LevelEditor/SLevelEditor.h"
 #include "Editor/UnrealEd/EditorViewportClient.h"
-#include <Engine/FLoaderOBJ.h>
-#include <Engine/StaticMeshActor.h>
+#include "Engine/FLoaderOBJ.h"
+#include "Engine/StaticMeshActor.h"
+#include "JSON/json.hpp"
 #include "Runtime/Engine/World.h"
+#include "UObject/Casts.h"
+#include "UObject/Object.h"
+#include "UObject/ObjectFactory.h"
 using json = nlohmann::json;
 
 //JSON 문자열 파싱해서 Scene Data 객체 구성.
@@ -212,6 +212,8 @@ bool FSceneMgr::LoadSceneFromFile(const FString& filename)
             }
         }
 #pragma endrigon
+        // [NOTE] UStaticMeshComp 배열을 옥트리 시스템에 추가 필요
+        TArray<UPrimitiveComponent*> StaticComps;
         if (jsonData.contains("Primitives"))
         {
             auto& primitives = jsonData["Primitives"];
@@ -239,10 +241,12 @@ bool FSceneMgr::LoadSceneFromFile(const FString& filename)
                     actor->SetActorScale(scale);
 
                     World->SetPickedActor(actor);
+                    StaticComps.Add(MeshComp);
                 }
 
             }
         }
+        World->SetOctreeSystem(StaticComps);
     }
     catch (const std::exception& e) {
         UE_LOG(LogLevel::Error, "Error parsing JSON: %s", e.what());

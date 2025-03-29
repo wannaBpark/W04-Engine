@@ -2,19 +2,24 @@
 #include "EditorPanel.h"
 
 #include "PropertyEditor/ControlEditorPanel.h"
+#include "PropertyEditor/FpsIndicator.h"
 #include "PropertyEditor/OutlinerEditorPanel.h"
 #include "PropertyEditor/PropertyEditorPanel.h"
 
 void UnrealEd::Initialize()
 {
-    auto ControlPanel = std::make_shared<ControlEditorPanel>();
+    const auto ControlPanel = std::make_shared<ControlEditorPanel>();
     Panels["ControlPanel"] = ControlPanel;
-    
-    auto OutlinerPanel = std::make_shared<OutlinerEditorPanel>();
+
+    const auto OutlinerPanel = std::make_shared<OutlinerEditorPanel>();
     Panels["OutlinerPanel"] = OutlinerPanel;
-    
-    auto PropertyPanel = std::make_shared<PropertyEditorPanel>();
+
+    const auto PropertyPanel = std::make_shared<PropertyEditorPanel>();
     Panels["PropertyPanel"] = PropertyPanel;
+
+    const auto FPSIndicator = std::make_shared<FFpsIndicator>();
+    Panels["FPSIndicator"] = FPSIndicator;
+    
 }
 
 void UnrealEd::Render() const
@@ -25,7 +30,7 @@ void UnrealEd::Render() const
     }
 }
 
-void UnrealEd::AddEditorPanel(const FString& PanelId, const std::shared_ptr<UEditorPanel>& EditorPanel)
+void UnrealEd::AddEditorPanel(const FString& PanelId, const std::shared_ptr<IEditorPanel>& EditorPanel)
 {
     Panels[PanelId] = EditorPanel;
 }
@@ -38,7 +43,7 @@ void UnrealEd::OnResize(HWND hWnd) const
     }
 }
 
-std::shared_ptr<UEditorPanel> UnrealEd::GetEditorPanel(const FString& PanelId)
+std::shared_ptr<IEditorPanel> UnrealEd::GetEditorPanel(const FString& PanelId)
 {
     return Panels[PanelId];
 }

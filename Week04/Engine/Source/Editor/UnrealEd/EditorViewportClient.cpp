@@ -463,3 +463,58 @@ FVector FViewportCameraTransform::GetUpVector()
 FViewportCameraTransform::FViewportCameraTransform()
 {
 }
+
+FFrustum FEditorViewportClient::CreateFrustumFromCamera()
+{
+    FFrustum Frustum;
+    auto& Camera = ViewTransformPerspective;
+    FVector CamPos = Camera.GetLocation();
+    FVector Forward = Camera.GetForwardVector().Normalize(); // 카메라 정면 방향 (+Z)
+    FVector Right = Camera.GetRightVector().Normalize();   // 카메라 우측 방향 (+X)
+    FVector Up = Camera.GetUpVector().Normalize();      // 카메라 상측 방향 (+Y)
+
+    constexpr float FarDist = 100.0f;             // TODO : 변경 필요!!!!!!
+    const float& FOV = FOVAngle;
+    const float& NearDist = nearPlane;
+
+    const float HalfV = tanf(FMath::DegreesToRadians(FOV) * 0.5f) * NearDist;
+    const float HalfH = HalfV * AspectRatio;
+
+    const FVector NearCenter = CamPos + Forward * NearDist;
+    const FVector FarCenter = CamPos + Forward * FarDist;
+
+    const FVector Back = Forward * -1.0f;
+    // Near / Far 평면
+    Frustum.Planes[4] = FPlane(Forward, NearCenter);  // Near
+    Frustum.Planes[5] = FPlane(Back, FarCenter);  // Far
+
+    // Left 평면
+    FVector LeftNormal = (NearCenter - Right * HalfH - CamPos).Normalize();
+    Frustum.Planes[0] = FPlane(Up.Cross(LeftNormal), CamPos);
+
+    // Right 평면
+    FVector RightNormal = (NearCenter + Right * HalfH - CamPos).Normalize();
+    Frustum.Planes[1] = FPlane(RightNormal.Cross(Up), CamPos);
+
+    // Top 평면
+    FVector TopNormal = (NearCenter + Up * HalfV - CamPos).Normalize();
+    Frustum.Planes[2] = FPlane(Right.Cross(TopNormal), CamPos);
+    /*FVector TopNormal = (NearCenter + Up * HalfV - CamPos).Normalize();
+    Frustum.Planes[2] = FPlane(TopNormal.Cross(Right), CamPos);*/
+
+    // Bottom 평면
+    FVector BottomNormal = (NearCenter - Up * HalfV - CamPos).Normalize();
+    Frustum.Planes[3] = FPlane(BottomNormal.Cross(Right), CamPos);
+    /*FVector BottomNormal = (NearCenter - Up * HalfV - CamPos).Normalize();
+    Frustum.Planes[3] = FPlane(Right.Cross(BottomNormal), CamPos);*/
+
+    // 출력용 로그 (평면의 normal 방향 체크용)
+    /*const char* name[6] = {
+        "Left", "Right", "Top", "Bottom", "Near", "Far"
+    };
+    for (int i = 0; i < 6; ++i) {
+        UE_LOG(LogLevel::Display, "Plane No %s : %.2f %.2f %.2f", name[i],
+            Frustum.Planes[i].Normal.x, Frustum.Planes[i].Normal.y, Frustum.Planes[i].Normal.z);
+    }*/
+    return Frustum;
+}

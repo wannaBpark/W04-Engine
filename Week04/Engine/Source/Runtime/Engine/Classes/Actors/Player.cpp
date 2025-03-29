@@ -1,6 +1,7 @@
-﻿#include "Player.h"
+#include "Player.h"
 
 #include "UnrealClient.h"
+#include "WindowsPlatformTime.h"
 #include "World.h"
 #include "BaseGizmos/GizmoArrowComponent.h"
 #include "BaseGizmos/GizmoCircleComponent.h"
@@ -12,15 +13,17 @@
 #include "Math/JungleMath.h"
 #include "Math/MathUtility.h"
 #include "PropertyEditor/ShowFlags.h"
+#include "Stats/Stats.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UObject/UObjectIterator.h"
+#include "GeometryCore/Octree.h"
+
 
 
 using namespace DirectX;
 
-AEditorPlayer::AEditorPlayer()
-{
-}
+// Picking 성능 측정 저장용 static 구조체
+AEditorPlayer::FPickingTimeInfo AEditorPlayer::PickingTimeInfo{};
 
 void AEditorPlayer::Tick(float DeltaTime)
 {
@@ -36,20 +39,24 @@ void AEditorPlayer::Input()
     {
         if (!bLeftMouseDown)
         {
+            QUICK_SCOPE_CYCLE_COUNTER(PickingTime);
             bLeftMouseDown = true;
 
             POINT mousePos;
             GetCursorPos(&mousePos);
             GetCursorPos(&m_LastMousePos);
 
+			// 컬러 피킹 부분입니다
+//#if _DEBUG
             uint32 UUID = GetEngine().graphicDevice.GetPixelUUID(mousePos);
             // TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
             for ( const auto obj : TObjectRange<USceneComponent>())
             {
                 if (obj->GetUUID() != UUID) continue;
 
-                UE_LOG(LogLevel::Display, *obj->GetName());
+                UE_LOG(LogLevel::Display, "%s Pixel Pick", *obj->GetName());
             }
+//#endif
             ScreenToClient(GetEngine().hWnd, &mousePos);
 
             FVector pickPosition;
@@ -58,6 +65,15 @@ void AEditorPlayer::Input()
             ScreenToViewSpace(mousePos.x, mousePos.y, ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix(), pickPosition);
             bool res = PickGizmo(pickPosition);
             if (!res) PickActor(pickPosition);
+
+            PickingTimeInfo.LastPickingTime.store(
+                static_cast<float>(CycleCount_PickingTime.Finish())
+                * FPlatformTime::GetSecondsPerCycle()
+                * 1000.0f,
+                std::memory_order_relaxed
+            );
+            PickingTimeInfo.NumAttempts.fetch_add(1, std::memory_order_relaxed);
+            PickingTimeInfo.AccumulatedTime.fetch_add(PickingTimeInfo.LastPickingTime, std::memory_order_relaxed);
         }
         else
         {
@@ -127,21 +143,21 @@ void AEditorPlayer::Input()
     }
 }
 
-bool AEditorPlayer::PickGizmo(FVector& pickPosition)
+bool AEditorPlayer::PickGizmo(const FVector& rayOrigin)
 {
     bool isPickedGizmo = false;
-    if (GetWorld()->GetSelectedActor())
+    if (GetWorld()->GetSelectedActor())             // 현재 선택된 액터가 있다면
     {
         if (cMode == CM_TRANSLATION)
         {
-            for (auto iter : GetWorld()->LocalGizmo->GetArrowArr())
+            for (auto iter : GetWorld()->LocalGizmo->GetArrowArr()) // 3개의 ArrowArr 순회
             {
                 int maxIntersect = 0;
                 float minDistance = FLT_MAX;
                 float Distance = 0.0f;
                 int currentIntersectCount = 0;
                 if (!iter) continue;
-                if (RayIntersectsObject(pickPosition, iter, Distance, currentIntersectCount))
+                if (RayIntersectsObject(rayOrigin, iter, Distance, currentIntersectCount))
                 {
                     if (Distance < minDistance)
                     {
@@ -161,7 +177,7 @@ bool AEditorPlayer::PickGizmo(FVector& pickPosition)
         }
         else if (cMode == CM_ROTATION)
         {
-            for (auto iter : GetWorld()->LocalGizmo->GetDiscArr())
+            for (auto iter : GetWorld()->LocalGizmo->GetDiscArr())          // 3개의 rotation 디스크 모양 교차 검사
             {
                 int maxIntersect = 0;
                 float minDistance = FLT_MAX;
@@ -169,7 +185,7 @@ bool AEditorPlayer::PickGizmo(FVector& pickPosition)
                 int currentIntersectCount = 0;
                 //UPrimitiveComponent* localGizmo = dynamic_cast<UPrimitiveComponent*>(GetWorld()->LocalGizmo[i]);
                 if (!iter) continue;
-                if (RayIntersectsObject(pickPosition, iter, Distance, currentIntersectCount))
+                if (RayIntersectsObject(rayOrigin, iter, Distance, currentIntersectCount))
                 {
                     if (Distance < minDistance)
                     {
@@ -196,7 +212,7 @@ bool AEditorPlayer::PickGizmo(FVector& pickPosition)
                 float Distance = 0.0f;
                 int currentIntersectCount = 0;
                 if (!iter) continue;
-                if (RayIntersectsObject(pickPosition, iter, Distance, currentIntersectCount))
+                if (RayIntersectsObject(rayOrigin, iter, Distance, currentIntersectCount))
                 {
                     if (Distance < minDistance)
                     {
@@ -225,7 +241,38 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     const UActorComponent* Possible = nullptr;
     int maxIntersect = 0;
     float minDistance = FLT_MAX;
-    for (const auto iter : TObjectRange<UPrimitiveComponent>())
+
+    // 옥트리 시스템 가져오기
+    UWorld* World = GetWorld();
+    OctreeSystem* Octree = World->GetOctreeSystem();
+    if (!Octree || !Octree->Root)
+    {
+        // 옥트리가 없으면 기존 방식으로 폴백
+        UE_LOG(LogLevel::Display, "Octree not initialized!");
+        return;
+    }
+#pragma region Octree Components Ray Intersects
+    // 옥트리에서 후보 컴포넌트 추출
+    TArray<UPrimitiveComponent*> CandidateComponents;
+    Ray MyRay = GetRayDirection(pickPosition);
+    Octree->Root->QueryRay(MyRay.Origin, MyRay.Direction, CandidateComponents);
+    UE_LOG(LogLevel::Display, " Candidate Count : %d", CandidateComponents.Num());
+    //for (const auto iter : TObjectRange<UPrimitiveComponent>())
+#pragma endregion
+
+#pragma region Octree Intersects Frustum Components
+	// 프러스텀과 겹치는 오브젝트만 추출
+    TArray< UPrimitiveComponent*> FrustumOctreeComps;
+	TSet<UPrimitiveComponent*> FrustumOctreeUniqueComps;
+    TSet<uint32> UniqueUUIDs;
+    FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
+    Octree->Root->QueryFrustumUnique(Frustum, FrustumOctreeUniqueComps, UniqueUUIDs);
+    Octree->Root->QueryFrustum(Frustum, FrustumOctreeComps);
+    // 각각 옥트리와 겹치는 개수 (중복O, 중복 제거)를 차례로 출력합니다
+    UE_LOG(LogLevel::Display, " Frustum & Octree Basic Count : %d", FrustumOctreeComps.Num()); 
+    UE_LOG(LogLevel::Display, " Frustum & Octree Unique Count : %d", FrustumOctreeUniqueComps.Num());
+#pragma endregion
+    for (const auto iter : CandidateComponents)
     {
         UPrimitiveComponent* pObj;
         if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())
@@ -260,6 +307,10 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     if (Possible)
     {
         GetWorld()->SetPickedActor(Possible->GetOwner());
+    }
+    else 
+    {
+        GetWorld()->SetPickedActor(nullptr);
     }
 }
 
@@ -378,7 +429,7 @@ void AEditorPlayer::PickedObjControl()
     }
 }
 
-void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
+void AEditorPlayer::ControlRotation(USceneComponent* pObj, const UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
     FVector cameraForward = GetWorld()->GetCamera()->GetForwardVector();
     FVector cameraRight = GetWorld()->GetCamera()->GetRightVector();
@@ -417,7 +468,7 @@ void AEditorPlayer::ControlRotation(USceneComponent* pObj, UGizmoBaseComponent* 
     }
 }
 
-void AEditorPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
+void AEditorPlayer::ControlTranslation(USceneComponent* pObj, const UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
     float DeltaX = static_cast<float>(deltaX);
     float DeltaY = static_cast<float>(deltaY);
@@ -470,9 +521,15 @@ void AEditorPlayer::ControlTranslation(USceneComponent* pObj, UGizmoBaseComponen
             pObj->AddLocation(FVector(0.0f, 0.0f, moveDir.z));
         }
     }
+
+    // 변화가 있을 때 pObj의 바운딩 박스 위치 업데이트
+    UWorld* World = GetWorld();
+    OctreeSystem* Octree = World->GetOctreeSystem();
+
+    // ------------------------------------ // 
 }
 
-void AEditorPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
+void AEditorPlayer::ControlScale(USceneComponent* pObj, const UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
 {
     float DeltaX = static_cast<float>(deltaX);
     float DeltaY = static_cast<float>(deltaY);
@@ -502,4 +559,30 @@ void AEditorPlayer::ControlScale(USceneComponent* pObj, UGizmoBaseComponent* Giz
         FVector moveDir = CameraUp * -DeltaY * 0.05f;
         pObj->AddScale(FVector(0.0f, 0.0f, moveDir.z));
     }
+}
+
+Ray AEditorPlayer::GetRayDirection(const FVector& pickPosition)
+{
+    Ray result;
+    FMatrix viewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
+    bool bIsOrtho = GetEngine().GetLevelEditor()->GetActiveViewportClient()->IsOrtho();
+
+    if (bIsOrtho)
+    {
+        FMatrix inverseView = FMatrix::Inverse(viewMatrix);
+        result.Origin = inverseView.TransformPosition(pickPosition);
+        result.Direction = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformOrthographic.GetForwardVector().Normalize();
+    }
+    else
+    {
+        FMatrix inverseViewMatrix = FMatrix::Inverse(viewMatrix);
+        FVector cameraOrigin = { 0,0,0 };
+        result.Origin = inverseViewMatrix.TransformPosition(cameraOrigin);
+        FVector transformedPick = inverseViewMatrix.TransformPosition(pickPosition);
+        result.Direction = (transformedPick - result.Origin).Normalize();
+    }
+
+    return result;
+
+
 }
