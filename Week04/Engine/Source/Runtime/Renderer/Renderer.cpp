@@ -245,6 +245,13 @@ void FRenderer::RenderPrimitive(const MaterialSubsetRenderData& SubsetRenderData
                     Graphics->DeviceContext->IASetIndexBuffer(StaticMeshInfo->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
                 }
 
+                UpdateConstant(
+                    StaticMeshInfo->MVP,
+                    StaticMeshInfo->NormalMatrix,
+                    StaticMeshInfo->UUIDColor,
+                    StaticMeshInfo->bIsSelected
+                );
+
                 /**
                  * SubsetRenderData를 설정할 때, 각 컴포넌트의 Mesh->Subset을 순회하며 배열에 넣기 때문에
                  * 한번 Buffer가 정해지면 다시 정해질 때 까지 같은 Mesh에 속한 Subset인것을 알 수 있음
@@ -260,13 +267,6 @@ void FRenderer::RenderPrimitive(const MaterialSubsetRenderData& SubsetRenderData
                     );
                 }
             }
-
-            UpdateConstant(
-                StaticMeshInfo->MVP,
-                StaticMeshInfo->NormalMatrix,
-                StaticMeshInfo->UUIDColor,
-                StaticMeshInfo->bIsSelected
-            );
 
             // bIsSubsetSelected이 true일때만 1번 바꿔주고, false일때는 Update안함
             if (SubsetInfo.bIsSubsetSelected)
