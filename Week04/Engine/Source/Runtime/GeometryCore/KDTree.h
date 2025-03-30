@@ -71,6 +71,7 @@ public:
 
     // 위치 변경 등으로 인한 업데이트
     void UpdateComponentPosition(UPrimitiveComponent* Comp);
+    TArray<UPrimitiveComponent*> KDTreeCullVisible(const FFrustum& viewFrustum, const FMatrix& viewProjMatrix, const DepthBuffer& depthBuffer);
 };
 
 // 구조체: 우선순위 큐 항목 [노드 포인터와 해당 노드의 교차 시작 거리]
@@ -119,5 +120,26 @@ struct SegmentTree {
     // query()는 전체 구간에 대해 최소 t값의 인덱스를 반환
     int query() {
         return idxTree[0];
+    }
+};
+
+
+class DepthBuffer {
+public:
+    int Width;
+    int Height;
+    std::vector<float> Depths; // size = Width * Height
+
+    DepthBuffer(int InWidth, int InHeight)
+        : Width(InWidth), Height(InHeight) {
+        // 기본값 1.0f (far plane)
+        Depths.resize(Width * Height, 1.0f);
+    }
+
+    // u, v는 [0, 1] 범위의 정규화된 화면 좌표
+    float GetDepth(float u, float v) const {
+        int x = std::min(Width - 1, std::max(0, static_cast<int>(u * Width)));
+        int y = std::min(Height - 1, std::max(0, static_cast<int>(v * Height)));
+        return Depths[y * Width + x];
     }
 };

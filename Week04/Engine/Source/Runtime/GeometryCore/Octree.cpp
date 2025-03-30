@@ -2,6 +2,7 @@
 #include "Engine/Source/Runtime/Engine/Classes/Components/PrimitiveComponent.h"   
 #include "Editor/UnrealEd/PrimitiveBatch.h"
 #include "Runtime/Core/Math/JungleMath.h"
+#include "KDTree.h"
 
 #pragma region Query Frustum Intersection
 void OctreeNode::QueryFrustum(const FFrustum& Frustum, TArray<UPrimitiveComponent*>& OutComponents)
