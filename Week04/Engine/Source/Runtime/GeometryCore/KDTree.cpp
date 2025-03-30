@@ -31,134 +31,96 @@ KDTreeNode::KDTreeNode(const FBoundingBox& InBounds, int InDepth)
 
 KDTreeNode::~KDTreeNode()
 {
-    if (Left)
-    {
+    if (Left) {
         delete Left;
         Left = nullptr;
     }
-    if (Right)
-    {
+    if (Right) {
         delete Right;
         Right = nullptr;
     }
 }
 
+// Insert: 객체의 위치를 기준으로 분할
 void KDTreeNode::Insert(UPrimitiveComponent* Comp)
 {
-    // 컴포넌트의 월드 AABB 계산
-    FMatrix Model = JungleMath::CreateModelMatrix(
-        Comp->GetWorldLocation(),
-        Comp->GetWorldRotation(),
-        Comp->GetWorldScale()
-    );
-    FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
-        Comp->AABB, Comp->GetWorldLocation(), Model
-    );
+    // 객체의 월드 위치를 구함 (물체의 중심)
+    FVector pos = Comp->GetWorldLocation();
 
-    // 현재 노드의 Bounds와 교차하지 않으면 삽입하지 않음
-    if (!WorldBBox.Intersects(Bounds)) { return; }
+    // 현재 노드 영역(Bounds)에 포함되지 않으면 삽입하지 않음
+    if (!Bounds.Contains(pos)) { return; }
 
-    // 자식이 없고, 아직 저장 객체 수가 MAX_OBJECTS 미만이거나 최대 깊이에 도달한 경우 현재 노드에 추가
+    // Leaf 노드이고, 저장 개수가 MAX_OBJECTS 미만이거나 최대 깊이에 도달한 경우 현재 노드에 추가
     if ((Left == nullptr && Right == nullptr) && (Components.Num() < MAX_OBJECTS || Depth >= MAX_DEPTH))
     {
         Components.Add(Comp);
         return;
     }
 
-    // 아직 자식이 생성되지 않았다면 분할 수행
+    // 아직 자식 노드가 생성되지 않았다면 분할
     if (Left == nullptr || Right == nullptr)
     {
         Subdivide();
     }
 
-    // 좌측 자식의 Bounds에 교차되면 좌측에 삽입
-    if (Left->Bounds.Intersects(WorldBBox))
-    {
+    // 분할 기준(SplitValue)와 객체 위치를 비교하여 왼쪽/오른쪽 자식에 삽입
+    if (pos[Axis] < SplitValue)
         Left->Insert(Comp);
-        return;
-    }
-    // 우측 자식의 Bounds에 교차되면 우측에 삽입
-    else if (Right->Bounds.Intersects(WorldBBox))
-    {
+    else
         Right->Insert(Comp);
-        return;
-    }
-    // 어느 한쪽에도 완전히 포함되지 않으면 현재 노드에 추가
-    else Components.Add(Comp);
 }
-
+// Subdivide: 현재 노드의 영역을 선택된 축 기준으로 두 영역으로 나눔
 void KDTreeNode::Subdivide()
 {
-    // 현재 노드의 Bounds를 해당 Axis에 대해 중앙으로 분할
     FVector leftMin = Bounds.min;
     FVector leftMax = Bounds.max;
     FVector rightMin = Bounds.min;
     FVector rightMax = Bounds.max;
 
-    // 선택된 축에 따라 분할
-        if (Axis == 0)
-        {
-            leftMax.x = SplitValue;
-            rightMin.x = SplitValue;
-        }
-        else if (Axis == 1)
-        {
-            leftMax.y = SplitValue;
-            rightMin.y = SplitValue;
-        }
-        else // Axis == 2
-        {
-            leftMax.z = SplitValue;
-            rightMin.z = SplitValue;
-        }
+    // 선택된 축에 대해 영역을 분할 (중앙값 SplitValue 기준)
+    if (Axis == 0)
+    {
+        leftMax.x = SplitValue;
+        rightMin.x = SplitValue;
+    }
+    else if (Axis == 1)
+    {
+        leftMax.y = SplitValue;
+        rightMin.y = SplitValue;
+    }
+    else // Axis == 2
+    {
+        leftMax.z = SplitValue;
+        rightMin.z = SplitValue;
+    }
 
     Left = new KDTreeNode(FBoundingBox(leftMin, leftMax), Depth + 1);
     Right = new KDTreeNode(FBoundingBox(rightMin, rightMax), Depth + 1);
 
-    // 기존에 저장된 컴포넌트들을 재분배
-    TArray<UPrimitiveComponent*> OldComponents;
-    for (auto& Comp : Components) { OldComponents.Add(Comp); }
+    // 기존에 저장된 객체들을 재분배 (객체의 위치를 기준으로)
+    TArray<UPrimitiveComponent*> OldComponents = Components;
     Components.Empty();
 
-    for (UPrimitiveComponent* Comp : OldComponents)
+    for (UPrimitiveComponent*& Comp : OldComponents)
     {
-        FMatrix Model = JungleMath::CreateModelMatrix(
-            Comp->GetWorldLocation(),
-            Comp->GetWorldRotation(),
-            Comp->GetWorldScale()
-        );
-        FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
-            Comp->AABB, Comp->GetWorldLocation(), Model
-        );
-        if (Left->Bounds.Intersects(WorldBBox))
-        {
+        FVector pos = Comp->GetWorldLocation();
+        if (pos[Axis] < SplitValue)
             Left->Insert(Comp);
-        }
-        else if (Right->Bounds.Intersects(WorldBBox))
-        {
-            Right->Insert(Comp);
-        }
         else
-        {
-            Components.Add(Comp);
-        }
+            Right->Insert(Comp);
     }
 }
 
 void KDTreeNode::QueryFrustum(const FFrustum& Frustum, TArray<UPrimitiveComponent*>& OutComponents)
 {
-    // 현재 노드의 Bounds가 Frustum과 교차하지 않으면 가지치기
     if (!Frustum.Intersects(Bounds))
         return;
 
-    
-    // 자식 노드가 있다면 재귀적으로 호출
     if (Left)
         Left->QueryFrustum(Frustum, OutComponents);
     if (Right)
         Right->QueryFrustum(Frustum, OutComponents);
-    // 현재 노드의 컴포넌트 추가
-    
+
     for (UPrimitiveComponent* Comp : Components)
     {
         OutComponents.Add(Comp);
@@ -170,7 +132,7 @@ void KDTreeNode::QueryFrustumUnique(const FFrustum& Frustum, TSet<UPrimitiveComp
     if (!Frustum.Intersects(Bounds))
         return;
 
-    for (UPrimitiveComponent* Comp : Components)
+    for (UPrimitiveComponent*& Comp : Components)
     {
         uint32 UUID = Comp->GetUUID();
         if (!UniqueUUIDs.Contains(UUID))
@@ -190,16 +152,15 @@ void KDTreeNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPri
     float Distance;
     if (!Bounds.Intersect(Origin, Dir, Distance))
         return;
-    
+
     if (Left)
         Left->QueryRay(Origin, Dir, OutComponents);
     if (Right)
         Right->QueryRay(Origin, Dir, OutComponents);
-    /*if (!Left && !Right)*/ {
-        for (UPrimitiveComponent*& Comp : Components)
-        {
-            OutComponents.Add(Comp);
-        }
+
+    for (UPrimitiveComponent*& Comp : Components)
+    {
+        OutComponents.Add(Comp);
     }
 }
 
@@ -224,6 +185,7 @@ void KDTreeNode::QueryRayUnique(const FVector& Origin, const FVector& Dir, TSet<
         Right->QueryRayUnique(Origin, Dir, OutComponents, UniqueUUIDs);
 }
 
+
 void KDTreeNode::RemoveComponent(UPrimitiveComponent* Comp)
 {
     while (Components.Contains(Comp))
@@ -239,28 +201,18 @@ void KDTreeNode::RemoveComponent(UPrimitiveComponent* Comp)
 
 void KDTreeNode::UpdateComponent(UPrimitiveComponent* Comp)
 {
-    // 컴포넌트의 월드 AABB 재계산
-    FMatrix Model = JungleMath::CreateModelMatrix(
-        Comp->GetWorldLocation(),
-        Comp->GetWorldRotation(),
-        Comp->GetWorldScale()
-    );
-    FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
-        Comp->AABB, Comp->GetWorldLocation(), Model
-    );
-    if (!WorldBBox.Intersects(Bounds))
+    FVector pos = Comp->GetWorldLocation();
+    if (!Bounds.Contains(pos))
     {
         RemoveComponent(Comp);
         return;
     }
-
-    // 자식 노드에 포함되는지 검사하여 재귀 호출
-    if (Left && Left->Bounds.Intersects(WorldBBox))
+    if (Left && Left->Bounds.Contains(pos))
     {
         Left->UpdateComponent(Comp);
         return;
     }
-    if (Right && Right->Bounds.Intersects(WorldBBox))
+    if (Right && Right->Bounds.Contains(pos))
     {
         Right->UpdateComponent(Comp);
         return;
@@ -272,23 +224,16 @@ void KDTreeNode::UpdateComponent(UPrimitiveComponent* Comp)
     }
 }
 
-// Scene의 모든 컴포넌트로부터 전체 AABB를 계산하여 kd‑tree를 구성
 void KDTreeSystem::Build(const TArray<UPrimitiveComponent*>& Components)
 {
+    // Scene의 모든 객체의 위치를 기반으로 최소, 최대 점 계산
     FVector SceneMin(FLT_MAX, FLT_MAX, FLT_MAX);
     FVector SceneMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
     for (UPrimitiveComponent* Comp : Components)
     {
-        FMatrix Model = JungleMath::CreateModelMatrix(
-            Comp->GetWorldLocation(),
-            Comp->GetWorldRotation(),
-            Comp->GetWorldScale()
-        );
-        FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
-            Comp->AABB, Comp->GetWorldLocation(), Model
-        );
-        SceneMin = SceneMin.ComponentMin(WorldBBox.min);
-        SceneMax = SceneMax.ComponentMax(WorldBBox.max);
+        FVector pos = Comp->GetWorldLocation();
+        SceneMin = SceneMin.ComponentMin(pos);
+        SceneMax = SceneMax.ComponentMax(pos);
     }
     if (Root)
     {
@@ -302,91 +247,22 @@ void KDTreeSystem::Build(const TArray<UPrimitiveComponent*>& Components)
     }
 }
 
-// 단일 컴포넌트 추가 (Bounds 변경 시 전체 재구축 고려)
 void KDTreeSystem::AddComponent(UPrimitiveComponent* Comp)
 {
-    if (Root && Root->Bounds.Contains(UPrimitiveBatch::GetWorldBoundingBox(Comp->AABB, Comp->GetWorldLocation(), JungleMath::CreateModelMatrix(Comp->GetWorldLocation(), Comp->GetWorldRotation(), Comp->GetWorldScale()))))
+    // 객체의 위치를 기준으로 현재 트리의 Bounds 내에 포함되면 삽입,
+    // 아니면 전체 재구축
+    FVector pos = Comp->GetWorldLocation();
+    if (Root && Root->Bounds.Contains(pos))
         Root->Insert(Comp);
     else
-    {
-        // 루트 영역이 변경될 경우 전체 재구축
         Build({ Comp });
-    }
 }
 
-// 위치 변경 등으로 인한 업데이트
 void KDTreeSystem::UpdateComponentPosition(UPrimitiveComponent* Comp)
 {
     if (Root)
     {
         Root->RemoveComponent(Comp);
         AddComponent(Comp);
-    }
-}
-
-void KDTreeSystem::FastRayPick(const FVector& RayOrigin, const FVector& RayDir, 
-    TArray<UPrimitiveComponent*>& OutSortedCandidates)
-{
-    TArray<UPrimitiveComponent*> CandidateArray;
-    // 1. kd‑tree를 통해 ray와 교차하는 후보 컴포넌트들을 추출
-    if (Root)
-    {
-        Root->QueryRay(RayOrigin, RayDir, CandidateArray);
-    }
-
-    // 2. 각 후보에 대해 대략적인 거리(예: AABB 중심 기준)를 계산하여 정렬
-    TArray<std::pair<UPrimitiveComponent*, float>> SortedCandidates;
-    for (UPrimitiveComponent*& comp : CandidateArray)
-    {
-        FMatrix Model = JungleMath::CreateModelMatrix(
-            comp->GetWorldLocation(),
-            comp->GetWorldRotation(),
-            comp->GetWorldScale()
-        );
-        FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
-            comp->AABB, comp->GetWorldLocation(), Model
-        );
-        FVector center = (WorldBBox.min + WorldBBox.max) * 0.5f;
-        FVector toCenter = center - RayOrigin;
-        float approxDistance = toCenter.x * toCenter.x + toCenter.y * toCenter.y + toCenter.z * toCenter.z;
-        float outDistance;
-        if (WorldBBox.Intersect(RayOrigin, RayDir, outDistance))
-        {
-            SortedCandidates.Add(std::make_pair(comp, approxDistance));
-        }
-    }
-    int idx = 0;
-    for (auto& i : SortedCandidates) { 
-        OutSortedCandidates.Add(i.first); 
-        if (++idx >= 15) { break; } // TODO : HARD CODING! 
-    }
-    return;
-}
-
-
-bool RayIntersectsObject(const FVector& RayOrigin, const FVector& RayDir, UPrimitiveComponent* Candidate, float& outDistance, int& outIntersectCount)
-{
-    // Candidate의 월드 변환 행렬 계산
-    FMatrix Model = JungleMath::CreateModelMatrix(
-        Candidate->GetWorldLocation(),
-        Candidate->GetWorldRotation(),
-        Candidate->GetWorldScale()
-    );
-    // 월드 AABB 계산 (UPrimitiveBatch를 통해 구함)
-    FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
-        Candidate->AABB, Candidate->GetWorldLocation(), Model
-    );
-
-    // slab method를 사용한 ray-AABB 교차 테스트
-    // outDistance에는 ray 원점에서 AABB와의 교차까지의 거리가 반환됩니다.
-    if (WorldBBox.Intersect(RayOrigin, RayDir, outDistance))
-    {
-        // 여기서는 간단히 교차 횟수를 1로 설정
-        outIntersectCount = 1;
-        return true;
-    }
-    else
-    {
-        return false;
     }
 }

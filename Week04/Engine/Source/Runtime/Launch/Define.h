@@ -270,6 +270,13 @@ struct FBoundingBox
             (Other.min.y >= min.y) && (Other.max.y <= max.y) &&
             (Other.min.z >= min.z) && (Other.max.z <= max.z);
     }
+
+    bool Contains(const FVector& pos) const
+    {
+        return (pos.x >= min.x) && (pos.x <= max.x) &&
+            (pos.y >= min.y) && (pos.y <= max.y) &&
+            (pos.z >= min.z) && (pos.z <= max.z);
+    }
 };
 
 // 평면 정의
