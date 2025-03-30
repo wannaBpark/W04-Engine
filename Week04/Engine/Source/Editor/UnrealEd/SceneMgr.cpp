@@ -248,6 +248,7 @@ bool FSceneMgr::LoadSceneFromFile(const FString& filename)
         }
         World->SetOctreeSystem(StaticComps);
         World->SetKDTreeSystem(StaticComps);
+		World->SetBVHSystem(StaticComps);
     }
     catch (const std::exception& e) {
         UE_LOG(LogLevel::Error, "Error parsing JSON: %s", e.what());

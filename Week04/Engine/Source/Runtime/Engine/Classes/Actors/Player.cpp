@@ -18,6 +18,7 @@
 #include "UObject/UObjectIterator.h"
 #include "GeometryCore/Octree.h"
 #include "GeometryCore/KDTree.h"
+#include "GeometryCore/BVHNode.h"
 
 #include "GeometryCore/SoftwareZBuffer.h"
 
@@ -246,6 +247,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     UWorld* World = GetWorld();
     OctreeSystem* Octree = World->GetOctreeSystem();
     KDTreeSystem* KDTree = World->GetKDTreeSystem();
+	BVHSystem* BVH = World->GetBVHSystem();
     if (!Octree || !Octree->Root)
     {
         // 옥트리가 없으면 기존 방식으로 폴백
@@ -257,6 +259,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
         UE_LOG(LogLevel::Display, "KDTree not initialized!");
         return;
     }
+
 #pragma region Octree Components Ray Intersects
     // 옥트리에서 후보 컴포넌트 추출
     TArray<UPrimitiveComponent*> KDComponents;
@@ -270,15 +273,13 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     Ray MyRay = GetRayDirection(pickPosition);
     //Octree->Root->QueryRay(MyRay.Origin, MyRay.Direction, CandidateComponents);
     //Octree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, RayUniqueComps, RayUniqueUUIDs);
-    KDTree->Root->QueryRay(MyRay.Origin, MyRay.Direction, KDComponents);
-    KDTree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, KDUniqueComps, KDUniqueUUIDs);
-    UE_LOG(LogLevel::Display, " Ray All Candidate Count : %d", KDComponents.Num());
-    UE_LOG(LogLevel::Display, " Ray Unique Candidate Count : %d", KDUniqueComps.Num());
+    //KDTree->Root->QueryRay(MyRay.Origin, MyRay.Direction, KDComponents);
+    //KDTree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, KDUniqueComps, KDUniqueUUIDs);
+    //UE_LOG(LogLevel::Display, " Ray All Candidate Count : %d", KDComponents.Num());
+    //UE_LOG(LogLevel::Display, " Ray Unique Candidate Count : %d", KDUniqueComps.Num());
 
     //UE_LOG(LogLevel::Display, " Ray All Candidate Count : %d", CandidateComponents.Num());
     //UE_LOG(LogLevel::Display, " Ray Unique Candidate Count : %d", RayUniqueComps.Num());
-
-
 
 #pragma endregion
 
@@ -308,8 +309,22 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     //szbuffer.PerformSWOcclusionCulling(KDTree, Frustum, szbuffer, VisibileComps);
     //UE_LOG(LogLevel::Display, "Visible Comps after Occlusion Culling : %d", VisibileComps.Num());
 #pragma endregion
+
+#pragma region BVH Ray Intersection
+	TArray<UPrimitiveComponent*> BVHComponents;
+	TSet<UPrimitiveComponent*> BVHUniqueComps;
+	TSet<uint32> BVHUniqueUUIDs;
+
+	BVH->Root->QueryRay(MyRay.Origin, MyRay.Direction, BVHComponents);
+	BVH->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, BVHUniqueComps, BVHUniqueUUIDs);
+    UE_LOG(LogLevel::Display, " Ray BVH Count : %d", BVHComponents.Num());
+    UE_LOG(LogLevel::Display, " Ray BVH Unique Count : %d", BVHUniqueComps.Num());
+
+#pragma end region
+
     //for (const auto iter : FrustumOctreeUniqueComps)
-    for (const auto& iter : KDComponents)
+    //for (const auto& iter : KDComponents)
+    for (const auto& iter : BVHComponents)
     {
         UPrimitiveComponent* pObj;
         if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())

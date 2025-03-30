@@ -8,6 +8,8 @@
 #include "UObject/UObjectIterator.h"
 #include "Components/PrimitiveComponent.h"
 #include "GeometryCore/KDTree.h"
+#include "GeometryCore/BVHNode.h"
+
 
 
 void UWorld::Initialize()
@@ -187,5 +189,28 @@ void UWorld::SetKDTreeSystem(const TArray<UPrimitiveComponent*>& Components)
         KDTree = new KDTreeSystem();
         this->SetKDTreeSystem(KDTree); // 월드에 옥트리 시스템 연결
         KDTree->Build(Components);
+    }
+}
+
+void UWorld::SetBVHSystem(const TArray<UPrimitiveComponent*>& Components)
+{
+    if (BVHSystem* BVH = this->GetBVHSystem())
+    {
+        delete BVH;
+
+        TArray<UPrimitiveComponent*> WorldComps;
+        for (const auto& obj : Components)
+        {
+            WorldComps.Add(obj);
+        }
+        BVH = new BVHSystem();
+        this->SetBVHSystem(BVH);
+        BVH->Build(WorldComps);
+    }
+    else
+    {
+        BVH = new BVHSystem();
+        this->SetBVHSystem(BVH); // 월드에 옥트리 시스템 연결
+        BVH->Build(Components);
     }
 }

@@ -277,6 +277,21 @@ struct FBoundingBox
             (pos.y >= min.y) && (pos.y <= max.y) &&
             (pos.z >= min.z) && (pos.z <= max.z);
     }
+
+    FBoundingBox Union(const FBoundingBox& Other) const
+    {
+        FVector newMin(
+            (min.x < Other.min.x) ? min.x : Other.min.x,
+            (min.y < Other.min.y) ? min.y : Other.min.y,
+            (min.z < Other.min.z) ? min.z : Other.min.z
+        );
+        FVector newMax(
+            (max.x > Other.max.x) ? max.x : Other.max.x,
+            (max.y > Other.max.y) ? max.y : Other.max.y,
+            (max.z > Other.max.z) ? max.z : Other.max.z
+        );
+        return FBoundingBox(newMin, newMax);
+    }
 };
 
 // 평면 정의

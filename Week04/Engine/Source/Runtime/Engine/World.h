@@ -14,6 +14,7 @@ class USceneComponent;
 class UTransformGizmo;
 class OctreeSystem;
 class KDTreeSystem;
+class BVHSystem;
 class UPrimitiveComponent;
 
 class UWorld : public UObject
@@ -57,6 +58,7 @@ private:
     AEditorPlayer* EditorPlayer = nullptr;
     OctreeSystem* Octree;
     KDTreeSystem* KDTree;
+    BVHSystem* BVH;
 
 public:
     UObject* worldGizmo = nullptr;
@@ -86,6 +88,10 @@ public:
     void SetKDTreeSystem(KDTreeSystem* InKDTree) { KDTree = InKDTree; }
     KDTreeSystem* GetKDTreeSystem() { return KDTree; }
     void SetKDTreeSystem(const TArray<UPrimitiveComponent*>& Components);
+
+    void SetBVHSystem(BVHSystem* InBVH) { BVH = InBVH; }
+    BVHSystem* GetBVHSystem() { return BVH; }
+    void SetBVHSystem(const TArray<UPrimitiveComponent*>& Components);
 };
 
 
