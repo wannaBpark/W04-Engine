@@ -1,12 +1,13 @@
 #pragma once
 
-#include <DirectXMath.h>
-
 // 4x4 행렬 연산
-struct FMatrix
+struct alignas(16) FMatrix
 {
-	float M[4][4];
+	alignas(16) float M[4][4];
+
 	static const FMatrix Identity;
+
+
 	// 기본 연산자 오버로딩
 	FMatrix operator+(const FMatrix& Other) const;
 	FMatrix operator-(const FMatrix& Other) const;

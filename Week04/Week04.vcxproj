@@ -241,6 +241,7 @@
     <ClCompile Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\MathSSE.h" />
     <ClInclude Include="Engine\Source\Runtime\GeometryCore\Octree.h" />
     <ClInclude Include="Engine\Source\Editor\PropertyEditor\FpsIndicator.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Delegates\Delegate.h" />
