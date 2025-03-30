@@ -19,30 +19,30 @@ void SoftwareZBuffer::RasterizeOccluder(const FBoundingBox& bbox, const FMatrix&
     for (int i = 0; i < 8; ++i)
     {
         FVector corner;
-        corner.x = (i & 1) ? bbox.max.x : bbox.min.x;
-        corner.y = (i & 2) ? bbox.max.y : bbox.min.y;
-        corner.z = (i & 4) ? bbox.max.z : bbox.min.z;
+        corner.X = (i & 1) ? bbox.max.X : bbox.min.X;
+        corner.Y = (i & 2) ? bbox.max.Y : bbox.min.Y;
+        corner.Z = (i & 4) ? bbox.max.Z : bbox.min.Z;
 
         // 3D 벡터를 4D 벡터로 변환 (w=1)
-        FVector4 corner4(corner.x, corner.y, corner.z, 1.0f);
+        FVector4 corner4(corner.X, corner.Y, corner.Z, 1.0f);
         // mvp 행렬로 변환 (우리 커스텀 FMatrix의 TransformFVector4 사용)
         FVector4 clip = MVP.TransformFVector4(corner4);
 
         // Perspective divide (w가 0이면 건너뜀 - div by 0 방지)
-        if (std::fabs(clip.a) > 1e-6f)
+        if (std::fabs(clip.W) > 1e-6f)
         {
-            clip.x /= clip.a;
-            clip.y /= clip.a;
-            clip.z /= clip.a;
+            clip.X /= clip.W;
+            clip.Y /= clip.W;
+            clip.Z /= clip.W;
         }
         else {
             continue;
         }
 
         // NDC [-1,1]를 화면 좌표 [0,width] / [0,height]로 매핑 (y축 flip)
-        clip.x = (clip.x * 0.5f + 0.5f) * width;
-        clip.y = (-clip.y * 0.5f + 0.5f) * height;
-        // clip.z는 0~1 depth 범위로 남음
+        clip.X = (clip.X * 0.5f + 0.5f) * width;
+        clip.Y = (-clip.Y * 0.5f + 0.5f) * height;
+        // clip.Z는 0~1 depth 범위로 남음
 
         screenPoints.push_back(clip);
     }
@@ -55,10 +55,10 @@ void SoftwareZBuffer::RasterizeOccluder(const FBoundingBox& bbox, const FMatrix&
     float maxX = -FLT_MAX, maxY = -FLT_MAX;
     for (const auto& sp : screenPoints)
     {
-        minX = std::min(minX, sp.x); minY = std::min(minY, sp.y); 
-        minZ = std::min(minZ, sp.z);
-        maxX = std::max(maxX, sp.x);
-        maxY = std::max(maxY, sp.y);
+        minX = std::min(minX, sp.X); minY = std::min(minY, sp.Y); 
+        minZ = std::min(minZ, sp.Z);
+        maxX = std::max(maxX, sp.X);
+        maxY = std::max(maxY, sp.Y);
     }
 
     // 화면 영역으로 clamping (정수 좌표로 변환)
@@ -113,23 +113,23 @@ void SoftwareZBuffer::PerformSWOcclusionCulling(KDTreeSystem*& kdTree, const FFr
 
         // 한 모서리(예: bbox.max) 사용하여 approximate radius 계산
         FVector corner = worldBBox.max;
-        FVector4 center4(center.x, center.y, center.z, 1.0f);
-        FVector4 corner4(corner.x, corner.y, corner.z, 1.0f);
+        FVector4 center4(center.X, center.Y, center.Z, 1.0f);
+        FVector4 corner4(corner.X, corner.Y, corner.Z, 1.0f);
 
         FVector4 clipCenter = mvp.TransformFVector4(center4);
         FVector4 clipCorner = mvp.TransformFVector4(corner4);
-        if (std::fabs(clipCenter.a) > 1e-6f)
+        if (std::fabs(clipCenter.W) > 1e-6f)
         {
-            clipCenter.x /= clipCenter.a;
-            clipCenter.y /= clipCenter.a;
+            clipCenter.X /= clipCenter.W;
+            clipCenter.Y /= clipCenter.W;
         }
-        if (std::fabs(clipCorner.a) > 1e-6f)
+        if (std::fabs(clipCorner.W) > 1e-6f)
         {
-            clipCorner.x /= clipCorner.a;
-            clipCorner.y /= clipCorner.a;
+            clipCorner.X /= clipCorner.W;
+            clipCorner.Y /= clipCorner.W;
         }
-        float dx = clipCorner.x - clipCenter.x;
-        float dy = clipCorner.y - clipCenter.y;
+        float dx = clipCorner.X - clipCenter.X;
+        float dy = clipCorner.Y - clipCenter.Y;
         float projectedRadSquared = dx * dx + dy * dy;
         float projectedArea = 3.1415926f * projectedRadSquared;
 
@@ -179,14 +179,14 @@ void SoftwareZBuffer::PerformSWOcclusionCulling(KDTreeSystem*& kdTree, const FFr
         );
         
         FVector center = (occdBBox.min + occdBBox.max) * 0.5f; // 단순화를 위해 AABB의 중심 사용
-        FVector4 center4(center.x, center.y, center.z, 1.0f);  // 4D 벡터로 확장 (w = 1) 
+        FVector4 center4(center.X, center.Y, center.Z, 1.0f);  // 4D 벡터로 확장 (w = 1) 
         FVector4 clip = mvp.TransformFVector4(center4);         // mvp 행렬을 통해 변환
         // Perspective divide
-        float ndcX = clip.x, ndcY = clip.y, ndcZ = clip.z;
-        if (std::fabs(clip.a) > 1e-6f) {
-            ndcX /= clip.a;
-            ndcY /= clip.a;
-            ndcZ /= clip.a;
+        float ndcX = clip.X, ndcY = clip.Y, ndcZ = clip.Z;
+        if (std::fabs(clip.W) > 1e-6f) {
+            ndcX /= clip.W;
+            ndcY /= clip.W;
+            ndcZ /= clip.W;
         }
         // ndc 좌표 [-1,1]를 화면 좌표 [0,width] / [0,height]로 매핑 (y축 flip)
         int screenX = (int)((ndcX * 0.5f + 0.5f) * swZBuffer.width);

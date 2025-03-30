@@ -251,7 +251,7 @@ void OctreeNode::Insert(UPrimitiveComponent* Comp)
 void OctreeNode::Subdivide()
 {
     // 작은 객체가 많을 경우 조기 분할 중지
-    // float NodeSize = (Bounds.max.x - Bounds.min.x);
+    // float NodeSize = (Bounds.max.X - Bounds.min.X);
     // if (NodeSize < 100.0f) return; // 최소 크기 제한
 
     FVector Center = (Bounds.min + Bounds.max) * 0.5f;
@@ -260,12 +260,12 @@ void OctreeNode::Subdivide()
     // 8개 영역 계산
     FVector ChildMins[8] = {
         Bounds.min,                                    // 좌하단 앞
-        FVector(Center.x, Bounds.min.y, Bounds.min.z), // 우하단 앞
-        FVector(Bounds.min.x, Center.y, Bounds.min.z), // 좌상단 앞
-        FVector(Center.x, Center.y, Bounds.min.z),     // 우상단 앞
-        FVector(Bounds.min.x, Bounds.min.y, Center.z), // 좌하단 뒤
-        FVector(Center.x, Bounds.min.y, Center.z),     // 우하단 뒤
-        FVector(Bounds.min.x, Center.y, Center.z),     // 좌상단 뒤
+        FVector(Center.X, Bounds.min.Y, Bounds.min.Z), // 우하단 앞
+        FVector(Bounds.min.X, Center.Y, Bounds.min.Z), // 좌상단 앞
+        FVector(Center.X, Center.Y, Bounds.min.Z),     // 우상단 앞
+        FVector(Bounds.min.X, Bounds.min.Y, Center.Z), // 좌하단 뒤
+        FVector(Center.X, Bounds.min.Y, Center.Z),     // 우하단 뒤
+        FVector(Bounds.min.X, Center.Y, Center.Z),     // 좌상단 뒤
         Center                                         // 우상단 뒤
     };
 
@@ -303,8 +303,8 @@ void OctreeNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPri
     float Distance;
     if (!Bounds.Intersect(Origin, Dir, Distance)) return;
 
-    //UE_LOG(LogLevel::Display, "Bounds Min : %.1f, %.1f, %.1f", Bounds.min.x, Bounds.min.y, Bounds.min.z);
-    //UE_LOG(LogLevel::Display, "Bounds Max : %.1f, %.1f, %.1f", Bounds.max.x, Bounds.max.y, Bounds.max.z);
+    //UE_LOG(LogLevel::Display, "Bounds Min : %.1f, %.1f, %.1f", Bounds.min.X, Bounds.min.Y, Bounds.min.Z);
+    //UE_LOG(LogLevel::Display, "Bounds Max : %.1f, %.1f, %.1f", Bounds.max.X, Bounds.max.Y, Bounds.max.Z);
 
     // 자식 노드가 있으면 재귀적 탐색
     if (Children[0] != nullptr) {
@@ -428,8 +428,8 @@ void OctreeSystem::Build(const TArray<UPrimitiveComponent*>& Components)
    Root = new OctreeNode(FBoundingBox(SceneMin, SceneMax));
 
    // 현재 Root의 월드 박스와 비교하여 다시 설정
-   //UE_LOG(LogLevel::Display, "Min Bounding Box : %.2f %.2f %.2f", SceneMin.x, SceneMin.y, SceneMin.z);
-   //UE_LOG(LogLevel::Display, "Max Bounding Box : %.2f %.2f %.2f", SceneMax.x, SceneMax.y, SceneMax.z);
+   //UE_LOG(LogLevel::Display, "Min Bounding Box : %.2f %.2f %.2f", SceneMin.X, SceneMin.Y, SceneMin.Z);
+   //UE_LOG(LogLevel::Display, "Max Bounding Box : %.2f %.2f %.2f", SceneMax.X, SceneMax.Y, SceneMax.Z);
 
    for (auto& Comp : AllComponents) {
        Root->Insert(Comp);  

@@ -183,7 +183,7 @@ void FEditorViewportClient::CameraMoveForward(float _Value)
     }
     else
     {
-        Pivot.x += _Value * 0.1f;
+        Pivot.X += _Value * 0.1f;
     }
 }
 
@@ -196,7 +196,7 @@ void FEditorViewportClient::CameraMoveRight(float _Value)
     }
     else
     {
-        Pivot.y += _Value * 0.1f;
+        Pivot.Y += _Value * 0.1f;
     }
 }
 
@@ -204,29 +204,29 @@ void FEditorViewportClient::CameraMoveUp(float _Value)
 {
     if (IsPerspective()) {
         FVector curCameraLoc = ViewTransformPerspective.GetLocation();
-        curCameraLoc.z = curCameraLoc.z + GetCameraSpeedScalar() * _Value;
+        curCameraLoc.Z = curCameraLoc.Z + GetCameraSpeedScalar() * _Value;
         ViewTransformPerspective.SetLocation(curCameraLoc);
     }
     else {
-        Pivot.z += _Value * 0.1f;
+        Pivot.Z += _Value * 0.1f;
     }
 }
 
 void FEditorViewportClient::CameraRotateYaw(float _Value)
 {
     FVector curCameraRot = ViewTransformPerspective.GetRotation();
-    curCameraRot.z += _Value ;
+    curCameraRot.Z += _Value ;
     ViewTransformPerspective.SetRotation(curCameraRot);
 }
 
 void FEditorViewportClient::CameraRotatePitch(float _Value)
 {
     FVector curCameraRot = ViewTransformPerspective.GetRotation();
-    curCameraRot.y += _Value;
-    if (curCameraRot.y <= -89.0f)
-        curCameraRot.y = -89.0f;
-    if (curCameraRot.y >= 89.0f)
-        curCameraRot.y = 89.0f;
+    curCameraRot.Y += _Value;
+    if (curCameraRot.Y <= -89.0f)
+        curCameraRot.Y = -89.0f;
+    if (curCameraRot.Y >= 89.0f)
+        curCameraRot.Y = 89.0f;
     ViewTransformPerspective.SetRotation(curCameraRot);
 }
 
@@ -379,12 +379,12 @@ void FEditorViewportClient::LoadConfig(const TMap<FString, FString>& config)
     CameraSpeedSetting = GetValueFromConfig(config, "CameraSpeedSetting" + ViewportNum, 1);
     CameraSpeedScalar = GetValueFromConfig(config, "CameraSpeedScalar" + ViewportNum, 1.0f);
     GridSize = GetValueFromConfig(config, "GridSize"+ ViewportNum, 10.0f);
-    ViewTransformPerspective.ViewLocation.x = GetValueFromConfig(config, "PerspectiveCameraLocX" + ViewportNum, 0.0f);
-    ViewTransformPerspective.ViewLocation.y = GetValueFromConfig(config, "PerspectiveCameraLocY" + ViewportNum, 0.0f);
-    ViewTransformPerspective.ViewLocation.z = GetValueFromConfig(config, "PerspectiveCameraLocZ" + ViewportNum, 0.0f);
-    ViewTransformPerspective.ViewRotation.x = GetValueFromConfig(config, "PerspectiveCameraRotX" + ViewportNum, 0.0f);
-    ViewTransformPerspective.ViewRotation.y = GetValueFromConfig(config, "PerspectiveCameraRotY" + ViewportNum, 0.0f);
-    ViewTransformPerspective.ViewRotation.z = GetValueFromConfig(config, "PerspectiveCameraRotZ" + ViewportNum, 0.0f);
+    ViewTransformPerspective.ViewLocation.X = GetValueFromConfig(config, "PerspectiveCameraLocX" + ViewportNum, 0.0f);
+    ViewTransformPerspective.ViewLocation.Y = GetValueFromConfig(config, "PerspectiveCameraLocY" + ViewportNum, 0.0f);
+    ViewTransformPerspective.ViewLocation.Z = GetValueFromConfig(config, "PerspectiveCameraLocZ" + ViewportNum, 0.0f);
+    ViewTransformPerspective.ViewRotation.X = GetValueFromConfig(config, "PerspectiveCameraRotX" + ViewportNum, 0.0f);
+    ViewTransformPerspective.ViewRotation.Y = GetValueFromConfig(config, "PerspectiveCameraRotY" + ViewportNum, 0.0f);
+    ViewTransformPerspective.ViewRotation.Z = GetValueFromConfig(config, "PerspectiveCameraRotZ" + ViewportNum, 0.0f);
     ShowFlag = GetValueFromConfig(config, "ShowFlag" + ViewportNum, 31.0f);
     ViewMode = static_cast<EViewModeIndex>(GetValueFromConfig(config, "ViewMode" + ViewportNum, 0));
     ViewportType = static_cast<ELevelViewportType>(GetValueFromConfig(config, "ViewportType" + ViewportNum, 3));
@@ -395,12 +395,12 @@ void FEditorViewportClient::SaveConfig(TMap<FString, FString>& config)
     config["CameraSpeedSetting"+ ViewportNum] = std::to_string(CameraSpeedSetting);
     config["CameraSpeedScalar"+ ViewportNum] = std::to_string(CameraSpeedScalar);
     config["GridSize"+ ViewportNum] = std::to_string(GridSize);
-    config["PerspectiveCameraLocX" + ViewportNum] = std::to_string(ViewTransformPerspective.GetLocation().x);
-    config["PerspectiveCameraLocY" + ViewportNum] = std::to_string(ViewTransformPerspective.GetLocation().y);
-    config["PerspectiveCameraLocZ" + ViewportNum] = std::to_string(ViewTransformPerspective.GetLocation().z);
-    config["PerspectiveCameraRotX" + ViewportNum] = std::to_string(ViewTransformPerspective.GetRotation().x);
-    config["PerspectiveCameraRotY" + ViewportNum] = std::to_string(ViewTransformPerspective.GetRotation().y);
-    config["PerspectiveCameraRotZ" + ViewportNum] = std::to_string(ViewTransformPerspective.GetRotation().z);
+    config["PerspectiveCameraLocX" + ViewportNum] = std::to_string(ViewTransformPerspective.GetLocation().X);
+    config["PerspectiveCameraLocY" + ViewportNum] = std::to_string(ViewTransformPerspective.GetLocation().Y);
+    config["PerspectiveCameraLocZ" + ViewportNum] = std::to_string(ViewTransformPerspective.GetLocation().Z);
+    config["PerspectiveCameraRotX" + ViewportNum] = std::to_string(ViewTransformPerspective.GetRotation().X);
+    config["PerspectiveCameraRotY" + ViewportNum] = std::to_string(ViewTransformPerspective.GetRotation().Y);
+    config["PerspectiveCameraRotZ" + ViewportNum] = std::to_string(ViewTransformPerspective.GetRotation().Z);
     config["ShowFlag"+ ViewportNum] = std::to_string(ShowFlag);
     config["ViewMode" + ViewportNum] = std::to_string(int32(ViewMode));
     config["ViewportType" + ViewportNum] = std::to_string(int32(ViewportType));
@@ -469,9 +469,9 @@ FFrustum FEditorViewportClient::CreateFrustumFromCamera()
     FFrustum Frustum;
     auto& Camera = ViewTransformPerspective;
     FVector CamPos = Camera.GetLocation();
-    FVector Forward = Camera.GetForwardVector().Normalize(); // 카메라 정면 방향 (+Z)
-    FVector Right = Camera.GetRightVector().Normalize();   // 카메라 우측 방향 (+X)
-    FVector Up = Camera.GetUpVector().Normalize();      // 카메라 상측 방향 (+Y)
+    FVector Forward = Camera.GetForwardVector().GetSafeNormal(); // 카메라 정면 방향 (+Z)
+    FVector Right = Camera.GetRightVector().GetSafeNormal();   // 카메라 우측 방향 (+X)
+    FVector Up = Camera.GetUpVector().GetSafeNormal();      // 카메라 상측 방향 (+Y)
 
     constexpr float FarDist = 100.0f;             // TODO : 변경 필요!!!!!!
     const float& FOV = FOVAngle;
@@ -489,23 +489,23 @@ FFrustum FEditorViewportClient::CreateFrustumFromCamera()
     Frustum.Planes[5] = FPlane(Back, FarCenter);  // Far
 
     // Left 평면
-    FVector LeftNormal = (NearCenter - Right * HalfH - CamPos).Normalize();
+    FVector LeftNormal = (NearCenter - Right * HalfH - CamPos).GetSafeNormal();
     Frustum.Planes[0] = FPlane(Up.Cross(LeftNormal), CamPos);
 
     // Right 평면
-    FVector RightNormal = (NearCenter + Right * HalfH - CamPos).Normalize();
+    FVector RightNormal = (NearCenter + Right * HalfH - CamPos).GetSafeNormal();
     Frustum.Planes[1] = FPlane(RightNormal.Cross(Up), CamPos);
 
     // Top 평면
-    FVector TopNormal = (NearCenter + Up * HalfV - CamPos).Normalize();
+    FVector TopNormal = (NearCenter + Up * HalfV - CamPos).GetSafeNormal();
     Frustum.Planes[2] = FPlane(Right.Cross(TopNormal), CamPos);
-    /*FVector TopNormal = (NearCenter + Up * HalfV - CamPos).Normalize();
+    /*FVector TopNormal = (NearCenter + Up * HalfV - CamPos).GetSafeNormal();
     Frustum.Planes[2] = FPlane(TopNormal.Cross(Right), CamPos);*/
 
     // Bottom 평면
-    FVector BottomNormal = (NearCenter - Up * HalfV - CamPos).Normalize();
+    FVector BottomNormal = (NearCenter - Up * HalfV - CamPos).GetSafeNormal();
     Frustum.Planes[3] = FPlane(BottomNormal.Cross(Right), CamPos);
-    /*FVector BottomNormal = (NearCenter - Up * HalfV - CamPos).Normalize();
+    /*FVector BottomNormal = (NearCenter - Up * HalfV - CamPos).GetSafeNormal();
     Frustum.Planes[3] = FPlane(Right.Cross(BottomNormal), CamPos);*/
 
     // 출력용 로그 (평면의 normal 방향 체크용)
@@ -514,7 +514,7 @@ FFrustum FEditorViewportClient::CreateFrustumFromCamera()
     };
     for (int i = 0; i < 6; ++i) {
         UE_LOG(LogLevel::Display, "Plane No %s : %.2f %.2f %.2f", name[i],
-            Frustum.Planes[i].Normal.x, Frustum.Planes[i].Normal.y, Frustum.Planes[i].Normal.z);
+            Frustum.Planes[i].Normal.X, Frustum.Planes[i].Normal.Y, Frustum.Planes[i].Normal.Z);
     }*/
     return Frustum;
 }

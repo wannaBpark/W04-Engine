@@ -447,10 +447,10 @@ uint32 FGraphicsDevice::GetPixelUUID(POINT pt)
 
     if (pixelData)
     {
-        UUIDColor.x = static_cast<float>(pixelData[0]); // R
-        UUIDColor.y = static_cast<float>(pixelData[1]); // G
-        UUIDColor.z = static_cast<float>(pixelData[2]) ; // B
-        UUIDColor.a = static_cast<float>(pixelData[3]); // A
+        UUIDColor.X = static_cast<float>(pixelData[0]); // R
+        UUIDColor.Y = static_cast<float>(pixelData[1]); // G
+        UUIDColor.Z = static_cast<float>(pixelData[2]) ; // B
+        UUIDColor.W = static_cast<float>(pixelData[3]); // A
     }
 
     // 6. 매핑 해제 및 정리
@@ -461,10 +461,10 @@ uint32 FGraphicsDevice::GetPixelUUID(POINT pt)
 }
 
 uint32 FGraphicsDevice::DecodeUUIDColor(FVector4 UUIDColor) {
-    uint32_t W = static_cast<uint32_t>(UUIDColor.a) << 24;
-    uint32_t Z = static_cast<uint32_t>(UUIDColor.z) << 16;
-    uint32_t Y = static_cast<uint32_t>(UUIDColor.y) << 8;
-    uint32_t X = static_cast<uint32_t>(UUIDColor.x);
+    uint32_t W = static_cast<uint32_t>(UUIDColor.W) << 24;
+    uint32_t Z = static_cast<uint32_t>(UUIDColor.Z) << 16;
+    uint32_t Y = static_cast<uint32_t>(UUIDColor.Y) << 8;
+    uint32_t X = static_cast<uint32_t>(UUIDColor.X);
 
     return W | Z | Y | X;
 }
