@@ -374,12 +374,12 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
         // 오쏘에서는 픽킹 원점은 unproject된 픽셀의 위치
         FVector rayOrigin = worldPickPos;
         // 레이 방향은 카메라의 정면 방향 (평행)
-        FVector orthoRayDir = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformOrthographic.GetForwardVector().Normalize();
+        FVector orthoRayDir = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformOrthographic.GetForwardVector().GetSafeNormal();
 
         // 객체의 로컬 좌표계로 변환
         FMatrix localMatrix = FMatrix::Inverse(worldMatrix);
         FVector localRayOrigin = localMatrix.TransformPosition(rayOrigin);
-        FVector localRayDir = (localMatrix.TransformPosition(rayOrigin + orthoRayDir) - localRayOrigin).Normalize();
+        FVector localRayDir = (localMatrix.TransformPosition(rayOrigin + orthoRayDir) - localRayOrigin).GetSafeNormal();
         
         intersectCount = obj->CheckRayIntersection(localRayOrigin, localRayDir, hitDistance);
         return intersectCount;
@@ -391,7 +391,7 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
         FVector pickRayOrigin = inverseMatrix.TransformPosition(cameraOrigin);
         // 퍼스펙티브 모드의 기존 로직 사용
         FVector transformedPick = inverseMatrix.TransformPosition(pickPosition);
-        FVector rayDirection = (transformedPick - pickRayOrigin).Normalize();
+        FVector rayDirection = (transformedPick - pickRayOrigin).GetSafeNormal();
         
         intersectCount = obj->CheckRayIntersection(pickRayOrigin, rayDirection, hitDistance);
         return intersectCount;
@@ -571,7 +571,7 @@ Ray AEditorPlayer::GetRayDirection(const FVector& pickPosition)
     {
         FMatrix inverseView = FMatrix::Inverse(viewMatrix);
         result.Origin = inverseView.TransformPosition(pickPosition);
-        result.Direction = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformOrthographic.GetForwardVector().Normalize();
+        result.Direction = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformOrthographic.GetForwardVector().GetSafeNormal();
     }
     else
     {
@@ -579,7 +579,7 @@ Ray AEditorPlayer::GetRayDirection(const FVector& pickPosition)
         FVector cameraOrigin = { 0,0,0 };
         result.Origin = inverseViewMatrix.TransformPosition(cameraOrigin);
         FVector transformedPick = inverseViewMatrix.TransformPosition(pickPosition);
-        result.Direction = (transformedPick - result.Origin).Normalize();
+        result.Direction = (transformedPick - result.Origin).GetSafeNormal();
     }
 
     return result;

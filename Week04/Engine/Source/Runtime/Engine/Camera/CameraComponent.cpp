@@ -123,9 +123,9 @@ FFrustum UCameraComponent::CreateFrustumFromCamera()
     FFrustum Frustum;
 
     FVector CamPos = GetWorldLocation();
-    FVector Forward = zAxis.Normalize(); // 카메라 정면 방향 (+Z)
-    FVector Right = xAxis.Normalize();   // 카메라 우측 방향 (+X)
-    FVector Up = yAxis.Normalize();      // 카메라 상측 방향 (+Y)
+    FVector Forward = zAxis.GetSafeNormal(); // 카메라 정면 방향 (+Z)
+    FVector Right = xAxis.GetSafeNormal();   // 카메라 우측 방향 (+X)
+    FVector Up = yAxis.GetSafeNormal();      // 카메라 상측 방향 (+Y)
 
     float AspectRatio = 16.0f / 9.0f; // 가정된 기본 종횡비
 
@@ -141,19 +141,19 @@ FFrustum UCameraComponent::CreateFrustumFromCamera()
     Frustum.Planes[5] = FPlane(Back, FarCenter);  // Far
 
     // Left 평면
-    FVector LeftNormal = (NearCenter - Right * HalfH - CamPos).Normalize();
+    FVector LeftNormal = (NearCenter - Right * HalfH - CamPos).GetSafeNormal();
     Frustum.Planes[0] = FPlane(Up.Cross(LeftNormal), CamPos);
 
     // Right 평면
-    FVector RightNormal = (NearCenter + Right * HalfH - CamPos).Normalize();
+    FVector RightNormal = (NearCenter + Right * HalfH - CamPos).GetSafeNormal();
     Frustum.Planes[1] = FPlane(RightNormal.Cross(Up), CamPos);
 
     // Top 평면
-    FVector TopNormal = (NearCenter + Up * HalfV - CamPos).Normalize();
+    FVector TopNormal = (NearCenter + Up * HalfV - CamPos).GetSafeNormal();
     Frustum.Planes[2] = FPlane(TopNormal.Cross(Right), CamPos);
 
     // Bottom 평면
-    FVector BottomNormal = (NearCenter - Up * HalfV - CamPos).Normalize();
+    FVector BottomNormal = (NearCenter - Up * HalfV - CamPos).GetSafeNormal();
     Frustum.Planes[3] = FPlane(Right.Cross(BottomNormal), CamPos);
 
     return Frustum;

@@ -469,9 +469,9 @@ FFrustum FEditorViewportClient::CreateFrustumFromCamera()
     FFrustum Frustum;
     auto& Camera = ViewTransformPerspective;
     FVector CamPos = Camera.GetLocation();
-    FVector Forward = Camera.GetForwardVector().Normalize(); // 카메라 정면 방향 (+Z)
-    FVector Right = Camera.GetRightVector().Normalize();   // 카메라 우측 방향 (+X)
-    FVector Up = Camera.GetUpVector().Normalize();      // 카메라 상측 방향 (+Y)
+    FVector Forward = Camera.GetForwardVector().GetSafeNormal(); // 카메라 정면 방향 (+Z)
+    FVector Right = Camera.GetRightVector().GetSafeNormal();   // 카메라 우측 방향 (+X)
+    FVector Up = Camera.GetUpVector().GetSafeNormal();      // 카메라 상측 방향 (+Y)
 
     constexpr float FarDist = 100.0f;             // TODO : 변경 필요!!!!!!
     const float& FOV = FOVAngle;
@@ -489,23 +489,23 @@ FFrustum FEditorViewportClient::CreateFrustumFromCamera()
     Frustum.Planes[5] = FPlane(Back, FarCenter);  // Far
 
     // Left 평면
-    FVector LeftNormal = (NearCenter - Right * HalfH - CamPos).Normalize();
+    FVector LeftNormal = (NearCenter - Right * HalfH - CamPos).GetSafeNormal();
     Frustum.Planes[0] = FPlane(Up.Cross(LeftNormal), CamPos);
 
     // Right 평면
-    FVector RightNormal = (NearCenter + Right * HalfH - CamPos).Normalize();
+    FVector RightNormal = (NearCenter + Right * HalfH - CamPos).GetSafeNormal();
     Frustum.Planes[1] = FPlane(RightNormal.Cross(Up), CamPos);
 
     // Top 평면
-    FVector TopNormal = (NearCenter + Up * HalfV - CamPos).Normalize();
+    FVector TopNormal = (NearCenter + Up * HalfV - CamPos).GetSafeNormal();
     Frustum.Planes[2] = FPlane(Right.Cross(TopNormal), CamPos);
-    /*FVector TopNormal = (NearCenter + Up * HalfV - CamPos).Normalize();
+    /*FVector TopNormal = (NearCenter + Up * HalfV - CamPos).GetSafeNormal();
     Frustum.Planes[2] = FPlane(TopNormal.Cross(Right), CamPos);*/
 
     // Bottom 평면
-    FVector BottomNormal = (NearCenter - Up * HalfV - CamPos).Normalize();
+    FVector BottomNormal = (NearCenter - Up * HalfV - CamPos).GetSafeNormal();
     Frustum.Planes[3] = FPlane(BottomNormal.Cross(Right), CamPos);
-    /*FVector BottomNormal = (NearCenter - Up * HalfV - CamPos).Normalize();
+    /*FVector BottomNormal = (NearCenter - Up * HalfV - CamPos).GetSafeNormal();
     Frustum.Planes[3] = FPlane(Right.Cross(BottomNormal), CamPos);*/
 
     // 출력용 로그 (평면의 normal 방향 체크용)

@@ -30,7 +30,7 @@ void UText::TickComponent(float DeltaTime)
 
     //FVector newCamera = GetWorld()->GetCamera()->GetForwardVector();
     //newCamera.Z = 0;
-    //newCamera = newCamera.Normalize();
+    //newCamera = newCamera.GetSafeNormal();
     //float tmp = FVector(1.0f, 0.0f, 0.0f).Dot(newCamera);
     //float rad = acosf(tmp);
     //float degree = JungleMath::RadToDeg(rad);

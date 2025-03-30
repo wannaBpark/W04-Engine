@@ -35,8 +35,8 @@ FMatrix JungleMath::CreateModelMatrix(FVector translation, FQuat rotation, FVect
 }
 FMatrix JungleMath::CreateViewMatrix(FVector eye, FVector target, FVector up)
 {
-    FVector zAxis = (target - eye).Normalize();  // DirectX는 LH이므로 -z가 아니라 +Z 사용
-    FVector xAxis = (up.Cross(zAxis)).Normalize();
+    FVector zAxis = (target - eye).GetSafeNormal();  // DirectX는 LH이므로 -z가 아니라 +Z 사용
+    FVector xAxis = (up.Cross(zAxis)).GetSafeNormal();
     FVector yAxis = zAxis.Cross(xAxis);
 
     FMatrix View;
