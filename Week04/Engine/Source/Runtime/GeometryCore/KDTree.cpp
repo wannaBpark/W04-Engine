@@ -2,7 +2,58 @@
 #include "Engine/Source/Runtime/Engine/Classes/Components/PrimitiveComponent.h"   
 #include "Editor/UnrealEd/PrimitiveBatch.h"
 #include "Runtime/Core/Math/JungleMath.h"
+#include <queue>
 
+
+// Helper: 객체의 월드 바운딩박스를 계산
+static FBoundingBox GetWorldBox(UPrimitiveComponent* Comp)
+{
+    FMatrix Model = JungleMath::CreateModelMatrix(
+        Comp->GetWorldLocation(),
+        Comp->GetWorldRotation(),
+        Comp->GetWorldScale()
+    );
+    return UPrimitiveBatch::GetWorldBoundingBox(Comp->AABB, Comp->GetWorldLocation(), Model);
+}
+
+// Helper: 객체의 바운딩박스 중심(centroid)
+static FVector GetCentroid(UPrimitiveComponent* Comp)
+{
+    FBoundingBox box = GetWorldBox(Comp);
+    return (box.min + box.max) * 0.5f;
+}
+// Ray-Sphere 충돌 검사 함수
+bool KDIsRayIntersectingSphere(const FVector& Origin, const FVector& Dir, const FVector& Center, float Radius, float& OutDistance)
+{
+    FVector L = Center - Origin;
+    float tca = L.Dot(Dir);
+    float d2 = L.Dot(L) - tca * tca;
+    float radius2 = Radius * Radius;
+
+    // 교차하지 않음
+    if (d2 > radius2)
+        return false;
+
+    float thc = sqrt(radius2 - d2);
+    float t0 = tca - thc;
+    float t1 = tca + thc;
+
+    // t0이 더 크면 스왑
+    if (t0 > t1)
+        std::swap(t0, t1);
+
+    // t0이 음수면 t1로 교체
+    if (t0 < 0)
+        t0 = t1;
+
+    // 여전히 음수면 교차하지 않음
+    if (t0 < 0)
+        return false;
+
+    // 교차 거리 저장
+    OutDistance = t0;
+    return true;
+}
 
 // 생성자: 주어진 Bounds와 깊이로 노드를 초기화하며, 분할 축은 Bounds의 최장 축으로 결정
 KDTreeNode::KDTreeNode(const FBoundingBox& InBounds, int InDepth)
@@ -265,4 +316,74 @@ void KDTreeSystem::UpdateComponentPosition(UPrimitiveComponent* Comp)
         Root->RemoveComponent(Comp);
         AddComponent(Comp);
     }
+}
+
+// KDTreeNode::QueryRayClosestBestFirst: Best-First Traversal을 통해 Ray와 가장 가까운 컴포넌트를 반환
+UPrimitiveComponent* KDTreeNode::QueryRayClosestBestFirst(const FVector& Origin, const FVector& Dir)
+{
+    FVector normDir = Dir.Normalize();
+    std::priority_queue<KDPQEntry, std::vector<KDPQEntry>, KDPQEntryComparator> pq;
+    float bestT = std::numeric_limits<float>::max();
+    UPrimitiveComponent* bestComp = nullptr;
+
+    float tEntry;
+    if (Bounds.Intersect(Origin, normDir, tEntry))
+    {
+        pq.push({ this, tEntry });
+    }
+
+    while (!pq.empty())
+    {
+        KDPQEntry current = pq.top();
+        pq.pop();
+
+        // 이미 발견된 교차점보다 멀면 더 이상 탐색할 필요 없음
+        if (current.tEntry >= bestT)
+            continue;
+
+        KDTreeNode* node = current.Node;
+        // Leaf 노드인 경우: 이 노드에 포함된 각 컴포넌트에 대해 Ray-Sphere 교차 판정을 수행
+        if (!node->Left && !node->Right)
+        {
+            for (UPrimitiveComponent* comp : node->Components)
+            {
+                float tInter;
+                FBoundingBox box = GetWorldBox(comp);
+                // AABB를 구로 근사: 중심과 반지름 계산
+                FVector center = (box.min + box.max) * 0.5f;
+                float radius = (box.max - box.min).Magnitude() * 0.5f;
+
+                if (KDIsRayIntersectingSphere(Origin, normDir, center, radius, tInter))
+                {
+                    if (tInter < bestT)
+                    {
+                        bestT = tInter;
+                        bestComp = comp;
+                    }
+                }
+            }
+        }
+        else  // 내부 노드인 경우: 자식 노드들을 검사하여 큐에 삽입
+        {
+            if (node->Left)
+            {
+                float tLeft;
+                if (node->Left->Bounds.Intersect(Origin, normDir, tLeft) && tLeft < bestT)
+                    pq.push({ node->Left, tLeft });
+            }
+            if (node->Right)
+            {
+                float tRight;
+                if (node->Right->Bounds.Intersect(Origin, normDir, tRight) && tRight < bestT)
+                    pq.push({ node->Right, tRight });
+            }
+        }
+    }
+
+    if (bestComp)
+    {
+        UE_LOG(LogLevel::Display, TEXT("Closest intersection distance: %.2f"), bestT);
+    return bestComp;
+    }
+    return nullptr;
 }

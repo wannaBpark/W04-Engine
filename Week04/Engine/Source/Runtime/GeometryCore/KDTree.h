@@ -52,6 +52,7 @@ public:
     void RemoveComponent(UPrimitiveComponent* Comp);
     // 컴포넌트 위치/상태 업데이트 (Bounds와 비교하여 노드 내 업데이트)
     void UpdateComponent(UPrimitiveComponent* Comp);
+    UPrimitiveComponent* QueryRayClosestBestFirst(const FVector& Origin, const FVector& Dir);
 };
 
 class KDTreeSystem
@@ -72,3 +73,51 @@ public:
     void UpdateComponentPosition(UPrimitiveComponent* Comp);
 };
 
+// 구조체: 우선순위 큐 항목 [노드 포인터와 해당 노드의 교차 시작 거리]
+struct KDPQEntry
+{
+    KDTreeNode* Node;
+    float tEntry;
+};
+
+// 작은 tEntry가 우선되도록 [min-heap]
+struct KDPQEntryComparator
+{
+    bool operator()(const KDPQEntry& a, const KDPQEntry& b) const
+    {
+        return a.tEntry > b.tEntry;
+    }
+};
+struct SegmentTree {
+    std::vector<float> tree;
+    std::vector<int> idxTree;
+    int n;
+    SegmentTree(const std::vector<float>& arr) {
+        n = arr.size();
+        tree.resize(4 * n, std::numeric_limits<float>::max());
+        idxTree.resize(4 * n, -1);
+        build(arr, 0, n - 1, 0);
+    }
+    void build(const std::vector<float>& arr, int l, int r, int idx) {
+        if (l == r) {
+            tree[idx] = arr[l];
+            idxTree[idx] = l;
+            return;
+        }
+        int mid = (l + r) / 2;
+        build(arr, l, mid, 2 * idx + 1);
+        build(arr, mid + 1, r, 2 * idx + 2);
+        if (tree[2 * idx + 1] < tree[2 * idx + 2]) {
+            tree[idx] = tree[2 * idx + 1];
+            idxTree[idx] = idxTree[2 * idx + 1];
+        }
+        else {
+            tree[idx] = tree[2 * idx + 2];
+            idxTree[idx] = idxTree[2 * idx + 2];
+        }
+    }
+    // query()는 전체 구간에 대해 최소 t값의 인덱스를 반환
+    int query() {
+        return idxTree[0];
+    }
+};

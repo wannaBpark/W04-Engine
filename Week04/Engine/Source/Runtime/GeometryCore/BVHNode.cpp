@@ -9,11 +9,14 @@
 #include <future>
 #include <vector>
 #include <algorithm>
+#include <limits>
 #include <mutex>
+
+
 #include <immintrin.h>
 #include <queue>
 
-std::mutex resultMutex;
+static std::mutex g_resultMutex;
 
 
 // Helper: 객체의 월드 바운딩박스를 계산
@@ -455,7 +458,6 @@ UPrimitiveComponent* BVHNode::QueryRayClosest(const FVector& Origin, const FVect
 
 UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, const FVector& Dir)
 {
-    // Ray의 방향은 반드시 정규화되어 있어야 합니다.
     FVector normDir = Dir.Normalize();
 
     std::priority_queue<PQEntry, std::vector<PQEntry>, PQEntryComparator> pq;
@@ -463,8 +465,7 @@ UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, co
     UPrimitiveComponent* bestComp = nullptr;
 
     float tEntry;
-    if (Bounds.Intersect(Origin, normDir, tEntry))
-    {
+    if (Bounds.Intersect(Origin, normDir, tEntry)) {
         pq.push({ this, tEntry });
     }
 
@@ -481,7 +482,7 @@ UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, co
         // Leaf 노드인 경우, 이 노드에 있는 모든 컴포넌트에 대해 Ray-Sphere 교차 검사 수행
         if (!node->Left && !node->Right)
         {
-            for (UPrimitiveComponent* comp : node->Components)
+            for (UPrimitiveComponent*& comp : node->Components)
             {
                 float tInter;
                 FBoundingBox box = GetWorldBox(comp);
@@ -523,6 +524,8 @@ UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, co
     if (bestComp)
     {
         UE_LOG(LogLevel::Display, TEXT("Closest intersection distance: %.2f"), bestT);
+        return bestComp;
     }
-    return bestComp;
+    else return nullptr;
 }
+

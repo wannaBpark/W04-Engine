@@ -304,6 +304,7 @@ void AEditorPlayer::PickActorBVH(const FVector& pickPosition)
     // 옥트리 시스템 가져오기
     UWorld* World = GetWorld();
     BVHSystem* BVH = World->GetBVHSystem();
+    KDTreeSystem* KDTree = World->GetKDTreeSystem();
     Ray MyRay = GetRayDirection(pickPosition);
 
 
@@ -311,6 +312,12 @@ void AEditorPlayer::PickActorBVH(const FVector& pickPosition)
     float dist = FLT_MAX;
     //Possible = BVH->Root->QueryRayClosest(MyRay.Origin, MyRay.Direction);
     Possible = BVH->Root->QueryRayClosestBestFirst(MyRay.Origin, MyRay.Direction);
+    //Possible = KDTree->Root->QueryRayClosestBestFirst(MyRay.Origin, MyRay.Direction);
+    //Possible = BVH->Root->QueryRayClosestSegmentTree(MyRay.Origin, MyRay.Direction);
+
+    //TArray<UPrimitiveComponent*> BVHComps;
+    //BVH->Root->QueryRaySorted(MyRay.Origin, MyRay.Direction, BVHComps);
+    //Possible = BVHComps[0];
 #pragma endregion
 
     if (Possible)
