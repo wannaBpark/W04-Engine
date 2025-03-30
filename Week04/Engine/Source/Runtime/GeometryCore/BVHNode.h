@@ -10,6 +10,8 @@
 class UPrimitiveComponent;
 
 
+
+
 struct FComponentDistance
 {
     UPrimitiveComponent* Comp;
@@ -51,6 +53,7 @@ public:
     void UpdateComponent(UPrimitiveComponent* Comp);
     void QueryRayClosestInternal(const FVector& Origin, const FVector& Dir, UPrimitiveComponent*& OutClosest, float& OutMinDistance);
     UPrimitiveComponent* QueryRayClosest(const FVector& Origin, const FVector& Dir);
+    UPrimitiveComponent* QueryRayClosestBestFirst(const FVector& Origin, const FVector& Dir);
 };
 
 
@@ -84,3 +87,20 @@ public:
         }
     }
 };
+
+// 구조체: 우선순위 큐 항목 (노드 포인터와 해당 노드의 교차 시작 거리)
+struct PQEntry
+{
+    BVHNode* Node;
+    float tEntry;
+};
+
+// PQEntry 비교 함수: 작은 tEntry가 우선되도록 (min-heap)
+struct PQEntryComparator
+{
+    bool operator()(const PQEntry& a, const PQEntry& b) const
+    {
+        return a.tEntry > b.tEntry;
+    }
+};
+

@@ -65,9 +65,9 @@ void AEditorPlayer::Input()
 
             const auto& ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
             ScreenToViewSpace(mousePos.x, mousePos.y, ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix(), pickPosition);
-            bool res = PickGizmo(pickPosition);   
+            //bool res = PickGizmo(pickPosition);   
             //if (!res) PickActor(pickPosition);
-            if (!res) PickActorBVH(pickPosition);
+            /*if (!res) */PickActorBVH(pickPosition);
 
             PickingTimeInfo.LastPickingTime.store(
                 static_cast<float>(CycleCount_PickingTime.Finish())
@@ -309,7 +309,8 @@ void AEditorPlayer::PickActorBVH(const FVector& pickPosition)
 
 #pragma region BVH Ray Intersection
     float dist = FLT_MAX;
-    Possible = BVH->Root->QueryRayClosest(MyRay.Origin, MyRay.Direction);
+    //Possible = BVH->Root->QueryRayClosest(MyRay.Origin, MyRay.Direction);
+    Possible = BVH->Root->QueryRayClosestBestFirst(MyRay.Origin, MyRay.Direction);
 #pragma endregion
 
     if (Possible)

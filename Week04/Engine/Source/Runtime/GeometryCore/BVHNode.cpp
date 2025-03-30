@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <mutex>
 #include <immintrin.h>
+#include <queue>
 
 std::mutex resultMutex;
 
@@ -400,21 +401,26 @@ void BVHNode::UpdateComponent(UPrimitiveComponent* Comp)
     }
 }
 
-
-
 void BVHNode::QueryRayClosestInternal(const FVector& Origin, const FVector& Dir, UPrimitiveComponent*& OutClosest, float& OutMinDistance)
 {
     float dummy;
-    if (!Bounds.Intersect(Origin, Dir, dummy)) return;
+    // 현재 노드의 Bounds와 Ray 교차 검사 (AABB 기반)
+    if (!Bounds.Intersect(Origin, Dir, dummy))
+        return;
 
-    // Leaf 노드인 경우
+    // Leaf 노드인 경우: 각 컴포넌트에 대해 구 기반 교차 검사 수행
     if (!Left && !Right)
     {
         for (UPrimitiveComponent*& Comp : Components)
         {
             float tIntersection;
             FBoundingBox box = GetWorldBox(Comp);
-            if (box.Intersect(Origin, Dir, tIntersection))
+            // 구의 중심과 반지름 계산 (AABB를 사용)
+            FVector center = (box.min + box.max) * 0.5f;
+            float radius = (box.max - box.min).Magnitude() * 0.5f;
+
+            // Ray와 구의 교차 검사: Ray Origin에서의 교차 거리를 계산
+            if (IsRayIntersectingSphere(Origin, Dir, center, radius, tIntersection))
             {
                 if (tIntersection < OutMinDistance)
                 {
@@ -426,9 +432,11 @@ void BVHNode::QueryRayClosestInternal(const FVector& Origin, const FVector& Dir,
         return;
     }
 
-    // 내부 노드인 경우, 자식 노드를 재귀 호출하여 최소값 갱신
-    if (Left) Left->QueryRayClosestInternal(Origin, Dir, OutClosest, OutMinDistance);
-    if (Right) Right->QueryRayClosestInternal(Origin, Dir, OutClosest, OutMinDistance);
+    // 내부 노드인 경우: 자식 노드를 재귀적으로 탐색하여 최소 교차 거리를 갱신
+    if (Left)
+        Left->QueryRayClosestInternal(Origin, Dir, OutClosest, OutMinDistance);
+    if (Right)
+        Right->QueryRayClosestInternal(Origin, Dir, OutClosest, OutMinDistance);
 }
 
 // public 함수: 내부 재귀 함수를 호출하여 가장 가까운 컴포넌트를 반환합니다.
@@ -443,4 +451,78 @@ UPrimitiveComponent* BVHNode::QueryRayClosest(const FVector& Origin, const FVect
         return closest;
     }
     return nullptr;
+}
+
+UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, const FVector& Dir)
+{
+    // Ray의 방향은 반드시 정규화되어 있어야 합니다.
+    FVector normDir = Dir.Normalize();
+
+    std::priority_queue<PQEntry, std::vector<PQEntry>, PQEntryComparator> pq;
+    float bestT = FLT_MAX;
+    UPrimitiveComponent* bestComp = nullptr;
+
+    float tEntry;
+    if (Bounds.Intersect(Origin, normDir, tEntry))
+    {
+        pq.push({ this, tEntry });
+    }
+
+    while (!pq.empty())
+    {
+        PQEntry current = pq.top();
+        pq.pop();
+
+        // 만약 현재 노드의 진입 거리가 이미 최단 교차보다 멀다면 더 이상 탐색할 필요가 없음.
+        if (current.tEntry >= bestT)
+            continue;
+
+        BVHNode* node = current.Node;
+        // Leaf 노드인 경우, 이 노드에 있는 모든 컴포넌트에 대해 Ray-Sphere 교차 검사 수행
+        if (!node->Left && !node->Right)
+        {
+            for (UPrimitiveComponent* comp : node->Components)
+            {
+                float tInter;
+                FBoundingBox box = GetWorldBox(comp);
+                // AABB를 구로 근사: 구의 중심과 반지름 계산
+                FVector center = (box.min + box.max) * 0.5f;
+                float radius = (box.max - box.min).Magnitude() * 0.5f;
+
+                if (IsRayIntersectingSphere(Origin, normDir, center, radius, tInter))
+                {
+                    if (tInter < bestT)
+                    {
+                        bestT = tInter;
+                        bestComp = comp;
+                    }
+                }
+            }
+        }
+        else // 내부 노드인 경우, 자식 노드를 검사
+        {
+            if (node->Left)
+            {
+                float tLeft;
+                if (node->Left->Bounds.Intersect(Origin, normDir, tLeft) && tLeft < bestT)
+                {
+                    pq.push({ node->Left, tLeft });
+                }
+            }
+            if (node->Right)
+            {
+                float tRight;
+                if (node->Right->Bounds.Intersect(Origin, normDir, tRight) && tRight < bestT)
+                {
+                    pq.push({ node->Right, tRight });
+                }
+            }
+        }
+    }
+
+    if (bestComp)
+    {
+        UE_LOG(LogLevel::Display, TEXT("Closest intersection distance: %.2f"), bestT);
+    }
+    return bestComp;
 }
