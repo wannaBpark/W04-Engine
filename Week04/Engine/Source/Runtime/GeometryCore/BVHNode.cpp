@@ -4,8 +4,16 @@
 #include "Editor/UnrealEd/PrimitiveBatch.h"
 #include "Runtime/Core/Math/JungleMath.h"
 
-#include <algorithm>
 #include <cassert>
+#include <thread>
+#include <future>
+#include <vector>
+#include <algorithm>
+#include <mutex>
+#include <immintrin.h>
+
+std::mutex resultMutex;
+
 
 // Helper: 객체의 월드 바운딩박스를 계산
 static FBoundingBox GetWorldBox(UPrimitiveComponent* Comp)
@@ -54,6 +62,32 @@ bool IsRayIntersectingSphere(const FVector& Origin, const FVector& Dir, const FV
 
     // 교차 거리 저장
     OutDistance = t0;
+    return true;
+}
+
+
+bool IsRayIntersectingSphere(const FVector& Origin, const FVector& Dir, const FVector& Center, float Radius, float& OutIntersection, float& OutTca)
+{
+    FVector L = Center - Origin;
+    float tca = L.Dot(Dir);
+    OutTca = tca;
+    float d2 = L.Dot(L) - tca * tca;
+    float radius2 = Radius * Radius;
+
+    if (d2 > radius2)
+        return false;
+
+    float thc = sqrt(radius2 - d2);
+    float t0 = tca - thc;
+    float t1 = tca + thc;
+    if (t0 > t1)
+        std::swap(t0, t1);
+    if (t0 < 0)
+        t0 = t1;
+    if (t0 < 0)
+        return false;
+
+    OutIntersection = t0;
     return true;
 }
 
@@ -413,3 +447,47 @@ void BVHNode::QueryRayClosest(const FVector& Origin, const FVector& Dir, UPrimit
 }
 
 
+void BVHNode::QueryRayClosestInternal(const FVector& Origin, const FVector& Dir, UPrimitiveComponent*& OutClosest, float& OutMinDistance)
+{
+    float dummy;
+    if (!Bounds.Intersect(Origin, Dir, dummy))
+        return;
+
+    // Leaf 노드인 경우
+    if (!Left && !Right)
+    {
+        for (UPrimitiveComponent* Comp : Components)
+        {
+            float tIntersection;
+            FBoundingBox box = GetWorldBox(Comp);
+            if (box.Intersect(Origin, Dir, tIntersection))
+            {
+                if (tIntersection < OutMinDistance)
+                {
+                    OutMinDistance = tIntersection;
+                    OutClosest = Comp;
+                }
+            }
+        }
+        return;
+    }
+
+    // 내부 노드인 경우, 자식 노드를 재귀 호출하여 최소값 갱신
+    if (Left)
+        Left->QueryRayClosestInternal(Origin, Dir, OutClosest, OutMinDistance);
+    if (Right)
+        Right->QueryRayClosestInternal(Origin, Dir, OutClosest, OutMinDistance);
+}
+
+// public 함수: 내부 재귀 함수를 호출하여 가장 가까운 컴포넌트를 반환합니다.
+UPrimitiveComponent* BVHNode::QueryRayClosest(const FVector& Origin, const FVector& Dir)
+{
+    UPrimitiveComponent* closest = nullptr;
+    float minDistance = FLT_MAX;
+    QueryRayClosestInternal(Origin, Dir, closest, minDistance);
+    if (closest)
+    {
+        UE_LOG(LogLevel::Display, TEXT("Closest intersection distance: %.2f"), minDistance);
+    }
+    return closest;
+}

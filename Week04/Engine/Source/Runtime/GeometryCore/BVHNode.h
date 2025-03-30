@@ -5,8 +5,18 @@
 #include "Container/Set.h"
 
 #define BVH_SAT false
+#define MULTITHREAD false
 
 class UPrimitiveComponent;
+
+
+struct FComponentDistance
+{
+    UPrimitiveComponent* Comp;
+    float IntersectionDistance; // Ray와 구의 교차점까지의 거리 (t₀)
+    float OriginDistance;       // Ray Origin에서 구의 중심까지의 투영 거리 (tca)
+};
+
 class BVHNode
 {
 public:
@@ -40,6 +50,8 @@ public:
     void RemoveComponent(UPrimitiveComponent* Comp);
     void UpdateComponent(UPrimitiveComponent* Comp);
     void QueryRayClosest(const FVector& Origin, const FVector& Dir, UPrimitiveComponent*& ClosestComp, float& MinDistance);
+    void QueryRayClosestInternal(const FVector& Origin, const FVector& Dir, UPrimitiveComponent*& OutClosest, float& OutMinDistance);
+    UPrimitiveComponent* QueryRayClosest(const FVector& Origin, const FVector& Dir);
 };
 
 
