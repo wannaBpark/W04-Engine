@@ -341,7 +341,7 @@ void PropertyEditorPanel::RenderForMaterial(UStaticMeshComponent* StaticMeshComp
             {
                 if (ImGui::IsMouseDoubleClicked(0))
                 {
-                    StaticMeshComp->SetselectedSubMeshIndex(i);
+                    StaticMeshComp->SetSelectedSubMeshIndex(i);
                     SelectedStaticMeshComp = StaticMeshComp;
                 }
             }
@@ -350,7 +350,7 @@ void PropertyEditorPanel::RenderForMaterial(UStaticMeshComponent* StaticMeshComp
         if (ImGui::Selectable(temp.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
         {
             if (ImGui::IsMouseDoubleClicked(0))
-                StaticMeshComp->SetselectedSubMeshIndex(-1);
+                StaticMeshComp->SetSelectedSubMeshIndex(-1);
         }
 
         ImGui::TreePop();

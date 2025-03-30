@@ -5,6 +5,8 @@
 #include "Actors/Player.h"
 #include "BaseGizmos/GizmoBaseComponent.h"
 #include "Components/LightComponent.h"
+#include "Components/PrimitiveComponent.h"
+#include "Components/SkySphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/UBillboardComponent.h"
 #include "Components/UParticleSubUVComp.h"
@@ -12,17 +14,17 @@
 #include "Components/Material/Material.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Launch/EngineLoop.h"
+#include "LevelEditor/SLevelEditor.h"
 #include "Math/JungleMath.h"
+#include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/PrimitiveBatch.h"
 #include "UObject/Casts.h"
 #include "UObject/Object.h"
-#include "PropertyEditor/ShowFlags.h"
 #include "UObject/UObjectIterator.h"
-#include "Components/SkySphereComponent.h"
-#include "Engine/Classes/Components/PrimitiveComponent.h"
 
 #define SAFE_RELEASE(p)       { if (p) { (p)->Release();  (p) = nullptr; } }
+
 
 void FRenderer::Initialize(FGraphicsDevice* graphics)
 {
@@ -168,13 +170,20 @@ void FRenderer::RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, I
     Graphics->DeviceContext->DrawIndexed(numIndices, 0, 0);
 }
 
-void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<FStaticMaterial*> materials, TArray<UMaterial*> overrideMaterial, int selectedSubMeshIndex = -1) const
+void FRenderer::RenderPrimitive(
+    const OBJ::FStaticMeshRenderData* renderData,
+    const TArray<FStaticMaterial*>& materials,
+    const TArray<UMaterial*>&overrideMaterial,
+    int selectedSubMeshIndex
+) const
 {
     UINT offset = 0;
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &renderData->VertexBuffer, &Stride, &offset);
 
     if (renderData->IndexBuffer)
+    {
         Graphics->DeviceContext->IASetIndexBuffer(renderData->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+    }
 
     if (renderData->MaterialSubsets.Num() == 0)
     {
@@ -186,10 +195,13 @@ void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<F
     {
         int materialIndex = renderData->MaterialSubsets[subMeshIndex].MaterialIndex;
 
-        subMeshIndex == selectedSubMeshIndex ? UpdateSubMeshConstant(true) : UpdateSubMeshConstant(false);
+        subMeshIndex == selectedSubMeshIndex
+            ? UpdateSubMeshConstant(true)
+            : UpdateSubMeshConstant(false);
 
-        overrideMaterial[materialIndex] != nullptr ? 
-            UpdateMaterial(overrideMaterial[materialIndex]->GetMaterialInfo()) : UpdateMaterial(materials[materialIndex]->Material->GetMaterialInfo());
+        overrideMaterial[materialIndex] != nullptr
+            ? UpdateMaterial(overrideMaterial[materialIndex]->GetMaterialInfo())
+            : UpdateMaterial(materials[materialIndex]->Material->GetMaterialInfo());
 
         if (renderData->IndexBuffer)
         {
@@ -197,6 +209,70 @@ void FRenderer::RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<F
             uint64 startIndex = renderData->MaterialSubsets[subMeshIndex].IndexStart;
             uint64 indexCount = renderData->MaterialSubsets[subMeshIndex].IndexCount;
             Graphics->DeviceContext->DrawIndexed(indexCount, startIndex, 0);
+        }
+    }
+}
+
+void FRenderer::RenderPrimitive(const MaterialSubsetRenderData& SubsetRenderData) const
+{
+    for (const auto& [Material, RenderDataArray] : SubsetRenderData)
+    {
+        UpdateMaterial(Material->GetMaterialInfo());
+
+        ID3D11Buffer* CurrentVertexBuffer = nullptr;
+        for (const FSubsetRenderInfo& SubsetInfo : RenderDataArray)
+        {
+            const auto& StaticMeshInfo = SubsetInfo.StaticMeshInfo;
+
+            // 기존과 다른 Mesh일 경우, 버퍼 재설정
+            if (CurrentVertexBuffer != StaticMeshInfo->VertexBuffer)
+            {
+                uint32 Offset = 0;
+                Graphics->DeviceContext->IASetVertexBuffers(0, 1, &StaticMeshInfo->VertexBuffer, &Stride, &Offset);
+                if (StaticMeshInfo->IndexBuffer)
+                {
+                    Graphics->DeviceContext->IASetIndexBuffer(StaticMeshInfo->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+                }
+
+                UpdateConstant(
+                    StaticMeshInfo->MVP,
+                    StaticMeshInfo->NormalMatrix,
+                    StaticMeshInfo->UUIDColor,
+                    StaticMeshInfo->bIsSelected
+                );
+
+                /**
+                 * SubsetRenderData를 설정할 때, 각 컴포넌트의 Mesh->Subset을 순회하며 배열에 넣기 때문에
+                 * 한번 Buffer가 정해지면 다시 정해질 때 까지 같은 Mesh에 속한 Subset인것을 알 수 있음
+                 * 따라서 Buffer가 바뀔 때 1번만 렌더
+                 */
+                const auto& ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+                if (ActiveViewport->GetShowFlag() & EEngineShowFlags::SF_AABB)
+                {
+                    UPrimitiveBatch::GetInstance().RenderAABB(
+                        StaticMeshInfo->StaticMeshComp->GetBoundingBox(),
+                        StaticMeshInfo->StaticMeshComp->GetWorldLocation(),
+                        StaticMeshInfo->ModelMatrix
+                    );
+                }
+            }
+
+            // bIsSubsetSelected이 true일때만 1번 바꿔주고, false일때는 Update안함
+            if (SubsetInfo.bIsSubsetSelected)
+            {
+                UpdateSubMeshConstant(true);
+            }
+
+            Graphics->DeviceContext->DrawIndexed(
+                SubsetInfo.IndexCount,
+                SubsetInfo.StartIndex,
+                SubsetInfo.BaseVertexLocation
+            );
+
+            if (SubsetInfo.bIsSubsetSelected)
+            {
+                UpdateSubMeshConstant(false);
+            }
         }
     }
 }
@@ -471,7 +547,7 @@ void FRenderer::UpdateSubMeshConstant(bool isSelected) const
     }
 }
 
-void FRenderer::UpdateTextureConstant(float UOffset, float VOffset)
+void FRenderer::UpdateTextureConstant(float UOffset, float VOffset) const
 {
     if (TextureConstantBufer) {
         D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU �� �޸� �ּ� ����
@@ -941,7 +1017,7 @@ void FRenderer::ClearRenderArr()
     LightObjs.Empty();
 }
 
-void FRenderer::Render(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
+void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
 {
     Graphics->DeviceContext->RSSetViewports(1, &ActiveViewport->GetD3DViewport());
     Graphics->ChangeRasterizer(ActiveViewport->GetViewMode());
@@ -959,55 +1035,75 @@ void FRenderer::Render(UWorld* World, std::shared_ptr<FEditorViewportClient> Act
     ClearRenderArr(); // 왜 비워주는가?
 }
 
-void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
+void FRenderer::RenderStaticMeshes(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
 {
     PrepareShader();
 
+    MaterialSubsetRenderData SubsetRenderData;
     for (UStaticMeshComponent* StaticMeshComp : StaticMeshObjs)
     {
-        FMatrix Model = JungleMath::CreateModelMatrix(
-            StaticMeshComp->GetWorldLocation(),
-            StaticMeshComp->GetWorldRotation(),
-            StaticMeshComp->GetWorldScale()
-        );
-        // 최종 MVP 행렬
-        FMatrix MVP = Model * ActiveViewport->GetViewMatrix() * ActiveViewport->GetProjectionMatrix();
-        // 노말 회전시 필요 행렬
-        FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
-        FVector4 UUIDColor = StaticMeshComp->EncodeUUID() / 255.0f;
-        if (World->GetSelectedActor() == StaticMeshComp->GetOwner())
-        {
-            UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
-        }
-        else
-            UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+        const UStaticMesh* StaticMesh = StaticMeshComp->GetStaticMesh();
+        if (!StaticMesh) continue;
 
-        if (USkySphereComponent* skysphere = Cast<USkySphereComponent>(StaticMeshComp))
-        {
-            UpdateTextureConstant(skysphere->UOffset, skysphere->VOffset);
-        }
-        else
-        {
-            UpdateTextureConstant(0, 0);
-        }
+        const OBJ::FStaticMeshRenderData* RenderData = StaticMesh->GetRenderData();
+        if (!RenderData) continue;
 
-        if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
+        // FStaticMeshRenderInfo 만드는 과정
+        const auto MeshRenderInfo = std::make_shared<FStaticMeshRenderInfo>();
         {
-            UPrimitiveBatch::GetInstance().RenderAABB(
-                StaticMeshComp->GetBoundingBox(),
+            MeshRenderInfo->StaticMeshComp = StaticMeshComp;
+
+            // Mesh의 정점와 인덱스 정보를 설정
+            MeshRenderInfo->VertexBuffer = RenderData->VertexBuffer;
+            MeshRenderInfo->IndexBuffer = RenderData->IndexBuffer;
+
+            // 최종 MVP 행렬 계산
+            MeshRenderInfo->ModelMatrix = JungleMath::CreateModelMatrix(
                 StaticMeshComp->GetWorldLocation(),
-                Model
+                StaticMeshComp->GetWorldRotation(),
+                StaticMeshComp->GetWorldScale()
             );
+
+            MeshRenderInfo->MVP = MeshRenderInfo->ModelMatrix
+                * ActiveViewport->GetViewMatrix()
+                * ActiveViewport->GetProjectionMatrix();
+
+            // 노말 회전시 필요 행렬
+            MeshRenderInfo->NormalMatrix = FMatrix::Transpose(
+                FMatrix::Inverse(MeshRenderInfo->ModelMatrix)
+            );
+
+            // Pixel Picking에 사용되는 UUID to Color값
+            MeshRenderInfo->UUIDColor = StaticMeshComp->EncodeUUID() / 255.0f;
+
+            // Mesh가 선택되어 있는지 여부
+            MeshRenderInfo->bIsSelected =
+                World->GetSelectedActor() == StaticMeshComp->GetOwner();
         }
-                
-    
-        if (!StaticMeshComp->GetStaticMesh()) continue;
 
-        OBJ::FStaticMeshRenderData* renderData = StaticMeshComp->GetStaticMesh()->GetRenderData();
-        if (renderData == nullptr) continue;
+        // Material에 맞는 Subset을 추가
+        const TArray<FStaticMaterial*>& Materials = StaticMesh->GetMaterials();
+        const TArray<UMaterial*>& OverrideMaterial = StaticMeshComp->GetOverrideMaterials();
+        for (uint32 Index = 0; const FMaterialSubset& Subset : RenderData->MaterialSubsets)
+        {
+            TArray<FSubsetRenderInfo>& SubsetArrayRef = SubsetRenderData.FindOrAdd(
+                OverrideMaterial[Subset.MaterialIndex]
+                    ? OverrideMaterial[Subset.MaterialIndex]
+                    : Materials[Subset.MaterialIndex]->Material
+            );
 
-        RenderPrimitive(renderData, StaticMeshComp->GetStaticMesh()->GetMaterials(), StaticMeshComp->GetOverrideMaterials(), StaticMeshComp->GetselectedSubMeshIndex());
+            SubsetArrayRef.Emplace(
+                MeshRenderInfo,                                     // StaticMeshInfo
+                Subset.IndexCount,                                  // IndexCount
+                Subset.IndexStart,                                  // StartIndex
+                0,                                                  // BaseVertexLocation
+                Index == StaticMeshComp->GetSelectedSubMeshIndex()  // bIsSubsetSelected
+            );
+            ++Index;
+        }
     }
+
+    RenderPrimitive(SubsetRenderData);
 }
 
 void FRenderer::RenderGizmos(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
@@ -1073,7 +1169,7 @@ void FRenderer::RenderGizmos(const UWorld* World, const std::shared_ptr<FEditorV
 #pragma endregion GizmoDepth
 }
 
-void FRenderer::RenderBillboards(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
+void FRenderer::RenderBillboards(UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
 {
     PrepareTextureShader();
     PrepareSubUVConstant();

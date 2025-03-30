@@ -9,7 +9,7 @@ class UStaticMeshComponent : public UMeshComponent
 public:
     UStaticMeshComponent() = default;
 
-    PROPERTY(int, selectedSubMeshIndex);
+    PROPERTY(int, SelectedSubMeshIndex);
 
     virtual uint32 GetNumMaterials() const override;
     virtual UMaterial* GetMaterial(uint32 ElementIndex) const override;
@@ -29,5 +29,5 @@ public:
 
 protected:
     UStaticMesh* staticMesh = nullptr;
-    int selectedSubMeshIndex = -1;
+    int SelectedSubMeshIndex = -1;
 };
