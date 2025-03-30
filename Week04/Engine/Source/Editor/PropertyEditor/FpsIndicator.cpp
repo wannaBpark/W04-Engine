@@ -1,4 +1,4 @@
-﻿#include "FpsIndicator.h"
+#include "FpsIndicator.h"
 #include "Actors/Player.h"
 #include "ImGUI/imgui.h"
 
@@ -28,7 +28,7 @@ void FFpsIndicator::Render()
     const AEditorPlayer::FPickingTimeInfo& PickingTimeInfo = AEditorPlayer::PickingTimeInfo;
     ImGui::Text("FPS: %.1f (%.1f ms)", Fps, 1000.0f / Fps);
     ImGui::Text(
-        "Picking Time %ums, Num Attempts %u, Accumulated Time %llums",
+        "Picking Time %.7fms, Num Attempts %u, Accumulated Time %.5lfms",
         PickingTimeInfo.LastPickingTime.load(),
         PickingTimeInfo.NumAttempts.load(),
         PickingTimeInfo.AccumulatedTime.load()

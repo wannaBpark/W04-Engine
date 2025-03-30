@@ -2,22 +2,23 @@
 
 #include "World.h"
 #include "Actors/Player.h"
-#include "Components/CubeComp.h"
 #include "Components/LightComponent.h"
 #include "Components/SphereComp.h"
 #include "Components/UParticleSubUVComp.h"
 #include "Components/UText.h"
 #include "Engine/FLoaderOBJ.h"
 #include "Engine/StaticMeshActor.h"
-#include "ImGUI/imgui_internal.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "tinyfiledialogs/tinyfiledialogs.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "PropertyEditor/ShowFlags.h"
+#include "Runtime/GeometryCore/Octree.h"
 #include "JSON/json.hpp"
 #include "UnrealEd/SceneMgr.h"
 
 using json = nlohmann::json;
+
+
 void ControlEditorPanel::Render()
 {
     /* Pre Setup */
@@ -129,6 +130,7 @@ void ControlEditorPanel::CreateMenuButton(ImVec2 ButtonSize, ImFont* IconFont)
             //ScneData currentSceneData = GengineLoop.GetWorld()->ExprotSceneData();
             // TODO: Save Scene
             
+            FSceneMgr::SaveSceneToFile(FileName);
             tinyfd_messageBox("알림", "저장되었습니다.", "ok", "info", 1);
         }
 
@@ -278,11 +280,32 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 }
                 case OBJ_CUBE:
                 {
-                    AStaticMeshActor* TempActor = World->SpawnActor<AStaticMeshActor>();
+                    AStaticMeshActor* TempActor = World->SpawnActor<AStaticMeshActor>();        // 여기서 Static Mesh Actor Spawn
                     TempActor->SetActorLabel(TEXT("OBJ_CUBE"));
                     UStaticMeshComponent* MeshComp = TempActor->GetStaticMeshComponent();
                     FManagerOBJ::CreateStaticMesh("Assets/helloBlender.obj");
                     MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"helloBlender.obj"));
+                    
+                    //FVector Location = FVector(rand() % 20, rand() % 20, 0.0f);
+                    //MeshComp->SetLocation(Location);
+                    //MeshComp->AABB.min = MeshComp->AABB.min + Location - 1.0f;
+                    //MeshComp->AABB.max = MeshComp->AABB.max + Location + 1.0f;
+                    // 옥트리 시스템 가져오기 또는 초기화
+                    //TArray<UPrimitiveComponent*> CompArr;
+                    //CompArr.Add(MeshComp);
+                    //for (int i = 0; i < 200; i++) {
+                    //    for (int j = 0; j < 200; ++j) {
+                    //        AStaticMeshActor* TempActor = World->SpawnActor<AStaticMeshActor>();        // 여기서 Static Mesh Actor Spawn
+                    //        TempActor->SetActorLabel(TEXT("OBJ_CUBE"));
+                    //        UStaticMeshComponent* MeshComp = TempActor->GetStaticMeshComponent();
+                    //        FManagerOBJ::CreateStaticMesh("Assets/helloBlender.obj");
+                    //        MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"helloBlender.obj"));
+                    //        MeshComp->SetLocation(FVector(i*3, j*3, 0));
+                    //        CompArr.Add(MeshComp);
+                    //    }
+                    //}
+                    
+                    // ---------------------- //
                     break;
                 }
                 case OBJ_SpotLight:
@@ -346,6 +369,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
 
         UWorld* World = GEngineLoop.GetWorld();
 
+        TArray<UPrimitiveComponent*> AppleComps;
         if (ImGui::Button("Make Apple!")) {
 
             for (int x = 0; x < appleCountX; ++x)
@@ -363,10 +387,14 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                         UStaticMeshComponent* MeshComp = StaticMeshActor->GetStaticMeshComponent();
                         FManagerOBJ::CreateStaticMesh("Data/apple_mid.obj");
                         MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"apple_mid.obj"));
+                        
+                        AppleComps.Add(MeshComp);
                     }
                 }
             }
         }
+        World->SetOctreeSystem(AppleComps);
+        World->SetKDTreeSystem(AppleComps);
         ImGui::EndPopup();
     }
 }

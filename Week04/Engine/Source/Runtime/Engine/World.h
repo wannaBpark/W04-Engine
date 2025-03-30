@@ -12,7 +12,10 @@ class UCameraComponent;
 class AEditorPlayer;
 class USceneComponent;
 class UTransformGizmo;
-
+class OctreeSystem;
+class KDTreeSystem;
+class BVHSystem;
+class UPrimitiveComponent;
 
 class UWorld : public UObject
 {
@@ -53,6 +56,9 @@ private:
     USceneComponent* pickingGizmo = nullptr;
     UCameraComponent* camera = nullptr;
     AEditorPlayer* EditorPlayer = nullptr;
+    OctreeSystem* Octree;
+    KDTreeSystem* KDTree;
+    BVHSystem* BVH;
 
 public:
     UObject* worldGizmo = nullptr;
@@ -74,6 +80,18 @@ public:
     UObject* GetWorldGizmo() const { return worldGizmo; }
     USceneComponent* GetPickingGizmo() const { return pickingGizmo; }
     void SetPickingGizmo(UObject* Object);
+
+    void SetOctreeSystem(OctreeSystem* InOctree) { Octree = InOctree; }
+    OctreeSystem* GetOctreeSystem() { return Octree; }
+    void SetOctreeSystem(const TArray<UPrimitiveComponent*>& Components);
+
+    void SetKDTreeSystem(KDTreeSystem* InKDTree) { KDTree = InKDTree; }
+    KDTreeSystem* GetKDTreeSystem() { return KDTree; }
+    void SetKDTreeSystem(const TArray<UPrimitiveComponent*>& Components);
+
+    void SetBVHSystem(BVHSystem* InBVH) { BVH = InBVH; }
+    BVHSystem* GetBVHSystem() { return BVH; }
+    void SetBVHSystem(const TArray<UPrimitiveComponent*>& Components);
 };
 
 
@@ -89,3 +107,5 @@ T* UWorld::SpawnActor()
     PendingBeginPlayActors.Add(Actor);
     return Actor;
 }
+
+

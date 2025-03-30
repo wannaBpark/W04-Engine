@@ -124,7 +124,8 @@ public:
     float FOVAngle = 60.0f;
     float AspectRatio;
     float nearPlane = 0.1f;
-    float farPlane = 1000000.0f;
+    //float farPlane = 1000000.0f;
+    float farPlane = 100.0f;
     static FVector Pivot;
     static float orthoSize;
     ELevelViewportType ViewportType;
@@ -133,6 +134,8 @@ public:
 
     FMatrix View;
     FMatrix Projection;
+
+    FFrustum Frustum;
 public: //Camera Movement
     void CameraMoveForward(float _Value);
     void CameraMoveRight(float _Value);
@@ -177,6 +180,8 @@ public:
     PROPERTY(float, GridSize)
     float GetCameraSpeedScalar() const { return CameraSpeedScalar; };
     void SetCameraSpeedScalar(float value);
+
+    FFrustum CreateFrustumFromCamera();
 
 private:
     template <typename T>

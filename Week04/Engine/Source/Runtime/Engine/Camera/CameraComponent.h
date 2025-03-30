@@ -32,6 +32,8 @@ private:
     float FOV;
     float nearClip = 0.1f;
     float farClip = 1000.f;
+
+    FFrustum Frustum;
 public:
     void SetFOV(float _fov) { FOV = _fov; }
     float& GetFOV() { return FOV; }
@@ -41,4 +43,7 @@ public:
     float& GetFarClip() { return farClip; }
     void SetMouseSpeed(float _Value) { mouseSpeed = _Value; }
     float GetMouseSpeed() const { return mouseSpeed; }
+
+    FFrustum GetFrustum() const { return Frustum; }
+    FFrustum CreateFrustumFromCamera();
 };

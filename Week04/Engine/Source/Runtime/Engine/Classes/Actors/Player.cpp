@@ -1,4 +1,4 @@
-﻿#include "Player.h"
+#include "Player.h"
 
 #include "UnrealClient.h"
 #include "WindowsPlatformTime.h"
@@ -16,7 +16,12 @@
 #include "Stats/Stats.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UObject/UObjectIterator.h"
+#include "GeometryCore/Octree.h"
+#include "Editor/UnrealEd/PrimitiveBatch.h"
+#include "GeometryCore/KDTree.h"
+#include "GeometryCore/BVHNode.h"
 
+#include "GeometryCore/SoftwareZBuffer.h"
 
 using namespace DirectX;
 
@@ -27,6 +32,9 @@ void AEditorPlayer::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     Input();
+    // Octree없이 프러스텀 컬링 주석.
+    //UpdateVisibleStaticMeshComponents();
+    UpdateVisibleStaticMeshComponentsWithOctree();
 }
 
 void AEditorPlayer::Input()
@@ -44,27 +52,29 @@ void AEditorPlayer::Input()
             GetCursorPos(&mousePos);
             GetCursorPos(&m_LastMousePos);
 
-            uint32 UUID = GetEngine().graphicDevice.GetPixelUUID(mousePos);
-            // TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
-            for ( const auto obj : TObjectRange<USceneComponent>())
-            {
-                if (obj->GetUUID() != UUID) continue;
+			// 컬러 피킹 부분입니다
+//#if _DEBUG
+            //uint32 UUID = GetEngine().graphicDevice.GetPixelUUID(mousePos);
+            //// TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
+            //for ( const auto obj : TObjectRange<USceneComponent>())
+            //{
+            //    if (obj->GetUUID() != UUID) continue;
 
-                UE_LOG(LogLevel::Display, *obj->GetName());
-            }
+            //    UE_LOG(LogLevel::Display, "%s Pixel Pick", *obj->GetName());
+            //}
+//#endif
             ScreenToClient(GetEngine().hWnd, &mousePos);
 
             FVector pickPosition;
 
             const auto& ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
             ScreenToViewSpace(mousePos.x, mousePos.y, ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix(), pickPosition);
-            bool res = PickGizmo(pickPosition);
+            bool res = PickGizmo(pickPosition);   
             if (!res) PickActor(pickPosition);
 
             PickingTimeInfo.LastPickingTime.store(
                 static_cast<float>(CycleCount_PickingTime.Finish())
-                * FPlatformTime::GetSecondsPerCycle()
-                * 1000.0f,
+                * FPlatformTime::GetSecondsPerCycle() *1000.0f,
                 std::memory_order_relaxed
             );
             PickingTimeInfo.NumAttempts.fetch_add(1, std::memory_order_relaxed);
@@ -141,11 +151,11 @@ void AEditorPlayer::Input()
 bool AEditorPlayer::PickGizmo(const FVector& rayOrigin)
 {
     bool isPickedGizmo = false;
-    if (GetWorld()->GetSelectedActor())
+    if (GetWorld()->GetSelectedActor())             // 현재 선택된 액터가 있다면
     {
         if (cMode == CM_TRANSLATION)
         {
-            for (auto iter : GetWorld()->LocalGizmo->GetArrowArr())
+            for (auto iter : GetWorld()->LocalGizmo->GetArrowArr()) // 3개의 ArrowArr 순회
             {
                 int maxIntersect = 0;
                 float minDistance = FLT_MAX;
@@ -172,7 +182,7 @@ bool AEditorPlayer::PickGizmo(const FVector& rayOrigin)
         }
         else if (cMode == CM_ROTATION)
         {
-            for (auto iter : GetWorld()->LocalGizmo->GetDiscArr())
+            for (auto iter : GetWorld()->LocalGizmo->GetDiscArr())          // 3개의 rotation 디스크 모양 교차 검사
             {
                 int maxIntersect = 0;
                 float minDistance = FLT_MAX;
@@ -236,7 +246,89 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     const UActorComponent* Possible = nullptr;
     int maxIntersect = 0;
     float minDistance = FLT_MAX;
-    for (const auto iter : TObjectRange<UPrimitiveComponent>())
+
+    // 옥트리 시스템 가져오기
+    UWorld* World = GetWorld();
+    OctreeSystem* Octree = World->GetOctreeSystem();
+    KDTreeSystem* KDTree = World->GetKDTreeSystem();
+	BVHSystem* BVH = World->GetBVHSystem();
+    if (!Octree || !Octree->Root)
+    {
+        // 옥트리가 없으면 기존 방식으로 폴백
+        UE_LOG(LogLevel::Display, "Octree not initialized!");
+        return;
+    }
+    if (!KDTree || !KDTree->Root)
+    {
+        UE_LOG(LogLevel::Display, "KDTree not initialized!");
+        return;
+    }
+
+#pragma region Octree Components Ray Intersects
+    // 옥트리에서 후보 컴포넌트 추출
+    TArray<UPrimitiveComponent*> KDComponents;
+    TSet<UPrimitiveComponent*> KDUniqueComps;
+    TSet<uint32> KDUniqueUUIDs;
+
+    TArray<UPrimitiveComponent*> CandidateComponents;
+    TSet<UPrimitiveComponent*> RayUniqueComps;
+    TSet<uint32> RayUniqueUUIDs;
+
+    Ray MyRay = GetRayDirection(pickPosition);
+    //Octree->Root->QueryRay(MyRay.Origin, MyRay.Direction, CandidateComponents);
+    //Octree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, RayUniqueComps, RayUniqueUUIDs);
+    //KDTree->Root->QueryRay(MyRay.Origin, MyRay.Direction, KDComponents);
+    //KDTree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, KDUniqueComps, KDUniqueUUIDs);
+    //UE_LOG(LogLevel::Display, " Ray All Candidate Count : %d", KDComponents.Num());
+    //UE_LOG(LogLevel::Display, " Ray Unique Candidate Count : %d", KDUniqueComps.Num());
+
+    //UE_LOG(LogLevel::Display, " Ray All Candidate Count : %d", CandidateComponents.Num());
+    //UE_LOG(LogLevel::Display, " Ray Unique Candidate Count : %d", RayUniqueComps.Num());
+
+#pragma endregion
+
+#pragma region Octree Intersects Frustum Components
+	// 프러스텀과 겹치는 오브젝트만 추출
+    TArray< UPrimitiveComponent*> FrustumOctreeComps;
+	TSet<UPrimitiveComponent*> FrustumOctreeUniqueComps;
+    TSet<uint32> OctreeUniqueUUIDs;
+    //FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
+    //Octree->Root->QueryFrustumUnique(Frustum, FrustumOctreeUniqueComps, OctreeUniqueUUIDs);
+ //   Octree->Root->QueryFrustum(Frustum, FrustumOctreeComps);
+ //   // 각각 옥트리와 겹치는 개수 (중복O, 중복 제거)를 차례로 출력합니다
+ //   UE_LOG(LogLevel::Display, " Frustum & Octree Basic Count : %d", FrustumOctreeComps.Num()); 
+    //UE_LOG(LogLevel::Display, " Frustum & Octree Unique Count : %d", FrustumOctreeUniqueComps.Num());
+#pragma endregion
+#pragma region KD Tree Intersects Frustum
+    TSet<UPrimitiveComponent*> FrustumKDTreeUniqueComps;
+    TSet<uint32> KDFrustumUniqueUUIDs;
+    //FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
+    //KDTree->Root->QueryFrustumUnique(Frustum, FrustumKDTreeUniqueComps, KDFrustumUniqueUUIDs);
+    //UE_LOG(LogLevel::Display, " Frustum & KD Tree Unique Count : %d", FrustumKDTreeUniqueComps.Num());
+#pragma endregion
+
+#pragma region KD Tree Occlusion Culling Test
+    TArray<UPrimitiveComponent*> VisibileComps;
+    //SoftwareZBuffer szbuffer(100, 100);
+    //szbuffer.PerformSWOcclusionCulling(KDTree, Frustum, szbuffer, VisibileComps);
+    //UE_LOG(LogLevel::Display, "Visible Comps after Occlusion Culling : %d", VisibileComps.Num());
+#pragma endregion
+
+#pragma region BVH Ray Intersection
+	TArray<UPrimitiveComponent*> BVHComponents;
+	TSet<UPrimitiveComponent*> BVHUniqueComps;
+	TSet<uint32> BVHUniqueUUIDs;
+
+	BVH->Root->QueryRay(MyRay.Origin, MyRay.Direction, BVHComponents);
+	BVH->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, BVHUniqueComps, BVHUniqueUUIDs);
+    UE_LOG(LogLevel::Display, " Ray BVH Count : %d", BVHComponents.Num());
+    UE_LOG(LogLevel::Display, " Ray BVH Unique Count : %d", BVHUniqueComps.Num());
+
+#pragma end region
+
+    //for (const auto iter : FrustumOctreeUniqueComps)
+    //for (const auto& iter : KDComponents)
+    for (const auto& iter : BVHComponents)
     {
         UPrimitiveComponent* pObj;
         if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())
@@ -271,6 +363,10 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     if (Possible)
     {
         GetWorld()->SetPickedActor(Possible->GetOwner());
+    }
+    else 
+    {
+        GetWorld()->SetPickedActor(nullptr);
     }
 }
 
@@ -318,7 +414,6 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
 
 	FMatrix translationMatrix = FMatrix::CreateTranslationMatrix(obj->GetWorldLocation());
 
-	// ���� ��ȯ ���
 	FMatrix worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
 	FMatrix viewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
     
@@ -481,6 +576,12 @@ void AEditorPlayer::ControlTranslation(USceneComponent* pObj, const UGizmoBaseCo
             pObj->AddLocation(FVector(0.0f, 0.0f, moveDir.z));
         }
     }
+
+    // 변화가 있을 때 pObj의 바운딩 박스 위치 업데이트
+    UWorld* World = GetWorld();
+    OctreeSystem* Octree = World->GetOctreeSystem();
+
+    // ------------------------------------ // 
 }
 
 void AEditorPlayer::ControlScale(USceneComponent* pObj, const UGizmoBaseComponent* Gizmo, int32 deltaX, int32 deltaY)
@@ -513,4 +614,79 @@ void AEditorPlayer::ControlScale(USceneComponent* pObj, const UGizmoBaseComponen
         FVector moveDir = CameraUp * -DeltaY * 0.05f;
         pObj->AddScale(FVector(0.0f, 0.0f, moveDir.z));
     }
+}
+
+void AEditorPlayer::UpdateVisibleStaticMeshComponentsWithOctree()
+{
+    UWorld* World = GetWorld();
+    FRenderer* Renderer = &FEngineLoop::renderer;
+    OctreeSystem* Octree = World->GetOctreeSystem();
+    if (!Octree || !Octree->Root) return;
+
+    FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
+   
+    // 보여지는 오브젝트들 초기화.
+    Renderer->GetVisibleObjs().Empty();
+    TSet<UPrimitiveComponent*> FrustumComps;
+    TSet<uint32> UniqueUUIDs;
+    Octree->Root->QueryFrustumUnique(Frustum, FrustumComps, UniqueUUIDs);
+    
+    Renderer->SetVisibleObjs(FrustumComps);
+}
+
+void AEditorPlayer::UpdateVisibleStaticMeshComponents() {
+    UWorld* World = GetWorld();
+    FRenderer* Renderer = &FEngineLoop::renderer;
+
+    FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
+
+    Renderer->GetVisibleObjs().Empty();
+    TSet<UPrimitiveComponent*> FrustumComps;
+    TSet<uint32> UniqueUUIDs;
+
+    // TODO : TObjectRange<UPrimitveComponent> 캐싱해서 사용하기 성능 확인해보기
+    for (const auto iter : TObjectRange<UPrimitiveComponent>()) {
+
+        // AABB 교차 검사
+        FMatrix Model = JungleMath::CreateModelMatrix(
+            iter->GetWorldLocation(),
+            iter->GetWorldRotation(),
+            iter->GetWorldScale()
+        );
+        FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
+            iter->AABB, iter->GetWorldLocation(), Model
+        );
+        if (Frustum.Intersects(WorldBBox))
+        {
+            UniqueUUIDs.Add(iter->GetUUID());
+            FrustumComps.Add(iter);
+        }
+    }
+    Renderer->SetVisibleObjs(FrustumComps);
+}
+
+Ray AEditorPlayer::GetRayDirection(const FVector& pickPosition)
+{
+    Ray result;
+    FMatrix viewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
+    bool bIsOrtho = GetEngine().GetLevelEditor()->GetActiveViewportClient()->IsOrtho();
+
+    if (bIsOrtho)
+    {
+        FMatrix inverseView = FMatrix::Inverse(viewMatrix);
+        result.Origin = inverseView.TransformPosition(pickPosition);
+        result.Direction = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformOrthographic.GetForwardVector().Normalize();
+    }
+    else
+    {
+        FMatrix inverseViewMatrix = FMatrix::Inverse(viewMatrix);
+        FVector cameraOrigin = { 0,0,0 };
+        result.Origin = inverseViewMatrix.TransformPosition(cameraOrigin);
+        FVector transformedPick = inverseViewMatrix.TransformPosition(pickPosition);
+        result.Direction = (transformedPick - result.Origin).Normalize();
+    }
+
+    return result;
+
+
 }

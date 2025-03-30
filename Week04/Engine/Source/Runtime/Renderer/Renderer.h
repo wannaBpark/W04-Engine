@@ -20,6 +20,8 @@ class FEditorViewportClient;
 class UBillboardComponent;
 class UStaticMeshComponent;
 class UGizmoBaseComponent;
+class UPrimitiveComponent;
+
 
 //~ Material Sort 관련 구조체
 /**
@@ -53,7 +55,7 @@ using MaterialSubsetRenderData = TMap<UMaterial*, TArray<FSubsetRenderInfo>>;
 //~ Material Sort 관련 구조체
 
 
-class FRenderer
+class FRenderer 
 {
     float litFlag = 0;
 
@@ -191,6 +193,7 @@ public:
     void RenderBillboards(UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
 
 private:
+    TSet<UPrimitiveComponent*> VisibleObjs;
     TArray<UStaticMeshComponent*> StaticMeshObjs;
     TArray<UGizmoBaseComponent*> GizmoObjs;
     TArray<UBillboardComponent*> BillboardObjs;
@@ -204,4 +207,8 @@ public:
     ID3D11ShaderResourceView* pBBSRV = nullptr;
     ID3D11ShaderResourceView* pConeSRV = nullptr;
     ID3D11ShaderResourceView* pOBBSRV = nullptr;
+    
+public:
+    TSet<UPrimitiveComponent*>& GetVisibleObjs();
+    void SetVisibleObjs(const TSet<UPrimitiveComponent*>& comp);
 };

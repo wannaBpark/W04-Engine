@@ -282,7 +282,7 @@ void FGraphicsDevice::Release()
 }
 
 void FGraphicsDevice::SwapBuffer() {
-    SwapChain->Present(1, 0);
+    SwapChain->Present(0, 0); // VSync 활성화 여부
 }
 void FGraphicsDevice::Prepare()
 {

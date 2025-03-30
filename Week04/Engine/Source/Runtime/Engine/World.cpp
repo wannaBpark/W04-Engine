@@ -4,6 +4,12 @@
 #include "BaseGizmos/TransformGizmo.h"
 #include "Camera/CameraComponent.h"
 #include "LevelEditor/SLevelEditor.h"
+#include "Runtime/GeometryCore/Octree.h"
+#include "UObject/UObjectIterator.h"
+#include "Components/PrimitiveComponent.h"
+#include "GeometryCore/KDTree.h"
+#include "GeometryCore/BVHNode.h"
+
 
 
 void UWorld::Initialize()
@@ -137,4 +143,74 @@ bool UWorld::DestroyActor(AActor* ThisActor)
 void UWorld::SetPickingGizmo(UObject* Object)
 {
 	pickingGizmo = Cast<USceneComponent>(Object);
+}
+
+void UWorld::SetOctreeSystem(const TArray<UPrimitiveComponent*>& Components)
+{
+    if (OctreeSystem* Octree = this->GetOctreeSystem())
+    {
+        delete Octree;
+
+        TArray<UPrimitiveComponent*> WorldComps;
+        for (const auto& obj : Components)
+        {
+            WorldComps.Add(obj);
+        }
+        Octree = new OctreeSystem();
+        this->SetOctreeSystem(Octree);
+        Octree->Build(WorldComps);
+    }
+    else
+    {
+        // 옥트리가 없으면 새로 생성
+        Octree = new OctreeSystem();
+        this->SetOctreeSystem(Octree); // 월드에 옥트리 시스템 연결
+        Octree->Build(Components);
+    }
+}
+
+void UWorld::SetKDTreeSystem(const TArray<UPrimitiveComponent*>& Components)
+{
+    if (KDTreeSystem* KDTree = this->GetKDTreeSystem())
+    {
+        delete KDTree;
+
+        TArray<UPrimitiveComponent*> WorldComps;
+        for (const auto& obj : Components)
+        {
+            WorldComps.Add(obj);
+        }
+        KDTree = new KDTreeSystem();
+        this->SetKDTreeSystem(KDTree);
+        KDTree->Build(WorldComps);
+    }
+    else
+    {
+        KDTree = new KDTreeSystem();
+        this->SetKDTreeSystem(KDTree); // 월드에 옥트리 시스템 연결
+        KDTree->Build(Components);
+    }
+}
+
+void UWorld::SetBVHSystem(const TArray<UPrimitiveComponent*>& Components)
+{
+    if (BVHSystem* BVH = this->GetBVHSystem())
+    {
+        delete BVH;
+
+        TArray<UPrimitiveComponent*> WorldComps;
+        for (const auto& obj : Components)
+        {
+            WorldComps.Add(obj);
+        }
+        BVH = new BVHSystem();
+        this->SetBVHSystem(BVH);
+        BVH->Build(WorldComps);
+    }
+    else
+    {
+        BVH = new BVHSystem();
+        this->SetBVHSystem(BVH); // 월드에 옥트리 시스템 연결
+        BVH->Build(Components);
+    }
 }

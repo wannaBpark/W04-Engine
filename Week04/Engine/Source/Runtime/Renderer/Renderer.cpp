@@ -5,6 +5,8 @@
 #include "Actors/Player.h"
 #include "BaseGizmos/GizmoBaseComponent.h"
 #include "Components/LightComponent.h"
+#include "Components/PrimitiveComponent.h"
+#include "Components/SkySphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/UBillboardComponent.h"
 #include "Components/UParticleSubUVComp.h"
@@ -12,15 +14,17 @@
 #include "Components/Material/Material.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Launch/EngineLoop.h"
+#include "LevelEditor/SLevelEditor.h"
 #include "Math/JungleMath.h"
+#include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/PrimitiveBatch.h"
 #include "UObject/Casts.h"
 #include "UObject/Object.h"
-#include "PropertyEditor/ShowFlags.h"
 #include "UObject/UObjectIterator.h"
-#include "Components/SkySphereComponent.h"
-#include "LevelEditor/SLevelEditor.h"
+
+#define SAFE_RELEASE(p)       { if (p) { (p)->Release();  (p) = nullptr; } }
+
 
 void FRenderer::Initialize(FGraphicsDevice* graphics)
 {
@@ -72,23 +76,9 @@ void FRenderer::CreateShader()
 
 void FRenderer::ReleaseShader()
 {
-    if (InputLayout)
-    {
-        InputLayout->Release();
-        InputLayout = nullptr;
-    }
-
-    if (PixelShader)
-    {
-        PixelShader->Release();
-        PixelShader = nullptr;
-    }
-
-    if (VertexShader)
-    {
-        VertexShader->Release();
-        VertexShader = nullptr;
-    }
+    SAFE_RELEASE(InputLayout);
+    SAFE_RELEASE(InputLayout);
+    SAFE_RELEASE(VertexShader);
 }
 
 void FRenderer::PrepareShader() const
@@ -123,7 +113,6 @@ void FRenderer::ResetPixelShader() const
 
 void FRenderer::SetVertexShader(const FWString& filename, const FString& funcname, const FString& version)
 {
-    // ���� �߻��� ���ɼ��� ����
     if (Graphics == nullptr)
         assert(0);
     if (VertexShader != nullptr)
@@ -451,41 +440,12 @@ void FRenderer::CreateLitUnlitBuffer()
 
 void FRenderer::ReleaseConstantBuffer()
 {
-    if (ConstantBuffer)
-    {
-        ConstantBuffer->Release();
-        ConstantBuffer = nullptr;
-    }
-
-    if (LightingBuffer)
-    {
-        LightingBuffer->Release();
-        LightingBuffer = nullptr;
-    }
-
-    if (FlagBuffer)
-    {
-        FlagBuffer->Release();
-        FlagBuffer = nullptr;
-    }
-
-    if (MaterialConstantBuffer)
-    {
-        MaterialConstantBuffer->Release();
-        MaterialConstantBuffer = nullptr;
-    }
-
-    if (SubMeshConstantBuffer)
-    {
-        SubMeshConstantBuffer->Release();
-        SubMeshConstantBuffer = nullptr;
-    }
-
-    if (TextureConstantBufer)
-    {
-        TextureConstantBufer->Release();
-        TextureConstantBufer = nullptr;
-    }
+    SAFE_RELEASE(ConstantBuffer);
+    SAFE_RELEASE(LightingBuffer);
+    SAFE_RELEASE(FlagBuffer);
+    SAFE_RELEASE(MaterialConstantBuffer);
+    SAFE_RELEASE(SubMeshConstantBuffer);
+    SAFE_RELEASE(TextureConstantBufer);
 }
 
 void FRenderer::UpdateLightBuffer() const
@@ -641,33 +601,11 @@ void FRenderer::CreateTextureShader()
 
 void FRenderer::ReleaseTextureShader()
 {
-    if (TextureInputLayout)
-    {
-        TextureInputLayout->Release();
-        TextureInputLayout = nullptr;
-    }
-
-    if (PixelTextureShader)
-    {
-        PixelTextureShader->Release();
-        PixelTextureShader = nullptr;
-    }
-
-    if (VertexTextureShader)
-    {
-        VertexTextureShader->Release();
-        VertexTextureShader = nullptr;
-    }
-    if (SubUVConstantBuffer)
-    {
-        SubUVConstantBuffer->Release();
-        SubUVConstantBuffer = nullptr;
-    }
-    if (ConstantBuffer)
-    {
-        ConstantBuffer->Release();
-        ConstantBuffer = nullptr;
-    }
+    SAFE_RELEASE(TextureInputLayout);
+    SAFE_RELEASE(PixelTextureShader);
+    SAFE_RELEASE(VertexTextureShader);
+    SAFE_RELEASE(SubUVConstantBuffer);
+    SAFE_RELEASE(ConstantBuffer);
 }
 
 void FRenderer::PrepareTextureShader() const
@@ -1029,6 +967,7 @@ void FRenderer::UpdateLinePrimitveCountBuffer(int numBoundingBoxes, int numCones
     Graphics->DeviceContext->Unmap(LinePrimitiveBuffer, 0);
 }
 
+// 월드그리드, Bounding Box, Cone을 한 데 모아 배치 렌더링하는 코드
 void FRenderer::RenderBatch(
     const FGridParameters& gridParam, ID3D11Buffer* pVertexBuffer, int boundingBoxCount, int coneCount, int coneSegmentCount, int obbCount
 ) const
@@ -1046,24 +985,26 @@ void FRenderer::RenderBatch(
 
 void FRenderer::PrepareRender()
 {
-    for (const auto iter : TObjectRange<USceneComponent>())
+    for (UPrimitiveComponent* Comp : VisibleObjs)
     {
-        if (UStaticMeshComponent* pStaticMeshComp = Cast<UStaticMeshComponent>(iter))
+        if (UGizmoBaseComponent* Gizmo = Cast<UGizmoBaseComponent>(Comp))
         {
-            if (!Cast<UGizmoBaseComponent>(iter))
-                StaticMeshObjs.Add(pStaticMeshComp);
+            GizmoObjs.Add(Gizmo);
+            continue;
         }
-        if (UGizmoBaseComponent* pGizmoComp = Cast<UGizmoBaseComponent>(iter))
+        if (UStaticMeshComponent* Mesh = Cast<UStaticMeshComponent>(Comp))
         {
-            GizmoObjs.Add(pGizmoComp);
+            StaticMeshObjs.Add(Mesh);
+            continue;
         }
-        if (UBillboardComponent* pBillboardComp = Cast<UBillboardComponent>(iter))
+        if (UBillboardComponent* Billboard = Cast<UBillboardComponent>(Comp))
         {
-            BillboardObjs.Add(pBillboardComp);
+            BillboardObjs.Add(Billboard);
+            continue;
         }
-        if (ULightComponentBase* pLightComp = Cast<ULightComponentBase>(iter))
+        if (ULightComponentBase* Light = Cast<ULightComponentBase>(Comp))
         {
-            LightObjs.Add(pLightComp);
+            LightObjs.Add(Light);
         }
     }
 }
@@ -1084,14 +1025,14 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     UpdateLightBuffer();
     UPrimitiveBatch::GetInstance().RenderBatch(ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix());
 
-    if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives))
+    if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives)) // Static Mesh 렌더
         RenderStaticMeshes(World, ActiveViewport);
     RenderGizmos(World, ActiveViewport);
-    if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))
+    if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))    // 빌보드 텍스트 렌더
         RenderBillboards(World, ActiveViewport);
     RenderLight(World, ActiveViewport);
     
-    ClearRenderArr();
+    ClearRenderArr(); // 왜 비워주는가?
 }
 
 void FRenderer::RenderStaticMeshes(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
@@ -1271,6 +1212,17 @@ void FRenderer::RenderBillboards(UWorld* World, const std::shared_ptr<FEditorVie
     }
     PrepareShader();
 }
+
+TSet<UPrimitiveComponent*>& FRenderer::GetVisibleObjs()
+{
+    return VisibleObjs;
+}
+
+void FRenderer::SetVisibleObjs(const TSet<UPrimitiveComponent*>& comp)
+{
+    VisibleObjs = comp;
+}
+
 
 void FRenderer::RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
