@@ -909,27 +909,26 @@ void FRenderer::RenderBatch(
 
 void FRenderer::PrepareRender()
 {
-    // ?? : TObjectRange<USceneComponent>()
-    //for (const auto iter : TObjectRange<USceneComponent>())
-
-    for (const auto iter : VisibleObjs)
+    for (UPrimitiveComponent* Comp : VisibleObjs)
     {
-        if (UStaticMeshComponent* pStaticMeshComp = Cast<UStaticMeshComponent>(iter))
+        if (UGizmoBaseComponent* Gizmo = Cast<UGizmoBaseComponent>(Comp))
         {
-            if (!Cast<UGizmoBaseComponent>(iter))
-                StaticMeshObjs.Add(pStaticMeshComp);
+            GizmoObjs.Add(Gizmo);
+            continue;
         }
-        if (UGizmoBaseComponent* pGizmoComp = Cast<UGizmoBaseComponent>(iter))
+        if (UStaticMeshComponent* Mesh = Cast<UStaticMeshComponent>(Comp))
         {
-            GizmoObjs.Add(pGizmoComp);
+            StaticMeshObjs.Add(Mesh);
+            continue;
         }
-        if (UBillboardComponent* pBillboardComp = Cast<UBillboardComponent>(iter))
+        if (UBillboardComponent* Billboard = Cast<UBillboardComponent>(Comp))
         {
-            BillboardObjs.Add(pBillboardComp);
+            BillboardObjs.Add(Billboard);
+            continue;
         }
-        if (ULightComponentBase* pLightComp = Cast<ULightComponentBase>(iter))
+        if (ULightComponentBase* Light = Cast<ULightComponentBase>(Comp))
         {
-            LightObjs.Add(pLightComp);
+            LightObjs.Add(Light);
         }
     }
 }
