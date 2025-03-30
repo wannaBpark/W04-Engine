@@ -17,6 +17,7 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "UObject/UObjectIterator.h"
 #include "GeometryCore/Octree.h"
+#include "Editor/UnrealEd/PrimitiveBatch.h"
 #include "GeometryCore/KDTree.h"
 #include "GeometryCore/BVHNode.h"
 
@@ -31,6 +32,9 @@ void AEditorPlayer::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     Input();
+    // Octree없이 프러스텀 컬링 주석.
+    //UpdateVisibleStaticMeshComponents();
+    UpdateVisibleStaticMeshComponentsWithOctree();
 }
 
 void AEditorPlayer::Input()
@@ -410,7 +414,6 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
 
 	FMatrix translationMatrix = FMatrix::CreateTranslationMatrix(obj->GetWorldLocation());
 
-	// ���� ��ȯ ���
 	FMatrix worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
 	FMatrix viewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
     
@@ -611,6 +614,55 @@ void AEditorPlayer::ControlScale(USceneComponent* pObj, const UGizmoBaseComponen
         FVector moveDir = CameraUp * -DeltaY * 0.05f;
         pObj->AddScale(FVector(0.0f, 0.0f, moveDir.z));
     }
+}
+
+void AEditorPlayer::UpdateVisibleStaticMeshComponentsWithOctree()
+{
+    UWorld* World = GetWorld();
+    FRenderer* Renderer = &FEngineLoop::renderer;
+    OctreeSystem* Octree = World->GetOctreeSystem();
+    if (!Octree || !Octree->Root) return;
+
+    FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
+   
+    // 보여지는 오브젝트들 초기화.
+    Renderer->GetVisibleObjs().Empty();
+    TSet<UPrimitiveComponent*> FrustumComps;
+    TSet<uint32> UniqueUUIDs;
+    Octree->Root->QueryFrustumUnique(Frustum, FrustumComps, UniqueUUIDs);
+    
+    Renderer->SetVisibleObjs(FrustumComps);
+}
+
+void AEditorPlayer::UpdateVisibleStaticMeshComponents() {
+    UWorld* World = GetWorld();
+    FRenderer* Renderer = &FEngineLoop::renderer;
+
+    FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
+
+    Renderer->GetVisibleObjs().Empty();
+    TSet<UPrimitiveComponent*> FrustumComps;
+    TSet<uint32> UniqueUUIDs;
+
+    // TODO : TObjectRange<UPrimitveComponent> 캐싱해서 사용하기 성능 확인해보기
+    for (const auto iter : TObjectRange<UPrimitiveComponent>()) {
+
+        // AABB 교차 검사
+        FMatrix Model = JungleMath::CreateModelMatrix(
+            iter->GetWorldLocation(),
+            iter->GetWorldRotation(),
+            iter->GetWorldScale()
+        );
+        FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
+            iter->AABB, iter->GetWorldLocation(), Model
+        );
+        if (Frustum.Intersects(WorldBBox))
+        {
+            UniqueUUIDs.Add(iter->GetUUID());
+            FrustumComps.Add(iter);
+        }
+    }
+    Renderer->SetVisibleObjs(FrustumComps);
 }
 
 Ray AEditorPlayer::GetRayDirection(const FVector& pickPosition)

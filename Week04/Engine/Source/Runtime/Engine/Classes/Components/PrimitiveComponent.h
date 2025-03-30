@@ -31,4 +31,3 @@ public:
     }
     FBoundingBox GetBoundingBox() { return AABB; }
 };
-
