@@ -240,7 +240,7 @@ bool FSceneMgr::LoadSceneFromFile(const FString& filename)
                     actor->SetActorRotation(rotation);
                     actor->SetActorScale(scale);
 
-                    World->SetPickedActor(actor);
+                    //World->SetPickedActor(actor);
                     StaticComps.Add(MeshComp);
                 }
 

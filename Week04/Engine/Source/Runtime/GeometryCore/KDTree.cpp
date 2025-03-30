@@ -45,7 +45,7 @@ KDTreeNode::~KDTreeNode()
 
 void KDTreeNode::Insert(UPrimitiveComponent* Comp)
 {
-    // 컴포넌트의 월드 AABB 계산 (JungleMath 및 UPrimitiveBatch 사용)
+    // 컴포넌트의 월드 AABB 계산
     FMatrix Model = JungleMath::CreateModelMatrix(
         Comp->GetWorldLocation(),
         Comp->GetWorldRotation(),
@@ -56,8 +56,7 @@ void KDTreeNode::Insert(UPrimitiveComponent* Comp)
     );
 
     // 현재 노드의 Bounds와 교차하지 않으면 삽입하지 않음
-    if (!WorldBBox.Intersects(Bounds))
-        return;
+    if (!WorldBBox.Intersects(Bounds)) { return; }
 
     // 자식이 없고, 아직 저장 객체 수가 MAX_OBJECTS 미만이거나 최대 깊이에 도달한 경우 현재 노드에 추가
     if ((Left == nullptr && Right == nullptr) && (Components.Num() < MAX_OBJECTS || Depth >= MAX_DEPTH))
@@ -72,13 +71,13 @@ void KDTreeNode::Insert(UPrimitiveComponent* Comp)
         Subdivide();
     }
 
-    // 좌측 자식의 Bounds에 완전히 포함되면 좌측에 삽입
+    // 좌측 자식의 Bounds에 교차되면 좌측에 삽입
     if (Left->Bounds.Intersects(WorldBBox))
     {
         Left->Insert(Comp);
         return;
     }
-    // 우측 자식의 Bounds에 완전히 포함되면 우측에 삽입
+    // 우측 자식의 Bounds에 교차되면 우측에 삽입
     else if (Right->Bounds.Intersects(WorldBBox))
     {
         Right->Insert(Comp);
@@ -324,32 +323,6 @@ void KDTreeSystem::UpdateComponentPosition(UPrimitiveComponent* Comp)
         AddComponent(Comp);
     }
 }
-bool RayIntersectsObject(const FVector& RayOrigin, const FVector& RayDir, UPrimitiveComponent* Candidate, float& outDistance, int& outIntersectCount)
-{
-    // Candidate의 월드 변환 행렬 계산
-    FMatrix Model = JungleMath::CreateModelMatrix(
-        Candidate->GetWorldLocation(),
-        Candidate->GetWorldRotation(),
-        Candidate->GetWorldScale()
-    );
-    // 월드 AABB 계산 (UPrimitiveBatch를 통해 구함)
-    FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
-        Candidate->AABB, Candidate->GetWorldLocation(), Model
-    );
-
-    // slab method를 사용한 ray-AABB 교차 테스트
-    // outDistance에는 ray 원점에서 AABB와의 교차까지의 거리가 반환됩니다.
-    if (WorldBBox.Intersect(RayOrigin, RayDir, outDistance))
-    {
-        // 여기서는 간단히 교차 횟수를 1로 설정
-        outIntersectCount = 1;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
 
 void KDTreeSystem::FastRayPick(const FVector& RayOrigin, const FVector& RayDir, 
     TArray<UPrimitiveComponent*>& OutSortedCandidates)
@@ -385,37 +358,35 @@ void KDTreeSystem::FastRayPick(const FVector& RayOrigin, const FVector& RayDir,
     int idx = 0;
     for (auto& i : SortedCandidates) { 
         OutSortedCandidates.Add(i.first); 
-        if (++idx >= 20) { break; } // TODO : HARD CODING! 
+        if (++idx >= 15) { break; } // TODO : HARD CODING! 
     }
     return;
-    //SortedCandidates.Sort([](const std::pair<UPrimitiveComponent*, float>& A, const std::pair<UPrimitiveComponent*, float>& B)
-    //    {
-    //        return A.second < B.second;
-    //    });
-    //return SortedCandidates[0].first;
-    //// 3. 가까운 후보부터 정밀한 ray-picking 테스트 수행
-    //UPrimitiveComponent* BestCandidate = nullptr;
-    //float BestDistance = FLT_MAX;
-    //int BestIntersectCount = 0;
-    //for (const auto& candidate : SortedCandidates)
-    //{
-    //    UPrimitiveComponent* comp = candidate.first;
-    //    float preciseDistance = 0.0f;
-    //    int intersectCount = 0;
-    //    // 정밀한 ray-AABB 교차 테스트 수행
-    //    if (RayIntersectsObject(RayOrigin, RayDir, comp, preciseDistance, intersectCount))
-    //    {
-    //        if (preciseDistance < BestDistance ||
-    //            (std::fabs(preciseDistance - BestDistance) < FLT_EPSILON && intersectCount > BestIntersectCount))
-    //        {
-    //            BestDistance = preciseDistance;
-    //            BestIntersectCount = intersectCount;
-    //            BestCandidate = comp;
-    //            // 충분히 가까운 hit를 찾으면 바로 종료할 수도 있음.
-    //            // break;
-    //        }
-    //    }
-    //}
+}
 
-    //return BestCandidate;
+
+bool RayIntersectsObject(const FVector& RayOrigin, const FVector& RayDir, UPrimitiveComponent* Candidate, float& outDistance, int& outIntersectCount)
+{
+    // Candidate의 월드 변환 행렬 계산
+    FMatrix Model = JungleMath::CreateModelMatrix(
+        Candidate->GetWorldLocation(),
+        Candidate->GetWorldRotation(),
+        Candidate->GetWorldScale()
+    );
+    // 월드 AABB 계산 (UPrimitiveBatch를 통해 구함)
+    FBoundingBox WorldBBox = UPrimitiveBatch::GetWorldBoundingBox(
+        Candidate->AABB, Candidate->GetWorldLocation(), Model
+    );
+
+    // slab method를 사용한 ray-AABB 교차 테스트
+    // outDistance에는 ray 원점에서 AABB와의 교차까지의 거리가 반환됩니다.
+    if (WorldBBox.Intersect(RayOrigin, RayDir, outDistance))
+    {
+        // 여기서는 간단히 교차 횟수를 1로 설정
+        outIntersectCount = 1;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }

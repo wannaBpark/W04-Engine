@@ -171,6 +171,7 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Source\Runtime\GeometryCore\SoftwareZBuffer.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Renderer\Culling_Pass.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -245,6 +246,7 @@
     <ClCompile Include="Engine\Source\Runtime\GeometryCore\KDTree.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Source\Runtime\GeometryCore\SoftwareZBuffer.h" />
     <ClInclude Include="Engine\Source\Runtime\Renderer\Culling_Pass.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
@@ -370,6 +372,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Depth_PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -377,6 +380,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\StaticMeshPixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -386,6 +390,7 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">mainPS</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mainPS</EntryPointName>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\PixelTextureShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -413,6 +418,7 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">mainVS</EntryPointName>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mainVS</EntryPointName>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\VertexTextureShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
