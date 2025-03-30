@@ -192,7 +192,7 @@ void UWorld::SetKDTreeSystem(const TArray<UPrimitiveComponent*>& Components)
     }
 }
 
-void UWorld::SetBVHSystem(const TArray<UPrimitiveComponent*>& Components)
+void UWorld::SetBVHSystem(TArray<UPrimitiveComponent*>& Components)
 {
     if (BVHSystem* BVH = this->GetBVHSystem())
     {

@@ -24,8 +24,40 @@ static FVector GetCentroid(UPrimitiveComponent* Comp)
     FBoundingBox box = GetWorldBox(Comp);
     return (box.min + box.max) * 0.5f;
 }
+// Ray-Sphere 충돌 검사 함수
+bool IsRayIntersectingSphere(const FVector& Origin, const FVector& Dir, const FVector& Center, float Radius, float& OutDistance)
+{
+    FVector L = Center - Origin;
+    float tca = L.Dot(Dir);
+    float d2 = L.Dot(L) - tca * tca;
+    float radius2 = Radius * Radius;
 
-BVHNode::BVHNode(const TArray<UPrimitiveComponent*>& Objects, int InDepth)
+    // 교차하지 않음
+    if (d2 > radius2)
+        return false;
+
+    float thc = sqrt(radius2 - d2);
+    float t0 = tca - thc;
+    float t1 = tca + thc;
+
+    // t0이 더 크면 스왑
+    if (t0 > t1)
+        std::swap(t0, t1);
+
+    // t0이 음수면 t1로 교체
+    if (t0 < 0)
+        t0 = t1;
+
+    // 여전히 음수면 교차하지 않음
+    if (t0 < 0)
+        return false;
+
+    // 교차 거리 저장
+    OutDistance = t0;
+    return true;
+}
+
+BVHNode::BVHNode(TArray<UPrimitiveComponent*>& Objects, int InDepth)
     : Left(nullptr)
     , Right(nullptr)
     , Depth(InDepth)
@@ -38,6 +70,110 @@ BVHNode::~BVHNode()
     if (Left) { delete Left; Left = nullptr; }
     if (Right) { delete Right; Right = nullptr; }
 }
+
+#if BVH_SAT
+void BVHNode::Build(TArray<UPrimitiveComponent*>& Objects, int InDepth)
+{
+    if (Objects.Num() == 0) return;
+
+    // 노드의 Bounds: 모든 객체의 World 바운딩박스의 합집합
+    FBoundingBox unionBox = GetWorldBox(Objects[0]);
+    for (int i = 1; i < Objects.Num(); ++i)
+    {
+        unionBox = unionBox.Union(GetWorldBox(Objects[i]));
+    }
+    Bounds = unionBox;
+
+    // Leaf 조건: 객체 수가 작거나 최대 깊이에 도달한 경우
+    if (Objects.Num() <= MAX_OBJECTS || InDepth >= MAX_DEPTH)
+    {
+        Components = Objects;
+        return;
+    }
+
+    // SAT 기반 분할 축 계산
+    int bestAxis = 0;
+    float bestOverlap = FLT_MAX;
+    float bestSplit = 0.0f;
+
+    for (int axis = 0; axis < 3; ++axis)
+    {
+        // 객체들을 중심 기준으로 정렬
+        Objects.Sort([axis](UPrimitiveComponent* A, UPrimitiveComponent* B) {
+            return GetCentroid(A)[axis] < GetCentroid(B)[axis];
+            });
+
+        // 누적 바운딩 박스 계산
+        TArray<FBoundingBox> leftBoxes, rightBoxes;
+        leftBoxes.SetNum(Objects.Num());
+        rightBoxes.SetNum(Objects.Num());
+
+        FBoundingBox leftBox = GetWorldBox(Objects[0]);
+        leftBoxes[0] = leftBox;
+        for (int i = 1; i < Objects.Num(); ++i)
+        {
+            leftBox = leftBox.Union(GetWorldBox(Objects[i]));
+            leftBoxes[i] = leftBox;
+        }
+
+        FBoundingBox rightBox = GetWorldBox(Objects[Objects.Num() - 1]);
+        rightBoxes[Objects.Num() - 1] = rightBox;
+        for (int i = Objects.Num() - 2; i >= 0; --i)
+        {
+            rightBox = rightBox.Union(GetWorldBox(Objects[i]));
+            rightBoxes[i] = rightBox;
+        }
+
+        // SAT 기반 분할 비용 계산
+        for (int i = 0; i < Objects.Num() - 1; ++i)
+        {
+            int leftCount = i + 1;
+            int rightCount = Objects.Num() - leftCount;
+
+            float overlap = leftBoxes[i].SurfaceArea() * leftCount + rightBoxes[i + 1].SurfaceArea() * rightCount;
+            if (overlap < bestOverlap)
+            {
+                bestOverlap = overlap;
+                bestAxis = axis;
+                bestSplit = GetCentroid(Objects[i])[axis];
+            }
+        }
+    }
+
+    // SAT 기반 최적의 분할 축과 값을 기반으로 객체 분할
+    TArray<UPrimitiveComponent*> leftObjects, rightObjects;
+    for (UPrimitiveComponent* Comp : Objects)
+    {
+        FVector centroid = GetCentroid(Comp);
+        if (centroid[bestAxis] < bestSplit)
+            leftObjects.Add(Comp);
+        else
+            rightObjects.Add(Comp);
+    }
+
+    // 한쪽으로 치우친 경우 강제 균등 분할
+    if (leftObjects.Num() == 0 || rightObjects.Num() == 0)
+    {
+        int half = Objects.Num() / 2;
+        leftObjects.Empty();
+        rightObjects.Empty();
+        for (int i = 0; i < Objects.Num(); ++i)
+        {
+            if (i < half)
+                leftObjects.Add(Objects[i]);
+            else
+                rightObjects.Add(Objects[i]);
+        }
+    }
+
+    // 자식 노드 생성
+    Left = new BVHNode(leftObjects, InDepth + 1);
+    Right = new BVHNode(rightObjects, InDepth + 1);
+
+    // 부모 노드의 Bounds를 자식 노드의 Bounds로 갱신
+    Bounds = Left->Bounds.Union(Right->Bounds);
+}
+#else
 void BVHNode::Build(const TArray<UPrimitiveComponent*>& Objects, int InDepth)
 {
     if (Objects.Num() == 0) return;
@@ -107,7 +243,7 @@ void BVHNode::Build(const TArray<UPrimitiveComponent*>& Objects, int InDepth)
     // 부모 노드의 Bounds를 자식 노드의 Bounds로 갱신
     Bounds = Left->Bounds.Union(Right->Bounds);
 }
-
+#endif
 void BVHNode::QueryFrustum(const FFrustum& Frustum, TArray<UPrimitiveComponent*>& OutComponents)
 {
     // 노드의 Bounds와 프러스텀의 교차 여부로 가지치기
@@ -145,15 +281,34 @@ void BVHNode::QueryFrustumUnique(const FFrustum& Frustum, TSet<UPrimitiveCompone
 void BVHNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPrimitiveComponent*>& OutComponents)
 {
     float distance;
+    // BVH 노드의 바운딩 구와 Ray의 교차 여부 확인
     if (!Bounds.Intersect(Origin, Dir, distance))
         return;
 
+    // Leaf 노드의 경우: 모든 객체와 거리 비교
+    if (!Left && !Right)
+    {
+        for (UPrimitiveComponent* Comp : Components)
+        {
+            float objDistance;
+            FBoundingBox box = GetWorldBox(Comp);
+
+            // 구의 중심과 반지름 계산
+            FVector center = (box.min + box.max) * 0.5f;
+            float radius = (box.max - box.min).Magnitude() * 0.5f;
+
+            // Ray-Sphere 교차 검사 함수 사용
+            if (IsRayIntersectingSphere(Origin, Dir, center, radius, objDistance))
+            {
+                OutComponents.Add(Comp);
+            }
+        }
+        return;
+    }
+
+    // 자식 노드 탐색
     if (Left) Left->QueryRay(Origin, Dir, OutComponents);
     if (Right) Right->QueryRay(Origin, Dir, OutComponents);
-    for (UPrimitiveComponent* Comp : Components)
-    {
-        OutComponents.Add(Comp);
-    }
 }
 
 void BVHNode::QueryRayUnique(const FVector& Origin, const FVector& Dir, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs)
@@ -210,3 +365,51 @@ void BVHNode::UpdateComponent(UPrimitiveComponent* Comp)
         Components[Index] = Comp;
     }
 }
+
+void BVHNode::QueryRayClosest(const FVector& Origin, const FVector& Dir, UPrimitiveComponent*& ClosestComp, float& MinDistance)
+{
+    float distance;
+    if (!Bounds.Intersect(Origin, Dir, distance))
+        return;
+
+    // Leaf 노드의 경우, 모든 객체와 거리 비교
+    if (!Left && !Right)
+    {
+        for (UPrimitiveComponent* Comp : Components)
+        {
+            float objDistance;
+            FBoundingBox box = GetWorldBox(Comp);
+            if (box.Intersect(Origin, Dir, objDistance) && objDistance < MinDistance)
+            {
+                MinDistance = objDistance;
+                ClosestComp = Comp;
+            }
+        }
+        return;
+    }
+
+    // 두 자식 노드를 탐색할 순서를 결정 (Ray의 방향을 고려하여 근접 노드 우선)
+    BVHNode* first = Left;
+    BVHNode* second = Right;
+
+    // 자식 노드 탐색 순서를 Ray 방향에 따라 결정
+    float leftDistance, rightDistance;
+    bool leftHit = Left && Left->Bounds.Intersect(Origin, Dir, leftDistance);
+    bool rightHit = Right && Right->Bounds.Intersect(Origin, Dir, rightDistance);
+
+    if (rightHit && (!leftHit || rightDistance < leftDistance))
+    {
+        std::swap(first, second);
+        std::swap(leftDistance, rightDistance);
+    }
+
+    // 첫 번째 노드 탐색
+    if (leftHit && leftDistance < MinDistance)
+        first->QueryRayClosest(Origin, Dir, ClosestComp, MinDistance);
+
+    // 두 번째 노드 탐색 (첫 번째에서 조기 탈출하지 못한 경우에만)
+    if (rightHit && rightDistance < MinDistance)
+        second->QueryRayClosest(Origin, Dir, ClosestComp, MinDistance);
+}
+
+

@@ -259,6 +259,11 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
         UE_LOG(LogLevel::Display, "KDTree not initialized!");
         return;
     }
+    if (!BVH || !BVH->Root)
+    {
+        UE_LOG(LogLevel::Display, "BVH not initialized!");
+        return;
+    }
 
 #pragma region Octree Components Ray Intersects
     // 옥트리에서 후보 컴포넌트 추출
@@ -298,27 +303,35 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
 #pragma region KD Tree Intersects Frustum
     TSet<UPrimitiveComponent*> FrustumKDTreeUniqueComps;
     TSet<uint32> KDFrustumUniqueUUIDs;
-    //FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
+    FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
     //KDTree->Root->QueryFrustumUnique(Frustum, FrustumKDTreeUniqueComps, KDFrustumUniqueUUIDs);
     //UE_LOG(LogLevel::Display, " Frustum & KD Tree Unique Count : %d", FrustumKDTreeUniqueComps.Num());
 #pragma endregion
 
-#pragma region KD Tree Occlusion Culling Test
-    TArray<UPrimitiveComponent*> VisibileComps;
-    //SoftwareZBuffer szbuffer(100, 100);
-    //szbuffer.PerformSWOcclusionCulling(KDTree, Frustum, szbuffer, VisibileComps);
-    //UE_LOG(LogLevel::Display, "Visible Comps after Occlusion Culling : %d", VisibileComps.Num());
-#pragma endregion
 
 #pragma region BVH Ray Intersection
-	TArray<UPrimitiveComponent*> BVHComponents;
+    TArray<UPrimitiveComponent*> BVHComponents;
 	TSet<UPrimitiveComponent*> BVHUniqueComps;
 	TSet<uint32> BVHUniqueUUIDs;
+    UPrimitiveComponent* ClosestBVHComp;
+    TArray<UPrimitiveComponent*> FrustumBVHComps;
+    float dist = FLT_MAX;
 
 	BVH->Root->QueryRay(MyRay.Origin, MyRay.Direction, BVHComponents);
-	BVH->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, BVHUniqueComps, BVHUniqueUUIDs);
     UE_LOG(LogLevel::Display, " Ray BVH Count : %d", BVHComponents.Num());
-    UE_LOG(LogLevel::Display, " Ray BVH Unique Count : %d", BVHUniqueComps.Num());
+
+    //BVH->Root->QueryFrustum(Frustum, FrustumBVHComps);
+    //UE_LOG(LogLevel::Display, " Frustum & BVH Count : %d", FrustumBVHComps.Num());
+
+    /*BVH->Root->QueryRayClosest(MyRay.Origin, MyRay.Direction, ClosestBVHComp, dist);
+    if (ClosestBVHComp)
+    {
+        UE_LOG(LogLevel::Display, TEXT("Closest component found at distance: %f"), dist);
+    }
+    else
+    {
+        UE_LOG(LogLevel::Display, TEXT("No component intersected with the ray."));
+    }*/
 
 #pragma end region
 

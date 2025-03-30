@@ -4,6 +4,7 @@
 #include "Container/Array.h"
 #include "Container/Set.h"
 
+#define BVH_SAT false
 
 class UPrimitiveComponent;
 class BVHNode
@@ -20,12 +21,15 @@ public:
     static const int MAX_DEPTH = 15;    // 최대 트리 깊이
 
     BVHNode() = default;
-    BVHNode(const TArray<UPrimitiveComponent*>& Objects, int InDepth);
+    BVHNode(TArray<UPrimitiveComponent*>& Objects, int InDepth);
     ~BVHNode();
 
     // 재귀적으로 BVH를 구성
+#if BVH_SAT
+    void Build(TArray<UPrimitiveComponent*>& Objects, int InDepth);
+#else
     void Build(const TArray<UPrimitiveComponent*>& Objects, int InDepth);
-
+#endif
     // Query 함수들 (Bounds와 교차하면 하위로 내려감)
     void QueryFrustum(const FFrustum& Frustum, TArray<UPrimitiveComponent*>& OutComponents);
     void QueryFrustumUnique(const FFrustum& Frustum, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs);
@@ -35,6 +39,7 @@ public:
     // 업데이트/삭제 (간단한 재구축 방식)
     void RemoveComponent(UPrimitiveComponent* Comp);
     void UpdateComponent(UPrimitiveComponent* Comp);
+    void QueryRayClosest(const FVector& Origin, const FVector& Dir, UPrimitiveComponent*& ClosestComp, float& MinDistance);
 };
 
 
@@ -44,7 +49,7 @@ public:
     BVHNode* Root;
     BVHSystem() : Root(nullptr) {}
     // 주어진 컴포넌트 목록으로 BVH를 빌드
-    void Build(const TArray<UPrimitiveComponent*>& Components)
+    void Build(TArray<UPrimitiveComponent*>& Components)
     {
         if (Root) {
             delete Root;
