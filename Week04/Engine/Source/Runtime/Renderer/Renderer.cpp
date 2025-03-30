@@ -219,14 +219,16 @@ void FRenderer::RenderPrimitive(const MaterialSubsetRenderData& SubsetRenderData
     {
         UpdateMaterial(Material->GetMaterialInfo());
 
-        ID3D11Buffer* CurrentVertexBuffer = nullptr;
+        std::shared_ptr<FStaticMeshRenderInfo> CurrentMesh = nullptr;
         for (const FSubsetRenderInfo& SubsetInfo : RenderDataArray)
         {
             const auto& StaticMeshInfo = SubsetInfo.StaticMeshInfo;
 
             // 기존과 다른 Mesh일 경우, 버퍼 재설정
-            if (CurrentVertexBuffer != StaticMeshInfo->VertexBuffer)
+            if (CurrentMesh != StaticMeshInfo)
             {
+                CurrentMesh = StaticMeshInfo;
+
                 uint32 Offset = 0;
                 Graphics->DeviceContext->IASetVertexBuffers(0, 1, &StaticMeshInfo->VertexBuffer, &Stride, &Offset);
                 if (StaticMeshInfo->IndexBuffer)
@@ -243,8 +245,8 @@ void FRenderer::RenderPrimitive(const MaterialSubsetRenderData& SubsetRenderData
 
                 /**
                  * SubsetRenderData를 설정할 때, 각 컴포넌트의 Mesh->Subset을 순회하며 배열에 넣기 때문에
-                 * 한번 Buffer가 정해지면 다시 정해질 때 까지 같은 Mesh에 속한 Subset인것을 알 수 있음
-                 * 따라서 Buffer가 바뀔 때 1번만 렌더
+                 * 한번 Mesh가 정해지면 다시 정해질 때 까지 같은 Mesh에 속한 Subset인것을 알 수 있음
+                 * 따라서 Mesh가 바뀔 때 1번만 렌더
                  */
                 const auto& ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
                 if (ActiveViewport->GetShowFlag() & EEngineShowFlags::SF_AABB)
