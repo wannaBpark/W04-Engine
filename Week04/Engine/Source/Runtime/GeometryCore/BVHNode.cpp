@@ -67,9 +67,9 @@ void BVHNode::Build(const TArray<UPrimitiveComponent*>& Objects, int InDepth)
 
     FVector extents = centroidBox.max - centroidBox.min;
     int axis = 0;
-    if (extents.y >= extents.x && extents.y >= extents.z)
+    if (extents.Y >= extents.X && extents.Y >= extents.Z)
         axis = 1;
-    else if (extents.z >= extents.x && extents.z >= extents.y)
+    else if (extents.Z >= extents.X && extents.Z >= extents.Y)
         axis = 2;
 
     float splitValue = (centroidBox.min[axis] + centroidBox.max[axis]) * 0.5f;

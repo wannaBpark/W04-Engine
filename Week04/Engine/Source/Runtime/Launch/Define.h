@@ -273,24 +273,24 @@ struct FBoundingBox
 
     bool Contains(const FVector& pos) const
     {
-        return (pos.x >= min.x) && (pos.x <= max.x) &&
-            (pos.y >= min.y) && (pos.y <= max.y) &&
-            (pos.z >= min.z) && (pos.z <= max.z);
+        return (pos.X >= min.X) && (pos.X <= max.X)
+            && (pos.Y >= min.Y) && (pos.Y <= max.Y)
+            && (pos.Z >= min.Z) && (pos.Z <= max.Z);
     }
 
     FBoundingBox Union(const FBoundingBox& Other) const
     {
         FVector newMin(
-            (min.x < Other.min.x) ? min.x : Other.min.x,
-            (min.y < Other.min.y) ? min.y : Other.min.y,
-            (min.z < Other.min.z) ? min.z : Other.min.z
+            (min.X < Other.min.X) ? min.X : Other.min.X,
+            (min.Y < Other.min.Y) ? min.Y : Other.min.Y,
+            (min.Z < Other.min.Z) ? min.Z : Other.min.Z
         );
         FVector newMax(
-            (max.x > Other.max.x) ? max.x : Other.max.x,
-            (max.y > Other.max.y) ? max.y : Other.max.y,
-            (max.z > Other.max.z) ? max.z : Other.max.z
+            (max.X > Other.max.X) ? max.X : Other.max.X,
+            (max.Y > Other.max.Y) ? max.Y : Other.max.Y,
+            (max.Z > Other.max.Z) ? max.Z : Other.max.Z
         );
-        return FBoundingBox(newMin, newMax);
+        return FBoundingBox{newMin, newMax};
     }
 };
 

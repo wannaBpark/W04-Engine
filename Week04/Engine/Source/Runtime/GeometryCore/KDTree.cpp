@@ -13,20 +13,20 @@ KDTreeNode::KDTreeNode(const FBoundingBox& InBounds, int InDepth)
 {
     // Bounds의 확장을 계산하여 가장 긴 축 결정
     FVector Extent = Bounds.max - Bounds.min;
-    if (Extent.x >= Extent.y && Extent.x >= Extent.z) {
+    if (Extent.X >= Extent.Y && Extent.X >= Extent.Z) {
         Axis = 0;
-    } else if (Extent.y >= Extent.x && Extent.y >= Extent.z) {
+    } else if (Extent.Y >= Extent.X && Extent.Y >= Extent.Z) {
         Axis = 1;
     } else {
         Axis = 2;
     }
     // 분할 좌표는 해당 축의 중앙값
     if (Axis == 0)
-        SplitValue = (Bounds.min.x + Bounds.max.x) * 0.5f;
+        SplitValue = (Bounds.min.X + Bounds.max.X) * 0.5f;
     else if (Axis == 1)
-        SplitValue = (Bounds.min.y + Bounds.max.y) * 0.5f;
+        SplitValue = (Bounds.min.Y + Bounds.max.Y) * 0.5f;
     else
-        SplitValue = (Bounds.min.z + Bounds.max.z) * 0.5f;
+        SplitValue = (Bounds.min.Z + Bounds.max.Z) * 0.5f;
 }
 
 KDTreeNode::~KDTreeNode()
@@ -80,18 +80,18 @@ void KDTreeNode::Subdivide()
     // 선택된 축에 대해 영역을 분할 (중앙값 SplitValue 기준)
     if (Axis == 0)
     {
-        leftMax.x = SplitValue;
-        rightMin.x = SplitValue;
+        leftMax.X = SplitValue;
+        rightMin.X = SplitValue;
     }
     else if (Axis == 1)
     {
-        leftMax.y = SplitValue;
-        rightMin.y = SplitValue;
+        leftMax.Y = SplitValue;
+        rightMin.Y = SplitValue;
     }
     else // Axis == 2
     {
-        leftMax.z = SplitValue;
-        rightMin.z = SplitValue;
+        leftMax.Z = SplitValue;
+        rightMin.Z = SplitValue;
     }
 
     Left = new KDTreeNode(FBoundingBox(leftMin, leftMax), Depth + 1);

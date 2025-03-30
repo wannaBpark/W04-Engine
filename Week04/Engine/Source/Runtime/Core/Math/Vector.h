@@ -122,6 +122,7 @@ public:
     bool operator!=(const FVector& Other) const;
 
     float& operator[](int Index);
+    const float& operator[](int Index) const;
 
 public:
     bool Equals(const FVector& V, float Tolerance = KINDA_SMALL_NUMBER) const;
@@ -336,8 +337,14 @@ inline bool FVector::operator!=(const FVector& Other) const
     return X != Other.X || Y != Other.Y || Z != Other.Z;
 }
 
-float& FVector::operator[](int Index)
+inline float& FVector::operator[](int Index)
 {
-    assert(0 < Index || Index < 3)
+    assert(0 <= Index && Index <= 2);
     return reinterpret_cast<float*>(this)[Index];
+}
+
+inline const float& FVector::operator[](int Index) const
+{
+    assert(0 <= Index && Index <= 2);
+    return reinterpret_cast<const float*>(this)[Index];
 }
