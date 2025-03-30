@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <DirectXMath.h>
 
@@ -44,8 +44,13 @@ struct FVector2D
 
 struct FVector
 {
-    float x, y, z;
+    float X, Y, Z;
 
+    FVector() : X(0), Y(0), Z(0) {}
+    FVector(float X, float Y, float Z) : X(X), Y(Y), Z(Z) {}
+    FVector(float Scalar) : X(Scalar), Y(Scalar), Z(Scalar) {}
+
+    // Vector(0, 0, 0)
     static const FVector ZeroVector;
     static const FVector OneVector;
     static const FVector UpVector;
@@ -64,69 +69,22 @@ struct FVector
         return FVector(x - other.x, y - other.y, z - other.z);
     }
 
-    FVector operator+(const FVector& other) const
-    {
-        return FVector(x + other.x, y + other.y, z + other.z);
+
+    float Length() const;
+    float LengthSquared() const;
     }
 
-    // 벡터 내적  
-    float Dot(const FVector& other) const
-    {
-        return x * other.x + y * other.y + z * other.z;
-    }
 
-    // 벡터 크기  
-    float Magnitude() const
-    {
-        return sqrt(x * x + y * y + z * z);
-    }
+inline float FVector::Length() const
+{
+    return FMath::Sqrt(X * X + Y * Y + Z * Z);
+}
 
-    // 벡터 정규화  
-    FVector Normalize() const
-    {
-        float mag = Magnitude();
-        return (mag > 0) ? FVector(x / mag, y / mag, z / mag) : FVector(0, 0, 0);
-    }
+inline float FVector::LengthSquared() const
+{
+    return X * X + Y * Y + Z * Z;
+}
 
-    FVector Cross(const FVector& Other) const
-    {
-        return FVector{
-            y * Other.z - z * Other.y,
-            z * Other.x - x * Other.z,
-            x * Other.y - y * Other.x
-        };
-    }
-
-    // 스칼라 곱셈  
-    FVector operator*(float scalar) const
-    {
-        return FVector(x * scalar, y * scalar, z * scalar);
-    }
-
-    bool operator==(const FVector& other) const
-    {
-        return (x == other.x && y == other.y && z == other.z);
-    }
-
-    float Distance(const FVector& other) const
-    {
-        // 두 벡터의 차 벡터의 크기를 계산  
-        return ((*this - other).Magnitude());
-    }
-
-    DirectX::XMFLOAT3 ToXMFLOAT3() const
-    {
-        return DirectX::XMFLOAT3(x, y, z);
-    }
-
-    // 추가된 함수
-    FVector ComponentMin(const FVector& other) const
-    {
-        return FVector(
-            FMath::Min(x, other.x),
-            FMath::Min(y, other.y),
-            FMath::Min(z, other.z)
-        );
     }
 
     FVector ComponentMax(const FVector& other) const

@@ -275,9 +275,9 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
    /* for (const auto& [Id, Obj] : sceneData.Primitives)
     {
         USceneComponent* primitive = static_cast<USceneComponent*>(Obj);
-        std::vector<float> Location = { primitive->GetWorldLocation().x,primitive->GetWorldLocation().y,primitive->GetWorldLocation().z };
-        std::vector<float> Rotation = { primitive->GetWorldRotation().x,primitive->GetWorldRotation().y,primitive->GetWorldRotation().z };
-        std::vector<float> Scale = { primitive->GetWorldScale().x,primitive->GetWorldScale().y,primitive->GetWorldScale().z };
+        std::vector<float> Location = { primitive->GetWorldLocation().X,primitive->GetWorldLocation().Y,primitive->GetWorldLocation().Z };
+        std::vector<float> Rotation = { primitive->GetWorldRotation().X,primitive->GetWorldRotation().Y,primitive->GetWorldRotation().Z };
+        std::vector<float> Scale = { primitive->GetWorldScale().X,primitive->GetWorldScale().Y,primitive->GetWorldScale().Z };
 
         std::string primitiveName = *primitive->GetName();
         size_t pos = primitiveName.rfind('_');
@@ -324,8 +324,8 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
     //        float farClip = client->farPlane;
 
     //        j["PerspectiveCamera"][std::to_string(id)] = {
-    //            {"Location", { loc.x, loc.y, loc.z }},
-    //            {"Rotation", { rot.x, rot.y, rot.z }},
+    //            {"Location", { loc.X, loc.Y, loc.Z }},
+    //            {"Rotation", { rot.X, rot.Y, rot.Z }},
     //            {"FOV", fov},
     //            {"NearClip", nearClip},
     //            {"FarClip", farClip}
@@ -348,8 +348,8 @@ std::string FSceneMgr::SerializeSceneData(const SceneData& sceneData)
     float farClip = client->farPlane;
 
     j["PerspectiveCamera"] = {
-        {"Location", { loc.x, loc.y, loc.z }},
-        {"Rotation", { rot.x, rot.y, rot.z }},
+        {"Location", { loc.X, loc.Y, loc.Z }},
+        {"Rotation", { rot.X, rot.Y, rot.Z }},
         {"FOV",       std::vector<float>{fov}},
         {"NearClip",  std::vector<float>{nearClip}},   
         {"FarClip",   std::vector<float>{farClip}}     

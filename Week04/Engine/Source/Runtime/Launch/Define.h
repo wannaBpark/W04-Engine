@@ -187,17 +187,17 @@ struct FBoundingBox
         const float epsilon = 1e-6f;
 
         // X축 처리
-        if (fabs(rayDir.x) < epsilon)
+        if (fabs(rayDir.X) < epsilon)
         {
             // 레이가 X축 방향으로 거의 평행한 경우,
-            // 원점의 x가 박스 [min.x, max.x] 범위 밖이면 교차 없음
-            if (rayOrigin.x < min.x || rayOrigin.x > max.x)
+            // 원점의 x가 박스 [min.X, max.X] 범위 밖이면 교차 없음
+            if (rayOrigin.X < min.X || rayOrigin.X > max.X)
                 return false;
         }
         else
         {
-            float t1 = (min.x - rayOrigin.x) / rayDir.x;
-            float t2 = (max.x - rayOrigin.x) / rayDir.x;
+            float t1 = (min.X - rayOrigin.X) / rayDir.X;
+            float t2 = (max.X - rayOrigin.X) / rayDir.X;
             if (t1 > t2)  std::swap(t1, t2);
 
             // tmin은 "현재까지의 교차 구간 중 가장 큰 min"
@@ -209,15 +209,15 @@ struct FBoundingBox
         }
 
         // Y축 처리
-        if (fabs(rayDir.y) < epsilon)
+        if (fabs(rayDir.Y) < epsilon)
         {
-            if (rayOrigin.y < min.y || rayOrigin.y > max.y)
+            if (rayOrigin.Y < min.Y || rayOrigin.Y > max.Y)
                 return false;
         }
         else
         {
-            float t1 = (min.y - rayOrigin.y) / rayDir.y;
-            float t2 = (max.y - rayOrigin.y) / rayDir.y;
+            float t1 = (min.Y - rayOrigin.Y) / rayDir.Y;
+            float t2 = (max.Y - rayOrigin.Y) / rayDir.Y;
             if (t1 > t2)  std::swap(t1, t2);
 
             tmin = (t1 > tmin) ? t1 : tmin;
@@ -227,15 +227,15 @@ struct FBoundingBox
         }
 
         // Z축 처리
-        if (fabs(rayDir.z) < epsilon)
+        if (fabs(rayDir.Z) < epsilon)
         {
-            if (rayOrigin.z < min.z || rayOrigin.z > max.z)
+            if (rayOrigin.Z < min.Z || rayOrigin.Z > max.Z)
                 return false;
         }
         else
         {
-            float t1 = (min.z - rayOrigin.z) / rayDir.z;
-            float t2 = (max.z - rayOrigin.z) / rayDir.z;
+            float t1 = (min.Z - rayOrigin.Z) / rayDir.Z;
+            float t2 = (max.Z - rayOrigin.Z) / rayDir.Z;
             if (t1 > t2)  std::swap(t1, t2);
 
             tmin = (t1 > tmin) ? t1 : tmin;
@@ -258,17 +258,17 @@ struct FBoundingBox
 
     bool Intersects(const FBoundingBox& Other) const
     {
-        return (min.x <= Other.max.x && max.x >= Other.min.x) &&
-            (min.y <= Other.max.y && max.y >= Other.min.y) &&
-            (min.z <= Other.max.z && max.z >= Other.min.z);
+        return (min.X <= Other.max.X && max.X >= Other.min.X) &&
+            (min.Y <= Other.max.Y && max.Y >= Other.min.Y) &&
+            (min.Z <= Other.max.Z && max.Z >= Other.min.Z);
     }
 
     // 다른 AABB가 완전히 내부에 있는지 검사
     bool Contains(const FBoundingBox& Other) const
     {
-        return (Other.min.x >= min.x) && (Other.max.x <= max.x) &&
-            (Other.min.y >= min.y) && (Other.max.y <= max.y) &&
-            (Other.min.z >= min.z) && (Other.max.z <= max.z);
+        return (Other.min.X >= min.X) && (Other.max.X <= max.X) &&
+            (Other.min.Y >= min.Y) && (Other.max.Y <= max.Y) &&
+            (Other.min.Z >= min.Z) && (Other.max.Z <= max.Z);
     }
 };
 
@@ -283,8 +283,10 @@ struct FPlane
 
     // 법선과 한 점을 이용하여 평면 정의
     FPlane(const FVector& InNormal, const FVector& Point)
-        : Normal(InNormal.Normalize()), D(-Normal.Dot(Point)) {
+        : Normal(InNormal.GetSafeNormal()), D(-Normal.Dot(Point))
+    {
     }
+
     // 점이 평면과의 거리를 구함 (Ax + By + Cz + D)
     float PlaneDot(const FVector& Point) const
     {
@@ -304,9 +306,9 @@ struct FFrustum
             const FPlane& plane = Planes[i];
             // n-vertex 계산 (평면 반대 방향 최소점)
             FVector p;
-            p.x = (plane.Normal.x >= 0) ? Box.max.x : Box.min.x;
-            p.y = (plane.Normal.y >= 0) ? Box.max.y : Box.min.y;
-            p.z = (plane.Normal.z >= 0) ? Box.max.z : Box.min.z;
+            p.X = (plane.Normal.X >= 0) ? Box.max.X : Box.min.X;
+            p.Y = (plane.Normal.Y >= 0) ? Box.max.Y : Box.min.Y;
+            p.Z = (plane.Normal.Z >= 0) ? Box.max.Z : Box.min.Z;
 
             //UE_LOG(LogLevel::Display, "Plane %d dot < 0 ", i);
             if (plane.PlaneDot(p) < 0) // 평면 외부에 있으면
