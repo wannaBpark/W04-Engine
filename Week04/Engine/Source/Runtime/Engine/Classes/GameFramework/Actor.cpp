@@ -63,8 +63,7 @@ void AActor::RemoveOwnedComponent(UActorComponent* Component)
 
 void AActor::InitializeComponents()
 {
-    TSet<UActorComponent*> Components = GetComponents();
-    for (UActorComponent* ActorComp : Components)
+    for (UActorComponent* ActorComp : GetComponents())
     {
         if (ActorComp->bAutoActive && !ActorComp->IsActive())
         {
@@ -80,8 +79,7 @@ void AActor::InitializeComponents()
 
 void AActor::UninitializeComponents()
 {
-    TSet<UActorComponent*> Components = GetComponents();
-    for (UActorComponent* ActorComp : Components)
+    for (UActorComponent* ActorComp : GetComponents())
     {
         if (ActorComp->HasBeenInitialized())
         {
