@@ -18,9 +18,10 @@
 #include "UObject/UObjectIterator.h"
 #include "GeometryCore/Octree.h"
 #include "Editor/UnrealEd/PrimitiveBatch.h"
+#include "GeometryCore/KDTree.h"
+#include "GeometryCore/BVHNode.h"
 
-
-
+#include "GeometryCore/SoftwareZBuffer.h"
 
 using namespace DirectX;
 
@@ -53,14 +54,14 @@ void AEditorPlayer::Input()
 
 			// 컬러 피킹 부분입니다
 //#if _DEBUG
-            uint32 UUID = GetEngine().graphicDevice.GetPixelUUID(mousePos);
-            // TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
-            for ( const auto obj : TObjectRange<USceneComponent>())
-            {
-                if (obj->GetUUID() != UUID) continue;
+            //uint32 UUID = GetEngine().graphicDevice.GetPixelUUID(mousePos);
+            //// TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
+            //for ( const auto obj : TObjectRange<USceneComponent>())
+            //{
+            //    if (obj->GetUUID() != UUID) continue;
 
-                UE_LOG(LogLevel::Display, "%s Pixel Pick", *obj->GetName());
-            }
+            //    UE_LOG(LogLevel::Display, "%s Pixel Pick", *obj->GetName());
+            //}
 //#endif
             ScreenToClient(GetEngine().hWnd, &mousePos);
 
@@ -68,13 +69,12 @@ void AEditorPlayer::Input()
 
             const auto& ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
             ScreenToViewSpace(mousePos.x, mousePos.y, ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix(), pickPosition);
-            bool res = PickGizmo(pickPosition);
+            bool res = PickGizmo(pickPosition);   
             if (!res) PickActor(pickPosition);
 
             PickingTimeInfo.LastPickingTime.store(
                 static_cast<float>(CycleCount_PickingTime.Finish())
-                * FPlatformTime::GetSecondsPerCycle()
-                * 1000.0f,
+                * FPlatformTime::GetSecondsPerCycle() *1000.0f,
                 std::memory_order_relaxed
             );
             PickingTimeInfo.NumAttempts.fetch_add(1, std::memory_order_relaxed);
@@ -250,35 +250,85 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     // 옥트리 시스템 가져오기
     UWorld* World = GetWorld();
     OctreeSystem* Octree = World->GetOctreeSystem();
+    KDTreeSystem* KDTree = World->GetKDTreeSystem();
+	BVHSystem* BVH = World->GetBVHSystem();
     if (!Octree || !Octree->Root)
     {
         // 옥트리가 없으면 기존 방식으로 폴백
         UE_LOG(LogLevel::Display, "Octree not initialized!");
         return;
     }
+    if (!KDTree || !KDTree->Root)
+    {
+        UE_LOG(LogLevel::Display, "KDTree not initialized!");
+        return;
+    }
+
 #pragma region Octree Components Ray Intersects
     // 옥트리에서 후보 컴포넌트 추출
+    TArray<UPrimitiveComponent*> KDComponents;
+    TSet<UPrimitiveComponent*> KDUniqueComps;
+    TSet<uint32> KDUniqueUUIDs;
+
     TArray<UPrimitiveComponent*> CandidateComponents;
+    TSet<UPrimitiveComponent*> RayUniqueComps;
+    TSet<uint32> RayUniqueUUIDs;
+
     Ray MyRay = GetRayDirection(pickPosition);
-    Octree->Root->QueryRay(MyRay.Origin, MyRay.Direction, CandidateComponents);
-    UE_LOG(LogLevel::Display, " Candidate Count : %d", CandidateComponents.Num());
-    //for (const auto iter : TObjectRange<UPrimitiveComponent>())
+    //Octree->Root->QueryRay(MyRay.Origin, MyRay.Direction, CandidateComponents);
+    //Octree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, RayUniqueComps, RayUniqueUUIDs);
+    //KDTree->Root->QueryRay(MyRay.Origin, MyRay.Direction, KDComponents);
+    //KDTree->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, KDUniqueComps, KDUniqueUUIDs);
+    //UE_LOG(LogLevel::Display, " Ray All Candidate Count : %d", KDComponents.Num());
+    //UE_LOG(LogLevel::Display, " Ray Unique Candidate Count : %d", KDUniqueComps.Num());
+
+    //UE_LOG(LogLevel::Display, " Ray All Candidate Count : %d", CandidateComponents.Num());
+    //UE_LOG(LogLevel::Display, " Ray Unique Candidate Count : %d", RayUniqueComps.Num());
+
 #pragma endregion
 
 #pragma region Octree Intersects Frustum Components
 	// 프러스텀과 겹치는 오브젝트만 추출
     TArray< UPrimitiveComponent*> FrustumOctreeComps;
 	TSet<UPrimitiveComponent*> FrustumOctreeUniqueComps;
-    TSet<uint32> UniqueUUIDs;
-    FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
-    
-    Octree->Root->QueryFrustumUnique(Frustum, FrustumOctreeUniqueComps, UniqueUUIDs);
-    Octree->Root->QueryFrustum(Frustum, FrustumOctreeComps);
-    // 각각 옥트리와 겹치는 개수 (중복O, 중복 제거)를 차례로 출력합니다
-    UE_LOG(LogLevel::Display, " Frustum & Octree Basic Count : %d", FrustumOctreeComps.Num()); 
-    UE_LOG(LogLevel::Display, " Frustum & Octree Unique Count : %d", FrustumOctreeUniqueComps.Num());
+    TSet<uint32> OctreeUniqueUUIDs;
+    //FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
+    //Octree->Root->QueryFrustumUnique(Frustum, FrustumOctreeUniqueComps, OctreeUniqueUUIDs);
+ //   Octree->Root->QueryFrustum(Frustum, FrustumOctreeComps);
+ //   // 각각 옥트리와 겹치는 개수 (중복O, 중복 제거)를 차례로 출력합니다
+ //   UE_LOG(LogLevel::Display, " Frustum & Octree Basic Count : %d", FrustumOctreeComps.Num()); 
+    //UE_LOG(LogLevel::Display, " Frustum & Octree Unique Count : %d", FrustumOctreeUniqueComps.Num());
 #pragma endregion
-    for (const auto iter : CandidateComponents)
+#pragma region KD Tree Intersects Frustum
+    TSet<UPrimitiveComponent*> FrustumKDTreeUniqueComps;
+    TSet<uint32> KDFrustumUniqueUUIDs;
+    //FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
+    //KDTree->Root->QueryFrustumUnique(Frustum, FrustumKDTreeUniqueComps, KDFrustumUniqueUUIDs);
+    //UE_LOG(LogLevel::Display, " Frustum & KD Tree Unique Count : %d", FrustumKDTreeUniqueComps.Num());
+#pragma endregion
+
+#pragma region KD Tree Occlusion Culling Test
+    TArray<UPrimitiveComponent*> VisibileComps;
+    //SoftwareZBuffer szbuffer(100, 100);
+    //szbuffer.PerformSWOcclusionCulling(KDTree, Frustum, szbuffer, VisibileComps);
+    //UE_LOG(LogLevel::Display, "Visible Comps after Occlusion Culling : %d", VisibileComps.Num());
+#pragma endregion
+
+#pragma region BVH Ray Intersection
+	TArray<UPrimitiveComponent*> BVHComponents;
+	TSet<UPrimitiveComponent*> BVHUniqueComps;
+	TSet<uint32> BVHUniqueUUIDs;
+
+	BVH->Root->QueryRay(MyRay.Origin, MyRay.Direction, BVHComponents);
+	BVH->Root->QueryRayUnique(MyRay.Origin, MyRay.Direction, BVHUniqueComps, BVHUniqueUUIDs);
+    UE_LOG(LogLevel::Display, " Ray BVH Count : %d", BVHComponents.Num());
+    UE_LOG(LogLevel::Display, " Ray BVH Unique Count : %d", BVHUniqueComps.Num());
+
+#pragma end region
+
+    //for (const auto iter : FrustumOctreeUniqueComps)
+    //for (const auto& iter : KDComponents)
+    for (const auto& iter : BVHComponents)
     {
         UPrimitiveComponent* pObj;
         if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())

@@ -394,6 +394,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
             }
         }
         World->SetOctreeSystem(AppleComps);
+        World->SetKDTreeSystem(AppleComps);
         ImGui::EndPopup();
     }
 }
