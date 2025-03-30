@@ -240,13 +240,15 @@ bool FSceneMgr::LoadSceneFromFile(const FString& filename)
                     actor->SetActorRotation(rotation);
                     actor->SetActorScale(scale);
 
-                    World->SetPickedActor(actor);
+                    //World->SetPickedActor(actor);
                     StaticComps.Add(MeshComp);
                 }
 
             }
         }
         World->SetOctreeSystem(StaticComps);
+        World->SetKDTreeSystem(StaticComps);
+		World->SetBVHSystem(StaticComps);
     }
     catch (const std::exception& e) {
         UE_LOG(LogLevel::Error, "Error parsing JSON: %s", e.what());

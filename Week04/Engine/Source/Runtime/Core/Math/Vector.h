@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <DirectXMath.h>
 
@@ -57,6 +57,17 @@ struct FVector
         , y(_y)
         , z(_z)
     {
+    }
+
+    float& operator[](int index)
+    {
+        switch (index)
+        {
+        case 0:  return x;
+        case 1:  return y;
+        case 2:  return z;
+        default: assert(false && "Index out of range"); return x; // 예외 처리
+        }
     }
 
     FVector operator-(const FVector& other) const
