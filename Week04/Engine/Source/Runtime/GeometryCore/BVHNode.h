@@ -49,7 +49,6 @@ public:
     // 업데이트/삭제 (간단한 재구축 방식)
     void RemoveComponent(UPrimitiveComponent* Comp);
     void UpdateComponent(UPrimitiveComponent* Comp);
-    void QueryRayClosest(const FVector& Origin, const FVector& Dir, UPrimitiveComponent*& ClosestComp, float& MinDistance);
     void QueryRayClosestInternal(const FVector& Origin, const FVector& Dir, UPrimitiveComponent*& OutClosest, float& OutMinDistance);
     UPrimitiveComponent* QueryRayClosest(const FVector& Origin, const FVector& Dir);
 };

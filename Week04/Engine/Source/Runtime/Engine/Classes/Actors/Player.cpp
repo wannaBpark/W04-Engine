@@ -66,7 +66,8 @@ void AEditorPlayer::Input()
             const auto& ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
             ScreenToViewSpace(mousePos.x, mousePos.y, ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix(), pickPosition);
             bool res = PickGizmo(pickPosition);   
-            if (!res) PickActor(pickPosition);
+            //if (!res) PickActor(pickPosition);
+            if (!res) PickActorBVH(pickPosition);
 
             PickingTimeInfo.LastPickingTime.store(
                 static_cast<float>(CycleCount_PickingTime.Finish())
@@ -302,66 +303,14 @@ void AEditorPlayer::PickActorBVH(const FVector& pickPosition)
 
     // 옥트리 시스템 가져오기
     UWorld* World = GetWorld();
-    OctreeSystem* Octree = World->GetOctreeSystem();
-    KDTreeSystem* KDTree = World->GetKDTreeSystem();
     BVHSystem* BVH = World->GetBVHSystem();
-
-#pragma region Octree Components Ray Intersects
-    // 옥트리에서 후보 컴포넌트 추출
-    TArray<UPrimitiveComponent*> KDComponents;
-    TSet<UPrimitiveComponent*> KDUniqueComps;
-    TSet<uint32> KDUniqueUUIDs;
-
-    TArray<UPrimitiveComponent*> CandidateComponents;
-    TSet<UPrimitiveComponent*> RayUniqueComps;
-    TSet<uint32> RayUniqueUUIDs;
-
     Ray MyRay = GetRayDirection(pickPosition);
-
-    //FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();
-    //Octree->Root->QueryFrustumUnique(Frustum, FrustumOctreeUniqueComps, OctreeUniqueUUIDs);
-    //Octree->Root->QueryFrustum(Frustum, FrustumOctreeComps);
-    //// 각각 옥트리와 겹치는 개수 (중복O, 중복 제거)를 차례로 출력합니다
-    //UE_LOG(LogLevel::Display, " Frustum & Octree Basic Count : %d", FrustumOctreeComps.Num()); 
-    //UE_LOG(LogLevel::Display, " Frustum & Octree Unique Count : %d", FrustumOctreeUniqueComps.Num());
-#pragma endregion
-#pragma region KD Tree Intersects Frustum
-    /*TSet<UPrimitiveComponent*> FrustumKDTreeUniqueComps;
-    TSet<uint32> KDFrustumUniqueUUIDs;
-    FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();*/
-    //KDTree->Root->QueryFrustumUnique(Frustum, FrustumKDTreeUniqueComps, KDFrustumUniqueUUIDs);
-    //UE_LOG(LogLevel::Display, " Frustum & KD Tree Unique Count : %d", FrustumKDTreeUniqueComps.Num());
-#pragma endregion
 
 
 #pragma region BVH Ray Intersection
-    TArray<UPrimitiveComponent*> BVHComponents;
-    TSet<UPrimitiveComponent*> BVHUniqueComps;
-    TSet<uint32> BVHUniqueUUIDs;
-    UPrimitiveComponent* ClosestBVHComp;
-    TArray<UPrimitiveComponent*> FrustumBVHComps;
     float dist = FLT_MAX;
-
-    //BVH->Root->QueryRay(MyRay.Origin, MyRay.Direction, BVHComponents);
-    //UE_LOG(LogLevel::Display, " Ray BVH Count : %d", BVHComponents.Num());
-
-    //BVHComponents.Empty();
     Possible = BVH->Root->QueryRayClosest(MyRay.Origin, MyRay.Direction);
-    //UE_LOG(LogLevel::Display, " Ray sorted Count : %d", BVHComponents.Num());
-    //BVH->Root->QueryFrustum(Frustum, FrustumBVHComps);
-    //UE_LOG(LogLevel::Display, " Frustum & BVH Count : %d", FrustumBVHComps.Num());
-
-    /*BVH->Root->QueryRayClosest(MyRay.Origin, MyRay.Direction, ClosestBVHComp, dist);
-    if (ClosestBVHComp)
-    {
-        UE_LOG(LogLevel::Display, TEXT("Closest component found at distance: %f"), dist);
-    }
-    else
-    {
-        UE_LOG(LogLevel::Display, TEXT("No component intersected with the ray."));
-    }*/
-
-#pragma end region
+#pragma endregion
 
     if (Possible)
     {
