@@ -594,6 +594,7 @@ void AEditorPlayer::UpdateVisibleStaticMeshComponents() {
     TSet<UPrimitiveComponent*> FrustumComps;
     TSet<uint32> UniqueUUIDs;
 
+    // TODO : TObjectRange<UPrimitveComponent> 캐싱해서 사용하기 성능 확인해보기
     for (const auto iter : TObjectRange<UPrimitiveComponent>()) {
 
         // AABB 교차 검사

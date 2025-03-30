@@ -161,7 +161,7 @@ public:
     ID3D11ShaderResourceView* pOBBSRV = nullptr;
     
 public:
-    TSet<UPrimitiveComponent*> GetVisibleObjs();
-    void SetVisibleObjs(TSet<UPrimitiveComponent*> comp);
+    TSet<UPrimitiveComponent*>& GetVisibleObjs();
+    void SetVisibleObjs(const TSet<UPrimitiveComponent*>& comp);
 };
 
