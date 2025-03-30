@@ -20,6 +20,7 @@
 #include "PropertyEditor/ShowFlags.h"
 #include "UObject/UObjectIterator.h"
 #include "Components/SkySphereComponent.h"
+#include "Engine/Classes/Components/PrimitiveComponent.h"
 
 #define SAFE_RELEASE(p)       { if (p) { (p)->Release();  (p) = nullptr; } }
 
@@ -110,7 +111,6 @@ void FRenderer::ResetPixelShader() const
 
 void FRenderer::SetVertexShader(const FWString& filename, const FString& funcname, const FString& version)
 {
-    // ���� �߻��� ���ɼ��� ����
     if (Graphics == nullptr)
         assert(0);
     if (VertexShader != nullptr)
@@ -909,24 +909,26 @@ void FRenderer::RenderBatch(
 
 void FRenderer::PrepareRender()
 {
-    for (const auto iter : TObjectRange<USceneComponent>())
+    for (UPrimitiveComponent* Comp : VisibleObjs)
     {
-        if (UStaticMeshComponent* pStaticMeshComp = Cast<UStaticMeshComponent>(iter))
+        if (UGizmoBaseComponent* Gizmo = Cast<UGizmoBaseComponent>(Comp))
         {
-            if (!Cast<UGizmoBaseComponent>(iter))
-                StaticMeshObjs.Add(pStaticMeshComp);
+            GizmoObjs.Add(Gizmo);
+            continue;
         }
-        if (UGizmoBaseComponent* pGizmoComp = Cast<UGizmoBaseComponent>(iter))
+        if (UStaticMeshComponent* Mesh = Cast<UStaticMeshComponent>(Comp))
         {
-            GizmoObjs.Add(pGizmoComp);
+            StaticMeshObjs.Add(Mesh);
+            continue;
         }
-        if (UBillboardComponent* pBillboardComp = Cast<UBillboardComponent>(iter))
+        if (UBillboardComponent* Billboard = Cast<UBillboardComponent>(Comp))
         {
-            BillboardObjs.Add(pBillboardComp);
+            BillboardObjs.Add(Billboard);
+            continue;
         }
-        if (ULightComponentBase* pLightComp = Cast<ULightComponentBase>(iter))
+        if (ULightComponentBase* Light = Cast<ULightComponentBase>(Comp))
         {
-            LightObjs.Add(pLightComp);
+            LightObjs.Add(Light);
         }
     }
 }
@@ -960,6 +962,7 @@ void FRenderer::Render(UWorld* World, std::shared_ptr<FEditorViewportClient> Act
 void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
     PrepareShader();
+
     for (UStaticMeshComponent* StaticMeshComp : StaticMeshObjs)
     {
         FMatrix Model = JungleMath::CreateModelMatrix(
@@ -1113,6 +1116,17 @@ void FRenderer::RenderBillboards(UWorld* World, std::shared_ptr<FEditorViewportC
     }
     PrepareShader();
 }
+
+TSet<UPrimitiveComponent*>& FRenderer::GetVisibleObjs()
+{
+    return VisibleObjs;
+}
+
+void FRenderer::SetVisibleObjs(const TSet<UPrimitiveComponent*>& comp)
+{
+    VisibleObjs = comp;
+}
+
 
 void FRenderer::RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Object.h"
 #include "UObjectHash.h"
 #include "Container/Array.h"
