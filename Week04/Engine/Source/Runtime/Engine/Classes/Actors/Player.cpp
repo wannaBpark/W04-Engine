@@ -612,8 +612,14 @@ void AEditorPlayer::UpdateVisibleStaticMeshComponentsWithOctree()
     TSet<uint32> UniqueUUIDs;
     //Octree->Root->QueryFrustumUnique(Frustum, FrustumComps, UniqueUUIDs);
     Octree->Root->QueryFrustumOcclusionCulling(Frustum, GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation(), FrustumComps, UniqueUUIDs);
-    
-    Renderer->SetVisibleObjs(FrustumComps);
+
+    TArray<UPrimitiveComponent*> SortedComps = FrustumComps.Array();
+    SortedComps.Sort([](UPrimitiveComponent* A, UPrimitiveComponent* B)
+    {
+        return A->GetUUID() < B->GetUUID();
+    });
+
+    Renderer->SetVisibleObjs(SortedComps);
     UE_LOG(LogLevel::Display, TEXT("Visible Unique Components: %d"), FrustumComps.Num());
 
 }
@@ -646,7 +652,7 @@ void AEditorPlayer::UpdateVisibleStaticMeshComponents() {
             FrustumComps.Add(iter);
         }
     }
-    Renderer->SetVisibleObjs(FrustumComps);
+    //Renderer->SetVisibleObjs(FrustumComps);
 }
 
 Ray AEditorPlayer::GetRayDirection(const FVector& pickPosition)

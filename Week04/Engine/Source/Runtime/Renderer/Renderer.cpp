@@ -36,6 +36,7 @@ void FRenderer::Initialize(FGraphicsDevice* graphics)
     //CreateLightingBuffer();
     //CreateLitUnlitBuffer();
     //UpdateLitUnlitConstant(1);
+    
 }
 
 void FRenderer::Release()
@@ -1060,7 +1061,8 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     UPrimitiveBatch::GetInstance().RenderBatch(ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix());
 
     if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_Primitives)) // Static Mesh 렌더
-        RenderStaticMeshes(World, ActiveViewport);
+        RenderSortedStaticMeshes(World, ActiveViewport);
+        //RenderStaticMeshes(World, ActiveViewport);
     RenderGizmos(World, ActiveViewport);
     //if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))    // 빌보드 텍스트 렌더
     //    RenderBillboards(World, ActiveViewport);
@@ -1281,15 +1283,16 @@ void FRenderer::CreateDepthBuffer(ID3D11Device* device, int width, int height)
 
 }
 
-TSet<UPrimitiveComponent*>& FRenderer::GetVisibleObjs()
+TArray<UPrimitiveComponent*>& FRenderer::GetVisibleObjs()
 {
     return VisibleObjs;
 }
 
-void FRenderer::SetVisibleObjs(const TSet<UPrimitiveComponent*>& comp)
+void FRenderer::SetVisibleObjs(const TArray<UPrimitiveComponent*>& comp)
 {
     VisibleObjs = comp;
 }
+
 
 void FRenderer::CreateBatches(const MaterialSubsetRenderData& SubsetRenderData)
 {
@@ -1352,6 +1355,7 @@ void FRenderer::CreateBatches(const MaterialSubsetRenderData& SubsetRenderData)
                 CurrentBatch.VertexBuffer = FEngineLoop::renderer.CreateVertexBuffer(AccumVertices, sizeof(FVertexSimple) * AccumVertices.Num());
                 CurrentBatch.IndexBuffer = FEngineLoop::renderer.CreateIndexBuffer(AccumIndices, sizeof(uint32) * AccumIndices.Num());
                 CurrentBatch.IndexCount = AccumIndices.Num();
+                
                 //CurrentBatch.ObjectDatas = AccumObjectDatas;
 
                 RenderBatches.Add(CurrentBatch);
@@ -1381,22 +1385,6 @@ void FRenderer::CreateBatches(const MaterialSubsetRenderData& SubsetRenderData)
 
 void FRenderer::CreateStaticBuffer(MaterialSubsetRenderData& SubsetRenderData)
 {
-    // uuid 값 기준 정렬.
-    for (auto& [Material, SubsetArray] : SubsetRenderData)
-    {
-        SubsetArray.Sort([](const FSubsetRenderInfo& A, const FSubsetRenderInfo& B)
-        {
-            const FVector4& uuidA = A.StaticMeshInfo->UUIDColor;
-            const FVector4& uuidB = B.StaticMeshInfo->UUIDColor;
-
-            // 원하는 방식으로 정렬 기준 정의 (예: X 우선, 그다음 Y, Z 등)
-            if (uuidA.X != uuidB.X) return uuidA.X < uuidB.X;
-            if (uuidA.Y != uuidB.Y) return uuidA.Y < uuidB.Y;
-            if (uuidA.Z != uuidB.Z) return uuidA.Z < uuidB.Z;
-            return uuidA.W < uuidB.W;
-        });
-    }
-
     // 인덱스, 정점 버퍼 생성.
     TArray<FVertexSimple> AccumVertices;
     TArray<uint32> AccumIndices;
@@ -1404,6 +1392,10 @@ void FRenderer::CreateStaticBuffer(MaterialSubsetRenderData& SubsetRenderData)
 
     for (const auto& [Material, RenderDataArray] : SubsetRenderData)
     {
+        TArray<uint32> comps;
+        TArray<int> idxOffsets;
+        TArray<int> vtxOffsets;
+
         for (auto& renderData : RenderDataArray) {
             UStaticMeshComponent* mesh = renderData.StaticMeshInfo->StaticMeshComp;
             OBJ::FStaticMeshRenderData* data = mesh->GetStaticMesh()->GetRenderData();
@@ -1435,43 +1427,73 @@ void FRenderer::CreateStaticBuffer(MaterialSubsetRenderData& SubsetRenderData)
                 AccumVertices.Add(worldV);
             }
             vertexBaseOffset += vertices.Num();
+            comps.Add(mesh->GetUUID());
+            idxOffsets.Add(renderData.IndexCount);
+            vtxOffsets.Add(renderData.VertexCount);
         }
         StaticVertexBuffer[Material] = CreateVertexBuffer(AccumVertices, sizeof(FVertexSimple) * AccumVertices.Num());
         StaticIndexBuffer[Material] = CreateIndexBuffer(AccumIndices, sizeof(uint32) * AccumIndices.Num());
+        orgComps[Material] = comps;
+        idxOffset[Material] = idxOffsets;
+        vtxOffset[Material] = vtxOffsets;
+
+        comps.Empty();
+        idxOffsets.Empty();
         AccumVertices.Empty();
         AccumIndices.Empty();
         vertexBaseOffset = 0;
     }
 }
 
-void FRenderer::RenderSortedStaticMeshes(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport, TMap<UMaterial*, TArray<UPrimitiveComponent*>> CullingPrimitiveComps)
+void FRenderer::RenderSortedStaticMeshes(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
 {
+    
+    TMap<UMaterial*, TArray<UPrimitiveComponent*>> visibleMap;
+
+    for (auto comp : GetVisibleObjs()) {
+
+        UStaticMeshComponent* meshComp = Cast<UStaticMeshComponent>(comp);
+        TArray<UMaterial*> materials;
+        meshComp->GetUsedMaterials(materials);
+        for (auto mat : materials) {
+            visibleMap[mat].Add(comp);
+        }
+    }
     PrepareShader();
     // 바인딩 및 PrepareShader
     uint32 Offset = 0;
     
-
     const FMatrix viewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
     const FMatrix projMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
     const FMatrix VP = viewMatrix * projMatrix;
 
     UpdateConstant(VP);
 
-    int baseOffset = 0;
+    int baseIdxOffset = 0;
+    int baseVtxOffset = 0;
     int size = 0;
-    for (auto& [Material, CompArray] : CullingPrimitiveComps) {
+    for (auto& [Material, visibleArray] : visibleMap) {
+        if (flag == 0) {
+            MaterialSort();
+            CreateStaticBuffer(StaticSubsetRenderData);
+            flag = 1;
+        }
         Graphics->DeviceContext->IASetVertexBuffers(0, 1, &StaticVertexBuffer[Material], &Stride, &Offset);
         Graphics->DeviceContext->IASetIndexBuffer(StaticIndexBuffer[Material], DXGI_FORMAT_R32_UINT, 0);
         Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        for (int i = 0; i < CompArray.Num(); i++) {
-            //FIXME IsVisible 실제 값으로 바꾸기
-            /*if (CompArray[i]->IsVisible == false) {
-                Graphics->DeviceContext->DrawIndexed(size, baseOffset, 0);
+        for (int i = 0; i < orgComps[Material].Num(); i++) {
+            if (orgComps[Material][i] == visibleArray[i]->GetUUID()) {
+                size+=idxOffset[Material][i];
             }
             else {
-                size++;
-            }*/
+
+                Graphics->DeviceContext->DrawIndexed(size, baseIdxOffset, baseVtxOffset);
+                baseIdxOffset += size;
+                baseVtxOffset += vtxOffset[Material][i];
+                size = 0;
+            }      
         }
+        Graphics->DeviceContext->DrawIndexed(size, baseIdxOffset, baseVtxOffset);
     }
 }
 
@@ -1515,6 +1537,22 @@ void FRenderer::MaterialSort()
             );
             ++Index;
         }
+    }
+
+    // uuid 값 기준 정렬.
+    for (auto& [Material, SubsetArray] : StaticSubsetRenderData)
+    {
+        SubsetArray.Sort([](const FSubsetRenderInfo& A, const FSubsetRenderInfo& B)
+            {
+                const FVector4& uuidA = A.StaticMeshInfo->UUIDColor;
+                const FVector4& uuidB = B.StaticMeshInfo->UUIDColor;
+
+                // 원하는 방식으로 정렬 기준 정의 (예: X 우선, 그다음 Y, Z 등)
+                if (uuidA.X != uuidB.X) return uuidA.X < uuidB.X;
+                if (uuidA.Y != uuidB.Y) return uuidA.Y < uuidB.Y;
+                if (uuidA.Z != uuidB.Z) return uuidA.Z < uuidB.Z;
+                return uuidA.W < uuidB.W;
+            });
     }
 }
 

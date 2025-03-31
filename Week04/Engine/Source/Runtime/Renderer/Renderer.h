@@ -46,6 +46,7 @@ struct FSubsetRenderInfo
 {
     std::shared_ptr<FStaticMeshRenderInfo> StaticMeshInfo;
     uint32 IndexCount;
+    uint32 VertexCount;
     uint32 StartIndex;
     uint32 BaseVertexLocation;
     bool bIsSubsetSelected;  // Subset이 선택되어있는지 여부
@@ -213,7 +214,7 @@ public:
     void RenderBillboards(UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
 
 private:
-    TSet<UPrimitiveComponent*> VisibleObjs;
+    TArray<UPrimitiveComponent*> VisibleObjs;
     TArray<UStaticMeshComponent*> StaticMeshObjs;
     TArray<UGizmoBaseComponent*> GizmoObjs;
     TArray<UBillboardComponent*> BillboardObjs;
@@ -242,12 +243,20 @@ public:
     TMap<UMaterial*, ID3D11Buffer*> StaticVertexBuffer;
     TMap<UMaterial*, ID3D11Buffer*> StaticIndexBuffer;
     MaterialSubsetRenderData StaticSubsetRenderData;
+    TMap<UMaterial*, TArray<uint32>> orgComps;
+    TMap<UMaterial*, TArray<int>> idxOffset;
+    TMap<UMaterial*, TArray<int>> vtxOffset;
+    
+
+
 public:
-    TSet<UPrimitiveComponent*>& GetVisibleObjs();
-    void SetVisibleObjs(const TSet<UPrimitiveComponent*>& comp);
+    TArray<UPrimitiveComponent*>& GetVisibleObjs();
+    void SetVisibleObjs(const TArray<UPrimitiveComponent*>& comp);
     void CreateBatches(const MaterialSubsetRenderData& SubsetRenderData);
 
     void CreateStaticBuffer(MaterialSubsetRenderData& SubsetRenderData);
-    void RenderSortedStaticMeshes(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport, TMap<UMaterial*, TArray<UPrimitiveComponent*>> CullingPrimitiveComps);
+    void RenderSortedStaticMeshes(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
     void MaterialSort();
+
+    int flag = 0;
 };
