@@ -71,7 +71,7 @@ public:
 
     // 위치 변경 등으로 인한 업데이트
     void UpdateComponentPosition(UPrimitiveComponent* Comp);
-    TArray<UPrimitiveComponent*> KDTreeCullVisible(const FFrustum& viewFrustum, const FMatrix& viewProjMatrix, const DepthBuffer& depthBuffer);
+    //TArray<UPrimitiveComponent*> KDTreeCullVisible(const FFrustum& viewFrustum, const FMatrix& viewProjMatrix, const DepthBuffer& depthBuffer);
 };
 
 // 구조체: 우선순위 큐 항목 [노드 포인터와 해당 노드의 교차 시작 거리]

@@ -8,6 +8,7 @@
 #include "EngineBaseTypes.h"
 #include "Define.h"
 #include "Container/Set.h"
+#include "Container/Array.h"
 
 class ULightComponentBase;
 class UWorld;
@@ -19,6 +20,7 @@ class FEditorViewportClient;
 class UBillboardComponent;
 class UStaticMeshComponent;
 class UGizmoBaseComponent;
+class UPrimitiveComponent;
 class FRenderer 
 {
 
@@ -142,7 +144,11 @@ public: // line shader
     void RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
     void RenderGizmos(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
     void RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
-    void RenderBillboards(UWorld* World,std::shared_ptr<FEditorViewportClient> ActiveViewport);
+    HRESULT CreateOcclusionResources(UINT occludeeCount, UINT viewportWidth, UINT viewportHeight);
+    void RunOcclusionCullingComputeShaderGeneric(const std::vector<OccludeeData>& occludeeData, ID3D11ShaderResourceView* depthSRV, UINT viewportWidth, UINT viewportHeight);
+    void PerformOcclusionCullingForOccludees(const TArray<UPrimitiveComponent*>& occludeeCandidates,
+        ID3D11ShaderResourceView* depthSRV, UINT viewportWidth, UINT viewportHeight, TArray<UPrimitiveComponent*>& OutVisibleComponents);
+    void RenderBillboards(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
 private:
     TArray<UStaticMeshComponent*> StaticMeshObjs;
     TArray<UGizmoBaseComponent*> GizmoObjs;
@@ -157,5 +163,12 @@ public:
     ID3D11ShaderResourceView* pBBSRV = nullptr;
     ID3D11ShaderResourceView* pConeSRV = nullptr;
     ID3D11ShaderResourceView* pOBBSRV = nullptr;
+
+    ID3D11Buffer* occludeeBuffer = nullptr;
+    ID3D11Buffer* resultBuffer = nullptr;
+    ID3D11ShaderResourceView* occludeeSRV = nullptr;
+    ID3D11ComputeShader* occlusionCS = nullptr;
+    ID3D11Buffer* cbBuffer = nullptr;
 };
+
 

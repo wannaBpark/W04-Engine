@@ -1,48 +1,59 @@
-cbuffer CB_HizCull : register(b0)
+cbuffer CB_OcclusionCulling : register(b0)
 {
-    matrix gView;
-    matrix gProj;
-    matrix gViewProj;
-    float4 gFrustumPlanes[6];
-    float3 gEyePos;
-    float gViewportSize;
+    float4x4 viewProj; // 카메라의 view * proj 행렬 (row-major)
+    float viewportWidth;
+    float viewportHeight;
+    uint occludeeCount; // occludee 개수를 전달 (추가)
 };
 
-StructuredBuffer<float4> ColliderBuffer : register(t0);
-Texture2D HiZMap : register(t1);
-SamplerState samp : register(s0);
-RWStructuredBuffer<float> CullingBuffer : register(u0);
+struct OccludeeData
+{
+    float centerX;
+    float centerY;
+    float centerZ;
+    float radius;
+};
 
-[numthreads(1, 1, 1)]
-void main(uint3 DTid : SV_DispatchThreadID)
+// occludee 데이터가 저장된 구조화 버퍼 (t0)
+StructuredBuffer<OccludeeData> gOccludeeBuffer : register(t0);
+
+// 계층적 Z 버퍼 (Hi-Z): 각 mip level에 해당하는 SRV
+Texture2D gHiZTexture : register(t1);
+SamplerState gHiZSampler : register(s0);
+
+// 결과 버퍼: 각 occludee별로 1 (visible) 또는 0 (occluded)을 저장 (u0)
+RWStructuredBuffer<int> gResultBuffer : register(u0);
+
+[numthreads(64, 1, 1)]
+void CSMain(uint3 DTid : SV_DispatchThreadID)
 {
     uint index = DTid.x;
-    float4 sphere = ColliderBuffer[index];
+    // occludee 데이터 개수 검사
+    if (index >= occludeeCount)
+        return;
     
-    // sphere center를 NDC로 투영
-    float4 projPos = mul(float4(sphere.xyz, 1.0f), gViewProj);
-    projPos /= projPos.w;
-    
-    // Occludee가 화면 상에 보장되는 2x2 texel 영역 산출 (계산 생략)
-    // 간략화를 위해 mipLevel은 0으로 가정
-    uint mipLevel = 0;
-    
-    float2 screenPos = (projPos.xy * 0.5f + 0.5f) * gViewportSize;
-    uint2 texelCoord = uint2(screenPos);
-    
-    // 2x2 texel 샘플링하여 최대 depth 찾기
-    float maxDepth = 0.0f;
-    [unroll]
-    for (int y = 0; y < 2; y++)
+    OccludeeData data = gOccludeeBuffer[index];
+    float4 center = float4(data.centerX, data.centerY, data.centerZ, 1.0f);
+
+    // viewProj 변환
+    float4 clipPos = mul(center, viewProj);
+    // Perspective divide
+    if (abs(clipPos.w) > 1e-6)
     {
-        for (int x = 0; x < 2; x++)
-        {
-            float depth = HiZMap.Load(int3(texelCoord + uint2(x, y), mipLevel)).r;
-            maxDepth = max(maxDepth, depth);
-        }
+        clipPos.xyz /= clipPos.w;
     }
     
-    // 투영된 depth와 비교하여 occlusion 판단
-    float visible = (projPos.z <= maxDepth) ? 1.0f : 0.0f;
-    CullingBuffer[index] = visible;
+    // NDC [-1,1] -> 화면 좌표 [0, viewportWidth], [0, viewportHeight]
+    float screenX = (clipPos.x * 0.5f + 0.5f) * viewportWidth;
+    float screenY = (-clipPos.y * 0.5f + 0.5f) * viewportHeight;
+
+    // 화면 좌표를 int로 변환 (픽셀 좌표)
+    int2 screenPos = int2(screenX, screenY);
+
+    // Hi-Z mip level 선택: 여기서는 0번 mip level (최고 해상도) 사용
+    float hiZDepth = gHiZTexture.Load(int3(screenPos, 0)).r;
+
+    // 가시성 판정: occludee의 clipPos.z와 hiZDepth 비교 (clipPos.z가 작으면 더 앞)
+    int visible = (clipPos.z < hiZDepth) ? 1 : 0;
+    gResultBuffer[index] = visible;
 }

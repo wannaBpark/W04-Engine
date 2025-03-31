@@ -413,3 +413,20 @@ struct FTextureConstants {
     float pad1;
 };
 
+
+
+struct OccludeeData
+{
+    float centerX;
+    float centerY;
+    float centerZ;
+    float radius;
+};
+
+struct CB_OcclusionCulling
+{
+    FMatrix viewProj;      // 카메라의 view * proj 행렬 (row-major)
+    float viewportWidth;
+    float viewportHeight;
+    uint32 occludeeCount;
+};
