@@ -332,7 +332,7 @@ struct FFrustum
     FPlane Planes[6]; // 6개 평면: Left, Right, Top, Bottom, Near, Far
 
     // AABB와 프러스텀의 교차 여부 검사
-    FORCEINLINE bool Intersects(const FBoundingBox& Box) const
+    bool Intersects(const FBoundingBox& Box) const
     {
         for (int i = 0; i < 6; ++i)
         {

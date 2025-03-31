@@ -32,8 +32,6 @@ public:
     static FGraphicsDevice graphicDevice;
     static FRenderer renderer;
     static FResourceMgr resourceMgr;
-    static uint32 TotalAllocationBytes;
-    static uint32 TotalAllocationCount;
 
 
     HWND hWnd;
