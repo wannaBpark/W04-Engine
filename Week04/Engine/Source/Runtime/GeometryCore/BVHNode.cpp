@@ -15,6 +15,7 @@
 
 #include <immintrin.h>
 #include <queue>
+#include "Octree.h"
 
 static std::mutex g_resultMutex;
 
@@ -532,11 +533,11 @@ UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, co
             {
                 float tInter;
                 FBoundingBox box = GetWorldBox(comp);
-                // AABB를 구로 근사: 구의 중심과 반지름 계산
+                // AABB를 구로 근사 - 중심과 반지름 계산
                 FVector center = (box.min + box.max) * 0.5f;
                 float radius = (box.max - box.min).Length() * 0.5f;
 
-                // 비트마스킹을 이용한 빠른 충돌 검사
+                // 비트마스킹 빠른 충돌 검사
                 if (FastIsRayIntersectingSphere(Origin, normDir, center, radius, tInter))
                 {
                     if (tInter < bestT)
@@ -575,5 +576,3 @@ UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, co
     }
     return nullptr;
 }
-
-

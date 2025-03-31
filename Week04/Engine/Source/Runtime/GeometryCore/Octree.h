@@ -41,6 +41,8 @@ public:
     void UpdateComponent(UPrimitiveComponent* Comp);
     void RemoveComponent(UPrimitiveComponent* Comp);
 
+    void QueryFrustumOcclusionCulling(const FFrustum& Frustum, const FVector& CameraPos, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs);
+
     void QueryFrustum(const FFrustum& Frustum, TArray<UPrimitiveComponent*>& OutComponents);
     void QueryFrustumUnique(const FFrustum& Frustum, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs);
     void CollectComponents(TArray<UPrimitiveComponent*>& OutComponents)
@@ -66,10 +68,6 @@ public:
         HalfExtent = HalfExtent * LOOSE_FACTOR;
         return FBoundingBox(Center - HalfExtent, Center + HalfExtent);
     }
-
-    void QueryDistanceCulling(const FVector& CameraPos, float MaxDistance, TArray<UPrimitiveComponent*>& OutComponents);
-    void QueryDistanceCullingUnique(const FVector& CameraPos, float MaxDistance, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs);
-
 };
 
 class OctreeSystem
@@ -81,8 +79,4 @@ public:
     void AddComponent(UPrimitiveComponent* Comp);
 
     void UpdateComponentPosition(UPrimitiveComponent* Comp);
-
-    void QueryVisibleNodes(const FVector& CameraPos, float MaxDistance, TArray<UPrimitiveComponent*>& OutComponents);
-    void QueryVisibleNodesUnique(const FVector& CameraPos, float MaxDistance, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs);
-
 };

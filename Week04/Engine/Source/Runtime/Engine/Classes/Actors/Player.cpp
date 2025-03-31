@@ -325,7 +325,7 @@ void AEditorPlayer::PickActorBVH(const FVector& pickPosition)
     TSet<uint32> UUIDs;
     //Octree->QueryVisibleNodes(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation(), 100.0f, VisibleComponents);
     //UE_LOG(LogLevel::Display, TEXT("Visible Components: %d"), VisibleComponents.Num());
-    //Octree->QueryVisibleNodesUnique(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation(), 50.0f, VisibleSet,UUIDs);
+    //Octree->Root->QueryOcclusionCulling(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation(),VisibleSet,UUIDs);
 
     //UE_LOG(LogLevel::Display, TEXT("Visible Unique Components: %d"), VisibleSet.Num());
 
@@ -610,9 +610,12 @@ void AEditorPlayer::UpdateVisibleStaticMeshComponentsWithOctree()
     Renderer->GetVisibleObjs().Empty();
     TSet<UPrimitiveComponent*> FrustumComps;
     TSet<uint32> UniqueUUIDs;
-    Octree->Root->QueryFrustumUnique(Frustum, FrustumComps, UniqueUUIDs);
+    //Octree->Root->QueryFrustumUnique(Frustum, FrustumComps, UniqueUUIDs);
+    Octree->Root->QueryFrustumOcclusionCulling(Frustum, GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation(), FrustumComps, UniqueUUIDs);
     
     Renderer->SetVisibleObjs(FrustumComps);
+    UE_LOG(LogLevel::Display, TEXT("Visible Unique Components: %d"), FrustumComps.Num());
+
 }
 
 void AEditorPlayer::UpdateVisibleStaticMeshComponents() {

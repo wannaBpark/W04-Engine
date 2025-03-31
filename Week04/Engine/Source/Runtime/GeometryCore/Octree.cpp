@@ -471,51 +471,42 @@ void OctreeSystem::UpdateComponentPosition(UPrimitiveComponent* Comp)
 }
 
 
-// 거리 기반 Culling: 중복 제거 없이
-void OctreeNode::QueryDistanceCulling(const FVector& CameraPos, float MaxDistance, TArray<UPrimitiveComponent*>& OutComponents)
+
+
+TArray<FVector> GetBoxVertices(const FBoundingBox& Box)
 {
-    // 노드 중심 계산
-    FVector Center = (Bounds.min + Bounds.max) * 0.5f;
-    float Distance = CalculateDistance(CameraPos, Center);
-
-    // 거리가 임계값을 초과하면 가지치기
-    if (Distance > MaxDistance) {
-        return;
-    }
-
-    // Leaf 노드인 경우 컴포넌트 추가
-    if (Children[0] == nullptr) {
-        for (auto& Comp : Components) {
-            OutComponents.Add(Comp);
-        }
-        return;
-    }
-
-    // 자식 노드가 있으면 재귀적으로 호출
-    for (auto& Child : Children) {
-        if (Child) {
-            Child->QueryDistanceCulling(CameraPos, MaxDistance, OutComponents);
-        }
-    }
+    TArray<FVector> Vertices;
+    Vertices.Add(FVector(Box.min.X, Box.min.Y, Box.min.Z));
+    Vertices.Add(FVector(Box.max.X, Box.min.Y, Box.min.Z));
+    Vertices.Add(FVector(Box.min.X, Box.max.Y, Box.min.Z));
+    Vertices.Add(FVector(Box.max.X, Box.max.Y, Box.min.Z));
+    Vertices.Add(FVector(Box.min.X, Box.min.Y, Box.max.Z));
+    Vertices.Add(FVector(Box.max.X, Box.min.Y, Box.max.Z));
+    Vertices.Add(FVector(Box.min.X, Box.max.Y, Box.max.Z));
+    Vertices.Add(FVector(Box.max.X, Box.max.Y, Box.max.Z));
+    return Vertices;
 }
 
-// 거리 기반 Culling: 중복 제거
-void OctreeNode::QueryDistanceCullingUnique(const FVector& CameraPos, float MaxDistance, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs)
+// Octree 노드에 새로운 함수 추가: 거리 및 occlusion 기반 컬링 (자식 노드들에 대해 8개 정점 광선 검사)
+// 이 함수는 카메라 위치와 시점(카메라 위치로부터 각 정점까지의 광선)이 주어졌을 때,
+// 해당 노드의 자식들 중 완전히 가려진 노드는 순회하지 않고, 그렇지 않은 경우에만 재귀적으로 탐색하여
+// 중복 없이(Unique UUID) 가시한 UPrimitiveComponent들을 OutComponents에 추가합니다.
+void OctreeNode::QueryFrustumOcclusionCulling(const FFrustum& Frustum, const FVector& CameraPos,
+    TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs)
 {
-    // 노드 중심 계산
-    FVector Center = (Bounds.min + Bounds.max) * 0.5f;
-    float Distance = CalculateDistance(CameraPos, Center);
-
-    // 거리가 임계값을 초과하면 가지치기
-    if (Distance > MaxDistance) {
+    // 1. 프러스텀 컬링: 현재 노드의 AABB가 프러스텀과 교차하지 않으면 조기 리턴
+    if (!Frustum.Intersects(Bounds))
         return;
-    }
 
-    // Leaf 노드인 경우 컴포넌트 추가 (중복 제거)
-    if (Children[0] == nullptr) {
-        for (auto& Comp : Components) {
+    // 2. 내부 노드인지 Leaf 노드인지 판정
+    if (Children[0] == nullptr)
+    {
+        // Leaf 노드: 해당 노드의 모든 컴포넌트를 중복 없이 추가
+        for (auto& Comp : Components)
+        {
             uint32 UUID = Comp->GetUUID();
-            if (!UniqueUUIDs.Contains(UUID)) {
+            if (!UniqueUUIDs.Contains(UUID))
+            {
                 UniqueUUIDs.Add(UUID);
                 OutComponents.Add(Comp);
             }
@@ -523,24 +514,56 @@ void OctreeNode::QueryDistanceCullingUnique(const FVector& CameraPos, float MaxD
         return;
     }
 
-    // 자식 노드가 있으면 재귀적으로 호출
-    for (auto& Child : Children) {
-        if (Child) {
-            Child->QueryDistanceCullingUnique(CameraPos, MaxDistance, OutComponents, UniqueUUIDs);
+    // 3. 내부 노드의 경우, 각 자식 노드에 대해 occlusion 검사 수행
+    //    각 자식 노드에 대해, 자식의 AABB를 이루는 8개 코너 정점에 대해 검사합니다.
+    for (int i = 0; i < 8; ++i)
+    {
+        if (Children[i] == nullptr)
+            continue;
+
+        TArray<FVector> childVertices = GetBoxVertices(Children[i]->Bounds);
+        bool childFullyOccluded = true;
+
+        // 각 정점마다 검사: 하나라도 광선이 형제 노드들(자신을 제외한 다른 자식)의 AABB와 교차하지 않으면, 해당 자식은 가려지지 않은 것으로 판단
+        for (const FVector& vertex : childVertices)
+        {
+            // 카메라에서 정점까지의 광선 방향과 거리 계산
+            FVector rayDir = (vertex - CameraPos).GetSafeNormal();
+            float dVertex = (vertex - CameraPos).Length();
+            bool vertexOccluded = false;
+
+            // 현재 자식(i) 외의 모든 자식(j)에 대해 검사
+            for (int j = 0; j < 8; ++j)
+            {
+                if (j == i || Children[j] == nullptr)
+                    continue;
+
+                float tIntersect;
+                // 만약 카메라에서 정점으로 향하는 ray가 자식 j의 AABB와 교차하고 그 교차 거리가 정점까지의 거리보다 짧으면
+                if (Children[j]->Bounds.Intersect(CameraPos, rayDir, tIntersect) && tIntersect < dVertex)
+                {
+                    vertexOccluded = true;
+                    break;
+                }
+            }
+
+            // 하나라도 occluded되지 않은 정점이 있다면, 해당 자식은 완전히 가려지지 않음
+            if (!vertexOccluded)
+            {
+                childFullyOccluded = false;
+                break;
+            }
         }
-    }
-}
 
-void OctreeSystem::QueryVisibleNodes(const FVector& CameraPos, float MaxDistance, TArray<UPrimitiveComponent*>& OutComponents)
-{
-    if (Root) {
-        Root->QueryDistanceCulling(CameraPos, MaxDistance, OutComponents);
-    }
-}
-
-void OctreeSystem::QueryVisibleNodesUnique(const FVector& CameraPos, float MaxDistance, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs)
-{
-    if (Root) {
-        Root->QueryDistanceCullingUnique(CameraPos, MaxDistance, OutComponents, UniqueUUIDs);
+        // 4. 자식 노드가 완전히 가려졌다면, 해당 자식은 무시 (Early-out)
+        if (childFullyOccluded)
+        {
+            continue;
+        }
+        else
+        {
+            // 재귀 호출: 해당 자식 노드를 순회
+            Children[i]->QueryFrustumOcclusionCulling(Frustum, CameraPos, OutComponents, UniqueUUIDs);
+        }
     }
 }
