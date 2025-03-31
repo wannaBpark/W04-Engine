@@ -51,6 +51,26 @@ struct FSubsetRenderInfo
     bool bIsSubsetSelected;  // Subset이 선택되어있는지 여부
 };
 
+struct FObjectData
+{
+    FMatrix VP;
+    FMatrix MInverseTranspose;
+    FVector4 UUID;
+    uint32 isSelected;
+    uint32 objectID;
+};
+
+struct FRenderBatch {
+    ID3D11Buffer* VertexBuffer = nullptr;
+    ID3D11Buffer* IndexBuffer = nullptr;
+    UINT IndexCount = 0;
+    //UINT VertexOffset = 0;
+
+    //TArray<OBJ::FStaticMeshRenderData*> MeshDatas;
+    //TArray<FObjectData> ObjectDatas;
+};
+
+
 using MaterialSubsetRenderData = TMap<UMaterial*, TArray<FSubsetRenderInfo>>;
 //~ Material Sort 관련 구조체
 
@@ -89,7 +109,7 @@ public:
     ) const;
 
     // Subset Optimizer
-    void RenderPrimitive(const MaterialSubsetRenderData& SubsetRenderData) const;
+    void RenderPrimitive(const MaterialSubsetRenderData& SubsetRenderData);
 
     void RenderTexturedModelPrimitive(
         ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices, ID3D11ShaderResourceView* InTextureSRV,
@@ -121,7 +141,7 @@ public:
 
     // update
     void UpdateLightBuffer() const;
-    void UpdateConstant(const FMatrix& MVP, const FMatrix& NormalMatrix, FVector4 UUIDColor, bool IsSelected) const;
+    void UpdateConstant(const FMatrix& VP) const;
     void UpdateMaterial(const FObjMaterialInfo& MaterialInfo) const;
     void UpdateLitUnlitConstant(int isLit) const;
     void UpdateSubMeshConstant(bool isSelected) const;
@@ -199,6 +219,8 @@ private:
     TArray<UBillboardComponent*> BillboardObjs;
     TArray<ULightComponentBase*> LightObjs;
 
+    TMap<UMaterial*, TArray<FRenderBatch>> Batches;
+
 public:
     ID3D11VertexShader* VertexLineShader = nullptr;
     ID3D11PixelShader* PixelLineShader = nullptr;
@@ -211,4 +233,5 @@ public:
 public:
     TSet<UPrimitiveComponent*>& GetVisibleObjs();
     void SetVisibleObjs(const TSet<UPrimitiveComponent*>& comp);
+    void CreateBatches(const MaterialSubsetRenderData& SubsetRenderData);
 };

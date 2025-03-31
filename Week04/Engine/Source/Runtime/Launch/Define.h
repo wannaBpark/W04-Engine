@@ -25,6 +25,7 @@ struct FVertexSimple
     float nx, ny, nz;
     float u=0, v=0;
     uint32 MaterialIndex;
+    uint32 IsSelected;
 };
 
 // Material Subset
@@ -392,12 +393,9 @@ struct FMaterialConstants {
 };
 
 struct FConstants {
-    FMatrix MVP;      // 모델
-    FMatrix ModelMatrixInverseTranspose; // normal 변환을 위한 행렬
-    FVector4 UUIDColor;
-    bool IsSelected;
-    FVector pad;
+    FMatrix VP;
 };
+
 struct FLitUnlitConstants {
     int isLit; // 1 = Lit, 0 = Unlit 
     FVector pad;
