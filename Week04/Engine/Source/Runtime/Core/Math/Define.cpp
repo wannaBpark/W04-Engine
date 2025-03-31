@@ -1,4 +1,6 @@
 #include "Define.h"
+#include "MathSSE.h"
+
 
 // 단위 행렬 정의
 const FMatrix FMatrix::Identity = { {
@@ -29,19 +31,20 @@ FMatrix FMatrix::operator-(const FMatrix& Other) const {
 // 행렬 곱셈
 FMatrix FMatrix::operator*(const FMatrix& Other) const {
     FMatrix Result = {};
-    for (int32 i = 0; i < 4; i++)
-        for (int32 j = 0; j < 4; j++)
-            for (int32 k = 0; k < 4; k++)
-                Result.M[i][j] += M[i][k] * Other.M[k][j];
+    SSE::VectorMatrixMultiply(&Result, this, &Other);
     return Result;
 }
 
 // 스칼라 곱셈
 FMatrix FMatrix::operator*(float Scalar) const {
     FMatrix Result;
-    for (int32 i = 0; i < 4; i++)
-        for (int32 j = 0; j < 4; j++)
-            Result.M[i][j] = M[i][j] * Scalar;
+    for (int32 i = 0; i < 4; ++i)
+    {
+        Result.M[i][0] = M[i][0] * Scalar;
+        Result.M[i][1] = M[i][1] * Scalar;
+        Result.M[i][2] = M[i][2] * Scalar;
+        Result.M[i][3] = M[i][3] * Scalar;
+    }
     return Result;
 }
 
