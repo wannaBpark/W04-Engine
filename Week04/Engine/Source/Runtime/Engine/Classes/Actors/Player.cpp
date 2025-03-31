@@ -315,7 +315,7 @@ void AEditorPlayer::PickActorBVH(const FVector& pickPosition)
 #pragma region BVH Ray Intersection
     float dist = FLT_MAX;
     //Possible = BVH->Root->QueryRayClosest(MyRay.Origin, MyRay.Direction);
-    Possible = BVH->Root->QueryRayClosestBestFirst(MyRay.Origin, MyRay.Direction);
+    Possible = BVH ? BVH->Root->QueryRayClosestBestFirst(MyRay.Origin, MyRay.Direction) : nullptr;
     //Possible = KDTree->Root->QueryRayClosestBestFirst(MyRay.Origin, MyRay.Direction);
     //Possible = BVH->Root->QueryRayClosestSegmentTree(MyRay.Origin, MyRay.Direction);
 
