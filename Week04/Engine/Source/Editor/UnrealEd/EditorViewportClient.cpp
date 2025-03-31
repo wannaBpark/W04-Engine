@@ -1,19 +1,23 @@
 #include "EditorViewportClient.h"
-#include "fstream"
-#include "sstream"
-#include "ostream"
-#include "Math/JungleMath.h"
+
+#include <algorithm>
+#include <fstream>
+#include <ostream>
+#include <sstream>
 #include "EngineLoop.h"
 #include "UnrealClient.h"
 #include "World.h"
 #include "GameFramework/Actor.h"
+#include "Math/JungleMath.h"
 
 FVector FEditorViewportClient::Pivot = FVector(0.0f, 0.0f, 0.0f);
 float FEditorViewportClient::orthoSize = 10.0f;
-FEditorViewportClient::FEditorViewportClient()
-    : Viewport(nullptr), ViewMode(VMI_Lit), ViewportType(LVT_Perspective), ShowFlag(31)
-{
 
+FEditorViewportClient::FEditorViewportClient()
+    : ViewportType(LVT_Perspective)
+    , ShowFlag(31)
+    , ViewMode(VMI_Lit)
+{
 }
 
 FEditorViewportClient::~FEditorViewportClient()
@@ -31,7 +35,7 @@ void FEditorViewportClient::Initialize(int32 viewportIndex)
     ViewTransformPerspective.SetLocation(FVector(8.0f, 8.0f, 8.f));
     ViewTransformPerspective.SetRotation(FVector(0.0f, 45.0f, -135.0f));
     Viewport = new FViewport(static_cast<EViewScreenLocation>(viewportIndex));
-    ResizeViewport(GEngineLoop.graphicDevice.SwapchainDesc);
+    ResizeViewport(FEngineLoop::graphicDevice.SwapchainDesc);
     ViewportIndex = viewportIndex;
 }
 
@@ -45,9 +49,9 @@ void FEditorViewportClient::Tick(float DeltaTime)
 
 void FEditorViewportClient::Release()
 {
-    if (Viewport)
-        delete Viewport;
- 
+    delete Viewport;
+    Viewport = nullptr;
+
 }
 
 
@@ -140,7 +144,7 @@ void FEditorViewportClient::ResizeViewport(const DXGI_SWAP_CHAIN_DESC& swapchain
     else {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
     }
-    AspectRatio = GEngineLoop.GetAspectRatio(GEngineLoop.graphicDevice.SwapChain);
+    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::graphicDevice.SwapChain);
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
@@ -152,11 +156,11 @@ void FEditorViewportClient::ResizeViewport(FRect Top, FRect Bottom, FRect Left, 
     else {
         UE_LOG(LogLevel::Error, "Viewport is nullptr");
     }
-    AspectRatio = GEngineLoop.GetAspectRatio(GEngineLoop.graphicDevice.SwapChain);
+    AspectRatio = GEngineLoop.GetAspectRatio(FEngineLoop::graphicDevice.SwapChain);
     UpdateProjectionMatrix();
     UpdateViewMatrix();
 }
-bool FEditorViewportClient::IsSelected(POINT point)
+bool FEditorViewportClient::IsSelected(POINT point) const
 {
     float TopLeftX = Viewport->GetViewport().TopLeftX;
     float TopLeftY = Viewport->GetViewport().TopLeftY;
@@ -170,7 +174,7 @@ bool FEditorViewportClient::IsSelected(POINT point)
     }
     return false;
 }
-D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport()
+D3D11_VIEWPORT& FEditorViewportClient::GetD3DViewport() const
 {
     return Viewport->GetViewport();
 }
@@ -222,20 +226,16 @@ void FEditorViewportClient::CameraRotateYaw(float _Value)
 void FEditorViewportClient::CameraRotatePitch(float _Value)
 {
     FVector curCameraRot = ViewTransformPerspective.GetRotation();
-    curCameraRot.Y += _Value;
-    if (curCameraRot.Y <= -89.0f)
-        curCameraRot.Y = -89.0f;
-    if (curCameraRot.Y >= 89.0f)
-        curCameraRot.Y = 89.0f;
+    curCameraRot.Y = FMath::Clamp(curCameraRot.Y + _Value, -89.f, 89.f);
     ViewTransformPerspective.SetRotation(curCameraRot);
 }
 
-void FEditorViewportClient::PivotMoveRight(float _Value)
+void FEditorViewportClient::PivotMoveRight(float _Value) const
 {
     Pivot = Pivot + ViewTransformOrthographic.GetRightVector() * _Value * -0.05f;
 }
 
-void FEditorViewportClient::PivotMoveUp(float _Value)
+void FEditorViewportClient::PivotMoveUp(float _Value) const
 {
     Pivot = Pivot + ViewTransformOrthographic.GetUpVector() * _Value * 0.05f;
 }
@@ -266,7 +266,7 @@ void FEditorViewportClient::UpdateProjectionMatrix()
 {
     if (IsPerspective()) {
         Projection = JungleMath::CreateProjectionMatrix(
-            ViewFOV * (3.141592f / 180.0f),
+            ViewFOV * (PI / 180.0f),
             GetViewport()->GetViewport().Width/ GetViewport()->GetViewport().Height,
             nearPlane,
             farPlane
@@ -367,10 +367,7 @@ void FEditorViewportClient::UpdateOrthoCameraLoc()
 
 void FEditorViewportClient::SetOthoSize(float _Value)
 {
-    orthoSize += _Value;
-    if (orthoSize <= 0.1f)
-        orthoSize = 0.1f;
-    
+    orthoSize = std::max(orthoSize + _Value, 0.1f);
 }
 
 void FEditorViewportClient::LoadConfig(const TMap<FString, FString>& config)
@@ -389,7 +386,7 @@ void FEditorViewportClient::LoadConfig(const TMap<FString, FString>& config)
     ViewMode = static_cast<EViewModeIndex>(GetValueFromConfig(config, "ViewMode" + ViewportNum, 0));
     ViewportType = static_cast<ELevelViewportType>(GetValueFromConfig(config, "ViewportType" + ViewportNum, 3));
 }
-void FEditorViewportClient::SaveConfig(TMap<FString, FString>& config)
+void FEditorViewportClient::SaveConfig(TMap<FString, FString>& config) const
 {
     FString ViewportNum = std::to_string(ViewportIndex);
     config["CameraSpeedSetting"+ ViewportNum] = std::to_string(CameraSpeedSetting);
@@ -402,10 +399,10 @@ void FEditorViewportClient::SaveConfig(TMap<FString, FString>& config)
     config["PerspectiveCameraRotY" + ViewportNum] = std::to_string(ViewTransformPerspective.GetRotation().Y);
     config["PerspectiveCameraRotZ" + ViewportNum] = std::to_string(ViewTransformPerspective.GetRotation().Z);
     config["ShowFlag"+ ViewportNum] = std::to_string(ShowFlag);
-    config["ViewMode" + ViewportNum] = std::to_string(int32(ViewMode));
-    config["ViewportType" + ViewportNum] = std::to_string(int32(ViewportType));
+    config["ViewMode" + ViewportNum] = std::to_string(ViewMode);
+    config["ViewportType" + ViewportNum] = std::to_string(ViewportType);
 }
-TMap<FString, FString> FEditorViewportClient::ReadIniFile(const FString& filePath)
+TMap<FString, FString> FEditorViewportClient::ReadIniFile(const FString& filePath) const
 {
     TMap<FString, FString> config;
     std::ifstream file(*filePath);
@@ -422,7 +419,7 @@ TMap<FString, FString> FEditorViewportClient::ReadIniFile(const FString& filePat
     return config;
 }
 
-void FEditorViewportClient::WriteIniFile(const FString& filePath, const TMap<FString, FString>& config)
+void FEditorViewportClient::WriteIniFile(const FString& filePath, const TMap<FString, FString>& config) const
 {
     std::ofstream file(*filePath);
     for (const auto& pair : config) {
@@ -440,31 +437,27 @@ void FEditorViewportClient::SetCameraSpeedScalar(float value)
 }
 
 
-FVector FViewportCameraTransform::GetForwardVector()
+FVector FViewportCameraTransform::GetForwardVector() const
 {
     FVector Forward = FVector(1.f, 0.f, 0.0f);
     Forward = JungleMath::FVectorRotate(Forward, ViewRotation);
     return Forward;
 }
-FVector FViewportCameraTransform::GetRightVector()
+FVector FViewportCameraTransform::GetRightVector() const
 {
     FVector Right = FVector(0.f, 1.f, 0.0f);
 	Right = JungleMath::FVectorRotate(Right, ViewRotation);
 	return Right;
 }
 
-FVector FViewportCameraTransform::GetUpVector()
+FVector FViewportCameraTransform::GetUpVector() const
 {
     FVector Up = FVector(0.f, 0.f, 1.0f);
     Up = JungleMath::FVectorRotate(Up, ViewRotation);
     return Up;
 }
 
-FViewportCameraTransform::FViewportCameraTransform()
-{
-}
-
-FFrustum FEditorViewportClient::CreateFrustumFromCamera()
+FFrustum FEditorViewportClient::CreateFrustumFromCamera() const
 {
     FFrustum Frustum;
     auto& Camera = ViewTransformPerspective;
