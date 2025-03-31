@@ -3,6 +3,13 @@
 #include "Editor/UnrealEd/PrimitiveBatch.h"
 #include "Runtime/Core/Math/JungleMath.h"
 
+// 거리 계산 함수 (카메라 위치와 노드 중심점 거리)
+inline float CalculateDistance(const FVector& a, const FVector& b) {
+    return sqrt((a.X - b.X) * (a.X - b.X) +
+        (a.Y - b.Y) * (a.Y - b.Y) +
+        (a.Z - b.Z) * (a.Z - b.Z));
+}
+
 #pragma region Query Frustum Intersection
 void OctreeNode::QueryFrustum(const FFrustum& Frustum, TArray<UPrimitiveComponent*>& OutComponents)
 {
@@ -461,4 +468,79 @@ void OctreeSystem::UpdateComponentPosition(UPrimitiveComponent* Comp)
 
     // 컴포넌트를 다시 삽입
     AddComponent(Comp);
+}
+
+
+// 거리 기반 Culling: 중복 제거 없이
+void OctreeNode::QueryDistanceCulling(const FVector& CameraPos, float MaxDistance, TArray<UPrimitiveComponent*>& OutComponents)
+{
+    // 노드 중심 계산
+    FVector Center = (Bounds.min + Bounds.max) * 0.5f;
+    float Distance = CalculateDistance(CameraPos, Center);
+
+    // 거리가 임계값을 초과하면 가지치기
+    if (Distance > MaxDistance) {
+        return;
+    }
+
+    // Leaf 노드인 경우 컴포넌트 추가
+    if (Children[0] == nullptr) {
+        for (auto& Comp : Components) {
+            OutComponents.Add(Comp);
+        }
+        return;
+    }
+
+    // 자식 노드가 있으면 재귀적으로 호출
+    for (auto& Child : Children) {
+        if (Child) {
+            Child->QueryDistanceCulling(CameraPos, MaxDistance, OutComponents);
+        }
+    }
+}
+
+// 거리 기반 Culling: 중복 제거
+void OctreeNode::QueryDistanceCullingUnique(const FVector& CameraPos, float MaxDistance, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs)
+{
+    // 노드 중심 계산
+    FVector Center = (Bounds.min + Bounds.max) * 0.5f;
+    float Distance = CalculateDistance(CameraPos, Center);
+
+    // 거리가 임계값을 초과하면 가지치기
+    if (Distance > MaxDistance) {
+        return;
+    }
+
+    // Leaf 노드인 경우 컴포넌트 추가 (중복 제거)
+    if (Children[0] == nullptr) {
+        for (auto& Comp : Components) {
+            uint32 UUID = Comp->GetUUID();
+            if (!UniqueUUIDs.Contains(UUID)) {
+                UniqueUUIDs.Add(UUID);
+                OutComponents.Add(Comp);
+            }
+        }
+        return;
+    }
+
+    // 자식 노드가 있으면 재귀적으로 호출
+    for (auto& Child : Children) {
+        if (Child) {
+            Child->QueryDistanceCullingUnique(CameraPos, MaxDistance, OutComponents, UniqueUUIDs);
+        }
+    }
+}
+
+void OctreeSystem::QueryVisibleNodes(const FVector& CameraPos, float MaxDistance, TArray<UPrimitiveComponent*>& OutComponents)
+{
+    if (Root) {
+        Root->QueryDistanceCulling(CameraPos, MaxDistance, OutComponents);
+    }
+}
+
+void OctreeSystem::QueryVisibleNodesUnique(const FVector& CameraPos, float MaxDistance, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs)
+{
+    if (Root) {
+        Root->QueryDistanceCullingUnique(CameraPos, MaxDistance, OutComponents, UniqueUUIDs);
+    }
 }

@@ -207,6 +207,12 @@ public:
     ID3D11ShaderResourceView* pBBSRV = nullptr;
     ID3D11ShaderResourceView* pConeSRV = nullptr;
     ID3D11ShaderResourceView* pOBBSRV = nullptr;
+
+    ID3D11Texture2D* depthTexture = nullptr;
+    ID3D11DepthStencilView* depthStencilView = nullptr;
+    ID3D11ShaderResourceView* depthSRV = nullptr;
+    
+    void CreateDepthBuffer(ID3D11Device* device, int width, int height);
     
 public:
     TSet<UPrimitiveComponent*>& GetVisibleObjs();
