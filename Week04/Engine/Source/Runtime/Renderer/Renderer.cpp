@@ -1,5 +1,8 @@
 #include "Renderer.h"
 #include <d3dcompiler.h>
+#include <mutex>
+#include <thread>
+#include <utility>
 
 #include "World.h"
 #include "Actors/Player.h"
@@ -83,19 +86,24 @@ void FRenderer::ReleaseShader()
 
 void FRenderer::PrepareShader() const
 {
-    Graphics->DeviceContext->VSSetShader(VertexShader, nullptr, 0);
-    Graphics->DeviceContext->PSSetShader(PixelShader, nullptr, 0);
-    Graphics->DeviceContext->IASetInputLayout(InputLayout);
+    PrepareShader(Graphics->DeviceContext);
+}
+
+void FRenderer::PrepareShader(ID3D11DeviceContext* Context) const
+{
+    Context->VSSetShader(VertexShader, nullptr, 0);
+    Context->PSSetShader(PixelShader, nullptr, 0);
+    Context->IASetInputLayout(InputLayout);
 
     if (ConstantBuffer)
     {
-        Graphics->DeviceContext->VSSetConstantBuffers(0, 1, &ConstantBuffer);
-        Graphics->DeviceContext->PSSetConstantBuffers(0, 1, &ConstantBuffer);
-        Graphics->DeviceContext->PSSetConstantBuffers(1, 1, &MaterialConstantBuffer);
-        Graphics->DeviceContext->PSSetConstantBuffers(2, 1, &LightingBuffer);
-        Graphics->DeviceContext->PSSetConstantBuffers(3, 1, &FlagBuffer);
-        Graphics->DeviceContext->PSSetConstantBuffers(4, 1, &SubMeshConstantBuffer);
-        Graphics->DeviceContext->PSSetConstantBuffers(5, 1, &TextureConstantBufer);
+        Context->VSSetConstantBuffers(0, 1, &ConstantBuffer);
+        Context->PSSetConstantBuffers(0, 1, &ConstantBuffer);
+        Context->PSSetConstantBuffers(1, 1, &MaterialConstantBuffer);
+        Context->PSSetConstantBuffers(2, 1, &LightingBuffer);
+        Context->PSSetConstantBuffers(3, 1, &FlagBuffer);
+        Context->PSSetConstantBuffers(4, 1, &SubMeshConstantBuffer);
+        Context->PSSetConstantBuffers(5, 1, &TextureConstantBufer);
     }
 }
 
@@ -215,67 +223,152 @@ void FRenderer::RenderPrimitive(
 
 void FRenderer::RenderPrimitive(const MaterialSubsetRenderData& SubsetRenderData) const
 {
+    std::mutex Mutex;
+    TArray<std::thread> Threads;
+    TArray<ID3D11CommandList*> CommandLists;
+
     for (const auto& [Material, RenderDataArray] : SubsetRenderData)
     {
-        UpdateMaterial(Material->GetMaterialInfo());
-
-        std::shared_ptr<FStaticMeshRenderInfo> CurrentMesh = nullptr;
-        for (const FSubsetRenderInfo& SubsetInfo : RenderDataArray)
-        {
-            const auto& StaticMeshInfo = SubsetInfo.StaticMeshInfo;
-
-            // 기존과 다른 Mesh일 경우, 버퍼 재설정
-            if (CurrentMesh != StaticMeshInfo)
+        Threads.Emplace(
+            [
+                &Material = std::as_const(Material),
+                &RenderDataArray = std::as_const(RenderDataArray),
+                &Mutex, &CommandLists, this
+            ]
             {
-                CurrentMesh = StaticMeshInfo;
+                ID3D11DeviceContext* DeferredContext;
+                Graphics->Device->CreateDeferredContext(FALSE, &DeferredContext);
 
-                uint32 Offset = 0;
-                Graphics->DeviceContext->IASetVertexBuffers(0, 1, &StaticMeshInfo->VertexBuffer, &Stride, &Offset);
-                if (StaticMeshInfo->IndexBuffer)
+                // Deferred Context 상태 설정
+                ID3D11RenderTargetView* renderTargetView = Graphics->FrameBufferRTV;
+                ID3D11DepthStencilView* depthStencilView = Graphics->DepthStencilView;
+                
+                DeferredContext->OMSetRenderTargets(1, &renderTargetView, depthStencilView);
+                
+                D3D11_VIEWPORT viewport;
+                viewport.Width = Graphics->screenWidth;
+                viewport.Height = Graphics->screenHeight;
+                viewport.MinDepth = 0.0f;
+                viewport.MaxDepth = 1.0f;
+                viewport.TopLeftX = 0;
+                viewport.TopLeftY = 0;
+                
+                DeferredContext->RSSetViewports(1, &viewport);
+
+                D3D11_BUFFER_DESC Desc{};
+                Desc.ByteWidth = (sizeof(FConstants) + 15) & ~15;
+                Desc.Usage = D3D11_USAGE_DYNAMIC;
+                Desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+                Desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+                ID3D11Buffer* ConstantBuf;
+                Graphics->Device->CreateBuffer(&Desc, nullptr, &ConstantBuf);
+
+                DeferredContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+                DeferredContext->VSSetShader(VertexShader, nullptr, 0);
+                DeferredContext->PSSetShader(PixelShader, nullptr, 0);
+                DeferredContext->IASetInputLayout(InputLayout);
+                
+                DeferredContext->VSSetConstantBuffers(0, 1, &ConstantBuf);
+                DeferredContext->PSSetConstantBuffers(0, 1, &ConstantBuf);
+                // DeferredContext->PSSetConstantBuffers(1, 1, &MaterialConstantBuffer);
+                // DeferredContext->PSSetConstantBuffers(2, 1, &LightingBuffer);
+                // DeferredContext->PSSetConstantBuffers(3, 1, &FlagBuffer);
+                // DeferredContext->PSSetConstantBuffers(4, 1, &SubMeshConstantBuffer);
+                // DeferredContext->PSSetConstantBuffers(5, 1, &TextureConstantBufer);
+
+                UpdateMaterial(Material->GetMaterialInfo(), DeferredContext);
+
+                std::shared_ptr<FStaticMeshRenderInfo> CurrentMesh = nullptr;
+                for (const FSubsetRenderInfo& SubsetInfo : RenderDataArray)
                 {
-                    Graphics->DeviceContext->IASetIndexBuffer(StaticMeshInfo->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-                }
+                    const auto& StaticMeshInfo = SubsetInfo.StaticMeshInfo;
 
-                UpdateConstant(
-                    StaticMeshInfo->MVP,
-                    StaticMeshInfo->NormalMatrix,
-                    StaticMeshInfo->UUIDColor,
-                    StaticMeshInfo->bIsSelected
-                );
+                    // 기존과 다른 Mesh일 경우, 버퍼 재설정
+                    if (CurrentMesh != StaticMeshInfo)
+                    {
+                        CurrentMesh = StaticMeshInfo;
 
-                /**
-                 * SubsetRenderData를 설정할 때, 각 컴포넌트의 Mesh->Subset을 순회하며 배열에 넣기 때문에
-                 * 한번 Mesh가 정해지면 다시 정해질 때 까지 같은 Mesh에 속한 Subset인것을 알 수 있음
-                 * 따라서 Mesh가 바뀔 때 1번만 렌더
-                 */
-                const auto& ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
-                if (ActiveViewport->GetShowFlag() & EEngineShowFlags::SF_AABB)
-                {
-                    UPrimitiveBatch::GetInstance().RenderAABB(
-                        StaticMeshInfo->StaticMeshComp->GetBoundingBox(),
-                        StaticMeshInfo->StaticMeshComp->GetWorldLocation(),
-                        StaticMeshInfo->ModelMatrix
+                        uint32 Offset = 0;
+                        DeferredContext->IASetVertexBuffers(0, 1, &StaticMeshInfo->VertexBuffer, &Stride, &Offset);
+                        if (StaticMeshInfo->IndexBuffer)
+                        {
+                            DeferredContext->IASetIndexBuffer(StaticMeshInfo->IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+                        }
+
+                        // UpdateConstant(
+                        //     StaticMeshInfo->MVP,
+                        //     StaticMeshInfo->NormalMatrix,
+                        //     StaticMeshInfo->UUIDColor,
+                        //     StaticMeshInfo->bIsSelected,
+                        //     DeferredContext
+                        // );
+
+                        D3D11_MAPPED_SUBRESOURCE ConstantBufferMSR;
+                        DeferredContext->Map(ConstantBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &ConstantBufferMSR);
+                        {
+                            FConstants* constants = static_cast<FConstants*>(ConstantBufferMSR.pData);
+                            constants->MVP = StaticMeshInfo->MVP;
+                            constants->ModelMatrixInverseTranspose = StaticMeshInfo->NormalMatrix;
+                            constants->UUIDColor = StaticMeshInfo->UUIDColor;
+                            constants->IsSelected = StaticMeshInfo->bIsSelected;
+                        }
+                        DeferredContext->Unmap(ConstantBuf, 0);
+
+                        /**
+                         * SubsetRenderData를 설정할 때, 각 컴포넌트의 Mesh->Subset을 순회하며 배열에 넣기 때문에
+                         * 한번 Mesh가 정해지면 다시 정해질 때 까지 같은 Mesh에 속한 Subset인것을 알 수 있음
+                         * 따라서 Mesh가 바뀔 때 1번만 렌더
+                         */
+                        // const auto& ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+                        // if (ActiveViewport->GetShowFlag() & EEngineShowFlags::SF_AABB)
+                        // {
+                        //     UPrimitiveBatch::GetInstance().RenderAABB(
+                        //         StaticMeshInfo->StaticMeshComp->GetBoundingBox(),
+                        //         StaticMeshInfo->StaticMeshComp->GetWorldLocation(),
+                        //         StaticMeshInfo->ModelMatrix
+                        //     );
+                        // }
+                    }
+
+                    // bIsSubsetSelected이 true일때만 1번 바꿔주고, false일때는 Update안함
+                    if (SubsetInfo.bIsSubsetSelected)
+                    {
+                        UpdateSubMeshConstant(true, DeferredContext);
+                    }
+
+                    DeferredContext->DrawIndexed(
+                        SubsetInfo.IndexCount,
+                        SubsetInfo.StartIndex,
+                        SubsetInfo.BaseVertexLocation
                     );
+
+                    if (SubsetInfo.bIsSubsetSelected)
+                    {
+                        UpdateSubMeshConstant(false, DeferredContext);
+                    }
                 }
-            }
 
-            // bIsSubsetSelected이 true일때만 1번 바꿔주고, false일때는 Update안함
-            if (SubsetInfo.bIsSubsetSelected)
-            {
-                UpdateSubMeshConstant(true);
+                ID3D11CommandList* CommandList;
+                DeferredContext->FinishCommandList(FALSE, &CommandList);
+                {
+                    std::lock_guard _{Mutex};
+                    CommandLists.Emplace(CommandList);
+                }
+                DeferredContext->Release();
             }
+        );
+    }
 
-            Graphics->DeviceContext->DrawIndexed(
-                SubsetInfo.IndexCount,
-                SubsetInfo.StartIndex,
-                SubsetInfo.BaseVertexLocation
-            );
+    for (std::thread& Thread : Threads)
+    {
+        Thread.join();
+    }
 
-            if (SubsetInfo.bIsSubsetSelected)
-            {
-                UpdateSubMeshConstant(false);
-            }
-        }
+    for (ID3D11CommandList* CommandList : CommandLists)
+    {
+        Graphics->DeviceContext->ExecuteCommandList(CommandList, TRUE);
+        CommandList->Release();
     }
 }
 
@@ -470,11 +563,18 @@ void FRenderer::UpdateLightBuffer() const
 
 void FRenderer::UpdateConstant(const FMatrix& MVP, const FMatrix& NormalMatrix, FVector4 UUIDColor, bool IsSelected) const
 {
+    UpdateConstant(MVP, NormalMatrix, UUIDColor, IsSelected, Graphics->DeviceContext);
+}
+
+void FRenderer::UpdateConstant(
+    const FMatrix& MVP, const FMatrix& NormalMatrix, FVector4 UUIDColor, bool IsSelected, ID3D11DeviceContext* Context
+) const
+{
     if (ConstantBuffer)
     {
         D3D11_MAPPED_SUBRESOURCE ConstantBufferMSR; // GPU�� �޸� �ּ� ����
 
-        Graphics->DeviceContext->Map(ConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ConstantBufferMSR); // update constant buffer every frame
+        Context->Map(ConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ConstantBufferMSR); // update constant buffer every frame
         {
             FConstants* constants = static_cast<FConstants*>(ConstantBufferMSR.pData);
             constants->MVP = MVP;
@@ -482,17 +582,22 @@ void FRenderer::UpdateConstant(const FMatrix& MVP, const FMatrix& NormalMatrix, 
             constants->UUIDColor = UUIDColor;
             constants->IsSelected = IsSelected;
         }
-        Graphics->DeviceContext->Unmap(ConstantBuffer, 0); // GPU�� �ٽ� ��밡���ϰ� �����
+        Context->Unmap(ConstantBuffer, 0); // GPU�� �ٽ� ��밡���ϰ� �����
     }
 }
 
 void FRenderer::UpdateMaterial(const FObjMaterialInfo& MaterialInfo) const
 {
+    UpdateMaterial(MaterialInfo, Graphics->DeviceContext);
+}
+
+void FRenderer::UpdateMaterial(const FObjMaterialInfo& MaterialInfo, ID3D11DeviceContext* Context) const
+{
     if (MaterialConstantBuffer)
     {
         D3D11_MAPPED_SUBRESOURCE ConstantBufferMSR; // GPU�� �޸� �ּ� ����
 
-        Graphics->DeviceContext->Map(MaterialConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ConstantBufferMSR); // update constant buffer every frame
+        Context->Map(MaterialConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &ConstantBufferMSR); // update constant buffer every frame
         {
             FMaterialConstants* constants = static_cast<FMaterialConstants*>(ConstantBufferMSR.pData);
             constants->DiffuseColor = MaterialInfo.Diffuse;
@@ -503,22 +608,22 @@ void FRenderer::UpdateMaterial(const FObjMaterialInfo& MaterialInfo) const
             constants->SpecularScalar = MaterialInfo.SpecularScalar;
             constants->EmmisiveColor = MaterialInfo.Emissive;
         }
-        Graphics->DeviceContext->Unmap(MaterialConstantBuffer, 0); // GPU�� �ٽ� ��밡���ϰ� �����
+        Context->Unmap(MaterialConstantBuffer, 0); // GPU�� �ٽ� ��밡���ϰ� �����
     }
 
     if (MaterialInfo.bHasTexture == true)
     {
         std::shared_ptr<FTexture> texture = FEngineLoop::resourceMgr.GetTexture(MaterialInfo.DiffuseTexturePath);
-        Graphics->DeviceContext->PSSetShaderResources(0, 1, &texture->TextureSRV);
-        Graphics->DeviceContext->PSSetSamplers(0, 1, &texture->SamplerState);
+        Context->PSSetShaderResources(0, 1, &texture->TextureSRV);
+        Context->PSSetSamplers(0, 1, &texture->SamplerState);
     }
     else
     {
         ID3D11ShaderResourceView* nullSRV[1] = {nullptr};
         ID3D11SamplerState* nullSampler[1] = {nullptr};
 
-        Graphics->DeviceContext->PSSetShaderResources(0, 1, nullSRV);
-        Graphics->DeviceContext->PSSetSamplers(0, 1, nullSampler);
+        Context->PSSetShaderResources(0, 1, nullSRV);
+        Context->PSSetSamplers(0, 1, nullSampler);
     }
 }
 
@@ -538,23 +643,29 @@ void FRenderer::UpdateLitUnlitConstant(int isLit) const
 
 void FRenderer::UpdateSubMeshConstant(bool isSelected) const
 {
+    UpdateSubMeshConstant(isSelected, Graphics->DeviceContext);
+}
+
+void FRenderer::UpdateSubMeshConstant(bool isSelected, ID3D11DeviceContext* Context) const
+{
     if (SubMeshConstantBuffer) {
         D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU �� �޸� �ּ� ����
-        Graphics->DeviceContext->Map(SubMeshConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR);
-        FSubMeshConstants* constants = (FSubMeshConstants*)constantbufferMSR.pData; //GPU �޸� ���� ����
+        Context->Map(SubMeshConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR);
+        FSubMeshConstants* constants = static_cast<FSubMeshConstants*>(constantbufferMSR.pData); //GPU �޸� ���� ����
         {
             constants->isSelectedSubMesh = isSelected;
         }
-        Graphics->DeviceContext->Unmap(SubMeshConstantBuffer, 0);
+        Context->Unmap(SubMeshConstantBuffer, 0);
     }
 }
+
 
 void FRenderer::UpdateTextureConstant(float UOffset, float VOffset) const
 {
     if (TextureConstantBufer) {
         D3D11_MAPPED_SUBRESOURCE constantbufferMSR; // GPU �� �޸� �ּ� ����
         Graphics->DeviceContext->Map(TextureConstantBufer, 0, D3D11_MAP_WRITE_DISCARD, 0, &constantbufferMSR);
-        FTextureConstants* constants = (FTextureConstants*)constantbufferMSR.pData; //GPU �޸� ���� ����
+        FTextureConstants* constants = static_cast<FTextureConstants*>(constantbufferMSR.pData); //GPU �޸� ���� ����
         {
             constants->UOffset = UOffset;
             constants->VOffset = VOffset;
@@ -1039,8 +1150,6 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
 
 void FRenderer::RenderStaticMeshes(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
 {
-    PrepareShader();
-
     MaterialSubsetRenderData SubsetRenderData;
     for (UStaticMeshComponent* StaticMeshComp : StaticMeshObjs)
     {

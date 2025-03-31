@@ -79,6 +79,7 @@ public:
     void Initialize(FGraphicsDevice* graphics);
 
     void PrepareShader() const;
+    void PrepareShader(ID3D11DeviceContext* Context) const;
 
     //Render
     void RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices) const;
@@ -122,9 +123,12 @@ public:
     // update
     void UpdateLightBuffer() const;
     void UpdateConstant(const FMatrix& MVP, const FMatrix& NormalMatrix, FVector4 UUIDColor, bool IsSelected) const;
+    void UpdateConstant(const FMatrix& MVP, const FMatrix& NormalMatrix, FVector4 UUIDColor, bool IsSelected, ID3D11DeviceContext* Context) const;
     void UpdateMaterial(const FObjMaterialInfo& MaterialInfo) const;
+    void UpdateMaterial(const FObjMaterialInfo& MaterialInfo, ID3D11DeviceContext* Context) const;
     void UpdateLitUnlitConstant(int isLit) const;
     void UpdateSubMeshConstant(bool isSelected) const;
+    void UpdateSubMeshConstant(bool isSelected, ID3D11DeviceContext* Context) const;
     void UpdateTextureConstant(float UOffset, float VOffset) const;
 
     //텍스쳐용 기능 추가
