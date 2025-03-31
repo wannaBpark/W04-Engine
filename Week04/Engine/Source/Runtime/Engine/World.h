@@ -54,7 +54,6 @@ private:
     AActor* SelectedActor = nullptr;
 
     USceneComponent* pickingGizmo = nullptr;
-    UCameraComponent* camera = nullptr;
     AEditorPlayer* EditorPlayer = nullptr;
     OctreeSystem* Octree;
     KDTreeSystem* KDTree;
@@ -66,7 +65,6 @@ public:
     const TSet<AActor*>& GetActors() const { return ActorsArray; }
 
     UTransformGizmo* LocalGizmo = nullptr;
-    UCameraComponent* GetCamera() const { return camera; }
     AEditorPlayer* GetEditorPlayer() const { return EditorPlayer; }
 
 
