@@ -233,7 +233,7 @@ public:
     ID3D11Texture2D* depthTexture = nullptr;
     ID3D11DepthStencilView* depthStencilView = nullptr;
     ID3D11ShaderResourceView* depthSRV = nullptr;
-    
+
     void CreateDepthBuffer(ID3D11Device* device, int width, int height);
     
     /*FMatrix prevVP;
