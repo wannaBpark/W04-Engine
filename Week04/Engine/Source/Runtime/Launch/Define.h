@@ -25,6 +25,8 @@ struct FVertexSimple
     float nx, ny, nz;
     float u=0, v=0;
     uint32 MaterialIndex;
+    uint32 ObjectID;
+
 };
 
 // Material Subset

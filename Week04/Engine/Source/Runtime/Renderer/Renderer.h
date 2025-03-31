@@ -52,6 +52,24 @@ struct FSubsetRenderInfo
 using MaterialSubsetRenderData = TMap<UMaterial*, TArray<FSubsetRenderInfo>>;
 //~ Material Sort 관련 구조체
 
+struct FObjectData
+{
+    FMatrix VP;
+    FMatrix MInverseTranspose;
+    FVector4 UUID;
+    uint32 isSelected;
+    uint32 objectID;
+};
+struct FRenderBatch {
+    ID3D11Buffer* VertexBuffer = nullptr;
+    ID3D11Buffer* IndexBuffer = nullptr;
+    UINT IndexCount = 0;
+    UINT VertexOffset = 0;
+
+    TArray<OBJ::FStaticMeshRenderData*> MeshDatas;
+    TArray<FObjectData> ObjectDatas;
+};
+
 
 class FRenderer
 {
@@ -68,6 +86,9 @@ public:
     ID3D11Buffer* MaterialConstantBuffer = nullptr;
     ID3D11Buffer* SubMeshConstantBuffer = nullptr;
     ID3D11Buffer* TextureConstantBufer = nullptr;
+    ID3D11Buffer* ObjectDataStructuredBuffer = nullptr;
+
+    ID3D11SamplerState* GLSamplerState = nullptr;
 
     FLighting lightingData;
 
@@ -191,11 +212,16 @@ public:
     void RenderBillboards(UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
 
 private:
+    void MaterialSort(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport, MaterialSubsetRenderData& OutMaterial);
+
+private:
     TArray<UStaticMeshComponent*> StaticMeshObjs;
     TArray<UGizmoBaseComponent*> GizmoObjs;
     TArray<UBillboardComponent*> BillboardObjs;
     TArray<ULightComponentBase*> LightObjs;
 
+public:
+    TArray<UStaticMeshComponent*> GetStaticMeshObjs() const;
 public:
     ID3D11VertexShader* VertexLineShader = nullptr;
     ID3D11PixelShader* PixelLineShader = nullptr;
@@ -204,4 +230,20 @@ public:
     ID3D11ShaderResourceView* pBBSRV = nullptr;
     ID3D11ShaderResourceView* pConeSRV = nullptr;
     ID3D11ShaderResourceView* pOBBSRV = nullptr;
+
+public:
+    ID3D11VertexShader* StaticMeshBatchVS = nullptr;
+    ID3D11PixelShader* StaticMeshBatchPS = nullptr;
+    ID3D11InputLayout* StaticMeshBatchInputLayout = nullptr;
+
+    ID3D11Buffer* ObjectDataBuffer = nullptr;
+    ID3D11ShaderResourceView* ObjectDataSRV = nullptr;
+
+    void CreateStaticMeshBatchShader();
+    void CreateObjectDataStructuredBuffer(const TArray<FObjectData>& InData);
+    void UpdateObjectDataStructuredBuffer(const TArray<FObjectData>& InData);
+    void PrepareStaticMeshBatchShader();
+    void RenderStaticMeshBatch(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
+    TArray<FRenderBatch> MakeBatchVertex();
+    void MakeBatchVertexSorting(const MaterialSubsetRenderData& SubsetRenderData, TMap<UMaterial*, TArray<FRenderBatch>>& OutBatches);
 };

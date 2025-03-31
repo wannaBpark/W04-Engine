@@ -3,7 +3,7 @@ SamplerState Sampler : register(s0);
 
 cbuffer MatrixConstants : register(b0)
 {
-    row_major float4x4 MVP;
+    row_major float4x4 VP;
     row_major float4x4 MInverseTranspose;
     float4 UUID;
     bool isSelected;
@@ -25,7 +25,7 @@ struct FMaterial
 cbuffer MaterialConstants : register(b1)
 {
     FMaterial Material;
-}
+};
 
 //cbuffer LightingConstants : register(b2)
 //{
@@ -37,23 +37,26 @@ cbuffer MaterialConstants : register(b1)
 //    float3 LightPad2; // 16바이트 정렬 맞춤 추가 패딩
 //};
 
+StructuredBuffer<FMaterial> MaterialBuffer : register(t1); // materialIndex 기반 머티리얼 배열
+
+
 cbuffer FlagConstants : register(b3)
 {
     bool IsLit;
     float3 flagPad0;
-}
+};
 
 cbuffer SubMeshConstants : register(b4)
 {
     bool IsSelectedSubMesh;
     float3 SubMeshPad0;
-}
+};
 
 cbuffer TextureConstants : register(b5)
 {
     float2 UVOffset;
     float2 TexturePad0;
-}
+};
 
 struct PS_INPUT
 {
@@ -62,7 +65,7 @@ struct PS_INPUT
     float3 normal : NORMAL; // 정규화된 노멀 벡터
     bool normalFlag : TEXCOORD0; // 노멀 유효성 플래그 (1.0: 유효, 0.0: 무효)
     float2 texcoord : TEXCOORD1;
-    int materialIndex : TEXCOORD2;
+    float4 uuidColor : TEXCOORD2;
 };
 
 struct PS_OUTPUT
@@ -105,7 +108,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
 {
     PS_OUTPUT output;
     
-    output.UUID = UUID;
+    output.UUID = input.uuidColor;
     
     float3 texColor = Textures.Sample(Sampler, input.texcoord + UVOffset);
     float3 color;
