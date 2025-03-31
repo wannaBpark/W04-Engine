@@ -37,6 +37,7 @@ public:
     void Input();
     bool PickGizmo(const FVector& rayOrigin);
     void PickActor(const FVector& pickPosition);
+    void PickActorBVH(const FVector& pickPosition);
     void AddControlMode();
     void AddCoordiMode();
 

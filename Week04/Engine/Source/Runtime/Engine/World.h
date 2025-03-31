@@ -91,7 +91,7 @@ public:
 
     void SetBVHSystem(BVHSystem* InBVH) { BVH = InBVH; }
     BVHSystem* GetBVHSystem() { return BVH; }
-    void SetBVHSystem(const TArray<UPrimitiveComponent*>& Components);
+    void SetBVHSystem(TArray<UPrimitiveComponent*>& Components);
 };
 
 

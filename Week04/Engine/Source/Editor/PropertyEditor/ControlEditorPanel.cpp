@@ -390,11 +390,13 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                         
                         AppleComps.Add(MeshComp);
                     }
+                    World->SetOctreeSystem(AppleComps);
+                    World->SetKDTreeSystem(AppleComps);
+                    World->SetBVHSystem(AppleComps);
                 }
             }
         }
-        World->SetOctreeSystem(AppleComps);
-        World->SetKDTreeSystem(AppleComps);
+        
         ImGui::EndPopup();
     }
 }

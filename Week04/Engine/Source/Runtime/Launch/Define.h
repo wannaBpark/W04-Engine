@@ -278,6 +278,7 @@ struct FBoundingBox
             && (pos.Z >= min.Z) && (pos.Z <= max.Z);
     }
 
+    // B
     FBoundingBox Union(const FBoundingBox& Other) const
     {
         FVector newMin(
@@ -291,6 +292,13 @@ struct FBoundingBox
             (max.Z > Other.max.Z) ? max.Z : Other.max.Z
         );
         return FBoundingBox{newMin, newMax};
+    }
+
+    // 표면적 계산 
+    float SurfaceArea() const
+    {
+        FVector extents = max - min;
+        return 2.0f * (extents.x * extents.y + extents.y * extents.z + extents.z * extents.x);
     }
 };
 
@@ -406,3 +414,4 @@ struct FTextureConstants {
     float pad0;
     float pad1;
 };
+
