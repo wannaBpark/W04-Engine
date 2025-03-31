@@ -216,9 +216,6 @@ void FRenderer::RenderPrimitive(
 
 void FRenderer::RenderPrimitive(const MaterialSubsetRenderData& SubsetRenderData)
 {
-    if (Batches.Num() == 0) {
-        CreateBatches(SubsetRenderData);
-    }
     //TMap<UMaterial*, TArray<FRenderBatch>> Batches;
     TArray<FRenderBatch> RenderBatches;
 
@@ -234,6 +231,11 @@ void FRenderer::RenderPrimitive(const MaterialSubsetRenderData& SubsetRenderData
     const FMatrix viewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
     const FMatrix projMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
     const FMatrix VP = viewMatrix * projMatrix;
+
+    //if (Batches.Num() == 0 || !FMatrix::MatrixEquals(prevVP, VP)) {
+    if (Batches.Num() == 0){
+        CreateBatches(SubsetRenderData);
+    }
 
     UpdateConstant(VP);
     int num = Batches.Num();
@@ -1137,6 +1139,9 @@ void FRenderer::RenderStaticMeshes(const UWorld* World, const std::shared_ptr<FE
     }
 
     
+    CreateStaticBuffer(SubsetRenderData);
+
+
     RenderPrimitive(SubsetRenderData);
 }
 
@@ -1347,6 +1352,145 @@ void FRenderer::CreateBatches(const MaterialSubsetRenderData& SubsetRenderData)
     }
 }
 
+void FRenderer::CreateStaticBuffer(MaterialSubsetRenderData& SubsetRenderData)
+{
+    // uuid 값 기준 정렬.
+    for (auto& [Material, SubsetArray] : SubsetRenderData)
+    {
+        SubsetArray.Sort([](const FSubsetRenderInfo& A, const FSubsetRenderInfo& B)
+        {
+            const FVector4& uuidA = A.StaticMeshInfo->UUIDColor;
+            const FVector4& uuidB = B.StaticMeshInfo->UUIDColor;
+
+            // 원하는 방식으로 정렬 기준 정의 (예: X 우선, 그다음 Y, Z 등)
+            if (uuidA.X != uuidB.X) return uuidA.X < uuidB.X;
+            if (uuidA.Y != uuidB.Y) return uuidA.Y < uuidB.Y;
+            if (uuidA.Z != uuidB.Z) return uuidA.Z < uuidB.Z;
+            return uuidA.W < uuidB.W;
+        });
+    }
+
+    // 인덱스, 정점 버퍼 생성.
+    TArray<FVertexSimple> AccumVertices;
+    TArray<uint32> AccumIndices;
+    uint32 vertexBaseOffset = 0;
+
+    for (const auto& [Material, RenderDataArray] : SubsetRenderData)
+    {
+        for (auto& renderData : RenderDataArray) {
+            UStaticMeshComponent* mesh = renderData.StaticMeshInfo->StaticMeshComp;
+            OBJ::FStaticMeshRenderData* data = mesh->GetStaticMesh()->GetRenderData();
+
+            const auto& vertices = data->Vertices;
+            const auto& indices = data->Indices;
+            
+            // 모델 행렬 계산
+            const FMatrix& modelMatrix = JungleMath::CreateModelMatrix(
+                mesh->GetWorldLocation(),
+                mesh->GetWorldRotation(),
+                mesh->GetWorldScale()
+            );
+
+            if (!data) continue;
+
+            for (auto index : indices)
+                AccumIndices.Add(index + vertexBaseOffset);
+            for (auto const& v : vertices) {
+                FVector localPos(v.x, v.y, v.z);
+                FVector worldPos = modelMatrix.TransformPosition(localPos);
+                FVertexSimple worldV = v;
+                worldV.x = worldPos.X;
+                worldV.y = worldPos.Y;
+                worldV.z = worldPos.Z;
+                // materialindex업데이트
+                // FIXME : isSlected 업데이트
+
+                AccumVertices.Add(worldV);
+            }
+            vertexBaseOffset += vertices.Num();
+        }
+        StaticVertexBuffer[Material] = CreateVertexBuffer(AccumVertices, sizeof(FVertexSimple) * AccumVertices.Num());
+        StaticIndexBuffer[Material] = CreateIndexBuffer(AccumIndices, sizeof(uint32) * AccumIndices.Num());
+        AccumVertices.Empty();
+        AccumIndices.Empty();
+        vertexBaseOffset = 0;
+    }
+}
+
+void FRenderer::RenderSortedStaticMeshes(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport, TMap<UMaterial*, TArray<UPrimitiveComponent*>> CullingPrimitiveComps)
+{
+    PrepareShader();
+    // 바인딩 및 PrepareShader
+    uint32 Offset = 0;
+    
+
+    const FMatrix viewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
+    const FMatrix projMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
+    const FMatrix VP = viewMatrix * projMatrix;
+
+    UpdateConstant(VP);
+
+    int baseOffset = 0;
+    int size = 0;
+    for (auto& [Material, CompArray] : CullingPrimitiveComps) {
+        Graphics->DeviceContext->IASetVertexBuffers(0, 1, &StaticVertexBuffer[Material], &Stride, &Offset);
+        Graphics->DeviceContext->IASetIndexBuffer(StaticIndexBuffer[Material], DXGI_FORMAT_R32_UINT, 0);
+        Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        for (int i = 0; i < CompArray.Num(); i++) {
+            //FIXME IsVisible 실제 값으로 바꾸기
+            /*if (CompArray[i]->IsVisible == false) {
+                Graphics->DeviceContext->DrawIndexed(size, baseOffset, 0);
+            }
+            else {
+                size++;
+            }*/
+        }
+    }
+}
+
+void FRenderer::MaterialSort()
+{
+    for (UStaticMeshComponent* StaticMeshComp : StaticMeshObjs)
+    {
+        const UStaticMesh* StaticMesh = StaticMeshComp->GetStaticMesh();
+        if (!StaticMesh) continue;
+
+        const OBJ::FStaticMeshRenderData* RenderData = StaticMesh->GetRenderData();
+        if (!RenderData) continue;
+
+        // FStaticM
+        // eshRenderInfo 만드는 과정
+        const auto MeshRenderInfo = std::make_shared<FStaticMeshRenderInfo>();
+        {
+            MeshRenderInfo->StaticMeshComp = StaticMeshComp;
+
+            // FIXME : 이 정점과 인덱스 정보 사용하지 않으므로 제거 해도되지 않나?
+            // Mesh의 정점와 인덱스 정보를 설정
+            MeshRenderInfo->VertexBuffer = RenderData->VertexBuffer;
+            MeshRenderInfo->IndexBuffer = RenderData->IndexBuffer;
+        }
+        const TArray<FStaticMaterial*>& Materials = StaticMesh->GetMaterials();
+        const TArray<UMaterial*>& OverrideMaterial = StaticMeshComp->GetOverrideMaterials();
+        for (uint32 Index = 0; const FMaterialSubset & Subset : RenderData->MaterialSubsets)
+        {
+            TArray<FSubsetRenderInfo>& SubsetArrayRef = StaticSubsetRenderData.FindOrAdd(
+                OverrideMaterial[Subset.MaterialIndex]
+                ? OverrideMaterial[Subset.MaterialIndex]
+                : Materials[Subset.MaterialIndex]->Material
+            );
+
+            SubsetArrayRef.Emplace(
+                MeshRenderInfo,                                     // StaticMeshInfo
+                Subset.IndexCount,                                  // IndexCount
+                Subset.IndexStart,                                  // StartIndex
+                0,                                                  // BaseVertexLocation
+                Index == StaticMeshComp->GetSelectedSubMeshIndex()  // bIsSubsetSelected
+            );
+            ++Index;
+        }
+    }
+}
+
 
 void FRenderer::RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
@@ -1355,5 +1499,7 @@ void FRenderer::RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient
         FMatrix Model = JungleMath::CreateModelMatrix(Light->GetWorldLocation(), Light->GetWorldRotation(), {1, 1, 1});
         UPrimitiveBatch::GetInstance().AddCone(Light->GetWorldLocation(), Light->GetRadius(), 15, 140, Light->GetColor(), Model);
         UPrimitiveBatch::GetInstance().RenderOBB(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);
+
+        
     }
 }

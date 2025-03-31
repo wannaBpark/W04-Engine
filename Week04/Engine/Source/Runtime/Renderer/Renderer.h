@@ -229,9 +229,25 @@ public:
     ID3D11ShaderResourceView* pBBSRV = nullptr;
     ID3D11ShaderResourceView* pConeSRV = nullptr;
     ID3D11ShaderResourceView* pOBBSRV = nullptr;
+
+    ID3D11Texture2D* depthTexture = nullptr;
+    ID3D11DepthStencilView* depthStencilView = nullptr;
+    ID3D11ShaderResourceView* depthSRV = nullptr;
     
+    void CreateDepthBuffer(ID3D11Device* device, int width, int height);
+    
+    /*FMatrix prevVP;
+    uint64 prevTimeMS = 0;*/
+
+    TMap<UMaterial*, ID3D11Buffer*> StaticVertexBuffer;
+    TMap<UMaterial*, ID3D11Buffer*> StaticIndexBuffer;
+    MaterialSubsetRenderData StaticSubsetRenderData;
 public:
     TSet<UPrimitiveComponent*>& GetVisibleObjs();
     void SetVisibleObjs(const TSet<UPrimitiveComponent*>& comp);
     void CreateBatches(const MaterialSubsetRenderData& SubsetRenderData);
+
+    void CreateStaticBuffer(MaterialSubsetRenderData& SubsetRenderData);
+    void RenderSortedStaticMeshes(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport, TMap<UMaterial*, TArray<UPrimitiveComponent*>> CullingPrimitiveComps);
+    void MaterialSort();
 };

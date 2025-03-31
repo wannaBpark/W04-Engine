@@ -18,6 +18,8 @@
 
 #include "UserInterface/Console.h"
 
+#include <immintrin.h>
+
 struct FVertexSimple
 {
     float x, y, z;    // Position
@@ -181,6 +183,7 @@ struct FBoundingBox
 	float pad;
 	FVector max; // Maximum extents
 	float pad1;
+
     bool Intersect(const FVector& rayOrigin, const FVector& rayDir, float& outDistance)
     {
         float tmin = -FLT_MAX;
@@ -330,7 +333,7 @@ struct FFrustum
     FPlane Planes[6]; // 6개 평면: Left, Right, Top, Bottom, Near, Far
 
     // AABB와 프러스텀의 교차 여부 검사
-    FORCENOINLINE bool Intersects(const FBoundingBox& Box) const
+    bool Intersects(const FBoundingBox& Box) const
     {
         for (int i = 0; i < 6; ++i)
         {

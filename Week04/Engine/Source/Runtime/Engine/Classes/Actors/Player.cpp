@@ -308,6 +308,7 @@ void AEditorPlayer::PickActorBVH(const FVector& pickPosition)
     // 옥트리 시스템 가져오기
     UWorld* World = GetWorld();
     BVHSystem* BVH = World->GetBVHSystem();
+    OctreeSystem* Octree = World->GetOctreeSystem();
     KDTreeSystem* KDTree = World->GetKDTreeSystem();
     Ray MyRay = GetRayDirection(pickPosition);
 
@@ -318,6 +319,15 @@ void AEditorPlayer::PickActorBVH(const FVector& pickPosition)
     Possible = BVH ? BVH->Root->QueryRayClosestBestFirst(MyRay.Origin, MyRay.Direction) : nullptr;
     //Possible = KDTree->Root->QueryRayClosestBestFirst(MyRay.Origin, MyRay.Direction);
     //Possible = BVH->Root->QueryRayClosestSegmentTree(MyRay.Origin, MyRay.Direction);
+
+    TArray<UPrimitiveComponent*> VisibleComponents;
+    TSet<UPrimitiveComponent*> VisibleSet;
+    TSet<uint32> UUIDs;
+    //Octree->QueryVisibleNodes(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation(), 100.0f, VisibleComponents);
+    //UE_LOG(LogLevel::Display, TEXT("Visible Components: %d"), VisibleComponents.Num());
+    //Octree->Root->QueryOcclusionCulling(GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation(),VisibleSet,UUIDs);
+
+    //UE_LOG(LogLevel::Display, TEXT("Visible Unique Components: %d"), VisibleSet.Num());
 
     //TArray<UPrimitiveComponent*> BVHComps;
     //BVH->Root->QueryRaySorted(MyRay.Origin, MyRay.Direction, BVHComps);
@@ -600,9 +610,12 @@ void AEditorPlayer::UpdateVisibleStaticMeshComponentsWithOctree()
     Renderer->GetVisibleObjs().Empty();
     TSet<UPrimitiveComponent*> FrustumComps;
     TSet<uint32> UniqueUUIDs;
-    Octree->Root->QueryFrustumUnique(Frustum, FrustumComps, UniqueUUIDs);
+    //Octree->Root->QueryFrustumUnique(Frustum, FrustumComps, UniqueUUIDs);
+    Octree->Root->QueryFrustumOcclusionCulling(Frustum, GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation(), FrustumComps, UniqueUUIDs);
     
     Renderer->SetVisibleObjs(FrustumComps);
+    UE_LOG(LogLevel::Display, TEXT("Visible Unique Components: %d"), FrustumComps.Num());
+
 }
 
 void AEditorPlayer::UpdateVisibleStaticMeshComponents() {
@@ -661,3 +674,4 @@ Ray AEditorPlayer::GetRayDirection(const FVector& pickPosition)
 
 
 }
+

@@ -15,9 +15,54 @@
 
 #include <immintrin.h>
 #include <queue>
+#include "Octree.h"
 
 static std::mutex g_resultMutex;
 
+bool IntersectSphereRayOptimized(const FVector& rayOrigin, const FVector& rayDir, const FVector& sphereCenter, float radius, float& outDistance)
+{
+    FVector m = rayOrigin - sphereCenter;
+    float b = FVector::DotProduct(m, rayDir);
+    float c = FVector::DotProduct(m, m) - radius * radius;
+
+    // 비트마스킹을 이용한 조건 검사
+    int mask = ((b > 0) << 1) | (c > 0);
+    if (mask == 3) return false;
+
+    float discr = b * b - c;
+    if (discr < 0) return false;
+
+    outDistance = -b - FMath::Sqrt(discr);
+    if (outDistance < 0) outDistance = 0;
+
+    return true;
+}
+
+inline bool FastIsRayIntersectingSphere(const FVector& Origin, const FVector& Dir, const FVector& Center, float Radius, float& OutDistance)
+{
+    FVector L = Center - Origin;
+    float tca = L.Dot(Dir);
+    float d2 = L.Dot(L) - tca * tca;
+    float radius2 = Radius * Radius;
+
+    // 비트마스킹으로 비교
+    if ((*(uint32_t*)&d2) > (*(uint32_t*)&radius2))
+        return false;
+
+    float thc = sqrt(radius2 - d2);
+    float t0 = tca - thc;
+    float t1 = tca + thc;
+
+    // t0이 더 크면 스왑
+    if (t0 > t1) std::swap(t0, t1);
+
+    // 비트마스킹 사용한 음수 판정
+    if ((*(uint32_t*)&t0) >> 31) t0 = t1;
+    if ((*(uint32_t*)&t0) >> 31) return false;
+
+    OutDistance = t0;
+    return true;
+}
 
 // Helper: 객체의 월드 바운딩박스를 계산
 static FBoundingBox GetWorldBox(UPrimitiveComponent* Comp)
@@ -450,11 +495,12 @@ UPrimitiveComponent* BVHNode::QueryRayClosest(const FVector& Origin, const FVect
     QueryRayClosestInternal(Origin, Dir, closest, minDistance);
     if (closest)
     {
-        UE_LOG(LogLevel::Display, TEXT("Closest intersection distance: %.2f"), minDistance);
+        //UE_LOG(LogLevel::Display, TEXT("Closest intersection distance: %.2f"), minDistance);
         return closest;
     }
     return nullptr;
 }
+
 
 UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, const FVector& Dir)
 {
@@ -479,6 +525,7 @@ UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, co
             continue;
 
         BVHNode* node = current.Node;
+
         // Leaf 노드인 경우, 이 노드에 있는 모든 컴포넌트에 대해 Ray-Sphere 교차 검사 수행
         if (!node->Left && !node->Right)
         {
@@ -486,11 +533,12 @@ UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, co
             {
                 float tInter;
                 FBoundingBox box = GetWorldBox(comp);
-                // AABB를 구로 근사: 구의 중심과 반지름 계산
+                // AABB를 구로 근사 - 중심과 반지름 계산
                 FVector center = (box.min + box.max) * 0.5f;
                 float radius = (box.max - box.min).Length() * 0.5f;
 
-                if (IsRayIntersectingSphere(Origin, normDir, center, radius, tInter))
+                // 비트마스킹 빠른 충돌 검사
+                if (FastIsRayIntersectingSphere(Origin, normDir, center, radius, tInter))
                 {
                     if (tInter < bestT)
                     {
@@ -523,9 +571,8 @@ UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, co
 
     if (bestComp)
     {
-        UE_LOG(LogLevel::Display, TEXT("Closest intersection distance: %.2f"), bestT);
+        //UE_LOG(LogLevel::Display, TEXT("Closest intersection distance: %.2f"), bestT);
         return bestComp;
     }
-    else return nullptr;
+    return nullptr;
 }
-

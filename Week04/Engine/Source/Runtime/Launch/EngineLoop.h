@@ -32,8 +32,6 @@ public:
     static FGraphicsDevice graphicDevice;
     static FRenderer renderer;
     static FResourceMgr resourceMgr;
-    static uint32 TotalAllocationBytes;
-    static uint32 TotalAllocationCount;
 
 
     HWND hWnd;
@@ -44,7 +42,7 @@ private:
     SLevelEditor* LevelEditor;
     UnrealEd* UnrealEditor;
     bool bIsExit = false;
-    const int32 targetFPS = 60;
+    const int32 targetFPS = 60000;
     bool bTestInput = false;
 
 public:

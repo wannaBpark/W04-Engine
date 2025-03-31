@@ -45,4 +45,17 @@ struct alignas(16) FMatrix
         float w = M[0][3] * vector.X + M[1][3] * vector.Y + M[2][3] * vector.Z + M[3][3];
         return w != 0.0f ? FVector{x / w, y / w, z / w} : FVector{x, y, z};
     }
+
+    static bool MatrixEquals(const FMatrix& A, const FMatrix& B, float Tolerance = 1e-4f)
+    {
+        for (int row = 0; row < 4; ++row)
+        {
+            for (int col = 0; col < 4; ++col)
+            {
+                if (fabsf(A.M[row][col] - B.M[row][col]) > Tolerance)
+                    return false;
+            }
+        }
+        return true;
+    }
 };
