@@ -1215,6 +1215,33 @@ void FRenderer::RenderBillboards(UWorld* World, const std::shared_ptr<FEditorVie
     PrepareShader();
 }
 
+void FRenderer::CreateDepthBuffer(ID3D11Device* device, int width, int height)
+{
+    D3D11_TEXTURE2D_DESC depthDesc = {};
+    depthDesc.Width = width;
+    depthDesc.Height = height;
+    depthDesc.MipLevels = 1;
+    depthDesc.ArraySize = 1;
+    depthDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+    depthDesc.SampleDesc.Count = 1;
+    depthDesc.Usage = D3D11_USAGE_DEFAULT;
+    depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+
+    device->CreateTexture2D(&depthDesc, nullptr, &depthTexture);
+
+    D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+    dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+    dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    device->CreateDepthStencilView(depthTexture, &dsvDesc, &depthStencilView);
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = 1;
+    device->CreateShaderResourceView(depthTexture, &srvDesc, &depthSRV);
+
+}
+
 TSet<UPrimitiveComponent*>& FRenderer::GetVisibleObjs()
 {
     return VisibleObjs;

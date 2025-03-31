@@ -18,6 +18,8 @@
 
 #include "UserInterface/Console.h"
 
+#include <immintrin.h>
+
 struct FVertexSimple
 {
     float x, y, z;    // Position
@@ -180,6 +182,7 @@ struct FBoundingBox
 	float pad;
 	FVector max; // Maximum extents
 	float pad1;
+
     bool Intersect(const FVector& rayOrigin, const FVector& rayDir, float& outDistance)
     {
         float tmin = -FLT_MAX;

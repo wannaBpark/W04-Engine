@@ -101,6 +101,7 @@ float4 PaperTexture(float3 originalColor)
     return float4(saturate(finalColor), 1.0);
 }
 
+[earlydepthstencil]
 PS_OUTPUT mainPS(PS_INPUT input)
 {
     PS_OUTPUT output;

@@ -41,6 +41,8 @@ public:
     void UpdateComponent(UPrimitiveComponent* Comp);
     void RemoveComponent(UPrimitiveComponent* Comp);
 
+    void QueryFrustumOcclusionCulling(const FFrustum& Frustum, const FVector& CameraPos, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs);
+
     void QueryFrustum(const FFrustum& Frustum, TArray<UPrimitiveComponent*>& OutComponents);
     void QueryFrustumUnique(const FFrustum& Frustum, TSet<UPrimitiveComponent*>& OutComponents, TSet<uint32>& UniqueUUIDs);
     void CollectComponents(TArray<UPrimitiveComponent*>& OutComponents)
