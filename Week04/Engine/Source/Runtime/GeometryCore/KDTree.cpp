@@ -321,7 +321,7 @@ void KDTreeSystem::UpdateComponentPosition(UPrimitiveComponent* Comp)
 // KDTreeNode::QueryRayClosestBestFirst: Best-First Traversal을 통해 Ray와 가장 가까운 컴포넌트를 반환
 UPrimitiveComponent* KDTreeNode::QueryRayClosestBestFirst(const FVector& Origin, const FVector& Dir)
 {
-    FVector normDir = Dir.Normalize();
+    FVector normDir = Dir.GetSafeNormal();
     std::priority_queue<KDPQEntry, std::vector<KDPQEntry>, KDPQEntryComparator> pq;
     float bestT = std::numeric_limits<float>::max();
     UPrimitiveComponent* bestComp = nullptr;
@@ -351,7 +351,7 @@ UPrimitiveComponent* KDTreeNode::QueryRayClosestBestFirst(const FVector& Origin,
                 FBoundingBox box = GetWorldBox(comp);
                 // AABB를 구로 근사: 중심과 반지름 계산
                 FVector center = (box.min + box.max) * 0.5f;
-                float radius = (box.max - box.min).Magnitude() * 0.5f;
+                float radius = (box.max - box.min).Length() * 0.5f;
 
                 if (KDIsRayIntersectingSphere(Origin, normDir, center, radius, tInter))
                 {

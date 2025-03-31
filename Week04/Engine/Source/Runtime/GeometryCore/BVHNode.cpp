@@ -333,7 +333,7 @@ void BVHNode::QueryRay(const FVector& Origin, const FVector& Dir, TArray<UPrimit
 
             // 구의 중심과 반지름 계산
             FVector center = (box.min + box.max) * 0.5f;
-            float radius = (box.max - box.min).Magnitude() * 0.5f;
+            float radius = (box.max - box.min).Length() * 0.5f;
 
             // Ray-Sphere 교차 검사 함수 사용
             if (IsRayIntersectingSphere(Origin, Dir, center, radius, objDistance))
@@ -420,7 +420,7 @@ void BVHNode::QueryRayClosestInternal(const FVector& Origin, const FVector& Dir,
             FBoundingBox box = GetWorldBox(Comp);
             // 구의 중심과 반지름 계산 (AABB를 사용)
             FVector center = (box.min + box.max) * 0.5f;
-            float radius = (box.max - box.min).Magnitude() * 0.5f;
+            float radius = (box.max - box.min).Length() * 0.5f;
 
             // Ray와 구의 교차 검사: Ray Origin에서의 교차 거리를 계산
             if (IsRayIntersectingSphere(Origin, Dir, center, radius, tIntersection))
@@ -458,7 +458,7 @@ UPrimitiveComponent* BVHNode::QueryRayClosest(const FVector& Origin, const FVect
 
 UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, const FVector& Dir)
 {
-    FVector normDir = Dir.Normalize();
+    FVector normDir = Dir.GetSafeNormal();
 
     std::priority_queue<PQEntry, std::vector<PQEntry>, PQEntryComparator> pq;
     float bestT = FLT_MAX;
@@ -488,7 +488,7 @@ UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, co
                 FBoundingBox box = GetWorldBox(comp);
                 // AABB를 구로 근사: 구의 중심과 반지름 계산
                 FVector center = (box.min + box.max) * 0.5f;
-                float radius = (box.max - box.min).Magnitude() * 0.5f;
+                float radius = (box.max - box.min).Length() * 0.5f;
 
                 if (IsRayIntersectingSphere(Origin, normDir, center, radius, tInter))
                 {

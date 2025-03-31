@@ -298,7 +298,7 @@ struct FBoundingBox
     float SurfaceArea() const
     {
         FVector extents = max - min;
-        return 2.0f * (extents.x * extents.y + extents.y * extents.z + extents.z * extents.x);
+        return 2.0f * (extents.X * extents.Y + extents.Y * extents.Z + extents.Z * extents.X);
     }
 };
 
