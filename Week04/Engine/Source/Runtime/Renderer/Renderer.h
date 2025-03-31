@@ -21,7 +21,7 @@ class UBillboardComponent;
 class UStaticMeshComponent;
 class UGizmoBaseComponent;
 class UPrimitiveComponent;
-class FRenderer 
+class FRenderer
 {
 
 private:
@@ -45,14 +45,14 @@ public:
 
 public:
     void Initialize(FGraphicsDevice* graphics);
-   
+
     void PrepareShader() const;
-    
+
     //Render
     void RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices) const;
     void RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices) const;
     void RenderPrimitive(OBJ::FStaticMeshRenderData* renderData, TArray<FStaticMaterial*> materials, TArray<UMaterial*> overrideMaterial, int selectedSubMeshIndex) const;
-   
+
     void RenderTexturedModelPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices, ID3D11ShaderResourceView* InTextureSRV, ID3D11SamplerState* InSamplerState) const;
     //Release
     void Release();
@@ -66,9 +66,9 @@ public:
 
     void SetVertexShader(const FWString& filename, const FString& funcname, const FString& version);
     void SetPixelShader(const FWString& filename, const FString& funcname, const FString& version);
-    
+
     void ChangeViewMode(EViewModeIndex evi) const;
-    
+
     // CreateBuffer
     void CreateConstantBuffer();
     void CreateLightingBuffer();
@@ -146,8 +146,8 @@ public: // line shader
     void RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
     HRESULT CreateOcclusionResources(UINT occludeeCount, UINT viewportWidth, UINT viewportHeight);
     void RunOcclusionCullingComputeShaderGeneric(const std::vector<OccludeeData>& occludeeData, ID3D11ShaderResourceView* depthSRV, UINT viewportWidth, UINT viewportHeight);
-    void PerformOcclusionCullingForOccludees(const TArray<UPrimitiveComponent*>& occludeeCandidates,
-        ID3D11ShaderResourceView* depthSRV, UINT viewportWidth, UINT viewportHeight, TArray<UPrimitiveComponent*>& OutVisibleComponents);
+    void PerformOcclusionCullingForOccludees(const TArray<UStaticMeshComponent*>& occludeeCandidates,
+        ID3D11ShaderResourceView* depthSRV, UINT viewportWidth, UINT viewportHeight, TArray<UStaticMeshComponent*>& OutVisibleComponents);
     void RenderBillboards(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
 private:
     TArray<UStaticMeshComponent*> StaticMeshObjs;
@@ -165,10 +165,13 @@ public:
     ID3D11ShaderResourceView* pOBBSRV = nullptr;
 
     ID3D11Buffer* occludeeBuffer = nullptr;
+    ID3D11ShaderResourceView* occludeeDataSRV = nullptr;
     ID3D11Buffer* resultBuffer = nullptr;
     ID3D11ShaderResourceView* occludeeSRV = nullptr;
     ID3D11ComputeShader* occlusionCS = nullptr;
     ID3D11Buffer* cbBuffer = nullptr;
+    ID3D11UnorderedAccessView* resultUAV = nullptr;
+    ID3D11SamplerState* BasicSampler = nullptr;
 };
 
 

@@ -5,7 +5,7 @@
 #include "Container/Set.h"
 
 
-#define BVH_SAT true
+#define BVH_SAT false
 #define MULTITHREAD false
 
 class UPrimitiveComponent;

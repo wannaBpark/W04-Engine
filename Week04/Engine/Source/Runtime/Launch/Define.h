@@ -423,10 +423,10 @@ struct OccludeeData
     float radius;
 };
 
-struct CB_OcclusionCulling
-{
-    FMatrix viewProj;      // 카메라의 view * proj 행렬 (row-major)
+struct CB_OcclusionCulling {
+    FMatrix viewProj; // row-major 4x4 행렬
     float viewportWidth;
     float viewportHeight;
-    uint32 occludeeCount;
+    UINT occludeeCount;
+    float pad; // 16바이트 정렬 패딩
 };

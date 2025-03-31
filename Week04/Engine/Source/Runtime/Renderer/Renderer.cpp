@@ -21,6 +21,7 @@
 #include "UObject/UObjectIterator.h"
 #include "Components/SkySphereComponent.h"
 #include "LevelEditor/SLevelEditor.h"
+#include "UnrealClient.h"
 
 #define SAFE_RELEASE(p)       { if (p) { (p)->Release();  (p) = nullptr; } }
 
@@ -961,7 +962,14 @@ void FRenderer::Render(UWorld* World, std::shared_ptr<FEditorViewportClient> Act
 void FRenderer::RenderStaticMeshes(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport)
 {
     PrepareShader();
-    for (UStaticMeshComponent* StaticMeshComp : StaticMeshObjs)
+    TArray<UStaticMeshComponent*> OutVisibleComps;
+    PerformOcclusionCullingForOccludees(StaticMeshObjs, occludeeSRV,
+        ActiveViewport->GetViewport()->GetViewport().Width,
+        ActiveViewport->GetViewport()->GetViewport().Height,
+        OutVisibleComps
+        );
+    UE_LOG(LogLevel::Display, "Out Visible Component Count : %d", OutVisibleComps.Num());
+    for (UStaticMeshComponent* StaticMeshComp : OutVisibleComps)
     {
         FMatrix Model = JungleMath::CreateModelMatrix(
             StaticMeshComp->GetWorldLocation(),
@@ -1124,16 +1132,11 @@ void FRenderer::RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient
         UPrimitiveBatch::GetInstance().RenderOBB(Light->GetBoundingBox(), Light->GetWorldLocation(), Model);
     }
 }
-
 HRESULT FRenderer::CreateOcclusionResources(UINT occludeeCount, UINT viewportWidth, UINT viewportHeight)
 {
     HRESULT hr = S_OK;
     ID3DBlob* csBlob = nullptr;
     ID3DBlob* errorBlob = nullptr;
-
-    // 테스트용 값 (실제 값은 인자로 전달됨)
-    occludeeCount = 10;
-    viewportWidth = viewportHeight = 100;
 
     // Compute Shader 컴파일
     hr = D3DCompileFromFile(L"Shaders/ComputeShader.hlsl", nullptr, nullptr, "CSMain", "cs_5_0", 0, 0, &csBlob, &errorBlob);
@@ -1163,12 +1166,12 @@ HRESULT FRenderer::CreateOcclusionResources(UINT occludeeCount, UINT viewportWid
     if (FAILED(hr))
         return hr;
 
-    // Result Buffer (Structured Buffer) - 사용 DEFAULT, dynamic은 UAV와 호환되지 않음.
+    // Result Buffer (Structured Buffer) - DEFAULT 사용 (UAV와 호환)
     D3D11_BUFFER_DESC resultDesc = {};
-    resultDesc.Usage = D3D11_USAGE_DEFAULT;  // DEFAULT 사용
+    resultDesc.Usage = D3D11_USAGE_DEFAULT;
     resultDesc.ByteWidth = sizeof(int) * occludeeCount;
     resultDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
-    resultDesc.CPUAccessFlags = 0;           // DEFAULT에서는 CPU 접근 불가
+    resultDesc.CPUAccessFlags = 0;
     resultDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
     resultDesc.StructureByteStride = sizeof(int);
     hr = Graphics->Device->CreateBuffer(&resultDesc, nullptr, &resultBuffer);
@@ -1179,11 +1182,75 @@ HRESULT FRenderer::CreateOcclusionResources(UINT occludeeCount, UINT viewportWid
     D3D11_BUFFER_DESC cbDesc = {};
     cbDesc.Usage = D3D11_USAGE_DYNAMIC;
     cbDesc.ByteWidth = sizeof(CB_OcclusionCulling);
+    static_assert((sizeof(CB_OcclusionCulling) % 16) == 0, "CB size must be 16-byte aligned");
     cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     hr = Graphics->Device->CreateBuffer(&cbDesc, nullptr, &cbBuffer);
     if (FAILED(hr))
         return hr;
+
+    D3D11_BUFFER_DESC bufferDesc = {};
+    bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    bufferDesc.ByteWidth = sizeof(OccludeeData) * occludeeCount;
+    bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+    bufferDesc.StructureByteStride = sizeof(OccludeeData);
+    Graphics->Device->CreateBuffer(&bufferDesc, nullptr, &occludeeBuffer);
+
+    // Occludee Buffer SRV 생성 
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_UNKNOWN; // Structured Buffer의 경우 UNKNOWN
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+    srvDesc.Buffer.FirstElement = 0;
+    srvDesc.Buffer.NumElements = occludeeCount;
+    hr = Graphics->Device->CreateShaderResourceView(occludeeBuffer, &srvDesc, &occludeeDataSRV);
+    if (FAILED(hr)) { return hr; }
+#pragma region occludee SRV
+    // Depth Texture 생성 (Texture2D)
+    ID3D11Texture2D* depthTexture;
+    D3D11_TEXTURE2D_DESC texDesc = {};
+    texDesc.Width = viewportWidth;
+    texDesc.Height = viewportHeight;
+    texDesc.MipLevels = 0;  // 자동 생성 (모든 밉맵 레벨)
+    texDesc.ArraySize = 1;
+    texDesc.Format = DXGI_FORMAT_R32_FLOAT; // 깊이 값은 float
+    texDesc.SampleDesc.Count = 1;
+    texDesc.Usage = D3D11_USAGE_DEFAULT;
+    texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE/* | D3D11_BIND_RENDER_TARGET*/;
+    texDesc.CPUAccessFlags = 0;
+    texDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS; // MipMap 자동 생성
+
+    hr = Graphics->Device->CreateTexture2D(&texDesc, nullptr, &depthTexture);
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC hiZSRVDesc = {};
+    hiZSRVDesc.Format = DXGI_FORMAT_R32_FLOAT; // 깊이 값이 float 형식일 경우
+    hiZSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    hiZSRVDesc.Texture2D.MostDetailedMip = 0;
+    hiZSRVDesc.Texture2D.MipLevels = -1; // 모든 밉맵 사용
+    hr = Graphics->Device->CreateShaderResourceView(depthTexture, &hiZSRVDesc, &occludeeSRV);
+    if (FAILED(hr)) { return hr; }
+#pragma endregion
+
+    // Result Buffer UAV 생성 
+    D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+	uavDesc.Format = DXGI_FORMAT_R32_UINT;				// visibility = int
+    uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+    uavDesc.Buffer.FirstElement = 0;
+    uavDesc.Buffer.NumElements = occludeeCount;
+    hr = Graphics->Device->CreateUnorderedAccessView(resultBuffer, &uavDesc, &resultUAV);
+    if (FAILED(hr))
+        return hr;
+
+	D3D11_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	Graphics->Device->CreateSamplerState(&samplerDesc, &BasicSampler);
 
     return hr;
 }
@@ -1192,57 +1259,51 @@ void FRenderer::RunOcclusionCullingComputeShaderGeneric(const std::vector<Occlud
     ID3D11ShaderResourceView* depthSRV,
     UINT viewportWidth, UINT viewportHeight)
 {
+    // Occludee CB 데이터 갱신
     D3D11_MAPPED_SUBRESOURCE mappedResource;
-    // occludee 데이터 업로드
-    Graphics->DeviceContext->Map(occludeeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+    auto hr = Graphics->DeviceContext->Map(occludeeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     memcpy(mappedResource.pData, occludeeData.data(), sizeof(OccludeeData) * occludeeData.size());
     Graphics->DeviceContext->Unmap(occludeeBuffer, 0);
 
-    // 상수 버퍼 준비: viewProj 행렬, viewport 크기
-    CB_OcclusionCulling cb;
+    // 상수 버퍼 업데이트
     FMatrix viewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
     FMatrix projMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
-
-    FMatrix vp = viewMatrix * projMatrix;
-    memcpy(&cb.viewProj, &vp, sizeof(FMatrix)); // 수정된 부분
-    cb.viewportWidth = (float)viewportWidth;
-    cb.viewportHeight = (float)viewportHeight;
-    cb.occludeeCount = occludeeData.size();
+	CB_OcclusionCulling cb = {
+		.viewProj = viewMatrix * projMatrix,
+		.viewportWidth = static_cast<float>(viewportWidth),
+		.viewportHeight = static_cast<float>(viewportHeight),
+		.occludeeCount = static_cast<UINT>(occludeeData.size()),
+		.pad = NULL,
+	};
 
     Graphics->DeviceContext->Map(cbBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
     memcpy(mappedResource.pData, &cb, sizeof(CB_OcclusionCulling));
     Graphics->DeviceContext->Unmap(cbBuffer, 0);
 
-    // 리소스 바인딩
-    // occludeeBuffer용 SRV는 미리 생성되어 있어야 하며, 여기서는 occludeeBufferSRV로 가정합니다.
-    ID3D11ShaderResourceView* occludeeSRV = nullptr; // 실제로는 g_Device->CreateShaderResourceView(occludeeBuffer, ...)로 생성
-    // 예: occludeeSRV = preCreatedOccludeeSRV;
-    // depthSRV는 인자로 전달됨.
-    ID3D11UnorderedAccessView* resultUAV = nullptr;    // resultBuffer용 UAV (미리 생성)
-    // 예: resultUAV = preCreatedResultUAV;
-
-    Graphics->DeviceContext->CSSetShaderResources(0, 1, &occludeeSRV);
-    Graphics->DeviceContext->CSSetShaderResources(1, 1, &depthSRV);
+    // SRV, UAV, CB 설정
+    Graphics->DeviceContext->CSSetShaderResources(0, 1, &occludeeDataSRV);
+    Graphics->DeviceContext->CSSetShaderResources(1, 1, &occludeeSRV);
     Graphics->DeviceContext->CSSetUnorderedAccessViews(0, 1, &resultUAV, nullptr);
     Graphics->DeviceContext->CSSetConstantBuffers(0, 1, &cbBuffer);
-
-    // Dispatch: 64 스레드 per group
-    UINT groupCount = (UINT)ceil(occludeeData.size() / 64.0f);
+    Graphics->DeviceContext->CSSetSamplers(0, 1, &BasicSampler);
     Graphics->DeviceContext->CSSetShader(occlusionCS, nullptr, 0);
+
+    // 그룹당 64 스레드
+    UINT groupCount = static_cast<UINT>(ceil(static_cast<float>(occludeeData.size()) / 64.0f));
     Graphics->DeviceContext->Dispatch(groupCount, 1, 1);
 
-    // 리소스 해제
-    ID3D11ShaderResourceView* nullSRV[2] = { nullptr, nullptr };
-    Graphics->DeviceContext->CSSetShaderResources(0, 2, nullSRV);
-    ID3D11UnorderedAccessView* nullUAV = nullptr;
-    Graphics->DeviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
+    // SRV, UAV 바인딩 해제
+    ID3D11ShaderResourceView* nullSRV[1] = { nullptr };
+    Graphics->DeviceContext->CSSetShaderResources(0, 1, nullSRV);
+    ID3D11UnorderedAccessView* nullUAV[1] = { nullptr };
+    Graphics->DeviceContext->CSSetUnorderedAccessViews(0, 1, nullUAV, nullptr);
     Graphics->DeviceContext->CSSetShader(nullptr, nullptr, 0);
 }
 
-void FRenderer::PerformOcclusionCullingForOccludees(const TArray<UPrimitiveComponent*>& occludeeCandidates,
+void FRenderer::PerformOcclusionCullingForOccludees(const TArray<UStaticMeshComponent*>& occludeeCandidates,
     ID3D11ShaderResourceView* depthSRV,
     UINT viewportWidth, UINT viewportHeight,
-    TArray<UPrimitiveComponent*>& OutVisibleComponents)
+    TArray<UStaticMeshComponent*>& OutVisibleComponents)
 {
     // 1. occludee 데이터 준비
     std::vector<OccludeeData> occludeeData;
@@ -1260,24 +1321,18 @@ void FRenderer::PerformOcclusionCullingForOccludees(const TArray<UPrimitiveCompo
         occludeeData.push_back(data);
     }
 
-    // 2. Depth 텍스처는 이미 생성된 것으로 가정 (depthSRV 인자로 전달됨)
+    // Depth 텍스처 =  depthSRV
 
-    // 3. Compute Shader를 이용한 Occlusion Culling
-    ID3D11Buffer* resultBuffer = nullptr;
-    ID3D11Buffer* occludeeBuffer = nullptr;
-    ID3D11ComputeShader* occlusionCS = nullptr;
-    ID3D11Buffer* cbBuffer = nullptr;
-
-    HRESULT hr = CreateOcclusionResources((UINT)occludeeData.size(), viewportWidth, viewportHeight);
+    // Compute Shader를 이용한 Occlusion Culling 
+    HRESULT hr = CreateOcclusionResources(static_cast<UINT>(occludeeData.size()), viewportWidth, viewportHeight);
     if (FAILED(hr))
     {
-        // 오류 처리
+        UE_LOG(LogLevel::Display, TEXT("CreateOcclusionResources failed: 0x%x"), hr);
         return;
     }
-
     RunOcclusionCullingComputeShaderGeneric(occludeeData, depthSRV, viewportWidth, viewportHeight);
 
-    // 4. 결과 읽어오기: resultBuffer는 DEFAULT이므로, 스테이징 버퍼를 사용하여 CPU로 복사 후 읽어옵니다.
+    // resultBuffer는 DEFAULT 용도이므로, 스테이징 버퍼를 사용하여 CPU로 복사
     D3D11_BUFFER_DESC resDesc;
     resultBuffer->GetDesc(&resDesc);
     resDesc.Usage = D3D11_USAGE_STAGING;
@@ -1285,14 +1340,22 @@ void FRenderer::PerformOcclusionCullingForOccludees(const TArray<UPrimitiveCompo
     resDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
     ID3D11Buffer* stagingBuffer = nullptr;
     hr = Graphics->Device->CreateBuffer(&resDesc, nullptr, &stagingBuffer);
-    if (FAILED(hr))// 오류 처리
+    if (FAILED(hr))
     {
+        UE_LOG(LogLevel::Display, TEXT("Failed to create staging buffer: 0x%x"), hr);
         return;
     }
     Graphics->DeviceContext->CopyResource(stagingBuffer, resultBuffer);
 
     D3D11_MAPPED_SUBRESOURCE mappedRes;
-    Graphics->DeviceContext->Map(stagingBuffer, 0, D3D11_MAP_READ, 0, &mappedRes);
+    ZeroMemory(&mappedRes, sizeof(mappedRes));
+    hr = Graphics->DeviceContext->Map(stagingBuffer, 0, D3D11_MAP_READ, 0, &mappedRes);
+    if (FAILED(hr))
+    {
+        UE_LOG(LogLevel::Display, TEXT("Failed to map staging buffer: 0x%x"), hr);
+        stagingBuffer->Release();
+        return;
+    }
     int* visibleResults = reinterpret_cast<int*>(mappedRes.pData);
     for (size_t i = 0; i < occludeeData.size(); ++i)
     {
@@ -1303,11 +1366,15 @@ void FRenderer::PerformOcclusionCullingForOccludees(const TArray<UPrimitiveCompo
     }
     Graphics->DeviceContext->Unmap(stagingBuffer, 0);
     stagingBuffer->Release();
-    UE_LOG(LogLevel::Display, "Total Count : %d", occludeeData.size());
-    UE_LOG(LogLevel::Display, "Visible Result Count : %d", OutVisibleComponents.Num());
-    // 5. 리소스 해제 (실제 프로젝트에서는 재사용 고려)
-    if (resultBuffer) { resultBuffer->Release(); resultBuffer = nullptr; }
-    if (occludeeBuffer) { occludeeBuffer->Release(); occludeeBuffer = nullptr; }
-    if (occlusionCS) { occlusionCS->Release(); occlusionCS = nullptr; }
-    if (cbBuffer) { cbBuffer->Release(); cbBuffer = nullptr; }
+
+    UE_LOG(LogLevel::Display, TEXT("Total Occludee Count: %d"), occludeeData.size());
+    UE_LOG(LogLevel::Display, TEXT("Visible Result Count: %d"), OutVisibleComponents.Num());
+
+    //// 리소스 해제 부분
+    //if (resultBuffer) { resultBuffer->Release(); resultBuffer = nullptr; }
+    //if (occludeeBuffer) { occludeeBuffer->Release(); occludeeBuffer = nullptr; }
+    //if (occlusionCS) { occlusionCS->Release(); occlusionCS = nullptr; }
+    //if (cbBuffer) { cbBuffer->Release(); cbBuffer = nullptr; }
+    //if (occludeeSRV) { occludeeSRV->Release(); occludeeSRV = nullptr; }
+    //if (resultUAV) { resultUAV->Release(); resultUAV = nullptr; }
 }
