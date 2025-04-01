@@ -21,7 +21,6 @@
 #include "GeometryCore/KDTree.h"
 #include "GeometryCore/BVHNode.h"
 
-#include "GeometryCore/SoftwareZBuffer.h"
 
 using namespace DirectX;
 
