@@ -501,7 +501,6 @@ UPrimitiveComponent* BVHNode::QueryRayClosest(const FVector& Origin, const FVect
     return nullptr;
 }
 
-
 UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, const FVector& Dir)
 {
     FVector normDir = Dir.GetSafeNormal();
@@ -520,7 +519,7 @@ UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, co
         PQEntry current = pq.top();
         pq.pop();
 
-        // 만약 현재 노드의 진입 거리가 이미 최단 교차보다 멀다면 더 이상 탐색할 필요가 없음.
+        // 현재 노드의 진입 거리가 이미 최단 교차보다 멀다면 탐색 중단
         if (current.tEntry >= bestT)
             continue;
 
@@ -533,9 +532,14 @@ UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, co
             {
                 float tInter;
                 FBoundingBox box = GetWorldBox(comp);
-                // AABB를 구로 근사 - 중심과 반지름 계산
+                // AABB를 구로 근사 - 중심과 내접구 반지름 계산
                 FVector center = (box.min + box.max) * 0.5f;
-                float radius = (box.max - box.min).Length() * 0.5f;
+
+                // 내접구 반지름 계산 (AABB의 최소 변 길이 절반)
+                float dx = box.max.X - box.min.X;
+                float dy = box.max.Y - box.min.Y;
+                float dz = box.max.Z - box.min.Z;
+                float radius = 0.5f * std::min({ dx, dy, dz });
 
                 // 비트마스킹 빠른 충돌 검사
                 if (FastIsRayIntersectingSphere(Origin, normDir, center, radius, tInter))
@@ -571,7 +575,6 @@ UPrimitiveComponent* BVHNode::QueryRayClosestBestFirst(const FVector& Origin, co
 
     if (bestComp)
     {
-        //UE_LOG(LogLevel::Display, TEXT("Closest intersection distance: %.2f"), bestT);
         return bestComp;
     }
     return nullptr;

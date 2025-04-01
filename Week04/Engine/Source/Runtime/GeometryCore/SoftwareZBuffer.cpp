@@ -140,9 +140,9 @@ void SoftwareZBuffer::PerformSWOcclusionCulling(KDTreeSystem*& kdTree, const FFr
             occludees.Add(comp);
     }
 
-    UE_LOG(LogLevel::Display, "Occluders Culling : %d", occluders.Num());
+    //UE_LOG(LogLevel::Display, "Occluders Culling : %d", occluders.Num());
 
-    UE_LOG(LogLevel::Display, "Occludees Culling : %d", occludees.Num());
+    //UE_LOG(LogLevel::Display, "Occludees Culling : %d", occludees.Num());
     // 3. 소프트웨어 Z-Buffer 초기화
     swZBuffer.Clear();
 

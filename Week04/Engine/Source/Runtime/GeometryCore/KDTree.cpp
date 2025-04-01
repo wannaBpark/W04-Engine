@@ -380,10 +380,6 @@ UPrimitiveComponent* KDTreeNode::QueryRayClosestBestFirst(const FVector& Origin,
         }
     }
 
-    if (bestComp)
-    {
-        UE_LOG(LogLevel::Display, TEXT("Closest intersection distance: %.2f"), bestT);
-    return bestComp;
-    }
-    return nullptr;
+    
+    return bestComp ? bestComp : nullptr;
 }

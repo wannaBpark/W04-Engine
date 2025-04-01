@@ -610,11 +610,9 @@ void AEditorPlayer::UpdateVisibleStaticMeshComponentsWithOctree()
     Renderer->GetVisibleObjs().Empty();
     TSet<UPrimitiveComponent*> FrustumComps;
     TSet<uint32> UniqueUUIDs;
-    //Octree->Root->QueryFrustumUnique(Frustum, FrustumComps, UniqueUUIDs);
     Octree->Root->QueryFrustumOcclusionCulling(Frustum, GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->ViewTransformPerspective.GetLocation(), FrustumComps, UniqueUUIDs);
-    
     Renderer->SetVisibleObjs(FrustumComps);
-    UE_LOG(LogLevel::Display, TEXT("Visible Unique Components: %d"), FrustumComps.Num());
+    //UE_LOG(LogLevel::Display, TEXT("Visible Unique Components: %d"), FrustumComps.Num());
 
 }
 
