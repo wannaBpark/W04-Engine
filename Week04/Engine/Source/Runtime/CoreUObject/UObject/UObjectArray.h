@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Container/Array.h"
 #include "Container/Set.h"
 

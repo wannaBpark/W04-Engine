@@ -40,7 +40,7 @@ public:
 private:
     UImGuiManager* UIMgr;
     // TODO : GWorld 소유는 UEditorEngine소유로 한정?하면 UEditorEngine만 남겨야 함
-    UWorld* GWorld;
+    //UWorld* GWorld;
     SLevelEditor* LevelEditor;
     UnrealEd* UnrealEditor;
     bool bIsExit = false;
@@ -48,7 +48,7 @@ private:
     bool bTestInput = false;
 
 public:
-    UWorld* GetWorld() const { return GWorld; }
+    UWorld* GetWorld() const;
     SLevelEditor* GetLevelEditor() const { return LevelEditor; }
     UnrealEd* GetUnrealEditor() const { return UnrealEditor; }
 };

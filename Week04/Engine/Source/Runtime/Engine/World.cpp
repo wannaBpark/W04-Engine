@@ -33,7 +33,7 @@ void UWorld::CreateBaseObject()
 	// 단일 Level이라 가정
 	if (PersistentLevel == nullptr)
 	{
-		PersistentLevel = new ULevel();
+		PersistentLevel = FObjectFactory::ConstructObject<ULevel>();
 		PersistentLevel->InitializeLevel(this);
 	}
 }
@@ -64,6 +64,8 @@ void UWorld::Tick(float DeltaTime)
 void UWorld::Release()
 {
 	PersistentLevel->Release();
+	GUObjectArray.MarkRemoveObject(PersistentLevel);
+	//GUObjectArray.ProcessPendingDestroyObjects();
 }
 
 bool UWorld::DestroyActor(AActor* ThisActor)

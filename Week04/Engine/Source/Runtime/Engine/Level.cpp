@@ -23,7 +23,7 @@ void ULevel::Release()
     }
     ActorsArray.Empty();
 
-    GUObjectArray.ProcessPendingDestroyObjects();
+    //GUObjectArray.ProcessPendingDestroyObjects();
 }
 
 void ULevel::DestoryActor(AActor* Actor)
