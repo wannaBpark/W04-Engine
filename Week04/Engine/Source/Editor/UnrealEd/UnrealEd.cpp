@@ -5,6 +5,7 @@
 #include "PropertyEditor/FpsIndicator.h"
 #include "PropertyEditor/OutlinerEditorPanel.h"
 #include "PropertyEditor/PropertyEditorPanel.h"
+#include "PropertyEditor/PlayEditorPanel.h"
 
 void UnrealEd::Initialize()
 {
@@ -20,6 +21,8 @@ void UnrealEd::Initialize()
     const auto FPSIndicator = std::make_shared<FFpsIndicator>();
     Panels["FPSIndicator"] = FPSIndicator;
     
+    const auto PlayModePanel = std::make_shared<PlayEditorPanel>();
+    Panels["PlayModePanel"] = PlayModePanel;
 }
 
 void UnrealEd::Render() const

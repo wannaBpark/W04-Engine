@@ -171,6 +171,7 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Source\Editor\PropertyEditor\PlayEditorPanel.cpp" />
     <ClCompile Include="Engine\Source\Editor\UnrealEd\Editor\EditorEngine.cpp" />
     <ClCompile Include="Engine\Source\Runtime\GeometryCore\BVHNode.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Renderer\Culling_Pass.cpp">
@@ -250,6 +251,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Level.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Source\Editor\PropertyEditor\PlayEditorPanel.h" />
     <ClInclude Include="Engine\Source\Editor\UnrealEd\Editor\EditorEngine.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\MathSSE.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\Engine.h" />
