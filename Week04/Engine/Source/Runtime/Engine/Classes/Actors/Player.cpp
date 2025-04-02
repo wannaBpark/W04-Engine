@@ -21,8 +21,6 @@
 #include "GeometryCore/KDTree.h"
 #include "GeometryCore/BVHNode.h"
 
-#include "GeometryCore/SoftwareZBuffer.h"
-
 using namespace DirectX;
 
 // Picking 성능 측정 저장용 static 구조체
