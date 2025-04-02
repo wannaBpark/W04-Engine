@@ -12,6 +12,14 @@
 #include "UObject/ObjectFactory.h"
 #include "GeometryCore/Octree.h"
 #include <Runtime/Engine/Classes/Engine/StringConverter.h>
+#include "Runtime/Engine/Classes/Components/SceneComponent.h"
+
+std::vector<ComponentTypeInfo> ComponentTypes = {
+    { "USceneComponent", [](AActor* Owner) { return Owner->AddComponent<USceneComponent>(); } },
+    { "UStaticMeshComponent", [](AActor* Owner) { return Owner->AddComponent<UStaticMeshComponent>(); } },
+    { "UBillboardComponent", [](AActor* Owner) { return Owner->AddComponent<UBillboardComponent>(); } },
+    { "ULightComponentBase", [](AActor* Owner) { return Owner->AddComponent<ULightComponentBase>(); } }
+};
 
 void PropertyEditorPanel::Render()
 {
@@ -47,6 +55,22 @@ void PropertyEditorPanel::Render()
         ImGui::SetItemDefaultFocus();
         // TreeNode 배경색을 변경 (기본 상태)
         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+        if (ImGui::TreeNodeEx("Hierarchy", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
+        {
+            std::string ActorLabel = *PickedActor->GetActorLabel();
+
+            if (ImGui::TreeNodeEx((void*)PickedActor, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow, "%s", ActorLabel.c_str()))
+            {
+                if (USceneComponent* Root = PickedActor->GetRootComponent())
+                {
+                    DrawSceneComponentTree(Root);
+                }
+
+                ImGui::TreePop(); // PickedActor 트리 닫기
+            }
+            ImGui::TreePop(); // Hierarchy 트리 닫기
+        }
+
         if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
         {
             Location = PickedActor->GetActorLocation();
@@ -86,6 +110,46 @@ void PropertyEditorPanel::Render()
                 player->AddCoordiMode();
             }
             ImGui::TreePop(); // 트리 닫기
+
+            if (ImGui::BeginCombo("Component Type", ComponentTypes[SelectedTypeIndex].Label))
+            {
+                for (int i = 0; i < ComponentTypes.size(); ++i)
+                {
+                    const bool isSelected = (i == SelectedTypeIndex);
+                    if (ImGui::Selectable(ComponentTypes[i].Label, isSelected))
+                    {
+                        SelectedTypeIndex = i;
+                    }
+
+                    if (isSelected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+
+            if (ImGui::Button("Add Component"))
+            {
+                if (SelectedComponent && Cast<USceneComponent>(SelectedComponent))
+                {
+                    USceneComponent* ParentScene = Cast<USceneComponent>(SelectedComponent);
+                    AActor* Owner = ParentScene->GetOwner();
+                    if (Owner)
+                    {
+                        // 선택된 타입에 맞는 컴포넌트 생성
+                        USceneComponent* NewComp = ComponentTypes[SelectedTypeIndex].CreateFunc(Owner);
+
+                        if (NewComp)
+                        {
+                            // 부모-자식 연결
+                            NewComp->SetupAttachment(ParentScene);
+
+                            // 이름 설정
+                            FString NameF = FString::FromInt(Owner->GetComponents().Num()) + "_ChildComp";
+                            // NewComp->SetName(*NameF); // SetName이 구현되어 있다면 사용
+                        }
+                    }
+                }
+            }
         }
         ImGui::PopStyleColor();
     }
@@ -605,6 +669,37 @@ void PropertyEditorPanel::RenderCreateMaterialView()
     }
 
     ImGui::End();
+}
+
+void PropertyEditorPanel::DrawSceneComponentTree(USceneComponent* Comp)
+{
+    if (!Comp) return;
+
+    FString LabelF = "[" + Comp->GetClass()->GetName() + "] " + Comp->GetName();
+    std::string LabelAnsi = *LabelF;
+
+    ImGuiTreeNodeFlags Flags = ImGuiTreeNodeFlags_OpenOnArrow;
+    if (Comp->GetAttachChildren().IsEmpty())
+    {
+        Flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+    }
+
+    bool bIsSelected = (SelectedComponent == Comp);
+    if (ImGui::TreeNodeEx((void*)Comp, Flags, "%s", LabelAnsi.c_str()))
+    {
+        if (ImGui::IsItemClicked())
+        {
+            SelectedComponent = Comp;
+        }
+
+        for (USceneComponent* Child : Comp->GetAttachChildren())
+        {
+            DrawSceneComponentTree(Child);
+        }
+
+        if (!(Flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
+            ImGui::TreePop();
+    }
 }
 
 void PropertyEditorPanel::OnResize(HWND hWnd)

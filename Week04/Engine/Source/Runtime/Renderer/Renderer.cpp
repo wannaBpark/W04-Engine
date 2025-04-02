@@ -1221,10 +1221,12 @@ void FRenderer::RenderBillboards(UWorld* World, const std::shared_ptr<FEditorVie
         }
         else
         {
-            RenderTexturePrimitive(
-                BillboardComp->vertexTextureBuffer, BillboardComp->numVertices,
-                BillboardComp->indexTextureBuffer, BillboardComp->numIndices, BillboardComp->Texture->TextureSRV, BillboardComp->Texture->SamplerState
-            );
+            if (BillboardComp->vertexTextureBuffer != nullptr) {
+                RenderTexturePrimitive(
+                    BillboardComp->vertexTextureBuffer, BillboardComp->numVertices,
+                    BillboardComp->indexTextureBuffer, BillboardComp->numIndices, BillboardComp->Texture->TextureSRV, BillboardComp->Texture->SamplerState
+                );
+            }
         }
     }
     

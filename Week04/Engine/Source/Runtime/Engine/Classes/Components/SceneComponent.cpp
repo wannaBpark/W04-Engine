@@ -3,6 +3,7 @@
 #include "Math/JungleMath.h"
 #include "UObject/ObjectFactory.h"
 #include "UUIDRenderComponent.h"
+#include "Runtime/Engine/Classes/Components/SceneComponent.h"
 USceneComponent::USceneComponent() :RelativeLocation(FVector(0.f, 0.f, 0.f)), RelativeRotation(FVector(0.f, 0.f, 0.f)), RelativeScale3D(FVector(1.f, 1.f, 1.f))
 {
 }
@@ -121,4 +122,9 @@ void USceneComponent::SetupAttachment(USceneComponent* InParent)
         AttachParent = InParent;
         InParent->AttachChildren.AddUnique(this);
     }
+}
+
+TArray<USceneComponent*> USceneComponent::GetAttachChildren()
+{
+    return AttachChildren;
 }
