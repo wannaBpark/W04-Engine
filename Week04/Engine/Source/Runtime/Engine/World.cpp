@@ -35,13 +35,13 @@ void UWorld::ReleaseBaseObject()
 {
     if (LocalGizmo)
     {
-        delete LocalGizmo;
+        LocalGizmo->MarkAsGarbage();
         LocalGizmo = nullptr;
     }
 
     if (EditorPlayer)
     {
-        delete EditorPlayer;
+        EditorPlayer->MarkAsGarbage();
         EditorPlayer = nullptr;
     }
 }

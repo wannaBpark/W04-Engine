@@ -54,9 +54,9 @@ private:
     AActor* SelectedActor = nullptr;
 
     AEditorPlayer* EditorPlayer = nullptr;
-    OctreeSystem* Octree;
-    KDTreeSystem* KDTree;
-    BVHSystem* BVH;
+    OctreeSystem* Octree = nullptr;
+    KDTreeSystem* KDTree = nullptr;
+    BVHSystem* BVH = nullptr;
 
 public:
     const TSet<AActor*>& GetActors() const { return ActorsArray; }
