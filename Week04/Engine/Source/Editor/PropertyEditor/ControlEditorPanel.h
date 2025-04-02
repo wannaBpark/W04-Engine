@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Components/ActorComponent.h"
 #include "UnrealEd/EditorPanel.h"
 
@@ -29,5 +29,9 @@ private:
     int appleCountY = 1;
     int appleCountZ = 1;
     float appleSpacing = 1.0f;
+
+    // billboard 관련
+    int spriteSelectedIndex;
+    
 };
 

@@ -18,6 +18,7 @@ public:
     ) override;
 
     void SetTexture(FWString _fileName);
+    std::shared_ptr<FTexture> GetTexture();
     void SetUUIDParent(USceneComponent* _parent);
     FMatrix CreateBillboardMatrix();
 
@@ -29,9 +30,6 @@ public:
     float finalIndexV = 0.0f;
     std::shared_ptr<FTexture> Texture;
 protected:
-
-
-
     USceneComponent* m_parent = nullptr;
 
     bool CheckPickingOnNDC(const TArray<FVector>& checkQuad, float& hitDistance);

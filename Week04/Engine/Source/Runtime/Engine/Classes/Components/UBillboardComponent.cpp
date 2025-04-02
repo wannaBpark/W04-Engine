@@ -34,6 +34,7 @@ void UBillboardComponent::InitializeComponent()
 {
     Super::InitializeComponent();
 	CreateQuadTextureVertexBuffer();
+    AABB = FBoundingBox({ -1.f,-1.f,-0.1f }, { 1.f,1.f,0.1f });
 }
 
 
@@ -59,6 +60,11 @@ int UBillboardComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDi
 void UBillboardComponent::SetTexture(FWString _fileName)
 {
 	Texture = FEngineLoop::resourceMgr.GetTexture(_fileName);
+}
+
+std::shared_ptr<FTexture> UBillboardComponent::GetTexture()
+{
+    return Texture;
 }
 
 void UBillboardComponent::SetUUIDParent(USceneComponent* _parent)

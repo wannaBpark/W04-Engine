@@ -21,6 +21,7 @@ class UBillboardComponent;
 class UStaticMeshComponent;
 class UGizmoBaseComponent;
 class UPrimitiveComponent;
+class UTextRenderComponent;
 
 
 //~ Material Sort 관련 구조체
@@ -104,6 +105,7 @@ public:
     void ResetVertexShader() const;
     void ResetPixelShader() const;
     void CreateShader();
+    void CreateBlendState();
 
     void SetVertexShader(const FWString& filename, const FString& funcname, const FString& version);
     void SetPixelShader(const FWString& filename, const FString& funcname, const FString& version);
@@ -191,12 +193,13 @@ public:
     void RenderGizmos(const UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
     void RenderLight(UWorld* World, std::shared_ptr<FEditorViewportClient> ActiveViewport);
     void RenderBillboards(UWorld* World, const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
-
+    void RenderTexts(const std::shared_ptr<FEditorViewportClient>& ActiveViewport);
 private:
     TSet<UPrimitiveComponent*> VisibleObjs;
     TArray<UStaticMeshComponent*> StaticMeshObjs;
     TArray<UGizmoBaseComponent*> GizmoObjs;
     TArray<UBillboardComponent*> BillboardObjs;
+    TArray<UTextRenderComponent*> TextObjs;
     TArray<ULightComponentBase*> LightObjs;
 
 public:
@@ -211,6 +214,7 @@ public:
     ID3D11Texture2D* depthTexture = nullptr;
     ID3D11DepthStencilView* depthStencilView = nullptr;
     ID3D11ShaderResourceView* depthSRV = nullptr;
+    ID3D11BlendState* pBlendState;
     
     void CreateDepthBuffer(ID3D11Device* device, int width, int height);
     

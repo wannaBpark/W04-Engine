@@ -108,7 +108,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
     
     output.UUID = UUID;
     
-    float3 texColor = Textures.Sample(Sampler, input.texcoord + UVOffset);
+    float4 texColor = Textures.Sample(Sampler, input.texcoord + UVOffset);
     float3 color;
     if (texColor.g == 0) // TODO: boolean으로 변경
         color = saturate(Material.DiffuseColor);
@@ -125,6 +125,9 @@ PS_OUTPUT mainPS(PS_INPUT input)
     }
     
     // 발광 색상 추가
+    float alpha = texColor.a;
+    if (alpha < 0.01f)
+        discard;
 
     if (IsLit == 1) // 조명이 적용되는 경우
     {
@@ -151,7 +154,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
         
         // 투명도 적용
         color += Material.EmissiveColor;
-        output.color = float4(color, Material.TransparencyScalar);
+        output.color = float4(color, alpha* Material.TransparencyScalar);
         return output;
     }
     else // unlit 상태일 때 PaperTexture 효과 적용
@@ -164,7 +167,7 @@ PS_OUTPUT mainPS(PS_INPUT input)
         
         output.color = float4(color, 1);
         // 투명도 적용
-        output.color.a = Material.TransparencyScalar;
+        output.color.a = alpha* Material.TransparencyScalar;
             
         return output;
     }

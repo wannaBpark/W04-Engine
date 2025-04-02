@@ -10,7 +10,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/UBillboardComponent.h"
 #include "Components/UParticleSubUVComp.h"
-#include "Components/UText.h"
+#include "Components/UTextRenderComponent.h"
 #include "Components/Material/Material.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Launch/EngineLoop.h"
@@ -30,6 +30,7 @@ void FRenderer::Initialize(FGraphicsDevice* graphics)
 {
     Graphics = graphics;
     CreateShader();
+    CreateBlendState();
     CreateTextureShader();
     CreateLineShader();
     CreateConstantBuffer();
@@ -72,6 +73,21 @@ void FRenderer::CreateShader()
     Stride = sizeof(FVertexSimple);
     VertexShaderCSO->Release();
     PixelShaderCSO->Release();
+}
+
+void FRenderer::CreateBlendState()
+{
+    D3D11_BLEND_DESC blendDesc = {};
+    blendDesc.RenderTarget[0].BlendEnable = TRUE;
+    blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+    blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    Graphics->Device->CreateBlendState(&blendDesc, &pBlendState);
 }
 
 void FRenderer::ReleaseShader()
@@ -987,26 +1003,29 @@ void FRenderer::RenderBatch(
 
 void FRenderer::PrepareRender()
 {
-    for (UPrimitiveComponent* Comp : VisibleObjs)
+    for (const auto iter : TObjectRange<USceneComponent>())
     {
-        if (UGizmoBaseComponent* Gizmo = Cast<UGizmoBaseComponent>(Comp))
+        if (UGizmoBaseComponent* Gizmo = Cast<UGizmoBaseComponent>(iter))
         {
             GizmoObjs.Add(Gizmo);
             continue;
         }
-        if (UStaticMeshComponent* Mesh = Cast<UStaticMeshComponent>(Comp))
+        if (UStaticMeshComponent* Mesh = Cast<UStaticMeshComponent>(iter))
         {
             StaticMeshObjs.Add(Mesh);
             continue;
         }
-        if (UBillboardComponent* Billboard = Cast<UBillboardComponent>(Comp))
+        if (UBillboardComponent* Billboard = Cast<UBillboardComponent>(iter))
         {
             BillboardObjs.Add(Billboard);
             continue;
         }
-        if (ULightComponentBase* Light = Cast<ULightComponentBase>(Comp))
+        if (ULightComponentBase* Light = Cast<ULightComponentBase>(iter))
         {
             LightObjs.Add(Light);
+        }
+        if (UTextRenderComponent* Text = Cast<UTextRenderComponent>(iter)) {
+            TextObjs.Add(Text);
         }
     }
 }
@@ -1032,8 +1051,11 @@ void FRenderer::Render(UWorld* World, const std::shared_ptr<FEditorViewportClien
     RenderGizmos(World, ActiveViewport);
     if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))    // 빌보드 텍스트 렌더
         RenderBillboards(World, ActiveViewport);
+    //if (ActiveViewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_UUIDText))
+        //Render
     RenderLight(World, ActiveViewport);
-    
+    RenderTexts(ActiveViewport);
+    PrepareShader();
     ClearRenderArr(); // 왜 비워주는가?
 }
 
@@ -1197,13 +1219,6 @@ void FRenderer::RenderBillboards(UWorld* World, const std::shared_ptr<FEditorVie
                 SubUVParticle->indexTextureBuffer, SubUVParticle->numIndices, SubUVParticle->Texture->TextureSRV, SubUVParticle->Texture->SamplerState
             );
         }
-        else if (UText* Text = Cast<UText>(BillboardComp))
-        {
-            FEngineLoop::renderer.RenderTextPrimitive(
-                Text->vertexTextBuffer, Text->numTextVertices,
-                Text->Texture->TextureSRV, Text->Texture->SamplerState
-            );
-        }
         else
         {
             RenderTexturePrimitive(
@@ -1212,7 +1227,32 @@ void FRenderer::RenderBillboards(UWorld* World, const std::shared_ptr<FEditorVie
             );
         }
     }
-    PrepareShader();
+    
+}
+
+void FRenderer::RenderTexts(const std::shared_ptr<FEditorViewportClient>& ActiveViewport)
+{
+    // FIXME : 그냥 냅다 subuvCosntant 초기화 시켜도 괜찮은가
+    PrepareTextureShader();
+    UpdateSubUVConstant(0, 0);
+    //PrepareSubUVConstant();
+
+    for (auto textComp : TextObjs) {
+        FMatrix Model = textComp->CreateTextMatrix();
+
+        // 최종 MVP 행렬
+        FMatrix MVP = Model * ActiveViewport->GetViewMatrix() * ActiveViewport->GetProjectionMatrix();
+        FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
+        FVector4 UUIDColor = textComp->EncodeUUID() / 255.0f;
+        if (textComp == GEngineLoop.GetWorld()->GetPickingGizmo())
+            UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
+        else
+            UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
+        FEngineLoop::renderer.RenderTextPrimitive(
+            textComp->vertexTextBuffer, textComp->numTextVertices,
+            textComp->Texture->TextureSRV, textComp->Texture->SamplerState
+        );
+    }
 }
 
 void FRenderer::CreateDepthBuffer(ID3D11Device* device, int width, int height)

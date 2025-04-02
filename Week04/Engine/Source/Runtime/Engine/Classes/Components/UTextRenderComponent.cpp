@@ -1,16 +1,16 @@
-#include "UText.h"
+#include "UTextRenderComponent.h"
 
 #include "World.h"
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"
 
-UText::UText()
+UTextRenderComponent::UTextRenderComponent()
 {
     SetType(StaticClass()->GetName());
 }
 
-UText::~UText()
+UTextRenderComponent::~UTextRenderComponent()
 {
 	if (vertexTextBuffer)
 	{
@@ -19,12 +19,12 @@ UText::~UText()
 	}
 }
 
-void UText::InitializeComponent()
+void UTextRenderComponent::InitializeComponent()
 {
     Super::InitializeComponent();
 }
 
-void UText::TickComponent(float DeltaTime)
+void UTextRenderComponent::TickComponent(float DeltaTime)
 {
 	Super::TickComponent(DeltaTime);
 
@@ -40,17 +40,17 @@ void UText::TickComponent(float DeltaTime)
     //RelativeRotation.Z = degree + 90;
 }
 
-void UText::ClearText()
+void UTextRenderComponent::ClearText()
 {
     vertexTextureArr.Empty();
 }
-void UText::SetRowColumnCount(int _cellsPerRow, int _cellsPerColumn) 
+void UTextRenderComponent::SetRowColumnCount(int _cellsPerRow, int _cellsPerColumn) 
 {
     RowCount = _cellsPerRow;
     ColumnCount = _cellsPerColumn;
 }
 
-int UText::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
+int UTextRenderComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
 {
 	if (!(ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText))) {
 		return 0;
@@ -64,8 +64,76 @@ int UText::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float
 	return CheckPickingOnNDC(quad,pfNearHitDistance);
 }
 
+bool UTextRenderComponent::CheckPickingOnNDC(const TArray<FVector>& checkQuad, float& hitDistance)
+{
+    bool result = false;
+    POINT mousePos;
+    GetCursorPos(&mousePos);
+    ScreenToClient(GEngineLoop.hWnd, &mousePos);
 
-void UText::SetText(FWString _text)
+    D3D11_VIEWPORT viewport;
+    UINT numViewports = 1;
+    FEngineLoop::graphicDevice.DeviceContext->RSGetViewports(&numViewports, &viewport);
+    float screenWidth = viewport.Width;
+    float screenHeight = viewport.Height;
+
+    FVector pickPosition;
+    int screenX = mousePos.x;
+    int screenY = mousePos.y;
+    FMatrix projectionMatrix = GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
+    pickPosition.X = ((2.0f * screenX / viewport.Width) - 1);
+    pickPosition.Y = -((2.0f * screenY / viewport.Height) - 1);
+    pickPosition.Z = 1.0f; // Near Plane
+
+    FMatrix M = CreateTextMatrix();
+    FMatrix V = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();;
+    FMatrix P = projectionMatrix;
+    FMatrix MVP = M * V * P;
+
+    float minX = FLT_MAX;
+    float maxX = FLT_MIN;
+    float minY = FLT_MAX;
+    float maxY = FLT_MIN;
+    float avgZ = 0.0f;
+    for (int i = 0; i < checkQuad.Num(); i++)
+    {
+        FVector4 v = FVector4(checkQuad[i].X, checkQuad[i].Y, checkQuad[i].Z, 1.0f);
+        FVector4 clipPos = FMatrix::TransformVector(v, MVP);
+
+        if (clipPos.W != 0)	clipPos = clipPos / clipPos.W;
+
+        minX = FMath::Min(minX, clipPos.X);
+        maxX = FMath::Max(maxX, clipPos.X);
+        minY = FMath::Min(minY, clipPos.Y);
+        maxY = FMath::Max(maxY, clipPos.Y);
+        avgZ += clipPos.W;
+    }
+
+    avgZ /= checkQuad.Num();
+
+    if (pickPosition.X >= minX && pickPosition.X <= maxX &&
+        pickPosition.Y >= minY && pickPosition.Y <= maxY)
+    {
+        float A = P.M[2][2];  // Projection Matrix의 A값 (Z 변환 계수)
+        float B = P.M[3][2];  // Projection Matrix의 B값 (Z 변환 계수)
+
+        float z_view_pick = (pickPosition.Z - B) / A; // 마우스 클릭 View 공간 Z
+        float z_view_billboard = (avgZ - B) / A; // Billboard View 공간 Z
+
+        hitDistance = 1000.0f;
+        result = true;
+    }
+
+    return result;
+}
+
+void UTextRenderComponent::SetTexture(FWString _fileName)
+{
+    Texture = FEngineLoop::resourceMgr.GetTexture(_fileName);
+}
+
+
+void UTextRenderComponent::SetText(FWString _text)
 {
 	text = _text;
 	if (_text.empty())
@@ -97,6 +165,9 @@ void UText::SetText(FWString _text)
 
 	for (int i = 0; i < _text.size(); i++)
 	{
+        if (text[i] == '\0') {
+            continue;
+        }
 		FVertexTexture leftUP = { -1.0f,1.0f,0.0f,0.0f,0.0f };
 		FVertexTexture rightUP = { 1.0f,1.0f,0.0f,1.0f,0.0f };
 		FVertexTexture leftDown = { -1.0f,-1.0f,0.0f,0.0f,1.0f };
@@ -141,7 +212,7 @@ void UText::SetText(FWString _text)
 
 	CreateTextTextureVertexBuffer(vertexTextureArr,byteWidth);
 }
-void UText::setStartUV(wchar_t hangul, float& outStartU, float& outStartV)
+void UTextRenderComponent::setStartUV(wchar_t hangul, float& outStartU, float& outStartV)
 {
     //대문자만 받는중
     int StartU = 0;
@@ -188,7 +259,7 @@ void UText::setStartUV(wchar_t hangul, float& outStartU, float& outStartV)
     outStartU = static_cast<float>(offsetU);
     outStartV = static_cast<float>(StartV + offsetV);
 }
-void UText::setStartUV(char alphabet, float& outStartU, float& outStartV)
+void UTextRenderComponent::setStartUV(char alphabet, float& outStartU, float& outStartV)
 {
     //대문자만 받는중
     int StartU=0;
@@ -231,7 +302,7 @@ void UText::setStartUV(char alphabet, float& outStartU, float& outStartV)
     outStartV = static_cast<float>(StartV + offsetV);
 
 }
-void UText::CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex,UINT byteWidth)
+void UTextRenderComponent::CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex,UINT byteWidth)
 {
 	numTextVertices = static_cast<UINT>(_vertex.Num());
 	// 2. Create a vertex buffer
@@ -256,13 +327,44 @@ void UText::CreateTextTextureVertexBuffer(const TArray<FVertexTexture>& _vertex,
 
 }
 
+FMatrix UTextRenderComponent::CreateTextMatrix()
+{
+    FMatrix CameraView = GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
 
-void UText::TextMVPRendering()
+    CameraView.M[0][3] = 0.0f;
+    CameraView.M[1][3] = 0.0f;
+    CameraView.M[2][3] = 0.0f;
+
+
+    CameraView.M[3][0] = 0.0f;
+    CameraView.M[3][1] = 0.0f;
+    CameraView.M[3][2] = 0.0f;
+    CameraView.M[3][3] = 1.0f;
+
+
+    CameraView.M[0][2] = -CameraView.M[0][2];
+    CameraView.M[1][2] = -CameraView.M[1][2];
+    CameraView.M[2][2] = -CameraView.M[2][2];
+    FMatrix LookAtCamera = FMatrix::Transpose(CameraView);
+
+    FVector worldLocation = RelativeLocation;
+    if (m_parent) worldLocation = RelativeLocation + m_parent->GetWorldLocation();
+    FVector worldScale = RelativeScale3D;
+    FMatrix S = FMatrix::CreateScale(worldScale.X, worldScale.Y, worldScale.Z);
+    FMatrix R = LookAtCamera;
+    FMatrix T = FMatrix::CreateTranslationMatrix(worldLocation);
+    FMatrix M = S * R * T;
+
+    return M;
+}
+
+
+void UTextRenderComponent::TextMVPRendering()
 {
     FEngineLoop::renderer.PrepareTextureShader();
     //FEngineLoop::renderer.UpdateSubUVConstant(0, 0);
     //FEngineLoop::renderer.PrepareSubUVConstant();
-    FMatrix Model = CreateBillboardMatrix();
+    FMatrix Model = CreateTextMatrix();
 
     FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
     FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));

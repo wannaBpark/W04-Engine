@@ -1,8 +1,8 @@
-﻿#pragma once
+#pragma once
 #include <unordered_map>
 #include "ContainerAllocator.h"
 #include "Pair.h"
-
+#include "Runtime/Core/Container/Array.h"
 
 template <typename KeyType, typename ValueType, typename Allocator = FDefaultAllocator<std::pair<const KeyType, ValueType>>>
 class TMap
@@ -166,5 +166,16 @@ public:
     void Reserve(SizeType Number)
     {
         ContainerPrivate.reserve(Number);
+    }
+
+    // 모든 key TArray 반환
+    TArray<KeyType> GetAllKeys() const {
+        TArray<KeyType> Keys;
+        Keys.Reserve(ContainerPrivate.size());
+        for (const auto& Pair : ContainerPrivate)
+        {
+            Keys.Add(Pair.first); // FString 복사
+        }
+        return Keys;
     }
 };

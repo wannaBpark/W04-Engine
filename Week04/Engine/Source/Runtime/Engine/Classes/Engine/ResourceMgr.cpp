@@ -33,6 +33,10 @@ void FResourceMgr::Initialize(FRenderer* renderer, FGraphicsDevice* device)
 	LoadTextureFromDDS(device->Device, device->DeviceContext, L"Assets/Texture/UUID_Font.dds");
 	LoadTextureFromFile(device->Device, device->DeviceContext, L"Assets/Texture/Wooden Crate_Crate_BaseColor.png");
 	LoadTextureFromFile(device->Device, device->DeviceContext, L"Assets/Texture/spotLight.png");
+
+    LoadTextureFromFile(device->Device, device->DeviceContext, L"Assets/Editor/Icon/Pawn_64x.png");
+    LoadTextureFromFile(device->Device, device->DeviceContext, L"Assets/Editor/Icon/PointLight_64x.png");
+    LoadTextureFromFile(device->Device, device->DeviceContext, L"Assets/Editor/Icon/SpotLight_64x.png");
 }
 
 void FResourceMgr::Release(FRenderer* renderer) {
@@ -67,6 +71,11 @@ std::shared_ptr<FTexture> FResourceMgr::GetTexture(const FWString& name) const
 {
     auto* TempValue = textureMap.Find(name);
     return TempValue ? *TempValue : nullptr;
+}
+
+TArray<FWString> FResourceMgr::GetAllTextureNames()
+{
+    return textureMap.GetAllKeys();
 }
 
 HRESULT FResourceMgr::LoadTextureFromFile(ID3D11Device* device, ID3D11DeviceContext* context, const wchar_t* filename)

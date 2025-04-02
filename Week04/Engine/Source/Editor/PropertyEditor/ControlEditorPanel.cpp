@@ -5,7 +5,7 @@
 #include "Components/LightComponent.h"
 #include "Components/SphereComp.h"
 #include "Components/UParticleSubUVComp.h"
-#include "Components/UText.h"
+#include "Components/UTextRenderComponent.h"
 #include "Engine/FLoaderOBJ.h"
 #include "Engine/StaticMeshActor.h"
 #include "LevelEditor/SLevelEditor.h"
@@ -15,7 +15,7 @@
 #include "Runtime/GeometryCore/Octree.h"
 #include "JSON/json.hpp"
 #include "UnrealEd/SceneMgr.h"
-
+#include "Runtime/Engine/Classes/Components//UBillboardComponent.h"
 using json = nlohmann::json;
 
 
@@ -259,7 +259,8 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
             { .label= "Sphere",    .obj= OBJ_SPHERE },
             { .label= "SpotLight", .obj= OBJ_SpotLight },
             { .label= "Particle",  .obj= OBJ_PARTICLE },
-            { .label= "Text",      .obj= OBJ_Text }
+            { .label= "Text",      .obj= OBJ_Text },
+            { .label = "BillBoard",      .obj = OBJ_BillBoard }
         };
 
         for (const auto& primitive : primitives)
@@ -286,10 +287,10 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     FManagerOBJ::CreateStaticMesh("Assets/helloBlender.obj");
                     MeshComp->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"helloBlender.obj"));
                     
-                    //FVector Location = FVector(rand() % 20, rand() % 20, 0.0f);
-                    //MeshComp->SetLocation(Location);
-                    //MeshComp->AABB.min = MeshComp->AABB.min + Location - 1.0f;
-                    //MeshComp->AABB.max = MeshComp->AABB.max + Location + 1.0f;
+                   /* FVector Location = FVector(rand() % 20, rand() % 20, 0.0f);
+                    MeshComp->SetLocation(Location);
+                    MeshComp->AABB.min = MeshComp->AABB.min + Location - 1.0f;
+                    MeshComp->AABB.max = MeshComp->AABB.max + Location + 1.0f;*/
                     // 옥트리 시스템 가져오기 또는 초기화
                     //TArray<UPrimitiveComponent*> CompArr;
                     //CompArr.Add(MeshComp);
@@ -313,6 +314,8 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                     SpawnedActor = World->SpawnActor<AActor>();
                     SpawnedActor->SetActorLabel(TEXT("OBJ_SpotLight"));
                     SpawnedActor->AddComponent<ULightComponentBase>();
+                    auto A = SpawnedActor->AddComponent<UBillboardComponent>();
+                    A->SetTexture(L"Assets/Texture/spotLight.png");
                     break;
                 }
                 case OBJ_PARTICLE:
@@ -330,7 +333,7 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 {
                     SpawnedActor = World->SpawnActor<AActor>();
                     SpawnedActor->SetActorLabel(TEXT("OBJ_Text"));
-                    UText* TextComponent = SpawnedActor->AddComponent<UText>();
+                    UTextRenderComponent* TextComponent = SpawnedActor->AddComponent<UTextRenderComponent>();
                     TextComponent->SetTexture(L"Assets/Texture/font.png");
                     TextComponent->SetRowColumnCount(106, 106);
                     TextComponent->SetText(L"안녕하세요 Jungle 1");
@@ -339,6 +342,14 @@ void ControlEditorPanel::CreateModifyButton(ImVec2 ButtonSize, ImFont* IconFont)
                 case OBJ_TRIANGLE:
                 case OBJ_CAMERA:
                 case OBJ_PLAYER:
+                case OBJ_BillBoard:
+                {
+                    SpawnedActor = World->SpawnActor<AActor>();
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_BillBoard"));
+                    UBillboardComponent* BillboardComponent = SpawnedActor->AddComponent<UBillboardComponent>();
+                    BillboardComponent->SetTexture(L"Assets/Editor/Icon/Pawn_64x.png");
+                    break;
+                }
                 case OBJ_END:
                     break;
                 }

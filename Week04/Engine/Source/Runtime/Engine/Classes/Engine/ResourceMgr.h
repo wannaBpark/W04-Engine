@@ -15,6 +15,7 @@ public:
     HRESULT LoadTextureFromDDS(ID3D11Device* device, ID3D11DeviceContext* context, const wchar_t* filename);
 
     std::shared_ptr<FTexture> GetTexture(const FWString& name) const;
+    TArray<FWString> GetAllTextureNames();
 private:
     TMap<FWString, std::shared_ptr<FTexture>> textureMap;
 };

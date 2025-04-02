@@ -167,7 +167,7 @@ void UPrimitiveBatch::RenderAABB(const FBoundingBox& localAABB, const FVector& c
     //FBoundingBox BoundingBox;
     //BoundingBox.min = min;
     //BoundingBox.max = max;
-    //BoundingBoxes.Add(BoundingBox);
+    //BoundingBoxes.Add(BoundingBox);      
 }
 void UPrimitiveBatch::RenderOBB(const FBoundingBox& localAABB, const FVector& center, const FMatrix& modelMatrix)
 {

@@ -4,13 +4,14 @@
 #include "Actors/Player.h"
 #include "Components/LightComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Components/UText.h"
+#include "Components/UTextRenderComponent.h"
 #include "Engine/FLoaderOBJ.h"
 #include "Math/MathUtility.h"
 #include "UnrealEd/ImGuiWidget.h"
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
 #include "GeometryCore/Octree.h"
+#include <Runtime/Engine/Classes/Engine/StringConverter.h>
 
 void PropertyEditorPanel::Render()
 {
@@ -64,9 +65,10 @@ void PropertyEditorPanel::Render()
             // Actor 위치 변화시 옥트리 바운딩 박스 재설정
             if ((PickedActor->GetActorLocation()- Location).Length() > 0.2f)
             {
-                GEngineLoop.GetWorld()->GetOctreeSystem()->UpdateComponentPosition(
-                    Cast<UPrimitiveComponent>(PickedActor->GetRootComponent())
-                );
+                UPrimitiveComponent* primitiveComp = Cast<UPrimitiveComponent>(PickedActor->GetRootComponent());
+                //if (primitiveComp != nullptr) {
+                //    GEngineLoop.GetWorld()->GetOctreeSystem()->UpdateComponentPosition(primitiveComp);
+                //}
             }
             // ---------------------------------- //
             PickedActor->SetActorLocation(Location);
@@ -168,7 +170,7 @@ void PropertyEditorPanel::Render()
 
     // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
     if (PickedActor)
-    if (UText* textOBj = Cast<UText>(PickedActor->GetRootComponent()))
+    if (UTextRenderComponent* textOBj = Cast<UTextRenderComponent>(PickedActor->GetRootComponent()))
     {
         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
         if (ImGui::TreeNodeEx("Text Component", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
@@ -187,7 +189,7 @@ void PropertyEditorPanel::Render()
                 ImGui::Text("Text: ", buf);
                 ImGui::SameLine();
                 ImGui::PushItemFlag(ImGuiItemFlags_NoNavDefaultFocus, true);
-                if (ImGui::InputText("##Text", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue))
+                if (ImGui::InputText("##Text: ", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue))
                 {
                     textOBj->ClearText();
                     int wlen = MultiByteToWideChar(CP_UTF8, 0, buf, -1, nullptr, 0);
@@ -196,12 +198,41 @@ void PropertyEditorPanel::Render()
                     textOBj->SetText(newWText);
                 }
                 ImGui::PopItemFlag();
+
+                
             }
             ImGui::TreePop();
         }
         ImGui::PopStyleColor();
     }
+    if (PickedActor)
+    if (UBillboardComponent* billboardObj = Cast<UBillboardComponent>(PickedActor->GetRootComponent()))
+    {
+        static int selectedIndex = -1;
+        const TArray<FWString> textureList = FEngineLoop::resourceMgr.GetAllTextureNames();
+        UBillboardComponent* billboardComp = Cast<UBillboardComponent>(PickedActor->GetRootComponent());
+        std::string tex;
+        if (ImGui::BeginCombo("Sprite", 
+            ((selectedIndex >= 0 && selectedIndex < textureList.Num()) 
+                ? tex.c_str() : "None"))) {
 
+            for (int i = 0; i < textureList.Num(); ++i) {
+                bool isSelected = (selectedIndex == i);
+                std::string indexedTex = StringConverter::ConvertWCharToChar(textureList[i].c_str());
+                if (ImGui::Selectable(indexedTex.c_str(), isSelected)) {
+                    selectedIndex = i;
+                    tex = StringConverter::ConvertWCharToChar(textureList[selectedIndex].c_str());
+                    billboardComp->SetTexture(textureList[i]);
+                }
+                if (isSelected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::Text("Preview:");
+        ImGui::Image((ImTextureID)billboardComp->GetTexture()->TextureSRV, ImVec2(64, 64));
+
+    }
     // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
     if (PickedActor)
     if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(PickedActor->GetRootComponent()))

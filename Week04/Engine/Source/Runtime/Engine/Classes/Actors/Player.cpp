@@ -21,8 +21,6 @@
 #include "GeometryCore/KDTree.h"
 #include "GeometryCore/BVHNode.h"
 
-#include "GeometryCore/SoftwareZBuffer.h"
-
 using namespace DirectX;
 
 // Picking 성능 측정 저장용 static 구조체
@@ -69,9 +67,9 @@ void AEditorPlayer::Input()
 
             const auto& ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
             ScreenToViewSpace(mousePos.x, mousePos.y, ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix(), pickPosition);
-            //bool res = PickGizmo(pickPosition);   
-            //if (!res) PickActor(pickPosition);
-            /*if (!res) */PickActorBVH(pickPosition);
+            bool res = PickGizmo(pickPosition);   
+            if (!res) PickActor(pickPosition);
+            //if (!res) PickActorBVH(pickPosition);
 
             PickingTimeInfo.LastPickingTime.store(
                 static_cast<float>(CycleCount_PickingTime.Finish())
@@ -249,16 +247,16 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     float minDistance = FLT_MAX;
 
     // 옥트리 시스템 가져오기
-    UWorld* World = GetWorld();
-	BVHSystem* BVH = World->GetBVHSystem();
-    Ray MyRay = GetRayDirection(pickPosition);
-
-#pragma region BVH Ray Intersection
-    TArray<UPrimitiveComponent*> BVHComponents;
-    BVH->Root->QueryRay(MyRay.Origin, MyRay.Direction, BVHComponents);
+//    UWorld* World = GetWorld();
+//	BVHSystem* BVH = World->GetBVHSystem();
+//    Ray MyRay = GetRayDirection(pickPosition);
+//
+//#pragma region BVH Ray Intersection
+//    TArray<UPrimitiveComponent*> BVHComponents;
+//    BVH->Root->QueryRay(MyRay.Origin, MyRay.Direction, BVHComponents);
 
 #pragma endregion
-    for (const auto& iter : BVHComponents)
+    for (const auto iter : TObjectRange<UPrimitiveComponent>())
     {
         UPrimitiveComponent* pObj;
         if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())
@@ -274,7 +272,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
         {
             float Distance = 0.0f;
             int currentIntersectCount = 0;
-            if (RayIntersectsObject(pickPosition, pObj, Distance, currentIntersectCount))
+                if (RayIntersectsObject(pickPosition, pObj, Distance, currentIntersectCount))
             {
                 if (Distance < minDistance)
                 {

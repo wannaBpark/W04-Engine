@@ -1,9 +1,16 @@
-﻿#include "Actor.h"
+#include "Actor.h"
 
 #include "World.h"
-
+#include "Components/UUIDRenderComponent.h"
 void AActor::BeginPlay()
 {
+    UUIDRenderComponent* uuidComp = AddComponent<UUIDRenderComponent>();
+    uuidComp->SetTexture(L"Assets/Texture/font.png");
+    uuidComp->SetRowColumnCount(106, 106);
+    wchar_t buffer[64];
+    swprintf(buffer, sizeof(buffer) / sizeof(wchar_t), L"UUID %d", GetUUID());
+    uuidComp->SetText(buffer);
+    uuidComp->SetupAttachment(RootComponent);
     // TODO: 나중에 삭제를 Pending으로 하던가 해서 복사비용 줄이기
     const auto CopyComponents = OwnedComponents;
     for (UActorComponent* Comp : CopyComponents)
