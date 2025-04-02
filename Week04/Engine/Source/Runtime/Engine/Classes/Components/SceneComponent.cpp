@@ -4,6 +4,12 @@
 #include "UObject/ObjectFactory.h"
 #include "UUIDRenderComponent.h"
 #include "Runtime/Engine/Classes/Components/SceneComponent.h"
+
+USceneComponent::USceneComponent()
+    : RelativeLocation(FVector(0.f, 0.f, 0.f))
+    , RelativeRotation(FVector(0.f, 0.f, 0.f))
+    , RelativeScale3D(FVector(1.f, 1.f, 1.f))
+
 USceneComponent::USceneComponent() :RelativeLocation(FVector(0.f, 0.f, 0.f)), RelativeRotation(FVector(0.f, 0.f, 0.f)), RelativeScale3D(FVector(1.f, 1.f, 1.f))
 {
 }
@@ -67,7 +73,7 @@ void USceneComponent::AddScale(FVector _added)
 
 }
 
-FVector USceneComponent::GetWorldRotation()
+FVector USceneComponent::GetWorldRotation() const
 {
 	if (AttachParent)
 	{
@@ -77,7 +83,7 @@ FVector USceneComponent::GetWorldRotation()
 		return GetLocalRotation();
 }
 
-FVector USceneComponent::GetWorldScale()
+FVector USceneComponent::GetWorldScale() const
 {
 	if (AttachParent)
 	{
@@ -87,7 +93,7 @@ FVector USceneComponent::GetWorldScale()
 		return GetLocalScale();
 }
 
-FVector USceneComponent::GetWorldLocation()
+FVector USceneComponent::GetWorldLocation() const
 {
 	if (AttachParent)
 	{
@@ -97,7 +103,7 @@ FVector USceneComponent::GetWorldLocation()
 		return GetLocalLocation();
 }
 
-FVector USceneComponent::GetLocalRotation()
+FVector USceneComponent::GetLocalRotation() const
 {
 	return JungleMath::QuaternionToEuler(QuatRotation);
 }

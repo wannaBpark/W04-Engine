@@ -1,6 +1,6 @@
 #include "ActorComponent.h"
-
 #include "GameFramework/Actor.h"
+#include "UObject/UObjectArray.h"
 
 
 void UActorComponent::InitializeComponent()

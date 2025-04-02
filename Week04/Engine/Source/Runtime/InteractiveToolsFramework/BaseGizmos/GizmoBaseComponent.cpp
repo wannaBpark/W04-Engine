@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "UnrealEd/EditorViewportClient.h"
+#include "UnrealEd/Editor/EditorEngine.h"
 
 
 int UGizmoBaseComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
@@ -56,7 +57,7 @@ void UGizmoBaseComponent::TickComponent(float DeltaTime)
 {
     Super::TickComponent(DeltaTime);
 
-    if (AActor* PickedActor = GetWorld()->GetSelectedActor())
+    if (AActor* PickedActor = GEditor->GetEditorWorldContext().World()->GetSelectedActor())
     {
         std::shared_ptr<FEditorViewportClient> activeViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
         if (activeViewport->IsPerspective())

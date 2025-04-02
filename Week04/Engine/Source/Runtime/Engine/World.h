@@ -3,6 +3,7 @@
 #include "Container/Set.h"
 #include "UObject/ObjectFactory.h"
 #include "UObject/ObjectMacros.h"
+#include "Engine/Level.h"
 
 class FObjectFactory;
 class AActor;
@@ -11,7 +12,7 @@ class UGizmoArrowComponent;
 class UCameraComponent;
 class AEditorPlayer;
 class USceneComponent;
-class UTransformGizmo;
+class ATransformGizmo;
 class OctreeSystem;
 class KDTreeSystem;
 class BVHSystem;
@@ -43,6 +44,12 @@ public:
     bool DestroyActor(AActor* ThisActor);
 
 private:
+    /* 현재 활성화된 레벨 : 1개로 가정 */
+    ULevel* PersistentLevel = nullptr;
+
+    /* 월드의 타입*/
+    EWorldType WorldType = EWorldType::Editor;
+
     const FString defaultMapName = "Default";
 
     /** World에서 관리되는 모든 Actor의 목록 */
@@ -53,20 +60,23 @@ private:
 
     AActor* SelectedActor = nullptr;
 
-    USceneComponent* pickingGizmo = nullptr;
     AEditorPlayer* EditorPlayer = nullptr;
-    OctreeSystem* Octree;
-    KDTreeSystem* KDTree;
-    BVHSystem* BVH;
-
+    OctreeSystem* Octree = nullptr;
+    KDTreeSystem* KDTree = nullptr;
+    BVHSystem* BVH = nullptr;
 public:
     UObject* worldGizmo = nullptr;
 
-    const TSet<AActor*>& GetActors() const { return ActorsArray; }
+    void SetPersistentLevel(ULevel* InLevel) { PersistentLevel = InLevel; }
+    ULevel* GetPersistentLevel() const { return PersistentLevel; }
 
-    UTransformGizmo* LocalGizmo = nullptr;
+    void SetWorldType(EWorldType InWorldType) { WorldType = InWorldType; }
+    const EWorldType& GetWorldType() const { return WorldType; }
+
+    //const TSet<AActor*>& GetActors() const { return ActorsArray; }
+
+    ATransformGizmo* LocalGizmo = nullptr;
     AEditorPlayer* GetEditorPlayer() const { return EditorPlayer; }
-
 
     // EditorManager 같은데로 보내기
     AActor* GetSelectedActor() const { return SelectedActor; }
@@ -75,21 +85,17 @@ public:
         SelectedActor = InActor;
     }
 
-    UObject* GetWorldGizmo() const { return worldGizmo; }
-    USceneComponent* GetPickingGizmo() const { return pickingGizmo; }
-    void SetPickingGizmo(UObject* Object);
-
-    void SetOctreeSystem(OctreeSystem* InOctree) { Octree = InOctree; }
-    OctreeSystem* GetOctreeSystem() { return Octree; }
+    OctreeSystem* GetOctreeSystem() const { return Octree; }
     void SetOctreeSystem(const TArray<UPrimitiveComponent*>& Components);
+    void SetOctreeSystem(OctreeSystem* InOctree) { Octree = InOctree; }
 
-    void SetKDTreeSystem(KDTreeSystem* InKDTree) { KDTree = InKDTree; }
-    KDTreeSystem* GetKDTreeSystem() { return KDTree; }
+    KDTreeSystem* GetKDTreeSystem() const { return KDTree; }
     void SetKDTreeSystem(const TArray<UPrimitiveComponent*>& Components);
+    void SetKDTreeSystem(KDTreeSystem* InKDTree) { KDTree = InKDTree; }
 
-    void SetBVHSystem(BVHSystem* InBVH) { BVH = InBVH; }
-    BVHSystem* GetBVHSystem() { return BVH; }
+    BVHSystem* GetBVHSystem() const { return BVH; }
     void SetBVHSystem(TArray<UPrimitiveComponent*>& Components);
+    void SetBVHSystem(BVHSystem* InBVH) { BVH = InBVH; }
 };
 
 
@@ -101,8 +107,12 @@ T* UWorld::SpawnActor()
     // TODO: 일단 AddComponent에서 Component마다 초기화
     // 추후에 RegisterComponent() 만들어지면 주석 해제
     // Actor->InitializeComponents();
-    ActorsArray.Add(Actor);
-    PendingBeginPlayActors.Add(Actor);
+    ULevel* TargetLevel = GetPersistentLevel();
+    Actor->SetLevel(TargetLevel);
+
+    TargetLevel->ActorsArray.Add(Actor);
+    TargetLevel->PendingBeginPlayActors.Add(Actor);
+    
     return Actor;
 }
 

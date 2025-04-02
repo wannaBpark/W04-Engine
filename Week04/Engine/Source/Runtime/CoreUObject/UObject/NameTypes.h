@@ -24,4 +24,17 @@ public:
     uint32 GetComparisonIndex() const { return ComparisonIndex; }
 
     bool operator==(const FName& Other) const;
+    bool operator==(ENameNone) const;
+    bool operator!=(const FName& Other) const;
+    bool operator!=(ENameNone) const;
+};
+
+template<>
+struct std::hash<FName>
+{
+    size_t operator()(const FName& Key) const noexcept
+    {
+        // TODO: 나중에 FName에 Number 추가하면 살짝 수정
+        return hash<uint32>()(Key.GetComparisonIndex());
+    }
 };

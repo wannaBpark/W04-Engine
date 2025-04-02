@@ -6,8 +6,9 @@
 #include "GizmoRectangleComponent.h"
 #include "World.h"
 #include "Engine/FLoaderOBJ.h"
+#include "UnrealEd/Editor/EditorEngine.h"
 
-UTransformGizmo::UTransformGizmo()
+ATransformGizmo::ATransformGizmo()
 {
     FManagerOBJ::CreateStaticMesh("Assets/gizmo_loc_x.obj");
     FManagerOBJ::CreateStaticMesh("Assets/gizmo_loc_y.obj");
@@ -78,19 +79,19 @@ UTransformGizmo::UTransformGizmo()
     CircleArr.Add(CircleZ);
 }
 
-void UTransformGizmo::Tick(float DeltaTime)
+void ATransformGizmo::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-    if (const AActor* PickedActor = GetWorld()->GetSelectedActor())
+    if (const AActor* PickedActor = GEditor->GetEditorWorldContext().World()->GetSelectedActor())
     {
         SetActorLocation(PickedActor->GetActorLocation());
-        if (GetWorld()->GetEditorPlayer()->GetCoordiMode() == CoordiMode::CDM_LOCAL)
+        if (GEditor->GetEditorWorldContext().World()->GetEditorPlayer()->GetCoordiMode() == CoordiMode::CDM_LOCAL)
         {
             // TODO: 임시로 RootComponent의 정보로 사용
             SetActorRotation(PickedActor->GetActorRotation());
         }
-        else if (GetWorld()->GetEditorPlayer()->GetCoordiMode() == CoordiMode::CDM_WORLD)
+        else if (GEditor->GetEditorWorldContext().World()->GetEditorPlayer()->GetCoordiMode() == CoordiMode::CDM_WORLD)
             SetActorRotation(FVector(0.0f, 0.0f, 0.0f));
     }
 }

@@ -5,6 +5,27 @@
 #include "Font/RawFonts.h"
 #include "Font/IconDefs.h"
 
+static const ImWchar IconRanges[] = {
+    ICON_MOVE,      ICON_MOVE + 1,
+    ICON_ROTATE,    ICON_ROTATE + 1,
+    ICON_SCALE,     ICON_SCALE + 1,
+    ICON_MONITOR,   ICON_MONITOR + 1,
+    ICON_BAR_GRAPH, ICON_BAR_GRAPH + 1,
+    ICON_NEW,       ICON_NEW + 1,
+    ICON_SAVE,      ICON_SAVE + 1,
+    ICON_LOAD,      ICON_LOAD + 1,
+    ICON_MENU,      ICON_MENU + 1,
+    ICON_SLIDER,    ICON_SLIDER + 1,
+    ICON_PLUS,      ICON_PLUS + 1,
+    0
+};
+
+// Font Awesome 아이콘 범위 설정
+static const ImWchar AwesomeIconRanges[] = {
+	0x0021, 0xF5C8,  // 범위: U+0021 ~ U+F5C8
+	0
+};
+
 void UImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext)
 {
     IMGUI_CHECKVERSION();
@@ -18,22 +39,17 @@ void UImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceCont
     FeatherFontConfig.PixelSnapH = true;
     FeatherFontConfig.FontDataOwnedByAtlas = false;
     FeatherFontConfig.GlyphOffset = ImVec2(0, 0);
-    static const ImWchar IconRanges[] = {
-        ICON_MOVE,      ICON_MOVE + 1,
-        ICON_ROTATE,    ICON_ROTATE + 1,
-        ICON_SCALE,     ICON_SCALE + 1,
-        ICON_MONITOR,   ICON_MONITOR + 1,
-        ICON_BAR_GRAPH, ICON_BAR_GRAPH + 1,
-        ICON_NEW,       ICON_NEW + 1,
-        ICON_SAVE,      ICON_SAVE + 1,
-        ICON_LOAD,      ICON_LOAD + 1,
-        ICON_MENU,      ICON_MENU + 1,
-        ICON_SLIDER,    ICON_SLIDER + 1,
-        ICON_PLUS,      ICON_PLUS + 1,
-        0 };
+    
 
     io.Fonts->AddFontFromMemoryTTF(FeatherRawData, FontSizeOfFeather, 22.0f, &FeatherFontConfig, IconRanges);
     PreferenceStyle();
+
+    ImFontConfig AwesomeFontConfig;
+    //AwesomeFontConfig.MergeMode = true;  // Feather 폰트와 병합
+    AwesomeFontConfig.PixelSnapH = true;
+    AwesomeFontConfig.FontDataOwnedByAtlas = false;
+    AwesomeFontConfig.GlyphOffset = ImVec2(0, 0);
+    io.Fonts->AddFontFromFileTTF("Assets\\Fonts\\fa-regular-400.ttf", 18.0f, &AwesomeFontConfig, AwesomeIconRanges);
 }
 
 void UImGuiManager::BeginFrame() const

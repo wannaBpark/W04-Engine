@@ -13,7 +13,13 @@ private:
     friend class AActor;
 
 public:
-    UActorComponent() = default;
+    UActorComponent()
+        : bHasBeenInitialized(false)
+        , bHasBegunPlay(false)
+        , bIsBeingDestroyed(false)
+        , bIsActive(false)
+    {
+    }
 
     /** AActor가 World에 Spawn되어 BeginPlay이전에 호출됩니다. */
     virtual void InitializeComponent();
@@ -68,9 +74,9 @@ private:
     uint8 bIsBeingDestroyed : 1;
 
     /** Component가 현재 활성화 중인지 여부 */
-    uint8 bIsActive:1;
+    uint8 bIsActive : 1;
 
 public:
     /** Component가 초기화 되었을 때, 자동으로 활성화할지 여부 */
-    uint8 bAutoActive : 1;
+    uint8 bAutoActive : 1 = false;
 };

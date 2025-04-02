@@ -1,6 +1,7 @@
 #include "UTextRenderComponent.h"
 
 #include "World.h"
+#include "Actors/Player.h"
 #include "Engine/Source/Editor/PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "LevelEditor/SLevelEditor.h"
@@ -135,24 +136,26 @@ void UTextRenderComponent::SetTexture(FWString _fileName)
 
 void UTextRenderComponent::SetText(FWString _text)
 {
-	text = _text;
-	if (_text.empty())
-	{
-		Console::GetInstance().AddLog(LogLevel::Warning, "Text is empty");
+    text = _text;
+    quad.Empty(); // Clear the quad array to prevent accumulation of vertices.
 
-		vertexTextureArr.Empty();
-		quad.Empty();
+    if (_text.empty())
+    {
+        Console::GetInstance().AddLog(LogLevel::Warning, "Text is empty");
 
-		// 기존 버텍스 버퍼가 있다면 해제
-		if (vertexTextBuffer)
-		{
-			vertexTextBuffer->Release();
-			vertexTextBuffer = nullptr;
-		}
-		return;
-	}
+        vertexTextureArr.Empty();
+        quad.Empty();
+
+        // 기존 버텍스 버퍼가 있다면 해제
+        if (vertexTextBuffer)
+        {
+            vertexTextBuffer->Release();
+            vertexTextBuffer = nullptr;
+        }
+        return;
+    }
+
 	int textSize = static_cast<int>(_text.size());
-
 
 	uint32 BitmapWidth = Texture->width;
 	uint32 BitmapHeight = Texture->height;
@@ -369,7 +372,7 @@ void UTextRenderComponent::TextMVPRendering()
     FMatrix MVP = Model * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix() * GetEngine().GetLevelEditor()->GetActiveViewportClient()->GetProjectionMatrix();
     FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
     FVector4 UUIDColor = EncodeUUID() / 255.0f;
-    if (this == GetWorld()->GetPickingGizmo()) {
+    if (this == GetWorld()->GetEditorPlayer()->GetPickedGizmoComponent()) {
         FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
     }
     else
