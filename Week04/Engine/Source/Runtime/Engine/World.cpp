@@ -3,14 +3,15 @@
 #include "Actors/Player.h"
 #include "BaseGizmos/TransformGizmo.h"
 #include "Camera/CameraComponent.h"
-#include "LevelEditor/SLevelEditor.h"
-#include "UObject/UObjectIterator.h"
 #include "Components/PrimitiveComponent.h"
-#include "Runtime/GeometryCore/Octree.h"
-#include "GeometryCore/KDTree.h"
 #include "GeometryCore/BVHNode.h"
+#include "GeometryCore/KDTree.h"
+#include "LevelEditor/SLevelEditor.h"
 #include "Runtime/Engine/Level.h"
+#include "Runtime/GeometryCore/Octree.h"
 #include "UObject/UObjectArray.h"
+#include "UObject/UObjectIterator.h"
+
 
 void UWorld::Initialize()
 {
@@ -27,7 +28,7 @@ void UWorld::CreateBaseObject()
 
 	if (LocalGizmo == nullptr)
 	{
-		LocalGizmo = FObjectFactory::ConstructObject<UTransformGizmo>();
+		LocalGizmo = FObjectFactory::ConstructObject<ATransformGizmo>();
 	}
 	
 	// 단일 Level이라 가정
@@ -42,16 +43,15 @@ void UWorld::ReleaseBaseObject()
 {
     if (LocalGizmo)
     {
-        delete LocalGizmo;
+        LocalGizmo->MarkAsGarbage();
         LocalGizmo = nullptr;
     }
 
     if (EditorPlayer)
     {
-        delete EditorPlayer;
+        EditorPlayer->MarkAsGarbage();
         EditorPlayer = nullptr;
     }
-
 }
 
 void UWorld::Tick(float DeltaTime)

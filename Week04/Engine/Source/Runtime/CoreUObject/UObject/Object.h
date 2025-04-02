@@ -66,11 +66,12 @@ public:
         return IsA(T::StaticClass());
     }
 
+    /** Object를 Pending Destroy 상태로 바꿈니다. */
+    void MarkAsGarbage();
+
 public:
     void* operator new(size_t size)
     {
-        //UE_LOG(LogLevel::Display, "UObject Created : %d", size);
-
         void* RawMemory = FPlatformMemory::Malloc<EAT_Object>(size);
         UE_LOG(
             LogLevel::Display,
@@ -79,6 +80,11 @@ public:
             FPlatformMemory::GetAllocationCount<EAT_Object>()
         );
         return RawMemory;
+    }
+
+    void* operator new(size_t, void* ptr)
+    {
+        return ptr;
     }
 
     void operator delete(void* ptr, size_t size)
