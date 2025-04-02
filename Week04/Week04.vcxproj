@@ -247,6 +247,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\QuadTexture.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.cpp" />
     <ClCompile Include="Engine\Source\Runtime\GeometryCore\KDTree.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Level.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\Editor\UnrealEd\Editor\EditorEngine.h" />
@@ -368,6 +369,7 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UTextUUID.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\World.h" />
     <ClInclude Include="Engine\Source\Runtime\GeometryCore\KDTree.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Level.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\StaticMeshPixelShader.hlsl">

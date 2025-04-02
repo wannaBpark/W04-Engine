@@ -24,7 +24,7 @@ struct FWorldContext
     }
 
     FWorldContext()
-        : WorldType(EWorldType::Editor)
+        : WorldType(EWorldType::Editor) // 기본 설정 : Editor
         , PIEInstance(INDEX_NONE)
         , ThisCurrentWorld(nullptr)
     {
@@ -48,7 +48,7 @@ class UEditorEngine final : public UObject
     void EndPIE();
 };
 
-void UEditorEngine::Tick(float DeltaSeconds)
+void UEditorEngine::Tick(float DeltaTime)
 {
     // Editor 전용 액터 Tick 처리
     for (FWorldContext& WorldContext : WorldContexts)
@@ -58,6 +58,8 @@ void UEditorEngine::Tick(float DeltaSeconds)
 
         if (EditorWorld && CurrentWorldType == EWorldType::Editor)
         {
+            EditorWorld->Tick(DeltaTime);
+            
             const ULevel* Level = EditorWorld->GetPersistentLevel();
             {
                 for (AActor* Actor : Level->GetActors())
@@ -71,6 +73,8 @@ void UEditorEngine::Tick(float DeltaSeconds)
         }
         else if (EditorWorld && CurrentWorldType == EWorldType::PIE)
         {
+            EditorWorld->Tick(DeltaTime);
+
             ULevel* Level = EditorWorld->GetPersistentLevel();
             {
                 for (AActor* Actor : Level->GetActors())

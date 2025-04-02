@@ -8,6 +8,7 @@
 #include "UObject/ObjectMacros.h"
 
 
+class ULevel;
 class UActorComponent;
 
 class AActor : public UObject
@@ -93,6 +94,9 @@ private:
     /** 이 Actor를 소유하고 있는 다른 Actor의 정보 */
     AActor* Owner = nullptr;
 
+    /* 이 Actor를 소유하고 있는 Level */
+    ULevel* Level = nullptr;
+
     /** 본인이 소유하고 있는 컴포넌트들의 정보 */
     TArray<UActorComponent*> OwnedComponents;
 
@@ -105,6 +109,9 @@ private:
 public:
     void SetTickInEditor(bool bIsTickInEditor) { bTickInEditor = bIsTickInEditor; }
     const bool& GetTickInEditor() const { return bTickInEditor; }
+
+    void SetLevel(ULevel* InLevel);
+    ULevel* GetLevel() const;
 
 #if 1 // TODO: WITH_EDITOR 추가
 public:

@@ -3,6 +3,7 @@
 #include "Container/Set.h"
 #include "UObject/ObjectFactory.h"
 #include "UObject/ObjectMacros.h"
+#include "Engine/Level.h"
 
 class FObjectFactory;
 class AActor;
@@ -16,7 +17,6 @@ class OctreeSystem;
 class KDTreeSystem;
 class BVHSystem;
 class UPrimitiveComponent;
-class ULevel;
 
 class UWorld : public UObject
 {
@@ -44,7 +44,7 @@ public:
     bool DestroyActor(AActor* ThisActor);
 
 private:
-    /* 현재 활성화된 레벨 */
+    /* 현재 활성화된 레벨 : 1개로 가정 */
     ULevel* PersistentLevel;
 
     /* 월드의 타입*/
@@ -69,7 +69,7 @@ public:
     UObject* worldGizmo = nullptr;
 
     void SetPersistentLevel(ULevel* InLevel) { PersistentLevel = InLevel; }
-    const ULevel* GetPersistentLevel() const { return PersistentLevel; }
+    ULevel* GetPersistentLevel() const { return PersistentLevel; }
 
     void SetWorldType(EWorldType InWorldType) { WorldType = InWorldType; }
     const EWorldType& GetWorldType() const { return WorldType; }
@@ -112,6 +112,13 @@ T* UWorld::SpawnActor()
     // TODO: 일단 AddComponent에서 Component마다 초기화
     // 추후에 RegisterComponent() 만들어지면 주석 해제
     // Actor->InitializeComponents();
+    ULevel* TargetLevel = GetPersistentLevel();
+    Actor->SetLevel(TargetLevel);
+
+    TargetLevel->ActorsArray.Add(Actor);
+    TargetLevel->PendingBeginPlayActors.Add(Actor);
+    
+    // TODO 
     ActorsArray.Add(Actor);
     PendingBeginPlayActors.Add(Actor);
     return Actor;
