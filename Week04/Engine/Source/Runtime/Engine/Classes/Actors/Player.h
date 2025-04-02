@@ -41,6 +41,8 @@ public:
     void AddControlMode();
     void AddCoordiMode();
 
+    USceneComponent* GetPickedGizmoComponent() const { return PickedGizmoComponent; }
+
 public:
     void SetMode(ControlMode InMode) { cMode = InMode; }
     ControlMode GetControlMode() const { return cMode; }
@@ -60,6 +62,8 @@ private:
     bool bLeftMouseDown = false;
     bool bRightMouseDown = false;
     bool bSpaceDown = false;
+
+    USceneComponent* PickedGizmoComponent = nullptr;
 
     POINT m_LastMousePos;
     ControlMode cMode = CM_TRANSLATION;
