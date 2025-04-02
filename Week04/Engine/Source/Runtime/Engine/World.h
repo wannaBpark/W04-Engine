@@ -11,7 +11,7 @@ class UGizmoArrowComponent;
 class UCameraComponent;
 class AEditorPlayer;
 class USceneComponent;
-class UTransformGizmo;
+class ATransformGizmo;
 class OctreeSystem;
 class KDTreeSystem;
 class BVHSystem;
@@ -64,7 +64,7 @@ public:
 
     const TSet<AActor*>& GetActors() const { return ActorsArray; }
 
-    UTransformGizmo* LocalGizmo = nullptr;
+    ATransformGizmo* LocalGizmo = nullptr;
     AEditorPlayer* GetEditorPlayer() const { return EditorPlayer; }
 
 
