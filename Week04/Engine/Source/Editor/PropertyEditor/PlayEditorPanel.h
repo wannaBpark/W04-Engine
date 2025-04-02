@@ -5,6 +5,8 @@
 class PlayEditorPanel : public IEditorPanel
 {
 public:
+	PlayEditorPanel() = default;
+public:
     virtual void Render() override;
     virtual void OnResize(HWND hWnd) override;
 

@@ -10,8 +10,8 @@ void PlayEditorPanel::Render()
     float PanelWidth = (Width) * 0.8f;
     float PanelHeight = 45.0f;
 
-    float PanelPosX = 525.0f;
-    float PanelPosY = 1.0f;
+    float PanelPosX = 1.0f;
+    float PanelPosY = 120.0f;
 
     ImVec2 MinSize(300, 50);
     ImVec2 MaxSize(FLT_MAX, 50);
@@ -24,6 +24,9 @@ void PlayEditorPanel::Render()
 
     /* Panel Flags */
     ImGuiWindowFlags PanelFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBackground;
+
+    /* 포커스 활성화 */
+    //ImGui::SetNextWindowFocus();
 
     /* Render Start */
     ImGui::Begin("Play Mode Panel", nullptr, PanelFlags);
