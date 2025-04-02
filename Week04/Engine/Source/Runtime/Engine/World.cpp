@@ -39,18 +39,11 @@ void UWorld::ReleaseBaseObject()
         LocalGizmo = nullptr;
     }
 
-    if (worldGizmo)
-    {
-        delete worldGizmo;
-        worldGizmo = nullptr;
-    }
-
     if (EditorPlayer)
     {
         delete EditorPlayer;
         EditorPlayer = nullptr;
     }
-
 }
 
 void UWorld::Tick(float DeltaTime)
