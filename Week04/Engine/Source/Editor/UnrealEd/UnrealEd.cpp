@@ -9,6 +9,9 @@
 
 void UnrealEd::Initialize()
 {
+    const auto PlayModePanel = std::make_shared<PlayEditorPanel>();
+    Panels["PlayModePanel"] = PlayModePanel;
+
     const auto ControlPanel = std::make_shared<ControlEditorPanel>();
     Panels["ControlPanel"] = ControlPanel;
     
@@ -21,8 +24,6 @@ void UnrealEd::Initialize()
     const auto FPSIndicator = std::make_shared<FFpsIndicator>();
     Panels["FPSIndicator"] = FPSIndicator;
     
-    const auto PlayModePanel = std::make_shared<PlayEditorPanel>();
-    Panels["PlayModePanel"] = PlayModePanel;
 }
 
 void UnrealEd::Render() const
