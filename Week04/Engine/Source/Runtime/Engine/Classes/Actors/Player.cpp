@@ -32,8 +32,8 @@ void AEditorPlayer::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
     Input();
     // Octree없이 프러스텀 컬링 주석.
-    //UpdateVisibleStaticMeshComponents();
-    UpdateVisibleStaticMeshComponentsWithOctree();
+    UpdateVisibleStaticMeshComponents();
+    //UpdateVisibleStaticMeshComponentsWithOctree();
 }
 
 void AEditorPlayer::Input()
@@ -257,7 +257,7 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     //BVH->Root->QueryRay(MyRay.Origin, MyRay.Direction, BVHComponents);
 
 #pragma endregion
-    /*for (const auto& iter : BVHComponents)
+    for (const auto& iter : TObjectRange<UPrimitiveComponent>())
     {
         UPrimitiveComponent* pObj;
         if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())
@@ -288,8 +288,8 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
                 }
             }
         }
-    }*/
-    Possible = BVH ? BVH->Root->QueryRayClosestBestFirst(MyRay.Origin, MyRay.Direction) : nullptr;
+    }
+    //Possible = BVH ? BVH->Root->QueryRayClosestBestFirst(MyRay.Origin, MyRay.Direction) : nullptr;
 
     if (Possible)
     {

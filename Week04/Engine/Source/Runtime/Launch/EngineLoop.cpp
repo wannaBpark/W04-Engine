@@ -125,8 +125,6 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     GEditor = FObjectFactory::ConstructObject<UEditorEngine>();
     GEditor->Initialize();
 
-    /*GWorld = FObjectFactory::ConstructObject<UWorld>();
-    GWorld->Initialize();*/
 
     return 0;
 }
@@ -194,7 +192,6 @@ void FEngineLoop::Tick()
 
         Input();
         GEditor->Tick(elapsedTime);
-        //GWorld->Tick(elapsedTime);
         LevelEditor->Tick(elapsedTime);
         Render();
         UIMgr->BeginFrame();
