@@ -89,8 +89,8 @@ void AEditorPlayer::Input()
     {
         if (bLeftMouseDown)
         {
-            bLeftMouseDown = false; // ���콺 ������ ��ư�� ���� ���� �ʱ�ȭ
-            GetWorld()->SetPickingGizmo(nullptr);
+            bLeftMouseDown = false;
+            PickedGizmoComponent = nullptr;
         }
     }
     if (GetAsyncKeyState(VK_SPACE) & 0x8000)
@@ -155,26 +155,26 @@ bool AEditorPlayer::PickGizmo(const FVector& rayOrigin)
     {
         if (cMode == CM_TRANSLATION)
         {
-            for (auto iter : GetWorld()->LocalGizmo->GetArrowArr()) // 3개의 ArrowArr 순회
+            for (auto GizmoComp : GetWorld()->LocalGizmo->GetArrowArr()) // 3개의 ArrowArr 순회
             {
                 int maxIntersect = 0;
                 float minDistance = FLT_MAX;
                 float Distance = 0.0f;
                 int currentIntersectCount = 0;
-                if (!iter) continue;
-                if (RayIntersectsObject(rayOrigin, iter, Distance, currentIntersectCount))
+                if (!GizmoComp) continue;
+                if (RayIntersectsObject(rayOrigin, GizmoComp, Distance, currentIntersectCount))
                 {
                     if (Distance < minDistance)
                     {
                         minDistance = Distance;
                         maxIntersect = currentIntersectCount;
-                        GetWorld()->SetPickingGizmo(iter);
+                        PickedGizmoComponent = GizmoComp;
                         isPickedGizmo = true;
                     }
                     else if (abs(Distance - minDistance) < FLT_EPSILON && currentIntersectCount > maxIntersect)
                     {
                         maxIntersect = currentIntersectCount;
-                        GetWorld()->SetPickingGizmo(iter);
+                        PickedGizmoComponent = GizmoComp;
                         isPickedGizmo = true;
                     }
                 }
@@ -182,27 +182,27 @@ bool AEditorPlayer::PickGizmo(const FVector& rayOrigin)
         }
         else if (cMode == CM_ROTATION)
         {
-            for (auto iter : GetWorld()->LocalGizmo->GetDiscArr())          // 3개의 rotation 디스크 모양 교차 검사
+            for (auto GizmoComp : GetWorld()->LocalGizmo->GetDiscArr())          // 3개의 rotation 디스크 모양 교차 검사
             {
                 int maxIntersect = 0;
                 float minDistance = FLT_MAX;
                 float Distance = 0.0f;
                 int currentIntersectCount = 0;
                 //UPrimitiveComponent* localGizmo = dynamic_cast<UPrimitiveComponent*>(GetWorld()->LocalGizmo[i]);
-                if (!iter) continue;
-                if (RayIntersectsObject(rayOrigin, iter, Distance, currentIntersectCount))
+                if (!GizmoComp) continue;
+                if (RayIntersectsObject(rayOrigin, GizmoComp, Distance, currentIntersectCount))
                 {
                     if (Distance < minDistance)
                     {
                         minDistance = Distance;
                         maxIntersect = currentIntersectCount;
-                        GetWorld()->SetPickingGizmo(iter);
+                        PickedGizmoComponent = GizmoComp;
                         isPickedGizmo = true;
                     }
                     else if (abs(Distance - minDistance) < FLT_EPSILON && currentIntersectCount > maxIntersect)
                     {
                         maxIntersect = currentIntersectCount;
-                        GetWorld()->SetPickingGizmo(iter);
+                        PickedGizmoComponent = GizmoComp;
                         isPickedGizmo = true;
                     }
                 }
@@ -210,26 +210,26 @@ bool AEditorPlayer::PickGizmo(const FVector& rayOrigin)
         }
         else if (cMode == CM_SCALE)
         {
-            for (auto iter : GetWorld()->LocalGizmo->GetScaleArr())
+            for (auto GizmoComp : GetWorld()->LocalGizmo->GetScaleArr())
             {
                 int maxIntersect = 0;
                 float minDistance = FLT_MAX;
                 float Distance = 0.0f;
                 int currentIntersectCount = 0;
-                if (!iter) continue;
-                if (RayIntersectsObject(rayOrigin, iter, Distance, currentIntersectCount))
+                if (!GizmoComp) continue;
+                if (RayIntersectsObject(rayOrigin, GizmoComp, Distance, currentIntersectCount))
                 {
                     if (Distance < minDistance)
                     {
                         minDistance = Distance;
                         maxIntersect = currentIntersectCount;
-                        GetWorld()->SetPickingGizmo(iter);
+                        PickedGizmoComponent = GizmoComp;
                         isPickedGizmo = true;
                     }
                     else if (abs(Distance - minDistance) < FLT_EPSILON && currentIntersectCount > maxIntersect)
                     {
                         maxIntersect = currentIntersectCount;
-                        GetWorld()->SetPickingGizmo(iter);
+                        PickedGizmoComponent = GizmoComp;
                         isPickedGizmo = true;
                     }
                 }
@@ -428,7 +428,7 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
 
 void AEditorPlayer::PickedObjControl()
 {
-    if (GetWorld()->GetSelectedActor() && GetWorld()->GetPickingGizmo())
+    if (GetWorld()->GetSelectedActor() && GetWorld()->GetEditorPlayer()->GetPickedGizmoComponent())
     {
         POINT currentMousePos;
         GetCursorPos(&currentMousePos);
@@ -437,7 +437,7 @@ void AEditorPlayer::PickedObjControl()
 
         // USceneComponent* pObj = GetWorld()->GetPickingObj();
         AActor* PickedActor = GetWorld()->GetSelectedActor();
-        UGizmoBaseComponent* Gizmo = static_cast<UGizmoBaseComponent*>(GetWorld()->GetPickingGizmo());
+        UGizmoBaseComponent* Gizmo = static_cast<UGizmoBaseComponent*>(GetWorld()->GetEditorPlayer()->GetPickedGizmoComponent());
         switch (cMode)
         {
         case CM_TRANSLATION:

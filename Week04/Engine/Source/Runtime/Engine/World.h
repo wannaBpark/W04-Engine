@@ -60,7 +60,6 @@ private:
 
     AActor* SelectedActor = nullptr;
 
-    USceneComponent* pickingGizmo = nullptr;
     AEditorPlayer* EditorPlayer = nullptr;
     OctreeSystem* Octree;
     KDTreeSystem* KDTree;
@@ -79,7 +78,6 @@ public:
     UTransformGizmo* LocalGizmo = nullptr;
     AEditorPlayer* GetEditorPlayer() const { return EditorPlayer; }
 
-
     // EditorManager 같은데로 보내기
     AActor* GetSelectedActor() const { return SelectedActor; }
     void SetPickedActor(AActor* InActor)
@@ -87,20 +85,17 @@ public:
         SelectedActor = InActor;
     }
 
-    UObject* GetWorldGizmo() const { return worldGizmo; }
-    USceneComponent* GetPickingGizmo() const { return pickingGizmo; }
-    void SetPickingGizmo(UObject* Object);
-
-    void SetOctreeSystem(OctreeSystem* InOctree) { Octree = InOctree; }
     void SetOctreeSystem(const TArray<UPrimitiveComponent*>& Components);
-    void SetKDTreeSystem(KDTreeSystem* InKDTree) { KDTree = InKDTree; }
-    void SetKDTreeSystem(const TArray<UPrimitiveComponent*>& Components);
-    void SetBVHSystem(BVHSystem* InBVH) { BVH = InBVH; }
-    void SetBVHSystem(TArray<UPrimitiveComponent*>& Components);
+    void SetOctreeSystem(OctreeSystem* InOctree) { Octree = InOctree; }
+    OctreeSystem* GetOctreeSystem() const { return Octree; }
 
-    OctreeSystem* GetOctreeSystem() { return Octree; }
-    KDTreeSystem* GetKDTreeSystem() { return KDTree; }
-    BVHSystem* GetBVHSystem() { return BVH; }
+    void SetKDTreeSystem(const TArray<UPrimitiveComponent*>& Components);
+    void SetKDTreeSystem(KDTreeSystem* InKDTree) { KDTree = InKDTree; }
+    KDTreeSystem* GetKDTreeSystem() const { return KDTree; }
+    
+    void SetBVHSystem(TArray<UPrimitiveComponent*>& Components);
+    void SetBVHSystem(BVHSystem* InBVH) { BVH = InBVH; }
+    BVHSystem* GetBVHSystem() const { return BVH; }
 };
 
 

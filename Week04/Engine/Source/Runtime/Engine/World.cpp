@@ -10,7 +10,7 @@
 #include "GeometryCore/KDTree.h"
 #include "GeometryCore/BVHNode.h"
 #include "Runtime/Engine/Level.h"
-
+#include "UObject/UObjectArray.h"
 
 void UWorld::Initialize()
 {
@@ -44,12 +44,6 @@ void UWorld::ReleaseBaseObject()
     {
         delete LocalGizmo;
         LocalGizmo = nullptr;
-    }
-
-    if (worldGizmo)
-    {
-        delete worldGizmo;
-        worldGizmo = nullptr;
     }
 
     if (EditorPlayer)
@@ -97,8 +91,7 @@ void UWorld::Release()
 	}
     ActorsArray.Empty();
 
-	pickingGizmo = nullptr;
-	ReleaseBaseObject();
+    ReleaseBaseObject();
 
     GUObjectArray.ProcessPendingDestroyObjects();
 }
@@ -142,11 +135,6 @@ bool UWorld::DestroyActor(AActor* ThisActor)
     // 제거 대기열에 추가
     GUObjectArray.MarkRemoveObject(ThisActor);
     return true;
-}
-
-void UWorld::SetPickingGizmo(UObject* Object)
-{
-	pickingGizmo = Cast<USceneComponent>(Object);
 }
 
 void UWorld::SetOctreeSystem(const TArray<UPrimitiveComponent*>& Components)
