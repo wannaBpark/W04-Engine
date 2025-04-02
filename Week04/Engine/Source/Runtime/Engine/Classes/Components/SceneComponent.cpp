@@ -3,128 +3,113 @@
 #include "Math/JungleMath.h"
 #include "UObject/ObjectFactory.h"
 #include "UUIDRenderComponent.h"
-#include "Runtime/Engine/Classes/Components/SceneComponent.h"
+
+// 중복 제거됨
 
 USceneComponent::USceneComponent()
     : RelativeLocation(FVector(0.f, 0.f, 0.f))
     , RelativeRotation(FVector(0.f, 0.f, 0.f))
     , RelativeScale3D(FVector(1.f, 1.f, 1.f))
-
-USceneComponent::USceneComponent() :RelativeLocation(FVector(0.f, 0.f, 0.f)), RelativeRotation(FVector(0.f, 0.f, 0.f)), RelativeScale3D(FVector(1.f, 1.f, 1.f))
 {
+    QuatRotation = JungleMath::EulerToQuaternion(RelativeRotation);
 }
 
 void USceneComponent::InitializeComponent()
 {
     Super::InitializeComponent();
-
 }
 
 void USceneComponent::TickComponent(float DeltaTime)
 {
-	Super::TickComponent(DeltaTime);
+    Super::TickComponent(DeltaTime);
 }
 
-
-int USceneComponent::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float& pfNearHitDistance)
+int USceneComponent::CheckRayIntersection(FVector& RayOrigin, FVector& RayDirection, float& OutNearHitDistance)
 {
-
     int nIntersections = 0;
     return nIntersections;
 }
 
 FVector USceneComponent::GetForwardVector()
 {
-	FVector Forward = FVector(1.f, 0.f, 0.0f);
-	Forward = JungleMath::FVectorRotate(Forward, QuatRotation);
-	return Forward;
+    FVector Forward = FVector(1.f, 0.f, 0.0f);
+    return JungleMath::FVectorRotate(Forward, QuatRotation);
 }
 
 FVector USceneComponent::GetRightVector()
 {
-	FVector Right = FVector(0.f, 1.f, 0.0f);
-	Right = JungleMath::FVectorRotate(Right, QuatRotation);
-	return Right;
+    FVector Right = FVector(0.f, 1.f, 0.0f);
+    return JungleMath::FVectorRotate(Right, QuatRotation);
 }
 
 FVector USceneComponent::GetUpVector()
 {
-	FVector Up = FVector(0.f, 0.f, 1.0f);
-	Up = JungleMath::FVectorRotate(Up, QuatRotation);
-	return Up;
+    FVector Up = FVector(0.f, 0.f, 1.0f);
+    return JungleMath::FVectorRotate(Up, QuatRotation);
 }
 
-
-void USceneComponent::AddLocation(FVector _added)
+void USceneComponent::AddLocation(FVector Added)
 {
-	RelativeLocation = RelativeLocation + _added;
-
+    RelativeLocation += Added;
 }
 
-void USceneComponent::AddRotation(FVector _added)
+void USceneComponent::AddRotation(FVector Added)
 {
-	RelativeRotation = RelativeRotation + _added;
-
+    RelativeRotation += Added;
+    QuatRotation = JungleMath::EulerToQuaternion(RelativeRotation);
 }
 
-void USceneComponent::AddScale(FVector _added)
+void USceneComponent::AddScale(FVector Added)
 {
-	RelativeScale3D = RelativeScale3D + _added;
-
+    RelativeScale3D += Added;
 }
 
 FVector USceneComponent::GetWorldRotation() const
 {
-	if (AttachParent)
-	{
-		return FVector(AttachParent->GetLocalRotation() + GetLocalRotation());
-	}
-	else
-		return GetLocalRotation();
+    if (AttachParent)
+    {
+        return AttachParent->GetLocalRotation() + GetLocalRotation();
+    }
+    return GetLocalRotation();
 }
 
 FVector USceneComponent::GetWorldScale() const
 {
-	if (AttachParent)
-	{
-		return FVector(AttachParent->GetWorldScale() + GetLocalScale());
-	}
-	else
-		return GetLocalScale();
+    if (AttachParent)
+    {
+        return AttachParent->GetWorldScale() * GetLocalScale(); // Scale은 곱셈
+    }
+    return GetLocalScale();
 }
 
 FVector USceneComponent::GetWorldLocation() const
 {
-	if (AttachParent)
-	{
-		return FVector(AttachParent->GetWorldLocation() + GetLocalLocation());
-	}
-	else
-		return GetLocalLocation();
+    if (AttachParent)
+    {
+        return AttachParent->GetWorldLocation() + GetLocalLocation();
+    }
+    return GetLocalLocation();
 }
 
 FVector USceneComponent::GetLocalRotation() const
 {
-	return JungleMath::QuaternionToEuler(QuatRotation);
+    return JungleMath::QuaternionToEuler(QuatRotation);
 }
 
-void USceneComponent::SetRotation(FVector _newRot)
+void USceneComponent::SetRotation(FVector NewRotation)
 {
-	RelativeRotation = _newRot;
-	QuatRotation = JungleMath::EulerToQuaternion(_newRot);
+    RelativeRotation = NewRotation;
+    QuatRotation = JungleMath::EulerToQuaternion(NewRotation);
 }
 
 void USceneComponent::SetupAttachment(USceneComponent* InParent)
 {
     if (
-        InParent != AttachParent                                  // 설정하려는 Parent가 기존의 Parent와 다르거나
-        && InParent != this                                       // InParent가 본인이 아니고
-        && InParent != nullptr                                    // InParent가 유효한 포인터 이며
-        && (
-            AttachParent == nullptr                               // AttachParent도 유효하며
-            || !AttachParent->AttachChildren.Contains(this)  // 이미 AttachParent의 자식이 아닌 경우
-        ) 
-    ) {
+        InParent != AttachParent &&
+        InParent != this &&
+        InParent != nullptr &&
+        (AttachParent == nullptr || !AttachParent->AttachChildren.Contains(this))
+        ) {
         AttachParent = InParent;
         InParent->AttachChildren.AddUnique(this);
     }

@@ -28,7 +28,7 @@ void AEditorPlayer::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     Input();
-    // Octree없이 프러스텀 컬링 주석.
+    // Octree없이 프러스텀 컬링
     UpdateVisibleStaticMeshComponents();
     //UpdateVisibleStaticMeshComponentsWithOctree();
 }

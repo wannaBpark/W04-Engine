@@ -1247,7 +1247,8 @@ void FRenderer::RenderTexts(const std::shared_ptr<FEditorViewportClient>& Active
         FMatrix MVP = Model * ActiveViewport->GetViewMatrix() * ActiveViewport->GetProjectionMatrix();
         FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
         FVector4 UUIDColor = textComp->EncodeUUID() / 255.0f;
-        if (textComp == GEngineLoop.GetWorld()->GetPickingGizmo())
+
+        if (textComp == GEngineLoop.GetWorld()->GetEditorPlayer()->GetPickedGizmoComponent())
             UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
         else
             UpdateConstant(MVP, NormalMatrix, UUIDColor, false);

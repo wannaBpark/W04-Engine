@@ -379,6 +379,7 @@ void UTextRenderComponent::TextMVPRendering()
         FEngineLoop::renderer.UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
 
     if (ShowFlags::GetInstance().currentFlags & static_cast<uint64>(EEngineShowFlags::SF_BillboardText)) {
+
         FEngineLoop::renderer.RenderTextPrimitive(vertexTextBuffer, numTextVertices,
             Texture->TextureSRV, Texture->SamplerState);
     }
