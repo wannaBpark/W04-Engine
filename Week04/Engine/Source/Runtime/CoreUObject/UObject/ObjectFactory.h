@@ -11,13 +11,14 @@ public:
         requires std::derived_from<T, UObject>
     static T* ConstructObject()
     {
-        uint32 id = UEngineStatics::GenUUID();
-        FString Name = T::StaticClass()->GetName() + "_" + std::to_string(id);
+        uint32 Id = UEngineStatics::GenUUID();
+        FString Name = T::StaticClass()->GetName() + "_" + std::to_string(Id);
 
-        T* Obj = new T;  // TODO: FPlatformMemory::Malloc으로 변경, placement new 사용시 Free방법 생각하기
+        // TODO: FPlatformMemory::Malloc으로 변경, placement new 사용시 Free방법 생각하기
+        T* Obj = new T(T::StaticClass()->GetDefaultObject());
         Obj->ClassPrivate = T::StaticClass();
         Obj->NamePrivate = Name;
-        Obj->UUID = id;
+        Obj->UUID = Id;
 
         GUObjectArray.AddObject(Obj);
 
