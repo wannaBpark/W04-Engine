@@ -1,4 +1,6 @@
 #include "UObject/Object.h"
+#include "CoreUObject/UObject/UObjectArray.h"
+#include "Engine/World.h"
 
 struct FWorldContext
 {
@@ -13,31 +15,37 @@ struct FWorldContext
     float PIEAccumulatedTickSeconds = 0.f;
 
     /** Set CurrentWorld and update external reference pointers to reflect this*/
-    void SetCurrentWorld(UWorld* World) { ThisCurrentWorld = std::make_shared<UWorld>(World); }
+    void SetCurrentWorld(UWorld* World) { ThisCurrentWorld = World; }
 
 
     FORCEINLINE UWorld* World() const
     {
-        return ThisCurrentWorld.get();
+        return ThisCurrentWorld;
     }
 
     FWorldContext()
-        : WorldType(EWorldType::None)
+        : WorldType(EWorldType::Editor)
         , PIEInstance(INDEX_NONE)
         , ThisCurrentWorld(nullptr)
     {
     }
 
+    ~FWorldContext() { GUObjectArray.MarkRemoveObject(ThisCurrentWorld); }
+
 private:
-    std::shared_ptr<UWorld>	ThisCurrentWorld;
+    UWorld*	ThisCurrentWorld;
 };
 
 
-class UEditorEngine : public UObject
+class ULevel;
+
+class UEditorEngine final : public UObject
 {
     TArray<FWorldContext> WorldContexts;
 
     virtual void Tick(float DeltaSeconds);
+    void StartPIE();
+    void EndPIE();
 };
 
 void UEditorEngine::Tick(float DeltaSeconds)
@@ -46,24 +54,26 @@ void UEditorEngine::Tick(float DeltaSeconds)
     for (FWorldContext& WorldContext : WorldContexts)
     {
         UWorld* EditorWorld = WorldContext.World();
-        if (EditorWorld && EditorWorld->WorldType == EWorldType::Editor)
+        EWorldType CurrentWorldType = EditorWorld->GetWorldType();
+
+        if (EditorWorld && CurrentWorldType == EWorldType::Editor)
         {
-            ULevel* Level = EditorWorld->Level;
+            const ULevel* Level = EditorWorld->GetPersistentLevel();
             {
-                for (AActor* Actor : Level->Actors)
+                for (AActor* Actor : Level->GetActors())
                 {
-                    if (Actor && Actor->bTickInEditor)
+                    if (Actor && Actor->GetTickInEditor())
                     {
                         Actor->Tick(DeltaSeconds);
                     }
                 }
             }
         }
-        else if (EditorWorld && EditorWorld->WorldType == EWorldType::PIE)
+        else if (EditorWorld && CurrentWorldType == EWorldType::PIE)
         {
-            ULevel* Level = EditorWorld->Level;
+            ULevel* Level = EditorWorld->GetPersistentLevel();
             {
-                for (AActor* Actor : Level->Actors)
+                for (AActor* Actor : Level->GetActors())
                 {
                     if (Actor)
                     {
@@ -75,11 +85,11 @@ void UEditorEngine::Tick(float DeltaSeconds)
     }
 }
 
-void StartPIE()
+void UEditorEngine::StartPIE()
 {
     UWorld* EditorWorld = GEditor->GetEditorWorldContext().World();
 
-    UWorld* PIEWorld = UWorld::DuplicateWorldForPIE(EditorWorld, ...);
+    UWorld* PIEWorld = UWorld::DuplicateWorldForPIE(EditorWorld, /* PIE 월드 이름 */);
 
     GWorld = PIEWorld;
 
@@ -87,7 +97,7 @@ void StartPIE()
     PIEWorld->InitializeActorsForPlay();
 }
 
-void EndPIE()
+void UEditorEngine::EndPIE()
 {
     if (GWorld && GWorld->IsPIEWorld())
     {

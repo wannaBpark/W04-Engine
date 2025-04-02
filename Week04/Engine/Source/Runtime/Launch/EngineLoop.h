@@ -11,6 +11,7 @@ class FEditorViewportClient;
 class SSplitterV;
 class SSplitterH;
 class SLevelEditor;
+class UEditorEngine;
 
 class FEngineLoop
 {
@@ -38,6 +39,7 @@ public:
 
 private:
     UImGuiManager* UIMgr;
+    // TODO : GWorld 소유는 UEditorEngine소유로 한정?하면 UEditorEngine만 남겨야 함
     UWorld* GWorld;
     SLevelEditor* LevelEditor;
     UnrealEd* UnrealEditor;

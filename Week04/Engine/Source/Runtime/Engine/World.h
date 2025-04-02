@@ -16,6 +16,7 @@ class OctreeSystem;
 class KDTreeSystem;
 class BVHSystem;
 class UPrimitiveComponent;
+class ULevel;
 
 class UWorld : public UObject
 {
@@ -43,6 +44,12 @@ public:
     bool DestroyActor(AActor* ThisActor);
 
 private:
+    /* 현재 활성화된 레벨 */
+    ULevel* PersistentLevel;
+
+    /* 월드의 타입*/
+    EWorldType WorldType = EWorldType::Editor;
+
     const FString defaultMapName = "Default";
 
     /** World에서 관리되는 모든 Actor의 목록 */
@@ -58,9 +65,14 @@ private:
     OctreeSystem* Octree;
     KDTreeSystem* KDTree;
     BVHSystem* BVH;
-
 public:
     UObject* worldGizmo = nullptr;
+
+    void SetPersistentLevel(ULevel* InLevel) { PersistentLevel = InLevel; }
+    const ULevel* GetPersistentLevel() const { return PersistentLevel; }
+
+    void SetWorldType(EWorldType InWorldType) { WorldType = InWorldType; }
+    const EWorldType& GetWorldType() const { return WorldType; }
 
     const TSet<AActor*>& GetActors() const { return ActorsArray; }
 
@@ -80,16 +92,15 @@ public:
     void SetPickingGizmo(UObject* Object);
 
     void SetOctreeSystem(OctreeSystem* InOctree) { Octree = InOctree; }
-    OctreeSystem* GetOctreeSystem() { return Octree; }
     void SetOctreeSystem(const TArray<UPrimitiveComponent*>& Components);
-
     void SetKDTreeSystem(KDTreeSystem* InKDTree) { KDTree = InKDTree; }
-    KDTreeSystem* GetKDTreeSystem() { return KDTree; }
     void SetKDTreeSystem(const TArray<UPrimitiveComponent*>& Components);
-
     void SetBVHSystem(BVHSystem* InBVH) { BVH = InBVH; }
-    BVHSystem* GetBVHSystem() { return BVH; }
     void SetBVHSystem(TArray<UPrimitiveComponent*>& Components);
+
+    OctreeSystem* GetOctreeSystem() { return Octree; }
+    KDTreeSystem* GetKDTreeSystem() { return KDTree; }
+    BVHSystem* GetBVHSystem() { return BVH; }
 };
 
 

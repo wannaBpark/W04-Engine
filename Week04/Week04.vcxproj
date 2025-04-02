@@ -249,6 +249,7 @@
     <ClCompile Include="Engine\Source\Runtime\GeometryCore\KDTree.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Source\Editor\UnrealEd\Editor\EditorEngine.h" />
     <ClInclude Include="Engine\Source\Runtime\Core\Math\MathSSE.h" />
     <ClInclude Include="Engine\Source\Runtime\GeometryCore\BVHNode.h" />
     <ClInclude Include="Engine\Source\Runtime\Renderer\Culling_Pass.h">
