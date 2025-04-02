@@ -384,7 +384,7 @@ SceneData FSceneMgr::GetWorldSceneData() {
     sceneData.Version = 1;
     sceneData.NextUUID = 0;
 
-    const TSet<AActor*>& Actors = GEngineLoop.GetWorld()->GetActors();
+    const TSet<AActor*>& Actors = GEngineLoop.GetWorld()->GetPersistentLevel()->GetActors();
 
     for (AActor* Actor : Actors)
     {
