@@ -77,8 +77,8 @@ void FRenderer::CreateShader()
 void FRenderer::ReleaseShader()
 {
     SAFE_RELEASE(InputLayout);
-    SAFE_RELEASE(InputLayout);
     SAFE_RELEASE(VertexShader);
+    SAFE_RELEASE(PixelShader);
 }
 
 void FRenderer::PrepareShader() const
