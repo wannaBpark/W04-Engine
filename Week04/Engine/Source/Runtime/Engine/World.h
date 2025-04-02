@@ -71,9 +71,6 @@ public:
         SelectedActor = InActor;
     }
 
-    USceneComponent* GetPickingGizmo() const { return pickingGizmo; }
-    void SetPickingGizmo(UObject* Object);
-
     void SetOctreeSystem(OctreeSystem* InOctree) { Octree = InOctree; }
     OctreeSystem* GetOctreeSystem() const { return Octree; }
     void SetOctreeSystem(const TArray<UPrimitiveComponent*>& Components);
