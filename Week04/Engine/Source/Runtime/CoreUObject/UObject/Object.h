@@ -66,6 +66,7 @@ public:
         return IsA(T::StaticClass());
     }
 
+    /** Object를 Pending Destroy 상태로 바꿈니다. */
     void MarkAsGarbage();
 
 public:

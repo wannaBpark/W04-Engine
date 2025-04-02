@@ -28,7 +28,7 @@ public: \
             { \
                 void* RawMemory = FPlatformMemory::Malloc<EAT_Object>(sizeof(TClass)); \
                 ::new (RawMemory) TClass; \
-                return static_cast<TClass*>(RawMemory); \
+                return static_cast<UObject*>(RawMemory); \
             } \
         }; \
         return &ClassInfo; \
