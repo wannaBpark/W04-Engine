@@ -45,7 +45,7 @@ public:
 
 private:
     /* 현재 활성화된 레벨 : 1개로 가정 */
-    ULevel* PersistentLevel;
+    ULevel* PersistentLevel = nullptr;
 
     /* 월드의 타입*/
     EWorldType WorldType = EWorldType::Editor;
