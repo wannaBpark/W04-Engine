@@ -35,6 +35,7 @@ void UBillboardComponent::InitializeComponent()
     Super::InitializeComponent();
 	CreateQuadTextureVertexBuffer();
     AABB = FBoundingBox({ -1.f,-1.f,-0.1f }, { 1.f,1.f,0.1f });
+    SetScale(FVector(3, 3, 3));
 }
 
 

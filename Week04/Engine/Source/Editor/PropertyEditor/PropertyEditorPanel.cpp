@@ -15,10 +15,27 @@
 #include "Runtime/Engine/Classes/Components/SceneComponent.h"
 
 std::vector<ComponentTypeInfo> ComponentTypes = {
-    { "USceneComponent", [](AActor* Owner) { return Owner->AddComponent<USceneComponent>(); } },
-    { "UStaticMeshComponent", [](AActor* Owner) { return Owner->AddComponent<UStaticMeshComponent>(); } },
-    { "UBillboardComponent", [](AActor* Owner) { return Owner->AddComponent<UBillboardComponent>(); } },
-    { "ULightComponentBase", [](AActor* Owner) { return Owner->AddComponent<ULightComponentBase>(); } }
+    { "Scene Comp", [](AActor* Owner) { return Owner->AddComponent<USceneComponent>(); } },
+    { "Primitive Comp", [](AActor* Owner) { return Owner->AddComponent<UPrimitiveComponent>(); } },
+    { "StaticMesh Comp", [](AActor* Owner) {
+        UStaticMeshComponent* StaticMeshComponent = Owner->AddComponent<UStaticMeshComponent>();
+        StaticMeshComponent->SetStaticMesh(FManagerOBJ::GetStaticMesh(L"apple_mid.obj"));
+        return StaticMeshComponent; 
+    }},
+    { "Text Comp", [](AActor* Owner) {
+        UTextRenderComponent* TextRenderComponent = Owner->AddComponent<UTextRenderComponent>();
+        TextRenderComponent->SetTexture(L"Assets/Texture/font.png");
+        TextRenderComponent->SetRowColumnCount(106, 106);
+        TextRenderComponent->SetText(L"Default Text");
+        return TextRenderComponent;
+    }},
+    { "Billboard Comp", [](AActor* Owner) { 
+        UBillboardComponent* BillboardComponent = Owner->AddComponent<UBillboardComponent>();
+        BillboardComponent->SetTexture(L"Assets/Editor/Icon/Pawn_64x.png");
+        return BillboardComponent;
+        
+    }},
+    { "Light Comp", [](AActor* Owner) { return Owner->AddComponent<ULightComponentBase>(); } }
 };
 
 void PropertyEditorPanel::Render()
@@ -70,86 +87,85 @@ void PropertyEditorPanel::Render()
             }
             ImGui::TreePop(); // Hierarchy 트리 닫기
         }
-
-        if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
+        if (ImGui::BeginCombo("Component", ComponentTypes[SelectedTypeIndex].Label))
         {
-            Location = PickedActor->GetActorLocation();
-            Rotation = PickedActor->GetActorRotation();
-            Scale = PickedActor->GetActorScale();
-            
-            FImGuiWidget::DrawVec3Control("Location", Location, 0, 85);
-            ImGui::Spacing();
-
-            FImGuiWidget::DrawVec3Control("Rotation", Rotation, 0, 85);
-            ImGui::Spacing();
-
-            FImGuiWidget::DrawVec3Control("Scale", Scale, 0, 85);
-            ImGui::Spacing();
-
-            // Actor 위치 변화시 옥트리 바운딩 박스 재설정
-            if ((PickedActor->GetActorLocation()- Location).Length() > 0.2f)
+            for (int i = 0; i < ComponentTypes.size(); ++i)
             {
-                /*GEngineLoop.GetWorld()->GetOctreeSystem()->UpdateComponentPosition(
-                    Cast<UPrimitiveComponent>(PickedActor->GetRootComponent())
-                );*/
-            }
-            // ---------------------------------- //
-            PickedActor->SetActorLocation(Location);
-            PickedActor->SetActorRotation(Rotation);
-            PickedActor->SetActorScale(Scale);
-            
-            std::string coordiButtonLabel;
-            if (player->GetCoordiMode() == CoordiMode::CDM_WORLD)
-                coordiButtonLabel = "World";
-            else if (player->GetCoordiMode() == CoordiMode::CDM_LOCAL)
-                coordiButtonLabel = "Local";
-            
-            if (ImGui::Button(coordiButtonLabel.c_str(), ImVec2(ImGui::GetWindowContentRegionMax().x * 0.9f, 32)))
-            {
-                player->AddCoordiMode();
-            }
-            ImGui::TreePop(); // 트리 닫기
-
-            if (ImGui::BeginCombo("Component Type", ComponentTypes[SelectedTypeIndex].Label))
-            {
-                for (int i = 0; i < ComponentTypes.size(); ++i)
+                const bool isSelected = (i == SelectedTypeIndex);
+                if (ImGui::Selectable(ComponentTypes[i].Label, isSelected))
                 {
-                    const bool isSelected = (i == SelectedTypeIndex);
-                    if (ImGui::Selectable(ComponentTypes[i].Label, isSelected))
-                    {
-                        SelectedTypeIndex = i;
-                    }
-
-                    if (isSelected)
-                        ImGui::SetItemDefaultFocus();
+                    SelectedTypeIndex = i;
                 }
-                ImGui::EndCombo();
+
+                if (isSelected)
+                    ImGui::SetItemDefaultFocus();
             }
+            ImGui::EndCombo();
+        }
 
-            if (ImGui::Button("Add Component"))
+        if (ImGui::Button("+ Add Component"))
+        {
+            if (SelectedComponent && Cast<USceneComponent>(SelectedComponent))
             {
-                if (SelectedComponent && Cast<USceneComponent>(SelectedComponent))
+                USceneComponent* ParentScene = Cast<USceneComponent>(SelectedComponent);
+                AActor* Owner = ParentScene->GetOwner();
+                if (Owner)
                 {
-                    USceneComponent* ParentScene = Cast<USceneComponent>(SelectedComponent);
-                    AActor* Owner = ParentScene->GetOwner();
-                    if (Owner)
+                    // 선택된 타입에 맞는 컴포넌트 생성
+                    USceneComponent* NewComp = ComponentTypes[SelectedTypeIndex].CreateFunc(Owner);
+
+                    if (NewComp)
                     {
-                        // 선택된 타입에 맞는 컴포넌트 생성
-                        USceneComponent* NewComp = ComponentTypes[SelectedTypeIndex].CreateFunc(Owner);
+                        // 부모-자식 연결
+                        NewComp->SetupAttachment(SelectedComponent);
 
-                        if (NewComp)
-                        {
-                            // 부모-자식 연결
-                            NewComp->SetupAttachment(ParentScene);
-
-                            // 이름 설정
-                            FString NameF = FString::FromInt(Owner->GetComponents().Num()) + "_ChildComp";
-                            // NewComp->SetName(*NameF); // SetName이 구현되어 있다면 사용
-                        }
+                        // 이름 설정
+                        FString NameF = FString::FromInt(Owner->GetComponents().Num()) + "_ChildComp";
+                        // NewComp->SetName(*NameF); // SetName이 구현되어 있다면 사용
                     }
                 }
             }
         }
+
+        if (ImGui::TreeNodeEx("Transform", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            USceneComponent* SceneComp = Cast<USceneComponent>(SelectedComponent);
+            if (SceneComp)
+            {
+                FVector LocalLocation = SceneComp->GetRelativeLocation();
+                FVector LocalRotation = SceneComp->GetRelativeRotation(); // Assuming this returns Euler angles
+                FVector LocalScale = SceneComp->GetRelativeScale3D();
+
+                FImGuiWidget::DrawVec3Control("Location", LocalLocation, 0, 85);
+                ImGui::Spacing();
+
+                FImGuiWidget::DrawVec3Control("Rotation", LocalRotation, 0, 85);
+                ImGui::Spacing();
+
+                FImGuiWidget::DrawVec3Control("Scale", LocalScale, 0, 85);
+                ImGui::Spacing();
+
+                // 변경 사항 적용
+                SceneComp->SetRelativeLocation(LocalLocation);
+                SceneComp->SetRelativeRotation(LocalRotation);
+                SceneComp->SetRelativeScale3D(LocalScale);
+            }
+
+            std::string coordiButtonLabel;
+            if (player->GetCoordiMode() == CoordiMode::CDM_WORLD)
+                coordiButtonLabel = "World";
+            else
+                coordiButtonLabel = "Local";
+
+            if (ImGui::Button(coordiButtonLabel.c_str(), ImVec2(ImGui::GetWindowContentRegionMax().x * 0.9f, 32)))
+            {
+                player->AddCoordiMode();
+            }
+
+            ImGui::TreePop();
+        }
+
+       
         ImGui::PopStyleColor();
     }
 
@@ -275,8 +291,11 @@ void PropertyEditorPanel::Render()
         const TArray<FWString> textureList = FEngineLoop::resourceMgr.GetAllTextureNames();
         UBillboardComponent* billboardComp = Cast<UBillboardComponent>(PickedActor->GetRootComponent());
         std::string tex;
-        if (ImGui::BeginCombo("Sprite", 
-            ((selectedIndex >= 0 && selectedIndex < textureList.Num()) 
+       
+        ImGui::Text("Texture:");
+        ImGui::Image((ImTextureID)billboardComp->GetTexture()->TextureSRV, ImVec2(64, 64));
+        ImGui::SameLine(); if (ImGui::BeginCombo("Sprite",
+            ((selectedIndex >= 0 && selectedIndex < textureList.Num())
                 ? tex.c_str() : "None"))) {
 
             for (int i = 0; i < textureList.Num(); ++i) {
@@ -292,8 +311,6 @@ void PropertyEditorPanel::Render()
             }
             ImGui::EndCombo();
         }
-        ImGui::Text("Preview:");
-        ImGui::Image((ImTextureID)billboardComp->GetTexture()->TextureSRV, ImVec2(64, 64));
 
     }
     // TODO: 추후에 RTTI를 이용해서 프로퍼티 출력하기
@@ -684,6 +701,12 @@ void PropertyEditorPanel::DrawSceneComponentTree(USceneComponent* Comp)
     }
 
     bool bIsSelected = (SelectedComponent == Comp);
+
+    //FIXME : 하이라이팅 안됨!!
+    if (bIsSelected)
+    {
+        Flags |= ImGuiTreeNodeFlags_Selected;
+    }
     if (ImGui::TreeNodeEx((void*)Comp, Flags, "%s", LabelAnsi.c_str()))
     {
         if (ImGui::IsItemClicked())

@@ -3,7 +3,7 @@
 UUIDRenderComponent::UUIDRenderComponent()
 {
     SetScale(FVector(0.1f, 0.25f, 0.25f));
-    SetLocation(FVector(0.0f, 0.0f, 1.0f));
+    SetLocation(FVector(0.0f, 0.0f, 5.0f));
 }
 
 //void UUIDRenderComponent::Render()

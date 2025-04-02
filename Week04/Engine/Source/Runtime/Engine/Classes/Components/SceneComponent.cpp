@@ -64,6 +64,36 @@ void USceneComponent::AddScale(FVector Added)
     RelativeScale3D += Added;
 }
 
+FVector USceneComponent::GetRelativeLocation()
+{
+    return RelativeLocation;
+}
+
+FVector USceneComponent::GetRelativeRotation()
+{
+    return RelativeRotation;
+}
+
+FVector USceneComponent::GetRelativeScale3D()
+{
+    return RelativeScale3D;
+}
+
+void USceneComponent::SetRelativeLocation(FVector loc)
+{
+    RelativeLocation = loc;
+}
+
+void USceneComponent::SetRelativeRotation(FVector rot)
+{
+    RelativeRotation = rot;
+}
+
+void USceneComponent::SetRelativeScale3D(FVector scale)
+{
+    RelativeScale3D = scale;
+}
+
 FVector USceneComponent::GetWorldRotation() const
 {
     if (AttachParent)

@@ -20,6 +20,14 @@ public:
     void AddRotation(FVector _added);
     void AddScale(FVector _added);
 
+    FVector GetRelativeLocation();
+    FVector GetRelativeRotation();
+    FVector GetRelativeScale3D();
+
+    void SetRelativeLocation(FVector loc);
+    void SetRelativeRotation(FVector rot);
+    void SetRelativeScale3D(FVector scale);
+
 protected:
     FVector RelativeLocation;
     FVector RelativeRotation;
