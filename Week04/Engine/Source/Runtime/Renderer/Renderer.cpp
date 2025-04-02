@@ -1150,7 +1150,7 @@ void FRenderer::RenderGizmos(const UWorld* World, const std::shared_ptr<FEditorV
 
         FMatrix MVP = Model * ActiveViewport->GetViewMatrix() * ActiveViewport->GetProjectionMatrix();
 
-        if (GizmoComp == World->GetPickingGizmo())
+        if (GizmoComp == World->GetEditorPlayer()->GetPickedGizmoComponent())
             UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
         else
             UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
@@ -1185,7 +1185,7 @@ void FRenderer::RenderBillboards(UWorld* World, const std::shared_ptr<FEditorVie
         FMatrix MVP = Model * ActiveViewport->GetViewMatrix() * ActiveViewport->GetProjectionMatrix();
         FMatrix NormalMatrix = FMatrix::Transpose(FMatrix::Inverse(Model));
         FVector4 UUIDColor = BillboardComp->EncodeUUID() / 255.0f;
-        if (BillboardComp == World->GetPickingGizmo())
+        if (BillboardComp == World->GetEditorPlayer()->GetPickedGizmoComponent())
             UpdateConstant(MVP, NormalMatrix, UUIDColor, true);
         else
             UpdateConstant(MVP, NormalMatrix, UUIDColor, false);
