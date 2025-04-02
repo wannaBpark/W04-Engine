@@ -1,11 +1,21 @@
 #include "UClass.h"
 #include <cassert>
 
+#include "EngineStatics.h"
+#include "UObjectArray.h"
 
-UClass::UClass(const char* InClassName, uint32 InClassSize, uint32 InAlignment, UClass* InSuperClass)
+
+UClass::UClass(
+    const char* InClassName,
+    uint32 InClassSize,
+    uint32 InAlignment,
+    UClass* InSuperClass,
+    ObjectCreator InCreator
+)
     : ClassSize(InClassSize)
     , ClassAlignment(InAlignment)
     , SuperClass(InSuperClass)
+    , ClassConstructor(InCreator)
 {
     NamePrivate = InClassName;
 }
@@ -28,11 +38,17 @@ bool UClass::IsChildOf(const UClass* SomeBase) const
 
 UObject* UClass::CreateDefaultObject()
 {
-    if (!ClassDefaultObject)
+    if (!ClassDefaultObject && ClassConstructor)
     {
-        // TODO: CDO 객체 만들기
-        ClassDefaultObject = nullptr;
-    }
+        // TODO: CDO 수정
+        return nullptr;
 
+        // ClassDefaultObject = ClassConstructor();
+        // ClassDefaultObject->ClassPrivate = this;
+        // ClassDefaultObject->NamePrivate = GetName() + "_CDO";
+        // ClassDefaultObject->UUID = UEngineStatics::GenUUID();
+        //
+        // GUObjectArray.AddObject(ClassDefaultObject);
+    }
     return ClassDefaultObject;
 }
