@@ -437,7 +437,6 @@ void AEditorPlayer::PickedObjControl()
         int32 deltaX = currentMousePos.x - m_LastMousePos.x;
         int32 deltaY = currentMousePos.y - m_LastMousePos.y;
 
-        // USceneComponent* pObj = GEditor->GetEditorWorldContext().World()->GetPickingObj();
         AActor* PickedActor = GEditor->GetEditorWorldContext().World()->GetSelectedActor();
         UGizmoBaseComponent* Gizmo = static_cast<UGizmoBaseComponent*>(GEditor->GetEditorWorldContext().World()->GetEditorPlayer()->GetPickedGizmoComponent());
         switch (cMode)

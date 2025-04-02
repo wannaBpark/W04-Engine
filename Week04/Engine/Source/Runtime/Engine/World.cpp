@@ -65,7 +65,6 @@ void UWorld::Release()
 {
 	PersistentLevel->Release();
 	GUObjectArray.MarkRemoveObject(PersistentLevel);
-	//GUObjectArray.ProcessPendingDestroyObjects();
 }
 
 bool UWorld::DestroyActor(AActor* ThisActor)

@@ -243,7 +243,6 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UBillboardComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UParticleSubUVComp.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UText.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\UTextUUID.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\World.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\QuadTexture.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\tinyfiledialogs\tinyfiledialogs.cpp" />
@@ -368,7 +367,6 @@
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\UObject\UClass.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UParticleSubUVComp.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UText.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\UTextUUID.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\World.h" />
     <ClInclude Include="Engine\Source\Runtime\GeometryCore\KDTree.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Level.h" />

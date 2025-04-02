@@ -8,10 +8,6 @@ USceneComponent::USceneComponent() :RelativeLocation(FVector(0.f, 0.f, 0.f)), Re
 {
 }
 
-USceneComponent::~USceneComponent()
-{
-	if (uuidText) delete uuidText;
-}
 void USceneComponent::InitializeComponent()
 {
     Super::InitializeComponent();

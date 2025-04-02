@@ -92,7 +92,7 @@ public:
     void SetKDTreeSystem(const TArray<UPrimitiveComponent*>& Components);
     void SetKDTreeSystem(KDTreeSystem* InKDTree) { KDTree = InKDTree; }
     KDTreeSystem* GetKDTreeSystem() const { return KDTree; }
-    
+
     void SetBVHSystem(TArray<UPrimitiveComponent*>& Components);
     void SetBVHSystem(BVHSystem* InBVH) { BVH = InBVH; }
     BVHSystem* GetBVHSystem() const { return BVH; }
