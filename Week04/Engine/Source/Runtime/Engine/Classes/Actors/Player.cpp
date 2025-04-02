@@ -20,6 +20,7 @@
 #include "Editor/UnrealEd/PrimitiveBatch.h"
 #include "GeometryCore/KDTree.h"
 #include "GeometryCore/BVHNode.h"
+#include "UnrealEd/Editor/EditorEngine.h"
 
 using namespace DirectX;
 
@@ -53,7 +54,7 @@ void AEditorPlayer::Input()
 			// 컬러 피킹 부분입니다
 //#if _DEBUG
             //uint32 UUID = GetEngine().graphicDevice.GetPixelUUID(mousePos);
-            //// TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
+            //// TArray<UObject*> objectArr = GEditor->GetEditorWorldContext().World()->GetObjectArr();
             //for ( const auto obj : TObjectRange<USceneComponent>())
             //{
             //    if (obj->GetUUID() != UUID) continue;
@@ -67,9 +68,9 @@ void AEditorPlayer::Input()
 
             const auto& ActiveViewport = GetEngine().GetLevelEditor()->GetActiveViewportClient();
             ScreenToViewSpace(mousePos.x, mousePos.y, ActiveViewport->GetViewMatrix(), ActiveViewport->GetProjectionMatrix(), pickPosition);
-            //bool res = PickGizmo(pickPosition);   
-            //if (!res) PickActor(pickPosition);
-            /*if (!res) */PickActorBVH(pickPosition);
+            bool res = PickGizmo(pickPosition);   
+            if (!res) PickActor(pickPosition);
+            //if (!res) PickActorBVH(pickPosition);
 
             PickingTimeInfo.LastPickingTime.store(
                 static_cast<float>(CycleCount_PickingTime.Finish())
@@ -120,7 +121,7 @@ void AEditorPlayer::Input()
 
         if (GetAsyncKeyState('Q') & 0x8000)
         {
-            //GetWorld()->SetPickingObj(nullptr);
+            //GEditor->GetEditorWorldContext().World()->SetPickingObj(nullptr);
         }
         if (GetAsyncKeyState('W') & 0x8000)
         {
@@ -138,7 +139,7 @@ void AEditorPlayer::Input()
 
     if (GetAsyncKeyState(VK_DELETE) & 0x8000)
     {
-        UWorld* World = GetWorld();
+        UWorld* World = GEditor->GetEditorWorldContext().World();
         if (AActor* PickedActor = World->GetSelectedActor())
         {
             World->DestroyActor(PickedActor);
@@ -150,11 +151,11 @@ void AEditorPlayer::Input()
 bool AEditorPlayer::PickGizmo(const FVector& rayOrigin)
 {
     bool isPickedGizmo = false;
-    if (GetWorld()->GetSelectedActor())             // 현재 선택된 액터가 있다면
+    if (GEditor->GetEditorWorldContext().World()->GetSelectedActor())             // 현재 선택된 액터가 있다면
     {
         if (cMode == CM_TRANSLATION)
         {
-            for (auto GizmoComp : GetWorld()->LocalGizmo->GetArrowArr()) // 3개의 ArrowArr 순회
+            for (auto GizmoComp : GEditor->GetEditorWorldContext().World()->LocalGizmo->GetArrowArr()) // 3개의 ArrowArr 순회
             {
                 int maxIntersect = 0;
                 float minDistance = FLT_MAX;
@@ -181,13 +182,13 @@ bool AEditorPlayer::PickGizmo(const FVector& rayOrigin)
         }
         else if (cMode == CM_ROTATION)
         {
-            for (auto GizmoComp : GetWorld()->LocalGizmo->GetDiscArr())          // 3개의 rotation 디스크 모양 교차 검사
+            for (auto GizmoComp : GEditor->GetEditorWorldContext().World()->LocalGizmo->GetDiscArr())          // 3개의 rotation 디스크 모양 교차 검사
             {
                 int maxIntersect = 0;
                 float minDistance = FLT_MAX;
                 float Distance = 0.0f;
                 int currentIntersectCount = 0;
-                //UPrimitiveComponent* localGizmo = dynamic_cast<UPrimitiveComponent*>(GetWorld()->LocalGizmo[i]);
+                //UPrimitiveComponent* localGizmo = dynamic_cast<UPrimitiveComponent*>(GEditor->GetEditorWorldContext().World()->LocalGizmo[i]);
                 if (!GizmoComp) continue;
                 if (RayIntersectsObject(rayOrigin, GizmoComp, Distance, currentIntersectCount))
                 {
@@ -209,7 +210,7 @@ bool AEditorPlayer::PickGizmo(const FVector& rayOrigin)
         }
         else if (cMode == CM_SCALE)
         {
-            for (auto GizmoComp : GetWorld()->LocalGizmo->GetScaleArr())
+            for (auto GizmoComp : GEditor->GetEditorWorldContext().World()->LocalGizmo->GetScaleArr())
             {
                 int maxIntersect = 0;
                 float minDistance = FLT_MAX;
@@ -247,16 +248,16 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     float minDistance = FLT_MAX;
 
     // 옥트리 시스템 가져오기
-    UWorld* World = GetWorld();
+    UWorld* World = GEditor->GetEditorWorldContext().World();
 	BVHSystem* BVH = World->GetBVHSystem();
     Ray MyRay = GetRayDirection(pickPosition);
 
 #pragma region BVH Ray Intersection
-    TArray<UPrimitiveComponent*> BVHComponents;
-    BVH->Root->QueryRay(MyRay.Origin, MyRay.Direction, BVHComponents);
+    //TArray<UPrimitiveComponent*> BVHComponents;
+    //BVH->Root->QueryRay(MyRay.Origin, MyRay.Direction, BVHComponents);
 
 #pragma endregion
-    for (const auto& iter : BVHComponents)
+    /*for (const auto& iter : BVHComponents)
     {
         UPrimitiveComponent* pObj;
         if (iter->IsA<UPrimitiveComponent>() || iter->IsA<ULightComponentBase>())
@@ -287,14 +288,16 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
                 }
             }
         }
-    }
+    }*/
+    Possible = BVH ? BVH->Root->QueryRayClosestBestFirst(MyRay.Origin, MyRay.Direction) : nullptr;
+
     if (Possible)
     {
-        GetWorld()->SetPickedActor(Possible->GetOwner());
+        GEditor->GetEditorWorldContext().World()->SetPickedActor(Possible->GetOwner());
     }
     else 
     {
-        GetWorld()->SetPickedActor(nullptr);
+        GEditor->GetEditorWorldContext().World()->SetPickedActor(nullptr);
     }
 }
 
@@ -304,7 +307,7 @@ void AEditorPlayer::PickActorBVH(const FVector& pickPosition)
     float minDistance = FLT_MAX;
 
     // 옥트리 시스템 가져오기
-    UWorld* World = GetWorld();
+    UWorld* World = GEditor->GetEditorWorldContext().World();
     BVHSystem* BVH = World->GetBVHSystem();
     OctreeSystem* Octree = World->GetOctreeSystem();
     KDTreeSystem* KDTree = World->GetKDTreeSystem();
@@ -334,11 +337,11 @@ void AEditorPlayer::PickActorBVH(const FVector& pickPosition)
 
     if (Possible)
     {
-        GetWorld()->SetPickedActor(Possible->GetOwner());
+        GEditor->GetEditorWorldContext().World()->SetPickedActor(Possible->GetOwner());
     }
     else
     {
-        GetWorld()->SetPickedActor(nullptr);
+        GEditor->GetEditorWorldContext().World()->SetPickedActor(nullptr);
     }
 }
 
@@ -427,16 +430,15 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
 
 void AEditorPlayer::PickedObjControl()
 {
-    if (GetWorld()->GetSelectedActor() && GetWorld()->GetEditorPlayer()->GetPickedGizmoComponent())
+    if (GEditor->GetEditorWorldContext().World()->GetSelectedActor() && GEditor->GetEditorWorldContext().World()->GetEditorPlayer()->GetPickedGizmoComponent())
     {
         POINT currentMousePos;
         GetCursorPos(&currentMousePos);
         int32 deltaX = currentMousePos.x - m_LastMousePos.x;
         int32 deltaY = currentMousePos.y - m_LastMousePos.y;
 
-        // USceneComponent* pObj = GetWorld()->GetPickingObj();
-        AActor* PickedActor = GetWorld()->GetSelectedActor();
-        UGizmoBaseComponent* Gizmo = static_cast<UGizmoBaseComponent*>(GetWorld()->GetEditorPlayer()->GetPickedGizmoComponent());
+        AActor* PickedActor = GEditor->GetEditorWorldContext().World()->GetSelectedActor();
+        UGizmoBaseComponent* Gizmo = static_cast<UGizmoBaseComponent*>(GEditor->GetEditorWorldContext().World()->GetEditorPlayer()->GetPickedGizmoComponent());
         switch (cMode)
         {
         case CM_TRANSLATION:
@@ -556,7 +558,7 @@ void AEditorPlayer::ControlTranslation(USceneComponent* pObj, const UGizmoBaseCo
     }
 
     // 변화가 있을 때 pObj의 바운딩 박스 위치 업데이트
-    UWorld* World = GetWorld();
+    UWorld* World = GEditor->GetEditorWorldContext().World();
     OctreeSystem* Octree = World->GetOctreeSystem();
 
     // ------------------------------------ // 
@@ -597,7 +599,7 @@ void AEditorPlayer::ControlScale(USceneComponent* pObj, const UGizmoBaseComponen
 
 void AEditorPlayer::UpdateVisibleStaticMeshComponentsWithOctree()
 {
-    UWorld* World = GetWorld();
+    UWorld* World = GEditor->GetEditorWorldContext().World();
     FRenderer* Renderer = &FEngineLoop::renderer;
     OctreeSystem* Octree = World->GetOctreeSystem();
     if (!Octree || !Octree->Root) return;
@@ -615,7 +617,7 @@ void AEditorPlayer::UpdateVisibleStaticMeshComponentsWithOctree()
 }
 
 void AEditorPlayer::UpdateVisibleStaticMeshComponents() {
-    UWorld* World = GetWorld();
+    UWorld* World = GEditor->GetEditorWorldContext().World();
     FRenderer* Renderer = &FEngineLoop::renderer;
 
     FFrustum Frustum = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->CreateFrustumFromCamera();

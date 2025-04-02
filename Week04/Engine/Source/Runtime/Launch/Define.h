@@ -418,3 +418,16 @@ struct FTextureConstants {
     float pad1;
 };
 
+// TODO : Enginedefine으로 빼놓기
+enum EWorldType
+{
+    None,           /** An untyped world, in most cases this will be the vestigial worlds of streamed in sub-levels */
+    Game,           /** The game world */
+    Editor,         /** A world being edited in the editor */
+    PIE,            /** A Play In Editor world */
+    EditorPreview,  /** A preview world for an editor tool */
+    GamePreview,    /** A preview world for a game */
+    GameRPC,        /** A minimal RPC world for a game */
+    Inactive        /** An editor world that was loaded but not currently being edited in the level editor */
+};
+

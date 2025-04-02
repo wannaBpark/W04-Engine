@@ -4,13 +4,13 @@
 #include "BaseGizmos/TransformGizmo.h"
 #include "Camera/CameraComponent.h"
 #include "LevelEditor/SLevelEditor.h"
-#include "Runtime/GeometryCore/Octree.h"
 #include "UObject/UObjectIterator.h"
 #include "Components/PrimitiveComponent.h"
+#include "Runtime/GeometryCore/Octree.h"
 #include "GeometryCore/KDTree.h"
 #include "GeometryCore/BVHNode.h"
+#include "Runtime/Engine/Level.h"
 #include "UObject/UObjectArray.h"
-
 
 void UWorld::Initialize()
 {
@@ -20,15 +20,22 @@ void UWorld::Initialize()
 
 void UWorld::CreateBaseObject()
 {
-    if (EditorPlayer == nullptr)
-    {
-        EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>();;
-    }
+	if (EditorPlayer == nullptr)
+	{
+		EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>();;
+	}
 
-    if (LocalGizmo == nullptr)
-    {
-        LocalGizmo = FObjectFactory::ConstructObject<UTransformGizmo>();
-    }
+	if (LocalGizmo == nullptr)
+	{
+		LocalGizmo = FObjectFactory::ConstructObject<UTransformGizmo>();
+	}
+	
+	// 단일 Level이라 가정
+	if (PersistentLevel == nullptr)
+	{
+		PersistentLevel = FObjectFactory::ConstructObject<ULevel>();
+		PersistentLevel->InitializeLevel(this);
+	}
 }
 
 void UWorld::ReleaseBaseObject()
@@ -51,38 +58,13 @@ void UWorld::Tick(float DeltaTime)
 {
     EditorPlayer->Tick(DeltaTime);
 	LocalGizmo->Tick(DeltaTime);
-
-    // SpawnActor()에 의해 Actor가 생성된 경우, 여기서 BeginPlay 호출
-    for (AActor* Actor : PendingBeginPlayActors)
-    {
-        Actor->BeginPlay();
-    }
-    PendingBeginPlayActors.Empty();
-
-    // 매 틱마다 Actor->Tick(...) 호출
-	for (AActor* Actor : ActorsArray)
-	{
-	    Actor->Tick(DeltaTime);
-	}
+	PersistentLevel->Tick(DeltaTime);
 }
 
 void UWorld::Release()
 {
-	for (AActor* Actor : ActorsArray)
-	{
-		Actor->EndPlay(EEndPlayReason::WorldTransition);
-        TArray<UActorComponent*> CopiedComponents = Actor->GetComponents();
-	    for (UActorComponent* Component : CopiedComponents)
-	    {
-	        GUObjectArray.MarkRemoveObject(Component);
-	    }
-	    GUObjectArray.MarkRemoveObject(Actor);
-	}
-    ActorsArray.Empty();
-
-    ReleaseBaseObject();
-
-    GUObjectArray.ProcessPendingDestroyObjects();
+	PersistentLevel->Release();
+	GUObjectArray.MarkRemoveObject(PersistentLevel);
 }
 
 bool UWorld::DestroyActor(AActor* ThisActor)
@@ -111,8 +93,15 @@ bool UWorld::DestroyActor(AActor* ThisActor)
         Component->DestroyComponent();
     }
 
-    // World에서 제거
+    // Actor 소유하고 있는 Level 에서 제거
+	ULevel* Level = ThisActor->GetLevel();
+	if (Level)
+	{
+		Level->ActorsArray.Remove(ThisActor);
+	}
     ActorsArray.Remove(ThisActor);
+
+	// PersistentLevel->RemoveActor()
 
     // 제거 대기열에 추가
     GUObjectArray.MarkRemoveObject(ThisActor);
