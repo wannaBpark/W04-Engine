@@ -2,15 +2,15 @@
 #include "World.h"
 #include "Math/JungleMath.h"
 #include "UObject/ObjectFactory.h"
-#include "UTextUUID.h"
-USceneComponent::USceneComponent() :RelativeLocation(FVector(0.f, 0.f, 0.f)), RelativeRotation(FVector(0.f, 0.f, 0.f)), RelativeScale3D(FVector(1.f, 1.f, 1.f))
+
+
+USceneComponent::USceneComponent()
+    : RelativeLocation(FVector(0.f, 0.f, 0.f))
+    , RelativeRotation(FVector(0.f, 0.f, 0.f))
+    , RelativeScale3D(FVector(1.f, 1.f, 1.f))
 {
 }
 
-USceneComponent::~USceneComponent()
-{
-	if (uuidText) delete uuidText;
-}
 void USceneComponent::InitializeComponent()
 {
     Super::InitializeComponent();
@@ -69,7 +69,7 @@ void USceneComponent::AddScale(FVector _added)
 
 }
 
-FVector USceneComponent::GetWorldRotation()
+FVector USceneComponent::GetWorldRotation() const
 {
 	if (AttachParent)
 	{
