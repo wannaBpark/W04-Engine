@@ -64,9 +64,9 @@ void PropertyEditorPanel::Render()
             // Actor 위치 변화시 옥트리 바운딩 박스 재설정
             if ((PickedActor->GetActorLocation()- Location).Length() > 0.2f)
             {
-                GEngineLoop.GetWorld()->GetOctreeSystem()->UpdateComponentPosition(
+                /*GEngineLoop.GetWorld()->GetOctreeSystem()->UpdateComponentPosition(
                     Cast<UPrimitiveComponent>(PickedActor->GetRootComponent())
-                );
+                );*/
             }
             // ---------------------------------- //
             PickedActor->SetActorLocation(Location);

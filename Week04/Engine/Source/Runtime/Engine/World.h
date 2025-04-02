@@ -73,7 +73,7 @@ public:
     void SetWorldType(EWorldType InWorldType) { WorldType = InWorldType; }
     const EWorldType& GetWorldType() const { return WorldType; }
 
-    const TSet<AActor*>& GetActors() const { return ActorsArray; }
+    //const TSet<AActor*>& GetActors() const { return ActorsArray; }
 
     ATransformGizmo* LocalGizmo = nullptr;
     AEditorPlayer* GetEditorPlayer() const { return EditorPlayer; }
