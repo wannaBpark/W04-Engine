@@ -68,24 +68,26 @@ int UText::CheckRayIntersection(FVector& rayOrigin, FVector& rayDirection, float
 
 void UText::SetText(FWString _text)
 {
-	text = _text;
-	if (_text.empty())
-	{
-		Console::GetInstance().AddLog(LogLevel::Warning, "Text is empty");
+    text = _text;
+    quad.Empty(); // Clear the quad array to prevent accumulation of vertices.
 
-		vertexTextureArr.Empty();
-		quad.Empty();
+    if (_text.empty())
+    {
+        Console::GetInstance().AddLog(LogLevel::Warning, "Text is empty");
 
-		// 기존 버텍스 버퍼가 있다면 해제
-		if (vertexTextBuffer)
-		{
-			vertexTextBuffer->Release();
-			vertexTextBuffer = nullptr;
-		}
-		return;
-	}
+        vertexTextureArr.Empty();
+        quad.Empty();
+
+        // 기존 버텍스 버퍼가 있다면 해제
+        if (vertexTextBuffer)
+        {
+            vertexTextBuffer->Release();
+            vertexTextBuffer = nullptr;
+        }
+        return;
+    }
+
 	int textSize = static_cast<int>(_text.size());
-
 
 	uint32 BitmapWidth = Texture->width;
 	uint32 BitmapHeight = Texture->height;

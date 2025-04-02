@@ -1,14 +1,14 @@
 #include "EngineLoop.h"
 #include "ImGuiManager.h"
+#include "UnrealClient.h"
 #include "World.h"
-#include "Camera/CameraComponent.h"
+#include "LevelEditor/SLevelEditor.h"
 #include "PropertyEditor/ViewportTypePanel.h"
+#include "slate/Widgets/Layout/SSplitter.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/UnrealEd.h"
-#include "UnrealClient.h"
-#include "slate/Widgets/Layout/SSplitter.h"
-#include "LevelEditor/SLevelEditor.h"
 #include "UnrealEd/Editor/EditorEngine.h"
+#include "UObject/UObjectArray.h"
 
 //extern UEditorEngine* GEditor;
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

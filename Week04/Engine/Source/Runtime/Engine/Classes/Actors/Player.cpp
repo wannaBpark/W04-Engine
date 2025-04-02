@@ -1,28 +1,25 @@
 #include "Player.h"
-
 #include "UnrealClient.h"
 #include "WindowsPlatformTime.h"
 #include "World.h"
 #include "BaseGizmos/GizmoArrowComponent.h"
 #include "BaseGizmos/GizmoCircleComponent.h"
-#include "BaseGizmos/GizmoRectangleComponent.h"
 #include "BaseGizmos/TransformGizmo.h"
 #include "Camera/CameraComponent.h"
 #include "Components/LightComponent.h"
+#include "Editor/UnrealEd/PrimitiveBatch.h"
+#include "GeometryCore/BVHNode.h"
+#include "GeometryCore/Octree.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "Math/JungleMath.h"
-#include "Math/MathUtility.h"
 #include "PropertyEditor/ShowFlags.h"
 #include "Stats/Stats.h"
 #include "UnrealEd/EditorViewportClient.h"
-#include "UObject/UObjectIterator.h"
-#include "GeometryCore/Octree.h"
-#include "Editor/UnrealEd/PrimitiveBatch.h"
-#include "GeometryCore/KDTree.h"
-#include "GeometryCore/BVHNode.h"
 #include "UnrealEd/Editor/EditorEngine.h"
+#include "UObject/UObjectIterator.h"
 
 using namespace DirectX;
+
 
 // Picking 성능 측정 저장용 static 구조체
 AEditorPlayer::FPickingTimeInfo AEditorPlayer::PickingTimeInfo{};
@@ -430,7 +427,8 @@ int AEditorPlayer::RayIntersectsObject(const FVector& pickPosition, USceneCompon
 
 void AEditorPlayer::PickedObjControl()
 {
-    if (GEditor->GetEditorWorldContext().World()->GetSelectedActor() && GEditor->GetEditorWorldContext().World()->GetEditorPlayer()->GetPickedGizmoComponent())
+    UWorld* World = GEditor->GetEditorWorldContext().World();
+    if (World->GetSelectedActor() && World->GetEditorPlayer()->GetPickedGizmoComponent())
     {
         POINT currentMousePos;
         GetCursorPos(&currentMousePos);

@@ -8,7 +8,15 @@
 class UClass : public UObject
 {
 public:
-    UClass(const char* InClassName, uint32 InClassSize, uint32 InAlignment, UClass* InSuperClass);
+    using ObjectCreator = UObject*(*)();
+
+    UClass(
+        const char* InClassName,
+        uint32 InClassSize,
+        uint32 InAlignment,
+        UClass* InSuperClass,
+        ObjectCreator InCreator
+    );
     virtual ~UClass() override = default;
 
     // 복사 & 이동 생성자 제거
@@ -49,6 +57,21 @@ public:
         return ClassDefaultObject;
     }
 
+    template <typename T>
+        requires std::derived_from<T, UObject>
+    T* GetDefaultObject() const
+    {
+        UObject* Ret = GetDefaultObject();
+        assert(Ret->IsA(T::StaticClass()));
+        return static_cast<T*>(Ret);
+    }
+
+    // TODO: CDO 만들면 제거
+    UObject* CreateObject() const
+    {
+        return ClassConstructor();
+    }
+
 protected:
     virtual UObject* CreateDefaultObject();
 
@@ -61,5 +84,6 @@ private:
 
     UClass* SuperClass = nullptr;
 
+    ObjectCreator ClassConstructor;
     UObject* ClassDefaultObject = nullptr;
 };
