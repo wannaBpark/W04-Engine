@@ -58,42 +58,12 @@ void UWorld::Tick(float DeltaTime)
 {
     EditorPlayer->Tick(DeltaTime);
 	LocalGizmo->Tick(DeltaTime);
-
-    // SpawnActor()에 의해 Actor가 생성된 경우, 여기서 BeginPlay 호출
-    for (AActor* Actor : PendingBeginPlayActors)
-    {
-        Actor->BeginPlay();
-    }
-    PendingBeginPlayActors.Empty();
-
-    // 매 틱마다 Actor->Tick(...) 호출
-	for (AActor* Actor : ActorsArray)
-	{
-	    Actor->Tick(DeltaTime);
-	}
-
 	PersistentLevel->Tick(DeltaTime);
 }
 
 void UWorld::Release()
 {
 	PersistentLevel->Release();
-
-	for (AActor* Actor : ActorsArray)
-	{
-		Actor->EndPlay(EEndPlayReason::WorldTransition);
-        TArray<UActorComponent*> CopiedComponents = Actor->GetComponents();
-	    for (UActorComponent* Component : CopiedComponents)
-	    {
-	        GUObjectArray.MarkRemoveObject(Component);
-	    }
-	    GUObjectArray.MarkRemoveObject(Actor);
-	}
-    ActorsArray.Empty();
-
-    ReleaseBaseObject();
-
-    GUObjectArray.ProcessPendingDestroyObjects();
 }
 
 bool UWorld::DestroyActor(AActor* ThisActor)

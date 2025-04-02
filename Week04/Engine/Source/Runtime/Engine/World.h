@@ -113,9 +113,6 @@ T* UWorld::SpawnActor()
     TargetLevel->ActorsArray.Add(Actor);
     TargetLevel->PendingBeginPlayActors.Add(Actor);
     
-    // TODO 
-    ActorsArray.Add(Actor);
-    PendingBeginPlayActors.Add(Actor);
     return Actor;
 }
 
