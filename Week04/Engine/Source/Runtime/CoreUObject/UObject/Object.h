@@ -18,7 +18,7 @@ private:
 
 public:
     using Super = UObject;
-    using ThisClass = UObject;
+    using ThisClass = UObject;  
 
     static UClass* StaticClass();
 

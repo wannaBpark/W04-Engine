@@ -3,6 +3,7 @@
 #include "Container/Set.h"
 #include "UObject/ObjectFactory.h"
 #include "UObject/ObjectMacros.h"
+#include "Engine/Level.h"
 
 class FObjectFactory;
 class AActor;
@@ -43,6 +44,12 @@ public:
     bool DestroyActor(AActor* ThisActor);
 
 private:
+    /* 현재 활성화된 레벨 : 1개로 가정 */
+    ULevel* PersistentLevel;
+
+    /* 월드의 타입*/
+    EWorldType WorldType = EWorldType::Editor;
+
     const FString defaultMapName = "Default";
 
     /** World에서 관리되는 모든 Actor의 목록 */
@@ -57,8 +64,15 @@ private:
     OctreeSystem* Octree = nullptr;
     KDTreeSystem* KDTree = nullptr;
     BVHSystem* BVH = nullptr;
-
 public:
+    UObject* worldGizmo = nullptr;
+
+    void SetPersistentLevel(ULevel* InLevel) { PersistentLevel = InLevel; }
+    ULevel* GetPersistentLevel() const { return PersistentLevel; }
+
+    void SetWorldType(EWorldType InWorldType) { WorldType = InWorldType; }
+    const EWorldType& GetWorldType() const { return WorldType; }
+
     const TSet<AActor*>& GetActors() const { return ActorsArray; }
 
     ATransformGizmo* LocalGizmo = nullptr;
@@ -71,17 +85,17 @@ public:
         SelectedActor = InActor;
     }
 
-    void SetOctreeSystem(OctreeSystem* InOctree) { Octree = InOctree; }
     OctreeSystem* GetOctreeSystem() const { return Octree; }
     void SetOctreeSystem(const TArray<UPrimitiveComponent*>& Components);
+    void SetOctreeSystem(OctreeSystem* InOctree) { Octree = InOctree; }
 
-    void SetKDTreeSystem(KDTreeSystem* InKDTree) { KDTree = InKDTree; }
     KDTreeSystem* GetKDTreeSystem() const { return KDTree; }
     void SetKDTreeSystem(const TArray<UPrimitiveComponent*>& Components);
+    void SetKDTreeSystem(KDTreeSystem* InKDTree) { KDTree = InKDTree; }
 
-    void SetBVHSystem(BVHSystem* InBVH) { BVH = InBVH; }
     BVHSystem* GetBVHSystem() const { return BVH; }
     void SetBVHSystem(TArray<UPrimitiveComponent*>& Components);
+    void SetBVHSystem(BVHSystem* InBVH) { BVH = InBVH; }
 };
 
 
@@ -93,8 +107,12 @@ T* UWorld::SpawnActor()
     // TODO: 일단 AddComponent에서 Component마다 초기화
     // 추후에 RegisterComponent() 만들어지면 주석 해제
     // Actor->InitializeComponents();
-    ActorsArray.Add(Actor);
-    PendingBeginPlayActors.Add(Actor);
+    ULevel* TargetLevel = GetPersistentLevel();
+    Actor->SetLevel(TargetLevel);
+
+    TargetLevel->ActorsArray.Add(Actor);
+    TargetLevel->PendingBeginPlayActors.Add(Actor);
+    
     return Actor;
 }
 

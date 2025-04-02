@@ -16,4 +16,8 @@
 #define ICON_SLIDER		0xE9C4
 #define ICON_PLUS       0xE9C8
 
+#define ICON_FA_PLAY "\xEF\x85\x84"  // PLAY
+#define ICON_FA_PAUSE "\xEF\x8A\x8C"  // PAUSE
+#define ICON_FA_STOP "\xEF\x8A\x8D"  // STOP
+
 #endif // !__ICON_FONT__

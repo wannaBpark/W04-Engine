@@ -22,6 +22,7 @@
 #include "UObject/Casts.h"
 #include "UObject/Object.h"
 #include "UObject/UObjectIterator.h"
+#include "UnrealEd/Editor/EditorEngine.h"
 
 #define SAFE_RELEASE(p)       { if (p) { (p)->Release();  (p) = nullptr; } }
 

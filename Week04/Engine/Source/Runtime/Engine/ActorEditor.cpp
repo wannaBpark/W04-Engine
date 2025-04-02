@@ -1,7 +1,17 @@
-﻿#include "GameFramework/Actor.h"
-
+#include "GameFramework/Actor.h"
+#include "Engine/Level.h"
 
 #if 1 // TODO: WITH_EDITOR 추가
+
+void AActor::SetLevel(ULevel* InLevel)
+{
+    Level = InLevel; 
+}
+
+ULevel* AActor::GetLevel() const
+{
+    return Level;
+}
 
 FString AActor::GetDefaultActorLabel() const
 {

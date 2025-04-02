@@ -1,16 +1,16 @@
 #include "EngineLoop.h"
 #include "ImGuiManager.h"
+#include "UnrealClient.h"
 #include "World.h"
-#include "Camera/CameraComponent.h"
+#include "LevelEditor/SLevelEditor.h"
 #include "PropertyEditor/ViewportTypePanel.h"
+#include "slate/Widgets/Layout/SSplitter.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/UnrealEd.h"
-#include "UnrealClient.h"
-#include "slate/Widgets/Layout/SSplitter.h"
-#include "LevelEditor/SLevelEditor.h"
+#include "UnrealEd/Editor/EditorEngine.h"
 #include "UObject/UObjectArray.h"
 
-
+//extern UEditorEngine* GEditor;
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -95,7 +95,6 @@ FResourceMgr FEngineLoop::resourceMgr;
 FEngineLoop::FEngineLoop()
     : hWnd(nullptr)
     , UIMgr(nullptr)
-    , GWorld(nullptr)
     , LevelEditor(nullptr)
     , UnrealEditor(nullptr)
 {
@@ -123,8 +122,11 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     LevelEditor = new SLevelEditor();
     LevelEditor->Initialize();
 
-    GWorld = FObjectFactory::ConstructObject<UWorld>();
-    GWorld->Initialize();
+    GEditor = FObjectFactory::ConstructObject<UEditorEngine>();
+    GEditor->Initialize();
+
+    /*GWorld = FObjectFactory::ConstructObject<UWorld>();
+    GWorld->Initialize();*/
 
     return 0;
 }
@@ -146,7 +148,7 @@ void FEngineLoop::Render()
             // renderer.UpdateLightBuffer();
             // RenderWorld();
             renderer.PrepareRender();
-            renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
+            renderer.Render(GEditor->GetEditorWorldContext().World(),LevelEditor->GetActiveViewportClient());
         }
         GetLevelEditor()->SetViewportClient(viewportClient);
     }
@@ -159,7 +161,7 @@ void FEngineLoop::Render()
         // renderer.UpdateLightBuffer();
         // RenderWorld();
         renderer.PrepareRender();
-        renderer.Render(GetWorld(),LevelEditor->GetActiveViewportClient());
+        renderer.Render(GEditor->GetEditorWorldContext().World(),LevelEditor->GetActiveViewportClient());
     }
 }
 
@@ -191,7 +193,8 @@ void FEngineLoop::Tick()
         }
 
         Input();
-        GWorld->Tick(elapsedTime);
+        GEditor->Tick(elapsedTime);
+        //GWorld->Tick(elapsedTime);
         LevelEditor->Tick(elapsedTime);
         Render();
         UIMgr->BeginFrame();
@@ -246,8 +249,8 @@ void FEngineLoop::Input()
 void FEngineLoop::Exit()
 {
     LevelEditor->Release();
-    GWorld->Release();
-    GUObjectArray.MarkRemoveObject(GWorld);
+    GEditor->Release();
+    GUObjectArray.MarkRemoveObject(GEditor);
     GUObjectArray.ProcessPendingDestroyObjects();
     UIMgr->Shutdown();
     delete UIMgr;
@@ -275,4 +278,9 @@ void FEngineLoop::WindowInit(HINSTANCE hInstance)
         CW_USEDEFAULT, CW_USEDEFAULT, 1000, 1000,
         nullptr, nullptr, hInstance, nullptr
     );
+}
+
+UWorld* FEngineLoop::GetWorld() const
+{
+    return GEditor->GetEditorWorldContext().World();
 }
